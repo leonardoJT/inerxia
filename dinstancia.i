@@ -1,0 +1,19 @@
+  FIELD Cod_Operacion LIKE Instancias.Cod_Operacion VALIDATE ~
+  FIELD Cod_Producto LIKE Instancias.Cod_Producto VALIDATE ~
+  FIELD Estado LIKE Instancias.Estado VALIDATE ~
+  FIELD Fec_Creacion LIKE Instancias.Fec_Creacion VALIDATE ~
+  FIELD Fec_Retiro LIKE Instancias.Fec_Retiro VALIDATE ~
+  FIELD Honorarios LIKE Instancias.Honorarios VALIDATE ~
+  FIELD Id_Abogado LIKE Instancias.Id_Abogado VALIDATE ~
+  FIELD Id_Concepto LIKE Instancias.Id_Concepto VALIDATE ~
+  FIELD Id_Negadas LIKE Instancias.Id_Negadas VALIDATE ~
+  FIELD Id_Scoring LIKE Instancias.Id_Scoring VALIDATE ~
+  FIELD Instancia LIKE Instancias.Instancia VALIDATE ~
+  FIELD Nom_Instancia LIKE Instancias.Nom_Instancia VALIDATE ~
+  FIELD Orden_Instancia LIKE Instancias.Orden_Instancia VALIDATE ~
+  FIELD Primera LIKE Instancias.Primera VALIDATE ~
+  FIELD Programa LIKE Instancias.Programa VALIDATE ~
+  FIELD Tipo_Instancia LIKE Instancias.Tipo_Instancia VALIDATE ~
+  FIELD Tipo_Producto LIKE Instancias.Tipo_Producto VALIDATE ~
+  FIELD TMI LIKE Instancias.TMI VALIDATE ~
+  FIELD Ultima LIKE Instancias.Ultima VALIDATE 
