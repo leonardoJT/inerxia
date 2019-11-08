@@ -1,0 +1,12 @@
+DEFINE VARIABLE retCode AS INTEGER INITIAL -1.
+RUN WC_Init("admin", "c:\webcaja.2006",OUTPUT retCode).
+IF retcode <> 0 THEN
+  MESSAGE "No se pudo conectar a la libreria WebCajaLib.dll"
+  VIEW-AS ALERT-BOX INFO BUTTONS OK.
+
+PROCEDURE WC_Init EXTERNAL "c:\webcaja.2006\WebCajaLib.dll" STDCALL PERSISTENT:
+    DEFINE INPUT  PARAMETER Usuario AS CHARACTER.
+    DEFINE INPUT  PARAMETER Ruta    AS CHARACTER.
+    DEFINE RETURN PARAMETER retCode AS BYTE.
+END.
+

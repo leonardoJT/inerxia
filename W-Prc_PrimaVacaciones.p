@@ -1,0 +1,3 @@
+DEFINE INPUT PARAMETER WNit LIKE Clientes.Nit.
+DEFINE OUTPUT PARAMETER WVal LIKE Ahorros.Sdo_Disponible.
+WVal = 400.

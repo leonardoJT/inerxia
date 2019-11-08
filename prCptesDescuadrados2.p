@@ -1,0 +1,257 @@
+/*
+Proposito   : Listar los Comprobantes Contables Descuadrados., 
+Date        : Dic/11/2007
+By          : Félix Vargas
+*/
+
+{incluido\iprmt_rpt.i}
+/* {incluido\igetfecha.i}  */
+/* {incluido\igetSdo.i}    */
+
+{incluido\Variable.i "SHARED"}
+/** Temporales*/
+/*   DEFINE VARIABLE W_Usuario   LIKE usuarios.usuario       INITIAL "308". /* 308 - Contabiliza*/ */
+/*   DEFINE VARIABLE W_Fecha     AS DATE   INITIAL TODAY.                                          */
+/*   DEFINE VARIABLE W_PathSpl   AS CHARACTER FORMAT "X(20)" INITIAL "c:\info_juriscoop\".         */
+/*   DEFINE VARIABLE W_Agencia   LIKE Agencia.Agencia        INITIAL "035". /*"035".*/             */
+/*     DEFINE {1} VAR W_Estacion    LIKE Estaciones.Estacion.                                                   */
+/* /*     DEFINE {1} VAR W_Usuario     LIKE Usuarios.Usuario. */                                                */
+/*     DEFINE {1} VAR W_Clave       LIKE Usuarios.Clave FORMAT "X(16)".                                         */
+/*     DEFINE {1} VAR W_Prioridad   LIKE Usuarios.Prioridad INITIAL "".                                         */
+/* /*     DEFINE {1} VAR W_Agencia     LIKE Usuarios.Agencia INITIAL 0.  */                                     */
+/*     DEFINE {1} VAR W_Ciudad      LIKE Agencia.Ciudad INITIAL 0.                                              */
+/*     DEFINE {1} VAR W_Nom_Agencia   AS CHARACTER FORMAT "X(60)".                                              */
+/*     DEFINE {1} VAR W_UbiDatos      AS CHAR INITIAL "D".                                                      */
+/*     /*DEFINE {1} VAR W_Ninv        LIKE Inversion.Nro_inversion.*/                                           */
+/*     DEFINE {1} VAR W_Nom_Entidad   AS CHARACTER FORMAT "X(60)".                                              */
+/*     DEFINE {1} VAR W_Entidad     LIKE Entidad.Entidad.                                                       */
+/*     DEFINE {1} VAR W_NitGlobal   LIKE Clientes.Nit INITIAL "".                                               */
+/*     DEFINE {1} VAR W_SMLV        LIKE Indicadores.Valor INITIAL 0.                                           */
+/*     DEFINE {1} VAR W_Manija        AS HANDLE.                                                                */
+/*     DEFINE {1} VAR W_ManFin        AS HANDLE.                                                                */
+/*     DEFINE {1} VAR W_ManTaq        AS HANDLE.                                                                */
+/*     DEFINE {1} VAR W_Nivel       LIKE Cuentas.Nivel.                                                         */
+/*     DEFINE {1} VAR W_CtaMay      LIKE Cuentas.Cuenta.                                                        */
+/* /*     DEFINE {1} VAR W_Fecha         AS DATE FORMAT "99/99/9999" INITIAL TODAY.  */                         */
+/*     DEFINE {1} VAR W_ficina        AS CHARACTER FORMAT "X(40)" VIEW-AS COMBO-BOX INNER-LINES 4 SIZE 40 BY 1. */
+/*     DEFINE {1} VAR W_Path        LIKE Entidad.Dir_Programas.                                                 */
+/* /*     DEFINE {1} VAR W_Pathspl     LIKE Entidad.Dir_Spl.  */                                                */
+/*     DEFINE {1} VAR W_Eleccion      AS LOGICAL.                                                               */
+/*     DEFINE {1} VAR W_CedGral     LIKE Clientes.Nit.                                                          */
+/*     DEFINE {1} VAR W_CenCosGral  LIKE Cen_Costos.Cen_Costos.                                                 */
+/*     DEFINE {1} VAR W_Cadena        AS CHARACTER FORMAT "X(9)" INITIAL "SIFINCOOP".                           */
+/*     /*DEFINE     VAR Agencia_Cnt     AS INTEGER FORMAT "999".*/                                              */
+/*     DEFINE {1} VAR P-Valida        AS LOGICAL.                                                               */
+/*     DEFINE {1} VAR W_VCodPcto    LIKE Ahorros.Cod_Ahorro.                                                    */
+/*     DEFINE {1} VAR W_VCueAhorro  LIKE Ahorros.Cue_Ahorros.                                                   */
+/*     DEFINE {1} VAR W_Solicitud   LIKE Solicitud.Num_Solicitud.                                               */
+/*     DEFINE {1} VAR W_PagareS     LIKE Creditos.Pagare.                                                       */
+/*     DEFINE {1} VAR P_SdoTot      LIKE Creditos.Sdo_Capital.                                                  */
+/*     DEFINE {1} VAR W_OfiCierre   LIKE Agencias.Agencia.                                                      */
+/********************/
+
+DEFINE VARIABLE qbf-count    AS INTEGER NO-UNDO.
+DEFINE VARIABLE qbf-governor AS INTEGER NO-UNDO.
+ 
+DEFINE VARIABLE qbf-govcnt AS INTEGER NO-UNDO.
+DEFINE VARIABLE qbf-loop   AS INTEGER NO-UNDO.
+DEFINE VARIABLE qbf-time   AS INTEGER NO-UNDO.
+
+DEFINE VARIABLE viCpt1 AS INTEGER     NO-UNDO.
+DEFINE VARIABLE viCpt2 AS INTEGER     NO-UNDO.
+DEFINE VARIABLE viAge1 AS INTEGER     NO-UNDO.
+DEFINE VARIABLE viAge2 AS INTEGER     NO-UNDO.
+DEFINE VARIABLE vccuenta AS CHARACTER NO-UNDO.
+
+DEFINE BUFFER Mov_Contable FOR Mov_Contable.
+
+ASSIGN
+  qbf-count    = 0
+  qbf-governor = 0
+  qbf-time     = TIME.
+
+ASSIGN 
+    viCpt1 = INTEGER(pc01)
+    viCpt2 = INTEGER(pc02)
+    viAge1 = INTEGER(pc03)
+    viAge2 = INTEGER(pc04).
+
+DEFINE VARIABLE vdSaldo   AS DECIMAL  INITIAL 0 NO-UNDO.
+DEFINE VARIABLE vdDebito  AS DECIMAL  INITIAL 0 NO-UNDO.
+DEFINE VARIABLE vdCredito AS DECIMAL  INITIAL 0 NO-UNDO.
+DEFINE VARIABLE vcNomCta  LIKE Cuentas.Nombre INITIAL "".
+DEFINE VARIABLE vcNatura  LIKE Cuentas.Naturaleza INITIAL "".
+
+DEFINE VARIABLE viagen    LIKE mov_contable.agencia       INITIAL 0.
+DEFINE VARIABLE vifecha   LIKE mov_contable.fec_contable  INITIAL ?.
+DEFINE VARIABLE vicpte    LIKE mov_contable.comprobante   INITIAL 0.
+DEFINE VARIABLE vinume    LIKE mov_contable.num_documento INITIAL 0.
+DEFINE VARIABLE vibandera AS INTEGER INITIAL 0.
+
+DEFI TEMP-TABLE TempCtas
+     FIELD Agen    LIKE mov_contable.Agencia
+     FIELD Fecha   LIKE mov_contable.fec_contable
+     FIELD Cpte    LIKE mov_contable.Comprobante
+     FIELD Dcto    LIKE mov_contable.num_documento
+     FIELD Debito  AS DECIMAL
+     FIELD Credito AS DECIMAL
+     FIELD Saldo   AS DECIMAL
+     INDEX x3 agen fecha Cpte Dcto.
+
+DEFINE TEMP-TABLE tempmov
+ FIELD agencia        LIKE mov_contable.agencia
+ FIELD comprobante    LIKE mov_contable.comprobante
+ FIELD fec_contable   LIKE mov_contable.fec_contable
+ FIELD num_documento  LIKE mov_contable.num_documento
+ FIELD db             LIKE mov_contable.db
+ FIELD cr             LIKE mov_contable.cr
+ INDEX idxtodo agencia fec_contable comprobante num_documento.
+
+MESSAGE "viAge1 = " viAge1
+        "viAge2 = " viAge2
+        "viCpt1 = " viCpt1
+        "viCpt2 = " viCpt2
+        "Fecha  = " pdt01
+        "Fecha  = " pdt02
+    VIEW-AS ALERT-BOX INFO BUTTONS OK.
+
+/*DO FOR Mov_Contable:*/
+/*     {incluido\RepHeader.i}                                                                   */
+/*     VIEW FRAME F-Encabezado.                                                                 */
+/*     W_Reporte   = "REPORTE   : Cpte.Descuadrados: " + P_Titulo + " (prCptesDescuadrados.p) " */
+/*                   + " - FECHA: " + STRING(TODAY) + " - " + STRING(TIME,"hh:mm am").          */
+/*     main-loop:  */
+    IF (viCpt1 = 0 AND viCpt2 = 99) AND (viAge1 = 0 AND viAge2 = 999) THEN DO:
+        MESSAGE "Entre a Todos."
+            VIEW-AS ALERT-BOX INFO BUTTONS OK.
+        FOR EACH Mov_Contable /*field(agencia comprobante fec_contable num_documento db cr)*/ WHERE
+            Mov_Contable.Fec_Contable >= pdt01 AND Mov_Contable.Fec_Contable <= pdt02 NO-LOCK
+            BREAK BY Mov_Contable.agencia     BY Mov_Contable.fec_contable 
+                  BY Mov_Contable.Comprobante BY Mov_Contable.Num_Documento:
+
+/*                  IF FIRST-OF(Mov_Contable.agencia) THEN                                       */
+/*                     ASSIGN vccuenta = mov_contable.cuenta.                                    */
+/*                  IF vccuenta NE mov_contable.cuenta THEN DO:                                  */
+/*                     FIND FIRST Cuentas WHERE cuentas.cuenta EQ mov_contable.cuenta NO-ERROR.  */
+/*                     IF AVAILABLE(Cuentas) THEN                                                */
+/*                        ASSIGN vcNomCta = Cuentas.Nombre                                       */
+/*                               vcNatura = Cuentas.Naturaleza.                                  */
+/*                     ASSIGN vccuenta = mov_contable.cuenta.                                    */
+/*                  END.                                                                         */
+             
+                 IF FIRST-OF(Mov_Contable.Agencia) OR FIRST-OF(Mov_Contable.fec_contable) OR 
+                    FIRST-OF(Mov_Contable.Comprobante) OR FIRST-OF(Mov_Contable.num_documento) THEN
+                    ASSIGN vdSaldo   = 0
+                           vdDebito  = 0
+                           vdCredito = 0.
+            
+                 ASSIGN /*vdSaldo   = Mov_Contable.Cr - Mov_Contable.Db*/
+                        vdDebito  = vdDebito  + Mov_Contable.Db
+                        vdCredito = vdCredito + Mov_Contable.Cr.
+            
+                 IF LAST-OF(Mov_Contable.Agencia) OR LAST-OF(Mov_Contable.fec_contable) OR
+                    LAST-OF(Mov_Contable.Comprobante) OR LAST-OF(Mov_Contable.num_documento) THEN DO:
+/*                     IF vcNatura EQ "DB" THEN                   */
+/*                        ASSIGN vdSaldo = vdDebito - vdCredito.  */
+/*                     ELSE                                       */
+                       ASSIGN vdSaldo = vdCredito - vdDebito.
+                    IF vdSaldo NE 0 THEN DO:
+                       CREATE TempCtas.
+                       UPDATE TempCtas.Agen    = mov_contable.agencia
+                              TempCtas.Fecha   = mov_contable.fec_contable
+                              TempCtas.Cpte    = mov_contable.Comprobante
+                              TempCtas.Dcto    = mov_contable.num_documento
+                              TempCtas.Debito  = vdDebito
+                              TempCtas.Credito = vdCredito
+                              TempCtas.Saldo   = vdSaldo.
+                    END.
+                 END.
+        END.
+    END.
+    ELSE
+        FOR EACH Mov_Contable /*field(agencia comprobante fec_contable num_documento cuenta db cr)*/
+            WHERE     /*agencia = 01 */
+                 (Mov_Contable.Comprobante >= viCpt1 AND Mov_Contable.Comprobante <= viCpt2) AND /* OR (viCpt1 = 0 AND viCpt2 = 0)) AND */
+                 (Mov_Contable.Fec_Contable >= pdt01 AND Mov_Contable.Fec_Contable <= pdt02) AND /*OR (pdt01 EQ ? AND pdt02 EQ ?)) AND */
+                 (Mov_Contable.Agencia >= viAge1     AND Mov_Contable.Agencia <= viAge2) no-lock: /*     OR (viAge1 = 0 AND viAge2 = 0)) */
+
+            CREATE tempmov.
+            UPDATE tempmov.agencia       =  mov_contable.agencia      
+                   tempmov.comprobante   =  mov_contable.comprobante  
+                   tempmov.fec_contable  =  mov_contable.fec_contable 
+                   tempmov.num_documento =  mov_contable.num_documento
+                   tempmov.db            =  mov_contable.db           
+                   tempmov.cr            =  mov_contable.cr.
+        END.
+        MESSAGE "Va a Empezar.."
+             VIEW-AS ALERT-BOX INFO BUTTONS OK.
+        FOR EACH tempmov:
+            IF vibandera = 0  THEN DO:
+               ASSIGN viagen  = mov_contable.agencia
+                      vifecha = mov_contable.fec_contable
+                      vicpte  = mov_contable.comprobante
+                      vinume  = mov_contable.num_documento.
+               ASSIGN vdSaldo   = 0
+                      vdDebito  = 0
+                      vdCredito = 0.
+               ASSIGN vibandera = 1.
+            END.
+
+            ASSIGN /*vdSaldo   = Mov_Contable.Cr - Mov_Contable.Db*/
+                   vdDebito  = vdDebito  + Mov_Contable.Db
+                   vdCredito = vdCredito + Mov_Contable.Cr.
+
+            IF viagen  NE Mov_Contable.Agencia      AND 
+               vifecha NE Mov_Contable.fec_contable AND  
+               vicpte  NE Mov_Contable.Comprobante  AND 
+               vinume  NE Mov_Contable.num_documento THEN DO:
+               ASSIGN vdSaldo = vdCredito - vdDebito.
+               IF vdSaldo NE 0 THEN DO:
+                  CREATE TempCtas.
+                  UPDATE TempCtas.Agen    = mov_contable.agencia
+                         TempCtas.Fecha   = mov_contable.fec_contable
+                         TempCtas.Cpte    = mov_contable.Comprobante
+                         TempCtas.Dcto    = mov_contable.num_documento
+                         TempCtas.Debito  = vdDebito
+                         TempCtas.Credito = vdCredito
+                         TempCtas.Saldo   = vdSaldo.
+               END.
+            END.
+        END.
+      RUN PValida_Salida NO-ERROR.
+
+
+PROCEDURE PValida_Salida:
+    
+/*     IF P_NomArchivo EQ "DEFAULT" THEN                                 */
+/*         ASSIGN P_NomArchivo = W_PathSpl + "CptesDescuadrados.txt".    */
+/*                                                                       */
+/*     OUTPUT TO VALUE(P_NomArchivo) PAGED PAGE-SIZE VALUE(P_NumLineas). */
+    OUTPUT TO "c:\info_juriscoop\cptedescuadrex.txt".
+    FOR EACH TempCtas: /* BY Agen BY Fecha BY Cpte BY Dcto:*/
+        FORM
+            TempCtas.Agen    COLUMN-LABEL "Age"         FORMAT "999"
+            TempCtas.Fecha   COLUMN-LABEL "Fecha"       FORMAT "99/99/9999"
+            TempCtas.Cpte    COLUMN-LABEL "Comprobante" FORMAT "99"
+            TempCtas.Dcto    COLUMN-LABEL "Documento"   FORMAT "999999999"
+            TempCtas.Debito  COLUMN-LABEL "Debito"      FORMAT "->>>,>>>,>>>,>>9.99"
+            TempCtas.Credito COLUMN-LABEL "Credito"     FORMAT "->>>,>>>,>>>,>>9.99"
+            TempCtas.Saldo   COLUMN-LABEL "Diferencia"  FORMAT "->>>,>>>,>>>,>>9.99"
+            WITH FRAME FCptDesc DOWN COLUMN 1 WIDTH 160
+                NO-ATTR-SPACE NO-VALIDATE NO-BOX USE-TEXT STREAM-IO.
+        DISPLAY 
+            TempCtas.Agen   
+            TempCtas.Fecha 
+            TempCtas.Cpte
+            TempCtas.Dcto  
+            TempCtas.Debito 
+            TempCtas.Credito
+            TempCtas.Saldo  
+          WITH FRAME FCptDesc.
+        DOWN WITH FRAME FCptDesc.
+    END.
+    VIEW FRAME F-Ftr.
+/*END.*/
+OUTPUT CLOSE.
+END PROCEDURE.
+RETURN.

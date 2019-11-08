@@ -1,0 +1,18 @@
+DEFINE SHARED VAR j AS DECIMAL FORMAT ">>>,>>,>>9".
+/*DEFINE SHARED VAR E AS DECIMAL FORMAT ">>>,>>,>>9".*/
+DEFINE SHARED VAR W_Pathspl LIKE Entidad.Dir_Spl.
+ASSIGN J = 0. /* E = 0.*/
+IF {3} EQ NO THEN DISABLE TRIGGERS FOR LOAD OF {1}.
+OS-DELETE VALUE(W_Pathspl + "\errores.e").
+OUTPUT TO VALUE(W_Pathspl + "\errores.e").
+IF {2} EQ YES THEN FOR EACH {1}: DELETE {1}. END.
+REPEAT:
+  j = j + 1.
+  CREATE {1}. 
+  IMPORT {1} NO-ERROR.
+  IF ERROR-STATUS:ERROR THEN DO:
+     DISPLAY "Error en Registro: " j WITH NO-LABELS.
+     /*E = E + 1.*/
+  END.
+END.
+OUTPUT CLOSE.

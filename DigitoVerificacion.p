@@ -1,0 +1,17 @@
+DEFINE INPUT PARAMETER numDoc AS CHARACTER.
+DEFINE OUTPUT PARAMETER dv AS INTEGER.
+
+DEFINE VAR primos AS INTEGER EXTENT 15 INITIAL [71, 67, 59, 53, 47, 43, 41, 37, 29, 23, 19, 17, 13, 7, 3].
+DEFINE VAR suma AS INTEGER.
+DEFINE VAR cont AS INTEGER.
+
+numDoc = STRING(INTEGER(numDoc),"999999999999999").
+
+DO cont = 1 TO 15:
+    suma = suma + (INTEGER(SUBSTRING(numDoc,cont,1)) * primos[cont]).
+END.
+
+IF suma MOD 11 = 0 OR suma MOD 11 = 1 THEN
+    dv = suma MOD 11.
+ELSE
+    dv = 11 - (suma MOD 11).

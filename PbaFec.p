@@ -1,0 +1,20 @@
+RUN D:\sicobel\dllo\prg\Proyeccion_Desembolso.P (INPUT 1000000,
+                INPUT 48,
+                INPUT 110000,
+                INPUT 0, /*total extras que ya no se utiliza*/
+                INPUT 07/14/2005, 
+                INPUT .020,
+                INPUT 0,
+                INPUT 0, /*gracia*/
+                INPUT 3,
+                INPUT 2,
+                INPUT 1,
+                INPUT "71171298",
+                INPUT "jlkjlkjkljkljlkjkljlkj",
+                INPUT 1,   
+                INPUT "Prueba",
+                INPUT "S",
+                INPUT 151515,
+                INPUT "Nom-Pdo",
+                INPUT "nom-sistema",
+                INPUT 1,INPUT 1000000). 

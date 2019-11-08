@@ -1,0 +1,271 @@
+/*******************************************************************
+ PROCEDIMIENTO: cheque
+ *******************************************************************/
+DEFINE INPUT PARAMETER P_Vctipo  AS CHARACTER FORMAT "X(1)"  NO-UNDO.
+DEFINE INPUT PARAMETER P_Nit     AS CHARACTER NO-UNDO.
+DEFINE INPUT PARAMETER P_Trans   AS INTEGER NO-UNDO.
+DEFINE INPUT PARAMETER P_Monto1  AS CHAR FORMAT "X(60)".
+DEFINE INPUT PARAMETER P_Monto2  AS CHAR FORMAT "X(60)".
+DEFINE INPUT PARAMETER P_Nombre  AS CHAR FORMAT "X(90)".
+DEFINE INPUT PARAMETER P_Ciudad  AS CHAR FORMAT "X(12)".
+DEFINE INPUT PARAMETER P_Valor   AS DECIMAL FORMAT "*,***,***,***.99".
+DEFINE INPUT PARAMETER P_Coment  AS CHAR FORMAT "X(60)".
+/* 25-Abril-2008*/
+DEFINE VARIABLE viagencia  AS INTEGER   FORMAT "999"              NO-UNDO.
+DEFINE VARIABLE vcnit1     AS CHARACTER FORMAT "X(12)" INITIAL "" NO-UNDO.
+DEFINE VARIABLE vcnombre   AS CHARACTER FORMAT "X(30)"            NO-UNDO. 
+DEFINE VARIABLE vinrocpte  AS INTEGER   FORMAT "99999999"         NO-UNDO.
+DEFINE VARIABLE vcdetalle  AS CHARACTER FORMAT "X(30)"            NO-UNDO.
+DEFINE VARIABLE vccheque   AS CHARACTER FORMAT "X(12)" INITIAL "" NO-UNDO.
+DEFINE VARIABLE vcctadb    AS CHARACTER FORMAT "X(14)"            NO-UNDO.
+DEFINE VARIABLE vcctacr    AS CHARACTER FORMAT "X(14)"            NO-UNDO.
+DEFINE VARIABLE vdnomctadb AS CHARACTER FORMAT "X(30)"            NO-UNDO.
+DEFINE VARIABLE vdnomctacr AS CHARACTER FORMAT "X(30)"            NO-UNDO.
+DEFINE VARIABLE vddebito   AS DECIMAL   FORMAT "->>>,>>>,>>>,>>9" NO-UNDO.
+DEFINE VARIABLE vdcredito  AS DECIMAL   FORMAT "->>>,>>>,>>>,>>9" NO-UNDO.
+DEFINE VARIABLE vcimpcptenca AS CHARACTER NO-UNDO.
+DEFINE VARIABLE vcimpcptdesc AS CHARACTER NO-UNDO.
+DEFINE VARIABLE vcimplinea AS CHARACTER FORMAT "X(220)" NO-UNDO.
+DEFINE VARIABLE vcimpcheque AS CHARACTER NO-UNDO.
+DEFINE VARIABLE vcimplinea1 AS CHARACTER FORMAT "X(220)" NO-UNDO.
+DEFINE VARIABLE vcimpespa   AS CHARACTER FORMAT "X(25)" INITIAL " " NO-UNDO.
+/**************************/
+
+DEFINE VARIABLE Ano      AS character FORMAT "X(4)".
+DEFINE VARIABLE vcMes    AS character FORMAT "X(2)".
+DEFINE VARIABLE vcDia    AS character FORMAT "X(2)".
+DEFINE VARIABLE P_Nom2   LIKE P_Nombre.
+DEFINE VARIABLE P_Val2   LIKE P_Valor.
+DEFINE VARIABLE P_Tit1   AS CHARACTER FORMAT "X(18)"  INITIAL "A Favor de      : ".
+DEFINE VARIABLE P_Tit2   AS CHARACTER FORMAT "X(18)"  INITIAL "Por un valor de : ".
+DEFINE VARIABLE procname AS CHARACTER FORMAT "X(132)" INITIAL "temporal.txt".
+DEFINE VARIABLE W_Rpta   AS LOGICAL. 
+
+ {Incluido\VARIABLE.I "SHARED"}
+
+ASSIGN Ano     = STRING(YEAR(W_Fecha),"9999")
+       vcMes   = STRING(MONTH(W_Fecha),"99")
+       vcDia   = STRING(DAY(W_Fecha),"99")
+       P_Val2  = P_Valor
+       P_Nom2  = P_Nombre.
+
+ASSIGN P_Nombre = TRIM(P_Nombre) + " **************************".
+IF TRIM(P_Monto2) = "" THEN
+   ASSIGN P_Monto1 = TRIM(P_Monto1) + " ****"
+          P_Monto2 = "***************************".
+ELSE
+   ASSIGN P_Monto2 = TRIM(P_Monto2) + "*****".
+/*25-Abril-2008*/
+
+IF P_vctipo = "1"  THEN DO: /* Taquilla*/
+   RUN Imp_CpteEgresoTaquilla.
+   /**** Encabezado***********/
+/*                 "                                                                                     " +                     */
+/*                 "                   " + "                   " +                                                               */
+/*                 STRING(vinrocpte) + "                                  " + STRING(viagencia,"999") + "                    " + */
+   vcimplinea = "                                                                                     " + 
+                "                                                                                                               " + 
+                STRING(DAY(W_Fecha), "99") + "-" + STRING(MONTH(W_Fecha), "99") + "-" + STRING(YEAR(W_Fecha), "9999").
+   vcimpcptenca  = vcimpcptenca + CHR(10) + CHR(10) + CHR(10) + CHR(10) + CHR(10) + CHR(10) +
+                CHR(10) + CHR(10) + CHR(10) + vcimplinea. /* -2 Linea 20 Mayo2008*/
+
+   vcimplinea = "                          " + TRIM(vcnombre,"X(30)").
+   vcimpcptenca  = vcimpcptenca  + CHR(10) + vcimplinea. 
+
+   vcimplinea = "          " + TRIM(vcdetalle).
+   vcimpcptenca  = vcimpcptenca  + CHR(10) + vcimplinea.
+   /**************** Descripcion*/
+   vcimplinea = STRING(vcctadb, "X(14)") + "  " + STRING(vdnomctadb, "X(30)") + "                                            " +
+                "                  " +
+                STRING(P_Nit,"X(12)") + "            " + STRING(vddebito, "$>,>>>,>>>,>>9"). 
+   vcimpcptdesc = vcimpcptdesc + CHR(10) + CHR(10) + CHR(10)+ CHR(10)+ vcimplinea.
+
+   vcimplinea = STRING(vcctacr, "X(14)") + "  " + STRING(vdnomctacr, "X(30)") + "                                            " +
+                "            " +
+                STRING(P_Nit,"X(12)") + "                                            " + STRING(vdcredito, "$>,>>>,>>>,>>9"). 
+   vcimpcptdesc  = vcimpcptdesc  + CHR(10) + vcimplinea.
+
+   vcimplinea = "                                                                                        " + 
+                "                                                                           " +
+                STRING(vddebito, "$>,>>>,>>>,>>9") + "                " + STRING(vdcredito, "$>,>>>,>>>,>>9"). 
+   vcimpcptdesc = vcimpcptdesc  + CHR(10) + CHR(10) + CHR(10) + CHR(10) + CHR(10) + CHR(10) +   
+                CHR(10) + CHR(10) + CHR(10) + CHR(10) + CHR(10) + CHR(10) + CHR(10)+ CHR(10) +
+                vcimplinea.  /* -1 Linea 20 Mayo2008*/
+
+   vcimplinea = "       " + STRING(vccheque).
+   vcimpcptdesc = vcimpcptdesc + CHR(10) + vcimplinea.
+END.
+/************************************/
+
+DEFINE VARIABLE Cheque AS CHARACTER FORMAT "X(50)".
+Cheque = W_PathSpl + "F_Cheque.Lst".
+
+DEFINE VAR W_Dispositivo AS CHARACTER INITIAL "P". 
+
+RUN P-DisPos IN W_Manija (INPUT-OUTPUT Cheque, INPUT-OUTPUT W_Dispositivo).
+IF W_Dispositivo = "" THEN
+   RETURN.
+IF W_Dispositivo = "I" THEN
+ DO:
+   Cheque = "Printer".
+   SYSTEM-DIALOG PRINTER-SETUP.
+ END.
+
+/*  MESSAGE "ojo - f-cheque1" SKIP            */
+/*         "P_Valor " P_Valor SKIP            */
+/*         "P_vctipo " P_vctipo SKIP          */
+/*         "vcimpcptenca " vcimpcptenca SKIP  */
+/*         "vcimpcptdesc " vcimpcptdesc       */
+/*      VIEW-AS ALERT-BOX INFO BUTTONS OK.    */
+
+ /* Tamaño de la página cambió de 66 a 42 wmr 03-12-2008*/
+OUTPUT TO VALUE(Cheque) NO-ECHO PAGED PAGE-SIZE 42.  
+IF P_Valor GT 0 AND P_vctipo = "1" THEN  /* Taquilla*/
+ DO:
+  DISPLAY 
+    Ano                        AT ROW 4  COL 41 FORMAT "X(4)"    /* ROW 6  COL 34 */
+    STRING(MONTH(TODAY),"99")  AT ROW 4  COL 47 FORMAT "X(2)"    /* ROW 6  COL 40 */
+    STRING(DAY(TODAY),"99")    AT ROW 4  COL 51 FORMAT "X(2)"    /* ROW 6  COL 44 */
+    P_Valor                    AT ROW 4  COL 58                  /* ROW 6  COL 50 */
+    P_Nombre                   AT ROW 7  COL 12                   /* ROW 8  COL 7  */
+    P_Monto1                   AT ROW 9  COL 12                   /* ROW 9  COL 7  */
+    P_Monto2                   AT ROW 11 COL 12                   /* ROW 11 COL 1  */
+
+      "*"                       AT ROW 16 COL 32                /* ROW 16 COL 27 */
+     P_Coment                   AT ROW 27 COL 32                /* ROW 27 COL 27 */
+     P_Tit1                     AT ROW 28 COL 32                /* ROW 28 COL 27 */
+     P_Nom2                     AT ROW 28 COL 45                /* ROW 28 COL 45 */
+     P_Tit2                     AT ROW 29 COL 32                /* ROW 29 COL 27 */
+     P_Val2                     AT ROW 29 COL 45                /* ROW 29 COL 45 */
+     TODAY                      AT ROW 30 COL 32                /* ROW 30 COL 27 */
+
+
+  WITH PAGE-TOP FRAME  F-cheqT width 180 NO-LABELS NO-BOX USE-TEXT.  /*120*/        /* 240 */
+
+/*  /*PUT CONTROL*/ CHR(27) + CHR(64) + CHR(80) + CHR(15). /* 10 cpi- Condensado*/ */
+/*   CHR(18) + CHR(77) + CHR(15).                                                  */
+/*   PUT UNFORMATTED vcimpcptenca SKIP.                                            */
+/*   CHR(27) + CHR(18) + CHR(77) + CHR(15). /* 12 cpi- Condensado*/                */
+/*   PUT UNFORMATTED vcimpcptdesc SKIP.                                            */
+/*   CHR(27) + CHR(18) + CHR(80) + CHR(12). /* 10 cpi*- Salto Pagina*/             */
+
+
+ END.
+ELSE
+  IF P_Valor GT 0 AND P_vctipo NE "1" THEN /* Desembolsos*/
+   DO:
+    DISPLAY 
+      Ano                        AT ROW 3  COL 73 FORMAT "X(4)"  /* ROW 4  COL 65 */
+      STRING(MONTH(TODAY),"99")  AT ROW 3  COL 80 FORMAT "X(2)"  /* ROW 4  COL 72 */
+      STRING(DAY(TODAY),"99")    AT ROW 3  COL 86 FORMAT "X(2)"  /* ROW 4  COL 78 */
+      P_Valor                    AT ROW 3  COL 90                /* ROW 4  COL 82 */
+      P_Nombre                   AT ROW 7  COL 32                /* ROW 7  COL 27 */
+      P_Monto1                   AT ROW 10 COL 32                /* ROW 10 COL 27 */
+      P_Monto2                   AT ROW 13 COL 26                /* ROW 13 COL 26 */
+       "*"                       AT ROW 16 COL 32                /* ROW 16 COL 27 */
+      P_Coment                   AT ROW 27 COL 32                /* ROW 27 COL 27 */
+      P_Tit1                     AT ROW 28 COL 32                /* ROW 28 COL 27 */
+      P_Nom2                     AT ROW 28 COL 45                /* ROW 28 COL 45 */
+      P_Tit2                     AT ROW 29 COL 32                /* ROW 29 COL 27 */
+      P_Val2                     AT ROW 29 COL 45                /* ROW 29 COL 45 */
+      TODAY                      AT ROW 30 COL 32                /* ROW 30 COL 27 */
+    WITH PAGE-TOP FRAME  F-cheq width 180 NO-LABELS NO-BOX USE-TEXT.  /*120*/        /* 240 */
+  END.
+  ELSE
+   IF P_Valor LE 0 THEN
+    DO:
+     DISPLAY 
+        "*"                        AT ROW 16 COL 1
+     WITH PAGE-TOP FRAME  F-cheq width 180 NO-LABELS NO-BOX USE-TEXT.
+   END.
+OUTPUT CLOSE.
+
+IF W_Dispositivo = "P" THEN  
+   RUN Ptlla_Imprimir.R(INPUT Cheque).
+
+IF W_Dispositivo <> "A" THEN
+  OS-DELETE VALUE(Cheque).
+
+PROCEDURE Imp_CpteEgresoTaquilla:
+ASSIGN viagencia  = 0
+       vcnit1     = ""
+       vcnombre   = ""
+       vinrocpte  = 0
+       vcdetalle  = ""
+       vcctadb    = ""
+       vcctacr    = ""
+       vdnomctadb = ""
+       vdnomctacr = ""
+       vccheque   = ""
+       vddebito   = 0
+       vdcredito  = 0.
+/* DEBUGGER:INITIATE().   */
+/* DEBUGGER:SET-BREAK().  */
+FOR EACH Taquilla WHERE
+    Taquilla.Usuario          EQ W_Usuario AND
+    Taquilla.Fec_Transaccion  EQ W_Fecha   AND 
+    Taquilla.Nit              EQ P_Nit     AND
+    Taquilla.Nro_Transaccion  EQ P_Trans   
+    NO-LOCK:
+   ASSIGN viagencia = Taquilla.Agencia
+          vccheque  = TRIM(Taquilla.Num_Retcheque).
+
+   IF vcnit1 = "" THEN DO:
+       FIND FIRST Clientes WHERE Clientes.Nit EQ Taquilla.Nit
+            NO-LOCK NO-ERROR.
+       IF AVAILABLE (Clientes) THEN
+          ASSIGN vcnombre = TRIM(Clientes.Nombre) + " " + TRIM(Clientes.Apellido1) + " " + TRIM(Clientes.Apellido2).
+       ASSIGN vcnit1 = P_Nit.
+   END.
+   /* Busca Debito*/
+   FIND FIRST Mov_Contable WHERE 
+        Mov_Contable.Cuenta       EQ Taquilla.Cuenta          AND
+        Mov_Contable.Comprobante  EQ 02                       AND
+        Mov_Contable.Agencia      EQ Taquilla.Agencia         AND
+        Mov_Contable.Fec_Contable EQ Taquilla.Fec_Transaccion AND
+        Mov_Contable.Cen_Costos   EQ 999                      AND
+        Mov_Contable.Usuario      EQ Taquilla.Usuario         AND
+        Mov_Contable.Nit          EQ Taquilla.Nit             AND
+        Mov_Contable.db           EQ Taquilla.val_cheque      AND
+        Mov_contable.Enlace       EQ STRING(Taquilla.Nro_Transaccion)
+        NO-LOCK NO-ERROR.
+  IF AVAILABLE (Mov_Contable) THEN DO:
+      ASSIGN vinrocpte = Mov_Contable.Num_Documento
+             vcdetalle = substring(Mov_Contable.Comentario,1,50) + "-" + "No." + STRING(Taquilla.Nro_Cuenta)
+             vcctadb   = Mov_Contable.Cuenta
+             vddebito  = Mov_Contable.db.
+      FIND FIRST Cuentas WHERE 
+           Cuentas.Cuenta EQ Mov_Contable.Cuenta
+           NO-LOCK NO-ERROR.
+      IF AVAILABLE (Cuentas) THEN
+          ASSIGN vdnomctadb = Cuentas.Nombre.
+       ELSE
+          ASSIGN vdnomctadb = "No Existe Nombre Cuenta".
+   END.
+   /* Busca Crédito - Cta Bancaria*/
+   FIND FIRST Mov_Contable WHERE 
+        Mov_Contable.Cuenta       EQ Taquilla.Cta_Contra      AND
+        Mov_Contable.Comprobante  EQ 02                       AND
+        Mov_Contable.Agencia      EQ Taquilla.Agencia         AND
+        Mov_Contable.Fec_Contable EQ Taquilla.Fec_Transaccion AND
+        Mov_Contable.Cen_Costos   EQ 999                      AND
+        Mov_Contable.Usuario      EQ Taquilla.Usuario         AND
+        Mov_Contable.Nit          EQ Taquilla.Nit             AND
+        Mov_Contable.cr           EQ Taquilla.val_cheque      AND
+        Mov_contable.Enlace       EQ STRING(Taquilla.Nro_Transaccion)
+        NO-LOCK NO-ERROR.
+  IF AVAILABLE (Mov_Contable) THEN DO:
+      ASSIGN vinrocpte = Mov_Contable.Num_Documento
+             vcctacr   = Mov_Contable.Cuenta
+             vdcredito = Mov_Contable.cr.
+      FIND FIRST Cuentas WHERE 
+           Cuentas.Cuenta EQ Mov_Contable.Cuenta
+           NO-LOCK NO-ERROR.
+      IF AVAILABLE (Cuentas) THEN
+         ASSIGN vdnomctacr = Cuentas.Nombre.
+       ELSE
+          ASSIGN vdnomctacr = "No Existe Nombre Cuenta".
+   END.
+END.
+
+END PROCEDURE.

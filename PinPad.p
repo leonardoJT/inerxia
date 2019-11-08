@@ -1,0 +1,134 @@
+/* DEFINE INPUT  PARAMETER pUsr    AS CHARACTER INITIAL "h00200101". */
+/* DEFINE INPUT  PARAMETER pClave  AS CHARACTER INITIAL "1234".      */
+/* DEFINE INPUT  PARAMETER ppin    AS CHARACTER INITIAL "1".         */
+/* DEFINE INPUT  PARAMETER pXmli   AS CHARACTER.                     */
+/* DEFINE INPUT  PARAMETER pXmlo   AS CHARACTER.                     */
+/* DEFINE INPUT-OUTPUT  PARAMETER pNroTar   AS CHARACTER.            */
+/* DEFINE OUTPUT PARAMETER retCod AS INTEGER INITIAL -1.             */
+
+
+DEFINE VARIABLE pUsr    AS CHARACTER INITIAL "h00200101".
+DEFINE  VARIABLE pClave  AS CHARACTER INITIAL "1234".
+DEFINE  VARIABLE ppin    AS INTEGER INITIAL 1.
+DEFINE  VARIABLE pXmli   AS CHARACTER.
+DEFINE  VARIABLE pXmlo   AS CHARACTER.
+DEFINE  VARIABLE pNroTar   AS CHARACTER.
+DEFINE  VARIABLE retCod AS INTEGER INITIAL -1.
+
+DEFINE  VARIABLE strY AS CHARACTER.
+DEFINE  VARIABLE strM AS CHARACTER.
+DEFINE  VARIABLE strD AS CHARACTER.
+
+DEFINE  VARIABLE strHH AS CHARACTER.
+DEFINE  VARIABLE strMM AS CHARACTER.
+DEFINE  VARIABLE strSS AS CHARACTER.
+
+DEFINE VARIABLE I AS INTEGER.
+
+
+DEFINE VARIABLE red AS INTEGER INITIAL 1. /* 1- visionamos 2- banco bogota */
+RUN Enviar.
+
+
+/*********************************************************/
+PROCEDURE Enviar:    
+    PAUSE 1.
+
+    RUN StdInit(OUTPUT retCod). /*inicializar 0- ok */
+    IF retCod = 0 THEN DO:
+        
+      RUN StdLogin(  pUsr, 
+                     pClave,
+                     OUTPUT retCod).  /*valida clave 0-ok */
+      IF retCod = 0 THEN DO:
+
+            strY = string(YEAR(TODAY)).
+            strM = STRING(MONTH(TODAY)).
+            strD = STRING(DAY(TODAY)).
+
+            IF LENGTH(strM) = 1 THEN DO:
+                strM = '0' + strM.
+            END.
+                
+            IF LENGTH(strD) = 1 THEN DO:
+                strM = '0' + strD.
+            END.
+
+            strHH = SUBSTRING(STRING(TIME,"HH:MM:SS"),1,2).
+            strMM = SUBSTRING(STRING(TIME,"HH:MM:SS"),4,2).
+            strSS = SUBSTRING(STRING(TIME,"HH:MM:SS"),7,2).
+
+            /*
+            consulta de saldo
+            */
+            pXmlI = '<?xml version="1.0" encoding="iso-8859-1"?>'.
+            pXmlI = pXmlI + '<ECG>'.
+            pXmlI = pXmlI + '<S007>0200</S007>'.
+            pXmlI = pXmlI + '<S008>30</S008>'.
+            pXmlI = pXmlI + '<S009>' + strHH + strMM + strSS + '</S009>'.
+            pXmlI = pXmlI + '<S011>12139501</S011>'.
+            pXmlI = pXmlI + '<S020>00100100018483</S020>'.
+            pXmlI = pXmlI + '<S025>00000020</S025>'.
+            pXmlI = pXmlI + '</ECG>'.
+
+            MESSAGE pXmlI view-as alert-box. 
+
+            PXmlO = "".
+            DO I = 1 TO 1024:
+              PXmlO = PXmlO + " ".
+            END.        
+
+            RUN StdTrans( 2, 
+                          PXmli, 
+                          INPUT-OUTPUT PXmlO, 
+                          OUTPUT retCod).   /* valida visionamos */
+
+        MESSAGE "TRN" retCod pXmlI pXmlo view-as alert-box. 
+      END.
+      ELSE DO:
+        MESSAGE "Error Login : " retCod pUsr pClave view-as alert-box.
+      END.
+
+      RUN StdDone(OUTPUT retCod).
+    END.
+    ELSE DO:
+      MESSAGE "Error Inicializacion : " retCod view-as alert-box.
+    END.
+
+/*
+      RUN StdBtaPinPad(INPUT-OUTPUT pNroTar,
+                     OUTPUT retCod). */    /* valida banco bogota */
+
+    PAUSE 2.
+END PROCEDURE.
+
+PROCEDURE StdTest EXTERNAL "ECGTSClientStd.dll" PERSISTENT STDCALL:
+    DEFINE RETURN PARAMETER retCod AS LONG.
+END.
+PROCEDURE StdInit EXTERNAL "ECGTSClientStd.dll" PERSISTENT STDCALL:
+    DEFINE RETURN PARAMETER retCod AS LONG.
+END.
+
+PROCEDURE StdDone EXTERNAL "ECGTSClientStd.dll" PERSISTENT STDCALL:
+    DEFINE RETURN PARAMETER retCod AS LONG.
+END.
+
+PROCEDURE StdLogin EXTERNAL "ECGTSClientStd.dll" PERSISTENT STDCALL:
+    DEFINE INPUT  PARAMETER Usr AS CHARACTER.
+    DEFINE INPUT  PARAMETER Clave AS CHARACTER.
+    DEFINE RETURN PARAMETER retCod AS LONG.
+END.
+
+PROCEDURE StdTrans EXTERNAL "ECGTSClientStd.dll" PERSISTENT STDCALL:
+    DEFINE INPUT  PARAMETER Pin AS BYTE.
+    DEFINE INPUT  PARAMETER XmlI AS CHARACTER.
+    DEFINE INPUT-OUTPUT PARAMETER XmlO AS CHARACTER.
+    DEFINE RETURN PARAMETER retCod AS LONG.
+END.
+
+PROCEDURE StdBtaPinpad EXTERNAL "ECGTSClientStd.dll" PERSISTENT STDCALL:
+    DEFINE INPUT-OUTPUT PARAMETER NroTarjeta AS CHARACTER.
+    DEFINE RETURN PARAMETER retCod AS LONG.
+END.
+
+RELEASE EXTERNAL PROCEDURE "ECGTSClientStd.dll".

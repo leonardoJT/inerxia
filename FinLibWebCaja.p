@@ -1,0 +1,9 @@
+DEFINE VARIABLE retCode AS INTEGER INITIAL -1.
+RUN WC_Done(OUTPUT retCode).
+IF retcode <> 0 THEN
+  MESSAGE "No se pudo hacer DESCONEXION de la libreria WebCajaLib.dll"
+      VIEW-AS ALERT-BOX INFO BUTTONS OK.
+
+PROCEDURE WC_Done EXTERNAL "c:\webcaja.2006\WebCajaLib.dll" CDECL:
+    DEFINE RETURN PARAMETER retCode AS BYTE.
+END.
