@@ -1,0 +1,49 @@
+ADD TABLE "Ctr_ProcDistribucion"
+  AREA "General"
+  DESCRIPTION "Tabla para control de procesos de distribución"
+  DUMP-NAME "Ctr_ProcDistribucion"
+
+ADD FIELD "agencia" OF "Ctr_ProcDistribucion" AS integer 
+  FORMAT "99"
+  INITIAL "0"
+  LABEL "Agencia"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "Cod_empresa" OF "Ctr_ProcDistribucion" AS integer 
+  FORMAT "999"
+  INITIAL "0"
+  LABEL "Código Empresa"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "Periodo" OF "Ctr_ProcDistribucion" AS integer 
+  FORMAT "99"
+  INITIAL "0"
+  LABEL "Periodo"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD FIELD "Fec_distribucion" OF "Ctr_ProcDistribucion" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  POSITION 5
+  MAX-WIDTH 4
+  ORDER 40
+
+ADD FIELD "ano" OF "Ctr_ProcDistribucion" AS integer 
+  FORMAT "9999"
+  INITIAL "0"
+  LABEL "Año"
+  POSITION 6
+  MAX-WIDTH 4
+  ORDER 35
+
+.
+PSC
+cpstream=ISO8859-1
+.
+0000000911

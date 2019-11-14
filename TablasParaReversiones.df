@@ -1,0 +1,193 @@
+ADD TABLE "transAhorros"
+  AREA "General"
+  LABEL "Transacciones de Ahorros"
+  DESCRIPTION "Se usa para realizar las reversiones de transacciones"
+  DUMP-NAME "transahorros"
+
+ADD FIELD "fec_contable" OF "transAhorros" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "comprobante" OF "transAhorros" AS integer 
+  FORMAT ">>>>>>9"
+  INITIAL "0"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "num_documento" OF "transAhorros" AS integer 
+  FORMAT ">>>>>>9"
+  INITIAL "0"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD FIELD "agencia" OF "transAhorros" AS integer 
+  FORMAT ">9"
+  INITIAL "0"
+  POSITION 5
+  MAX-WIDTH 4
+  ORDER 40
+
+ADD FIELD "cod_ahorro" OF "transAhorros" AS integer 
+  FORMAT ">>9"
+  INITIAL "0"
+  POSITION 6
+  MAX-WIDTH 4
+  ORDER 50
+
+ADD FIELD "cue_ahorros" OF "transAhorros" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 7
+  MAX-WIDTH 16
+  ORDER 60
+
+ADD FIELD "nit" OF "transAhorros" AS character 
+  FORMAT "x(10)"
+  INITIAL ""
+  POSITION 8
+  MAX-WIDTH 20
+  ORDER 70
+
+ADD FIELD "sdo_disponible" OF "transAhorros" AS decimal 
+  FORMAT "->>>,>>>,>>>,>>9.99"
+  INITIAL "0"
+  POSITION 9
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 80
+
+ADD FIELD "int_pagar" OF "transAhorros" AS decimal 
+  FORMAT "->>>,>>>,>>>,>>9.99"
+  INITIAL "0"
+  POSITION 10
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 90
+
+ADD FIELD "int_causado" OF "transAhorros" AS decimal 
+  FORMAT "->>>,>>>,>>>,>>9.99"
+  INITIAL "0"
+  POSITION 11
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 100
+
+ADD FIELD "int_sobregiro" OF "transAhorros" AS decimal 
+  FORMAT "->>>,>>>,>>>,>>9.99"
+  INITIAL "0"
+  POSITION 12
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 110
+
+ADD TABLE "transCreditos"
+  AREA "General"
+  DESCRIPTION "Se usa para realizar las reversiones de transacciones"
+  DUMP-NAME "transcreditos"
+
+ADD FIELD "fec_contable" OF "transCreditos" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "comprobante" OF "transCreditos" AS integer 
+  FORMAT ">>>>>>9"
+  INITIAL "0"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "num_documento" OF "transCreditos" AS integer 
+  FORMAT ">>>>>>9"
+  INITIAL "0"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD FIELD "agencia" OF "transCreditos" AS integer 
+  FORMAT ">9"
+  INITIAL "0"
+  POSITION 5
+  MAX-WIDTH 4
+  ORDER 40
+
+ADD FIELD "cod_credito" OF "transCreditos" AS integer 
+  FORMAT ">>9"
+  INITIAL "0"
+  POSITION 6
+  MAX-WIDTH 4
+  ORDER 50
+
+ADD FIELD "num_credito" OF "transCreditos" AS integer 
+  FORMAT ">>>>>>9"
+  INITIAL "0"
+  POSITION 7
+  MAX-WIDTH 4
+  ORDER 60
+
+ADD FIELD "pagare" OF "transCreditos" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 8
+  MAX-WIDTH 16
+  ORDER 70
+
+ADD FIELD "nit" OF "transCreditos" AS character 
+  FORMAT "x(10)"
+  INITIAL ""
+  POSITION 9
+  MAX-WIDTH 20
+  ORDER 80
+
+ADD FIELD "sdo_capital" OF "transCreditos" AS decimal 
+  FORMAT "->>>,>>>,>>>,>>9.99"
+  INITIAL "0"
+  POSITION 10
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 90
+
+ADD FIELD "int_corrientes" OF "transCreditos" AS decimal 
+  FORMAT "->>>,>>>,>>>,>>9.99"
+  INITIAL "0"
+  POSITION 11
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 100
+
+ADD FIELD "int_anticipado" OF "transCreditos" AS decimal 
+  FORMAT "->>>,>>>,>>>,>>9.99"
+  INITIAL "0"
+  POSITION 12
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 110
+
+ADD FIELD "int_morCobrar" OF "transCreditos" AS decimal 
+  FORMAT "->>>,>>>,>>>,>>9.99"
+  INITIAL "0"
+  POSITION 13
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 120
+
+ADD FIELD "int_difCobro" OF "transCreditos" AS decimal 
+  FORMAT "->>>,>>>,>>>,>>9.99"
+  INITIAL "0"
+  POSITION 14
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 130
+
+.
+PSC
+cpstream=ISO8859-1
+.
+0000003757

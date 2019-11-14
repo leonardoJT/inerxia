@@ -1,0 +1,49 @@
+ADD TABLE "cfg_listasSarlaft"
+  AREA "General"
+  DUMP-NAME "cfg_listassarlaft"
+
+ADD FIELD "Lista" OF "cfg_listasSarlaft" AS character 
+  FORMAT "x(30)"
+  INITIAL ""
+  POSITION 2
+  MAX-WIDTH 60
+  ORDER 10
+
+ADD FIELD "Fecha_modificacion" OF "cfg_listasSarlaft" AS date 
+  FORMAT "99/99/99"
+  INITIAL ?
+  POSITION 5
+  MAX-WIDTH 4
+  ORDER 50
+
+ADD FIELD "Usuario" OF "cfg_listasSarlaft" AS character 
+  DESCRIPTION "Último usuario en modificar lista"
+  FORMAT "x(60)"
+  INITIAL ""
+  POSITION 6
+  MAX-WIDTH 120
+  ORDER 60
+
+ADD FIELD "Estado" OF "cfg_listasSarlaft" AS integer 
+  DESCRIPTION "1 Activa
+2 Inactiva"
+  FORMAT "9"
+  INITIAL "0"
+  POSITION 7
+  MAX-WIDTH 4
+  HELP "Lista activa o inactiva"
+  ORDER 100
+
+ADD FIELD "Tipo" OF "cfg_listasSarlaft" AS character 
+  DESCRIPTION "Restrictiva o no restrictiva. Res, NoRes"
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 9
+  MAX-WIDTH 16
+  ORDER 90
+
+.
+PSC
+cpstream=ISO8859-1
+.
+0000000934

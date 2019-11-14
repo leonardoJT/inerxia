@@ -2,8 +2,9 @@ DEFINE INPUT PARAMETER pNit AS CHARACTER.
 DEFINE INPUT PARAMETER pCodCredito AS INTEGER.
 DEFINE INPUT PARAMETER pNumcredito AS INTEGER.
 DEFINE INPUT PARAMETER debitaAhPerm AS LOGICAL.
-
-{Incluido/Variable.I "SHARED"}
+DEFINE INPUT PARAMETER pFechaProceso AS DATE.
+DEFINE INPUT PARAMETER pUsuario AS CHARACTER.
+/* ----------------------- */
 
 DEFINE VAR pCuota AS DECIMAL.
 DEFINE VAR valDebitar AS DECIMAL.
@@ -28,7 +29,10 @@ DEFINE VAR pResult AS LOGICAL.
 DEFINE VAR flagContabiliza AS LOGICAL.
 
 DEFINE TEMP-TABLE TempCtas
-    FIELD Agen LIKE Ahorros.Agencia
+    FIELD agencia AS INTEGER
+
+    /* oakley */
+
     FIELD TipP AS CHAR FORM "X(1)"
     FIELD Pto LIKE Ahorros.Cod_Ahorro
     FIELD CtaPro LIKE Cuentas.Cuenta
@@ -65,7 +69,7 @@ IF AVAILABLE creditos THEN DO:
     /* 1. Determinamos el valor de la cuota a debitar */
     FOR EACH facturacion WHERE facturacion.nit = creditos.nit
                            AND facturacion.num_credito = creditos.num_credito
-                           AND facturacion.fec_pago <= w_fecha
+                           AND facturacion.fec_pago <= pFechaProceso
                            AND facturacion.estado = 1 NO-LOCK:
         pCuota = pcuota + (facturacion.cuota - facturacion.pago_mora - facturacion.pago_intCorriente - facturacion.pago_capital).
     END.
@@ -103,7 +107,7 @@ IF AVAILABLE creditos THEN DO:
                     valDebitar = TRUNCATE(((ahorros.sdo_disponible - saldoMinimo) * 100) / 100.4,0).
             END.
 
-            FIND FIRST TempCtas WHERE TempCtas.Agen EQ Ahorros.Agencia
+            FIND FIRST TempCtas WHERE TempCtas.Agencia EQ Ahorros.Agencia
                                   AND TempCtas.TipP EQ "A"
                                   AND TempCtas.Pto EQ Ahorros.Cod_Ahorro NO-LOCK NO-ERROR.
             IF NOT AVAIL(TempCtas) THEN DO:
@@ -116,7 +120,7 @@ IF AVAILABLE creditos THEN DO:
 
             IF valDebitar > 0 THEN DO:
                 ASSIGN Ahorros.Sdo_Disponible = Ahorros.Sdo_Disponible - valDebitar
-                       Ahorros.Fec_UltTrans = W_Fecha
+                       Ahorros.Fec_UltTrans = pFechaProceso
                        Ahorros.Num_RetMes = Ahorros.Num_RetMes + 1
                        Ahorros.Num_RetDia = Ahorros.Num_RetDia + 1
                        Ahorros.Val_RetDia = Ahorros.Val_RetDia + valDebitar
@@ -155,7 +159,7 @@ IF AVAILABLE creditos THEN DO:
                     valDebitar = TRUNCATE(((ahorros.sdo_disponible - saldoMinimo) * 100) / 100.4,0).
             END.
 
-            FIND FIRST TempCtas WHERE TempCtas.Agen EQ Ahorros.Agencia
+            FIND FIRST TempCtas WHERE TempCtas.Agencia EQ Ahorros.Agencia
                                   AND TempCtas.TipP EQ "A"
                                   AND TempCtas.Pto EQ Ahorros.Cod_Ahorro NO-LOCK NO-ERROR.
             IF NOT AVAIL(TempCtas) THEN DO:
@@ -168,7 +172,7 @@ IF AVAILABLE creditos THEN DO:
 
             IF valDebitar > 0 THEN DO:
                 ASSIGN Ahorros.Sdo_Disponible = Ahorros.Sdo_Disponible - valDebitar
-                       Ahorros.Fec_UltTrans = W_Fecha
+                       Ahorros.Fec_UltTrans = pFechaProceso
                        Ahorros.Num_RetMes = Ahorros.Num_RetMes + 1
                        Ahorros.Num_RetDia = Ahorros.Num_RetDia + 1
                        Ahorros.Val_RetDia = Ahorros.Val_RetDia + valDebitar
@@ -187,58 +191,6 @@ IF AVAILABLE creditos THEN DO:
         END.
     END.
 
-    /*IF pCuota > 0 AND (creditos.dias_atraso >= 85 OR debitaAhPerm = TRUE) THEN DO:
-        valDebitar = pCuota.
-
-        FIND FIRST ahorros WHERE ahorros.agencia = creditos.agencia
-                             AND ahorros.nit = creditos.nit
-                             AND ahorros.tip_ahorro = 2
-                             AND ahorros.cod_ahorro = 3
-                             AND ahorros.sdo_disponible > 0 NO-ERROR.
-        IF AVAILABLE ahorros THEN DO:
-            FIND FIRST pro_ahorros WHERE pro_ahorros.cod_ahorro = ahorros.cod_ahorro NO-LOCK NO-ERROR.
-            IF AVAILABLE pro_ahorros THEN DO:
-                IF pro_ahorros.id_salMinimo = YES THEN
-                    saldoMinimo = pro_ahorros.val_sdoMinimo.
-                ELSE
-                    saldoMinimo = 0.
-
-                IF ahorros.sdo_disponible - saldoMinimo < valDebitar * 1.004 THEN
-                    valDebitar = TRUNCATE(((ahorros.sdo_disponible - saldoMinimo) * 100) / 100.4,0).
-            END.
-
-            FIND FIRST TempCtas WHERE TempCtas.Agen EQ Ahorros.Agencia
-                                  AND TempCtas.TipP EQ "A"
-                                  AND TempCtas.Pto EQ Ahorros.Cod_Ahorro NO-LOCK NO-ERROR.
-            IF NOT AVAIL(TempCtas) THEN DO:
-                MESSAGE "Falta configuración con Producto_Ahorro:" Ahorros.Cod_Ahorro SKIP
-                        "para la agencia:" Ahorros.Agencia
-                    VIEW-AS ALERT-BOX ERROR.
-
-                RETURN ERROR.
-            END.
-
-            IF valDebitar > 0 THEN DO:
-                ASSIGN Ahorros.Sdo_Disponible = Ahorros.Sdo_Disponible - valDebitar
-                       Ahorros.Fec_UltTrans = W_Fecha
-                       Ahorros.Num_RetMes = Ahorros.Num_RetMes + 1
-                       Ahorros.Num_RetDia = Ahorros.Num_RetDia + 1
-                       Ahorros.Val_RetDia = Ahorros.Val_RetDia + valDebitar
-                       Ahorros.Val_RetMes = Ahorros.Val_RetMes + valDebitar
-                       pCuenta = TempCtas.CtaPro.
-
-                IF flagContabiliza = FALSE THEN
-                    flagContabiliza = TRUE.
-                
-                RUN Movimientos.
-                RUN GMF.
-
-                valAbono = valAbono + valDebitar.
-                pCuota = pCuota - valDebitar.
-            END.
-        END.
-    END.*/
-
     IF valAbono > 0 THEN DO:
         RUN p-pagoCredito.R(INPUT YES,
                             INPUT Creditos.Cod_Credito,
@@ -249,7 +201,7 @@ IF AVAILABLE creditos THEN DO:
                             INPUT pSecuencia,
                             INPUT 0,
                             INPUT 1,
-                            INPUT w_fecha,
+                            INPUT pFechaProceso,
                             INPUT FALSE,
                             OUTPUT P_Poliza,
                             OUTPUT P_Honora,
@@ -275,7 +227,7 @@ IF AVAILABLE creditos THEN DO:
             RETURN ERROR.
         END.
 
-        FIND FIRST TempCtas WHERE TempCtas.Agen EQ Creditos.Agencia
+        FIND FIRST TempCtas WHERE TempCtas.Agencia EQ Creditos.Agencia
                               AND TempCtas.TipP EQ "C"
                               AND TempCtas.Pto EQ Creditos.Cod_Credito NO-LOCK NO-ERROR.
         IF NOT AVAIL(TempCtas) THEN DO:
@@ -298,7 +250,7 @@ PROCEDURE GMF:
     DEFINE VAR gmfAplicado AS DECIMAL.
 
     RUN RutGMF.R (INPUT TRUE,
-                  INPUT W_Agencia,
+                  INPUT creditos.agencia,
                   INPUT Ahorros.Agencia,
                   INPUT 1,
                   INPUT Ahorros.Cod_Ahorro,
@@ -333,15 +285,15 @@ END PROCEDURE.
 PROCEDURE CargarCuentas:
     FOR EACH Pro_Ahorros WHERE (pro_ahorros.tip_ahorro = 1 AND (pro_ahorros.cod_ahorro = 4 OR pro_ahorros.cod_ahorro = 9))
                             OR (pro_ahorros.tip_ahorro = 2 AND pro_ahorros.cod_ahorro = 3) NO-LOCK BY Pro_Ahorros.Cod_Ahorro:
-        FOR EACH CortoLargo WHERE CortoLargo.Clase_Producto EQ 1
-                              AND CortoLargo.Cod_Producto EQ Pro_Ahorros.Cod_Ahorro
-                              AND CortoLargo.Plazo_Inicial GE 0 NO-LOCK BREAK BY CortoLargo.Agencia
+        FOR EACH CortoLargo WHERE CortoLargo.Clase_Producto = 1
+                              AND CortoLargo.Cod_Producto = Pro_Ahorros.Cod_Ahorro
+                              AND CortoLargo.Plazo_Inicial >= 0 NO-LOCK BREAK BY CortoLargo.Agencia
                                                                               BY CortoLargo.Cod_Producto
                                                                               BY CortoLargo.Plazo_Inicial:
             IF FIRST-OF(CortoLargo.Cod_Producto) THEN DO:
-                FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ CortoLargo.Cta_AsoAd
-                                     AND Cuentas.Tipo EQ 2
-                                     AND Cuentas.Estado EQ 1 NO-LOCK NO-ERROR.
+                FIND FIRST Cuentas WHERE Cuentas.Cuenta = CortoLargo.Cta_AsoAd
+                                     AND Cuentas.Tipo = 2
+                                     AND Cuentas.Estado = 1 NO-LOCK NO-ERROR.
                 IF AVAIL(Cuentas) THEN
                     FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ CortoLargo.Cta_SyA
                                          AND Cuentas.Tipo EQ 2
@@ -356,7 +308,7 @@ PROCEDURE CargarCuentas:
                 END.
 
                 CREATE TempCtas.
-                ASSIGN TempCtas.Age = CortoLargo.Agencia
+                ASSIGN TempCtas.Agencia = CortoLargo.Agencia
                        TempCtas.TipP = "A"
                        TempCtas.Pto = CortoLargo.Cod_Producto
                        TempCtas.CtaPro = CortoLargo.Cta_AsoAd
@@ -419,7 +371,7 @@ PROCEDURE CargarCuentas:
                 END.
 
                 CREATE TempCtas.
-                ASSIGN TempCtas.Age = CortoLargo.Agencia
+                ASSIGN TempCtas.Agencia = CortoLargo.Agencia
                        TempCtas.TipP = "C"
                        TempCtas.Pto = CortoLargo.Cod_Producto
                        TempCtas.CtaPro = CortoLargo.Cta_AsoAd
@@ -493,35 +445,43 @@ PROCEDURE Movimientos:
     ASSIGN Mov_Contable.Agencia = Ahorros.Agencia
            Mov_Contable.Cuenta = pCuenta
            Mov_Contable.Nit = Ahorros.Nit
-           Mov_Contable.Fec_Contable = W_Fecha
+           Mov_Contable.Fec_Contable = pFechaProceso
            Mov_Contable.Comentario = "Débito Automático"
-           Mov_Contable.Usuario = W_Usuario
-           Mov_Contable.Cen_Costos = W_Cencosgral
-           Mov_Contable.Destino = W_Agencia
+           Mov_Contable.Usuario = pUsuario
+           Mov_Contable.Cen_Costos = 999
+           Mov_Contable.Destino = creditos.agencia
            Mov_Contable.Comprobante = pComprobante
            Mov_Contable.Num_Documento = pSecuencia
            Mov_Contable.Doc_Refer = STRING(pSecuencia)
            Mov_Contable.Fec_Grabacion = TODAY
            Mov_Contable.Hora = TIME
-           Mov_Contable.Estacion = W_Estacion
            Mov_Contable.Db = valDebitar.
 
     CREATE Mov_Ahorros.
     ASSIGN Mov_Ahorros.Agencia = Ahorros.Agencia
-           Mov_Ahorros.Age_Destino = Ahorros.Agencia
-           Mov_Ahorros.Age_Fuente = W_Agencia
+           Mov_Ahorros.Age_Destino = creditos.agencia
+           Mov_Ahorros.Age_Fuente = ahorros.agencia
            Mov_Ahorros.Cod_Ahorro = Ahorros.Cod_Ahorro
            Mov_Ahorros.Cue_Ahorros = Ahorros.Cue_Ahorro
-           Mov_Ahorros.Fecha = W_Fecha
+           Mov_Ahorros.Fecha = pFechaProceso
            Mov_Ahorros.Hora = TIME
            Mov_Ahorros.Nit = Ahorros.Nit
            Mov_Ahorros.Num_Documento = STRING(pSecuencia)
            Mov_Ahorros.Sdo_Disponible = Ahorros.Sdo_Disponible + Ahorros.Sdo_Canje
-           Mov_Ahorros.Usuario = W_Usuario
+           Mov_Ahorros.Usuario = pUsuario
            Mov_Ahorros.Val_Efectivo = valDebitar
            Mov_Ahorros.Cod_Operacion = pOperacion
            Mov_Ahorros.Cpte = pComprobante
            Mov_Ahorros.Descrip = "Débito Automático".
 END PROCEDURE.
 
+PROCEDURE escribirLog:
+DEFINE INPUT PARAMETER pMensaje AS CHARACTER.
 
+OUTPUT TO VALUE("logs\" + pUsuario + ".csv") APPEND.
+    EXPORT DELIMITER ";"
+        NOW
+        pMensaje.
+
+OUTPUT CLOSE.
+END PROCEDURE.

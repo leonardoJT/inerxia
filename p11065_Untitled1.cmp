@@ -1,0 +1,12 @@
+FOR EACH mov_contable WHERE agencia = 1
+                        AND YEAR(fec_contable) = 2013
+                        AND nit <> ""
+                        AND db < 70000
+                        AND cr < 70000
+                        AND INDEX(comentario,"alojamiento") = 0 NO-LOCK:
+    FIND FIRST ahorros WHERE ahorros.nit = mov_contable.nit
+                         AND ahorros.agencia = 2
+                         AND ahorros.estado = 1 NO-LOCK NO-ERROR.
+    IF AVAILABLE ahorros THEN
+        DISPLAY mov_contable WITH WIDTH 200 1 COL.
+END.

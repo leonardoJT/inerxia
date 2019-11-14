@@ -1,0 +1,76 @@
+=====================================================
+PROGRESS stack trace as of Thu Mar 28 16:48:36 2019
+=====================================================
+Startup parameters:
+-pf C:\Progress\OpenEdge\startup.pf,-cpinternal ISO8859-1,-cpstream ISO8859-1,-cpcoll Spanish9,-cpcase Basic,-d dmy,-numsep 44,-numdec 46,(end .pf),-pf D:\SFG\Desarrollo\sfg.pf,-db desarrollo,-ld bdcentral,-H servidor_01,-N tcp,-S 7000,-nb 255,-T c:\tmp,(end .pf),-ininame D:\SFG\Desarrollo\sfg.ini,-p _desk,-rand 2
+
+Exception code: E0000003 
+Fault address:  750E012F 01:0001012F C:\Windows\syswow64\kernel32.dll
+
+Registers:
+EAX:0017F05C
+EBX:00000002
+ECX:005C0EB4
+EDX:047152D8
+ESI:00000002
+EDI:00000001
+CS:EIP:0023:750E012F
+SS:ESP:002B:0017F05C  EBP:0017F0AC
+DS:002B  ES:002B  FS:0053  GS:002B
+Flags:00000246
+
+Call Stack:
+Address   Frame
+750E012F  00000000  RaiseException+59
+1046F1F4  00000000  dbut_utfpsep+5714
+
+
+** ABL Stack Trace **
+
+--> adeuib/_undbrow.p (adeuib/_undbrow.r) at line 1767
+    adeuib/_rdqury.p (adeuib/_rdqury.r) at line 2974
+    analyze-suspend-reader adeuib/_qssuckr.p (adeuib/_qssuckr.r) at line 4532
+    adeuib/_qssuckr.p (adeuib/_qssuckr.r) at line 4140
+    adeuib/_open-w.p (adeuib/_open-w.r) at line 1540
+    choose_open adeuib/_uibmain.p (adeuib/_uibmain.r) at line 8082
+    choose_file_open adeuib/_uibmain.p (adeuib/_uibmain.r) at line 6821
+    USER-INTERFACE-TRIGGER adeuib/_uibmain.p (adeuib/_uibmain.r) at line 16813
+    adeuib/_uibmain.p (adeuib/_uibmain.r) at line 17213
+    _ab.p (C:\Progress\OpenEdge\gui\_ab.r) at line 394
+    _RunTool adedesk/_desktop.p (adedesk/_desktop.r) at line 1582
+    USER-INTERFACE-TRIGGER adedesk/_desktop.p (adedesk/_desktop.r) at line 2093
+    adedesk/_desktop.p (adedesk/_desktop.r) at line 2781
+
+** Persistent procedures/Classes **
+
+Handle  File Name
+001746  adecomm/as-utils.r
+001702  adecomm/_palette.r
+001701  protools/_protool.r
+001149  adecomm/_winmenu.r
+001148  adeshar/_mlmgr.r
+001025  adeuib/_abfuncs.r
+
+//=====================================================
+PROGRESS stack trace as of Thu Mar 28 16:48:37 2019
+//=====================================================
+Exception code: E0000003 
+Fault address:  750E012F 01:0001012F C:\Windows\syswow64\kernel32.dll
+
+Registers:
+EAX:0017F05C
+EBX:00000002
+ECX:005C0EB4
+EDX:047152D8
+ESI:00000002
+EDI:00000001
+CS:EIP:0023:750E012F
+SS:ESP:002B:0017F0C8  EBP:0017F0AC
+DS:002B  ES:002B  FS:0053  GS:002B
+Flags:00000246
+
+Call Stack:
+Address   Frame
+750E012F  0017F0AC  RaiseException+59
+1046F1F4  0017F0C0  dbut_utfpsep+5714
+

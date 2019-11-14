@@ -1,0 +1,27 @@
+=====================================================
+PROGRESS stack trace as of Thu Mar 28 17:06:22 2019
+=====================================================
+Startup parameters:
+-pf C:\Progress\OpenEdge\startup.pf,-cpinternal ISO8859-1,-cpstream ISO8859-1,-cpcoll Spanish9,-cpcase Basic,-d dmy,-numsep 44,-numdec 46,(end .pf),-pf D:\SFG\Desarrollo\sfg.pf,-db desarrollo,-ld bdcentral,-H servidor_01,-N tcp,-S 7000,-nb 255,-T c:\tmp,(end .pf),-ininame D:\SFG\Desarrollo\sfg.ini,-p _desk,-rand 2
+
+Exception code: C0000005 ACCESS_VIOLATION
+Fault address:  74D84A7F 01:00013A7F C:\Windows\WinSxS\x86_microsoft.vc80.crt_1fc8b3b9a1e18e3b_8.0.50727.6195_none_d09154e044272b9a\MSVCR80.dll
+
+Registers:
+EAX:20202020
+EBX:03C36754
+ECX:3FF6A004
+EDX:00000003
+ESI:FFFF967F
+EDI:03FAF000
+CS:EIP:0023:74D84A7F
+SS:ESP:002B:0017F970  EBP:03C35A2C
+DS:002B  ES:002B  FS:0053  GS:002B
+Flags:00010207
+
+Call Stack:
+Address   Frame
+74D84A7F  00000000  memset+5F
+
+
+** ABL Stack Trace **

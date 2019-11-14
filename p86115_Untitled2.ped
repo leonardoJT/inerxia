@@ -1,0 +1,9 @@
+DEF BUFFER c FOR creditos.
+DISABLE TRIGGERS FOR LOAD OF c.
+
+FOR EACH c EXCLUSIVE-LOCK .
+/*    c.tasa = c.tasa_desembolso.*/
+
+DELETE c.
+
+END.

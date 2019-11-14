@@ -1,0 +1,5 @@
+FOR EACH mov_contable WHERE fec_contable > 01/01/2012
+                        AND cr = 17945
+                        AND comprobante <> 20 NO-LOCK:
+    DISPLAY mov_contable WITH WIDTH 200 1 COL.
+END.

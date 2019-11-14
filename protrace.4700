@@ -1,0 +1,89 @@
+=====================================================
+PROGRESS stack trace as of Thu Apr 29 10:57:37 2010
+=====================================================
+Startup parameters:
+-pf c:\progress10\startup.pf,-cpinternal ISO8859-1,-cpstream ISO8859-1,-cpcoll Basic,-cpcase Basic,-d dmy,-numsep 44,-numdec 46,(end .pf),-pf \\192.168.101.9\desarrollo\configuracion\desarrollo.pf,-db bddesa,-H 192.168.101.19,-N tcp,-S 35020,-evtlevel none,-Mm 4096,-mmax 10000,-T c:\temp,-ld bdcentral,-numsep 44,-numdec 46,-d dmy,-p menu.r,(end .pf),-ininame \\192.168.101.9\desarrollo\configuracion\sfg_rmto_Alvaro.ini,-p _desk.r,-s 200,-nb 255
+
+Exception code: C0000005 ACCESS_VIOLATION
+Fault address:  1008DE10 01:0008CE10 C:\Progress10\bin\prow32.dll
+
+Registers:
+EAX:02785DDC
+EBX:0101D36C
+ECX:02780A04
+EDX:00000A00
+ESI:0411F824
+EDI:39315C5C
+CS:EIP:001B:1008DE10
+SS:ESP:0023:0012E8AC  EBP:00000A00
+DS:0023  ES:0023  FS:003B  GS:0000
+Flags:00010206
+
+Call Stack:
+Address   Frame
+1008DE10  00000000  DllStartup+6360
+
+
+** ABL Stack Trace **
+
+--> CompNoEncrypt adecomp/_compile.p (adecomp/_compile.r) at line 945
+    adecomp/_compile.p (adecomp/_compile.r) at line 755
+    StartCompile adecomp/_procomp.p (adecomp/_procomp.r) at line 2730
+    USER-INTERFACE-TRIGGER adecomp/_procomp.p (adecomp/_procomp.r) at line 1098
+    USER-INTERFACE-TRIGGER adecomp/_procomp.p (adecomp/_procomp.r) at line 1082
+    adecomp/_procomp.p (adecomp/_procomp.r) at line 3262
+    _comp.p (c:\progress10\gui\_comp.r) at line 428
+    _RunTool adeuib/_uibmain.p (adeuib/_uibmain.r) at line 13531
+    adeuib/_uibmain.p (adeuib/_uibmain.r) at line 5596
+    _ab.p (c:\progress10\gui\_ab.r) at line 394
+    _RunTool adedesk/_desktop.p (adedesk/_desktop.r) at line 1635
+    USER-INTERFACE-TRIGGER adedesk/_desktop.p (adedesk/_desktop.r) at line 2146
+    adedesk/_desktop.p (adedesk/_desktop.r) at line 2834
+    _desk.r (c:\progress10\gui\_desk.r) at line 430
+
+** Persistent procedures/Classes **
+
+Handle  File Name
+003568  c:\progress10\gui\adm2\toolbar.r
+003541  c:\progress10\gui\adm2\lookupfield.r
+003540  c:\progress10\gui\adm2\viewer.r
+003539  c:\progress10\gui\adm2\datavis.r
+003485  c:\progress10\gui\adm2\dataextapi.r
+003484  c:\progress10\gui\adm2\dataextcols.r
+003483  c:\progress10\gui\adm2\dataext.r
+003482  c:\progress10\gui\adm2\data.r
+003463  c:\progress10\gui\adm2\queryext.r
+003462  c:\progress10\gui\adm2\query.r
+003459  c:\progress10\gui\adm2\dataquery.r
+003270  c:\progress10\gui\adm2\appserver.r
+003161  c:\progress10\gui\adm2\containr.r
+003159  c:\progress10\gui\adm2\visual.r
+003154  c:\progress10\gui\adm2\smart.r
+002399  adeuib/_semain.r
+001746  adecomm/as-utils.r
+001149  adecomm/_winmenu.r
+001148  adeshar/_mlmgr.r
+001025  adeuib/_abfuncs.r
+
+//=====================================================
+PROGRESS stack trace as of Thu Apr 29 10:57:39 2010
+//=====================================================
+Exception code: C0000005 ACCESS_VIOLATION
+Fault address:  1008DE10 01:0008CE10 C:\Progress10\bin\prow32.dll
+
+Registers:
+EAX:02785DDC
+EBX:0101D36C
+ECX:02780A04
+EDX:00000A00
+ESI:0411F824
+EDI:39315C5C
+CS:EIP:001B:1008DE10
+SS:ESP:0023:00000A08  EBP:00000A00
+DS:0023  ES:0023  FS:003B  GS:0000
+Flags:00010206
+
+Call Stack:
+Address   Frame
+1008DE10  00000A00  DllStartup+6360
+

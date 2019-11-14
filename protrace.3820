@@ -1,0 +1,94 @@
+=====================================================
+PROGRESS stack trace as of Fri Sep 21 11:47:37 2018
+=====================================================
+Startup parameters:
+-pf C:\Progress\OpenEdge\startup.pf,-cpinternal ISO8859-1,-cpstream ISO8859-1,-cpcoll Spanish9,-cpcase Basic,-d dmy,-numsep 44,-numdec 46,(end .pf),-pf D:\SFG\Desarrollo\sfg.pf,-db desarrollo,-ld bdcentral,-H servidor_01,-N tcp,-S 7000,-nb 255,-T c:\tmp,(end .pf),-ininame D:\SFG\Desarrollo\sfg.ini,-p _desk,-rand 2
+
+Exception code: E0000003 
+Fault address:  7665012F 01:0001012F C:\Windows\syswow64\kernel32.dll
+
+Registers:
+EAX:0017E578
+EBX:00000002
+ECX:00482AB8
+EDX:00000002
+ESI:00000002
+EDI:00000001
+CS:EIP:0023:7665012F
+SS:ESP:002B:0017E578  EBP:0017E5C8
+DS:002B  ES:002B  FS:0053  GS:002B
+Flags:00000246
+
+Call Stack:
+Address   Frame
+7665012F  00000000  RaiseException+59
+1046F1F4  00000000  dbut_utfpsep+5714
+
+
+** ABL Stack Trace **
+
+--> adeshar/_gen4gl.p (adeshar/_gen4gl.r) at line 5252
+    choose_check_syntax adeuib/_uibmain.p (adeuib/_uibmain.r) at line 6188
+    adeuib/_uibmain.p (adeuib/_uibmain.r) at line 17213
+    _ab.p (C:\Progress\OpenEdge\gui\_ab.r) at line 394
+    _RunTool adedesk/_desktop.p (adedesk/_desktop.r) at line 1582
+    USER-INTERFACE-TRIGGER adedesk/_desktop.p (adedesk/_desktop.r) at line 2093
+    adedesk/_desktop.p (adedesk/_desktop.r) at line 2781
+
+** Persistent procedures/Classes **
+
+Handle  File Name
+006132  C:\Progress\OpenEdge\gui\adm2\browser.r
+006067  C:\Progress\OpenEdge\gui\adm2\filter.r
+004468  C:\Progress\OpenEdge\gui\adm2\toolbar.r
+004461  C:\Progress\OpenEdge\gui\adm2\dyntoolbar.r
+004441  C:\Progress\OpenEdge\gui\adm2\lookupfield.r
+004440  C:\Progress\OpenEdge\gui\adm2\viewer.r
+004439  C:\Progress\OpenEdge\gui\adm2\datavis.r
+004425  .\vsolprofinawi.r
+004385  C:\Progress\OpenEdge\gui\adm2\dataextapi.r
+004384  C:\Progress\OpenEdge\gui\adm2\dataextcols.r
+004383  C:\Progress\OpenEdge\gui\adm2\dataext.r
+004382  C:\Progress\OpenEdge\gui\adm2\data.r
+004363  C:\Progress\OpenEdge\gui\adm2\queryext.r
+004362  C:\Progress\OpenEdge\gui\adm2\query.r
+004359  C:\Progress\OpenEdge\gui\adm2\dataquery.r
+004352  .\dsolprofina.r
+004334  .\wsolprofina.r
+004170  C:\Progress\OpenEdge\gui\adm2\appserver.r
+004163  .\wgnrdordrccion.w
+004139  .\w-proclientesnew.r
+004066  C:\Progress\OpenEdge\gui\adm2\containr.r
+004064  C:\Progress\OpenEdge\gui\adm2\visual.r
+004059  C:\Progress\OpenEdge\gui\adm2\smart.r
+004056  .\w-adm_garantias.w
+003442  adeuib/_semain.r
+002055  adeuib/_semain.r
+002026  adecomm/as-utils.r
+001429  adecomm/_winmenu.r
+001428  adeshar/_mlmgr.r
+001306  adeuib/_abfuncs.r
+
+//=====================================================
+PROGRESS stack trace as of Fri Sep 21 11:47:39 2018
+//=====================================================
+Exception code: E0000003 
+Fault address:  7665012F 01:0001012F C:\Windows\syswow64\kernel32.dll
+
+Registers:
+EAX:0017E578
+EBX:00000002
+ECX:00482AB8
+EDX:00000002
+ESI:00000002
+EDI:00000001
+CS:EIP:0023:7665012F
+SS:ESP:002B:0017E5E4  EBP:0017E5C8
+DS:002B  ES:002B  FS:0053  GS:002B
+Flags:00000246
+
+Call Stack:
+Address   Frame
+7665012F  0017E5C8  RaiseException+59
+1046F1F4  0017E5DC  dbut_utfpsep+5714
+

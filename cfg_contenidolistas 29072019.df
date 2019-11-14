@@ -1,0 +1,23 @@
+ADD TABLE "cfg_contenidolistas"
+  AREA "General"
+  DUMP-NAME "cfg_contenidolistas"
+
+ADD FIELD "IDLista" OF "cfg_contenidolistas" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "Linea" OF "cfg_contenidolistas" AS character 
+  FORMAT "x(20)"
+  INITIAL ""
+  POSITION 3
+  MAX-WIDTH 40
+  ORDER 20
+
+.
+PSC
+cpstream=ISO8859-1
+.
+0000000360

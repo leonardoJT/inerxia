@@ -1,0 +1,12 @@
+DEFINE VAR totaldb AS DECIMAL.
+DEFINE VAR totalcr AS DECIMAL.
+
+FOR EACH mov_contable WHERE agencia = 1
+                        AND fec_contable >= 01/01/2011
+                        aND fec_contable <= 02/28/2011 NO-LOCK:
+    totaldb = totaldb + mov_contable.db.
+    totalcr = totalcr + mov_contable.cr.
+END.
+
+MESSAGE totaldb totalcr
+    VIEW-AS ALERT-BOX INFO BUTTONS OK.

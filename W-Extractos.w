@@ -122,6 +122,10 @@ W_Rseleccion W_Rproducto F_Nota SExtracto
 /* Define the widget handle for the window                              */
 DEFINE VAR W-Win AS WIDGET-HANDLE NO-UNDO.
 
+/* Definitions of handles for OCX Containers                            */
+DEFINE VARIABLE CtrlFrame AS WIDGET-HANDLE NO-UNDO.
+DEFINE VARIABLE chCtrlFrame AS COMPONENT-HANDLE NO-UNDO.
+
 /* Definitions of the field level widgets                               */
 DEFINE BUTTON Btn_Ayuda 
      IMAGE-UP FILE "imagenes/interrogacion.bmp":U
@@ -352,6 +356,13 @@ DEFINE FRAME F_Operaciones
          BGCOLOR 17 FONT 5
          TITLE "Restringir el extracto a Varias Operaciones".
 
+DEFINE FRAME extractoPDF
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 5 ROW 10.69
+         SIZE 89 BY 9.96
+         TITLE "EXTRACTO" WIDGET-ID 100.
+
 
 /* *********************** Procedure Settings ************************ */
 
@@ -404,7 +415,13 @@ ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 /* SETTINGS FOR WINDOW W-Win
   VISIBLE,,RUN-PERSISTENT                                               */
 /* REPARENT FRAME */
-ASSIGN FRAME F_Operaciones:FRAME = FRAME F-Main:HANDLE.
+ASSIGN FRAME extractoPDF:FRAME = FRAME F-Main:HANDLE
+       FRAME F_Operaciones:FRAME = FRAME F-Main:HANDLE.
+
+/* SETTINGS FOR FRAME extractoPDF
+   NOT-VISIBLE                                                          */
+ASSIGN 
+       FRAME extractoPDF:HIDDEN           = TRUE.
 
 /* SETTINGS FOR FRAME F-Main
    FRAME-NAME Custom                                                    */
@@ -433,6 +450,32 @@ THEN W-Win:HIDDEN = yes.
 
  
 
+
+/* **********************  Create OCX Containers  ********************** */
+
+&ANALYZE-SUSPEND _CREATE-DYNAMIC
+
+&IF "{&OPSYS}" = "WIN32":U AND "{&WINDOW-SYSTEM}" NE "TTY":U &THEN
+
+CREATE CONTROL-FRAME CtrlFrame ASSIGN
+       FRAME           = FRAME extractoPDF:HANDLE
+       ROW             = 1.81
+       COLUMN          = 5
+       HEIGHT          = 7.81
+       WIDTH           = 59
+       WIDGET-ID       = 2
+       HIDDEN          = no
+       SENSITIVE       = yes.
+
+PROCEDURE adm-create-controls:
+      CtrlFrame:NAME = "CtrlFrame":U .
+/* CtrlFrame OCXINFO:CREATE-CONTROL from: {CA8A9780-280D-11CF-A24D-444553540000} type: AcroPDF */
+
+END PROCEDURE.
+
+&ENDIF
+
+&ANALYZE-RESUME /* End of _CREATE-DYNAMIC */
 
 
 /* ************************  Control Triggers  ************************ */
@@ -1046,6 +1089,43 @@ END PROCEDURE.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE control_load W-Win  _CONTROL-LOAD
+PROCEDURE control_load :
+/*------------------------------------------------------------------------------
+  Purpose:     Load the OCXs    
+  Parameters:  <none>
+  Notes:       Here we load, initialize and make visible the 
+               OCXs in the interface.                        
+------------------------------------------------------------------------------*/
+
+&IF "{&OPSYS}" = "WIN32":U AND "{&WINDOW-SYSTEM}" NE "TTY":U &THEN
+DEFINE VARIABLE UIB_S    AS LOGICAL    NO-UNDO.
+DEFINE VARIABLE OCXFile  AS CHARACTER  NO-UNDO.
+
+OCXFile = SEARCH( "W-Extractos.wrx":U ).
+IF OCXFile = ? THEN
+  OCXFile = SEARCH(SUBSTRING(THIS-PROCEDURE:FILE-NAME, 1,
+                     R-INDEX(THIS-PROCEDURE:FILE-NAME, ".":U), "CHARACTER":U) + "wrx":U).
+
+IF OCXFile <> ? THEN
+DO:
+  ASSIGN
+    chCtrlFrame = CtrlFrame:COM-HANDLE
+    UIB_S = chCtrlFrame:LoadControls( OCXFile, "CtrlFrame":U)
+  .
+  RUN DISPATCH IN THIS-PROCEDURE("initialize-controls":U) NO-ERROR.
+END.
+ELSE MESSAGE "W-Extractos.wrx":U SKIP(1)
+             "The binary control file could not be found. The controls cannot be loaded."
+             VIEW-AS ALERT-BOX TITLE "Controls Not Loaded".
+
+&ENDIF
+
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE disable_UI W-Win  _DEFAULT-DISABLE
 PROCEDURE disable_UI :
 /*------------------------------------------------------------------------------
@@ -1085,6 +1165,7 @@ PROCEDURE enable_UI :
          RECT-15 RECT-217 RECT-282 RECT-283 RECT-284 RECT-285 
       WITH FRAME F-Main IN WINDOW W-Win.
   {&OPEN-BROWSERS-IN-QUERY-F-Main}
+  {&OPEN-BROWSERS-IN-QUERY-extractoPDF}
   DISPLAY T_Ope F_Ope 
       WITH FRAME F_Operaciones IN WINDOW W-Win.
   ENABLE BUTTON-124 T_Ope 
@@ -2295,6 +2376,8 @@ DEFINE VAR mesAnterior AS INTEGER.
 DEFINE VAR cont AS INTEGER.
 DEFINE VAR cont1 AS INTEGER.
 DEFINE VAR pNaturaleza AS CHARACTER.
+DEFINE VAR hPdf AS COM-HANDLE NO-UNDO.
+DEFINE VAR l-file AS CHARACTER.
 
 EMPTY TEMP-TABLE TT_Movimientos.
 EMPTY TEMP-TABLE cuentasProductos.
@@ -2316,6 +2399,11 @@ DO WITH FRAME {&FRAME-NAME}:
             DISPLAY Reng AT 1 FORM "X(150)"
                 WITH FRAME Fdet WIDTH 180 NO-LABELS NO-BOX USE-TEXT STREAM-IO.
         END.
+        RUN Rp_Extracto.R(INPUT TABLE TImp,
+                          INPUT TABLE Imp)  NO-ERROR.
+        l-file = "Extractos\Extracto.pdf".
+        hPdf = chCtrlFrame:acroPDF.
+        hPdf:LoadFile(l-file).
     END.
 
     IF W_Rseleccion = 3 THEN DO:

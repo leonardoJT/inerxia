@@ -388,7 +388,7 @@ PROCEDURE PageHeader:
                 RUN pdf_set_font IN h_PDFinc ("Spdf","Futura-bold",12).
                 RUN pdf_text_color IN h_PDFinc ("Spdf",0.5,0.0,0.0).
                 RUN pdf_text_xy IN h_PDFinc ("Spdf", "Autorización  de descuento por", pdf_LeftMargin("Spdf") + 50, iHeight - 743 + linea * 34 + 10).
-                RUN pdf_text_xy IN h_PDFinc ("Spdf", "Fecha de primer descuento", pdf_LeftMargin("Spdf") + 395, iHeight - 743 + linea * 34 + 10).
+                RUN pdf_text_xy IN h_PDFinc ("Spdf", "Fecha de primer pago", pdf_LeftMargin("Spdf") + 395, iHeight - 743 + linea * 34 + 10).
                 RUN pdf_set_font IN h_PDFinc ("Spdf","Futura-bold",20).
                 RUN pdf_text_color IN h_PDFinc ("Spdf",0.0,0.0,0.0).
                 RUN pdf_text_xy IN h_PDFinc ("Spdf", "AUTORIZACIÓN CRÉDITO", pdf_LeftMargin("Spdf") + 50, iHeight - 743 + linea * 33 - 5).

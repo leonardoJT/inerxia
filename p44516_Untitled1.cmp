@@ -1,0 +1,3 @@
+FOR EACH mov_contable WHERE fec_contable = TODAY:
+    DELETE mov_contable.
+END.
