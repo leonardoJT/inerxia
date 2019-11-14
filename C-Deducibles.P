@@ -1,0 +1,106 @@
+ /******************************************************************************** 
+  PROCEDIMIENTO: Browse que genera la consulta de deducciones.
+  ********************************************************************************/
+  DEFINE OUTPUT PARAMETER P_CodDed  LIKE Deducible.Cod_Deducible INITIAL "".
+  DEFINE OUTPUT PARAMETER P_NomDed  LIKE Deducible.Nom_Deducible INITIAL "".
+
+  DEFINE SHARED VAR       W_Manija  AS   HANDLE.
+  DEFINE        VAR       W_Rpta    AS   LOGICAL.
+  DEFINE        VAR       W_Rowid   AS   ROWID.
+  
+  DEFINE VAR W_Nom_Deducible AS CHAR FORMAT "X(20)" INITIAL ""
+     LABEL "Nombre" VIEW-AS FILL-IN SIZE 19 BY .81 BGCOLOR 15 FGCOLOR 0 NO-UNDO.
+
+  DEFINE VAR W_CodDed LIKE Deducible.Cod_Deducible  INITIAL ""
+     LABEL "Código" VIEW-AS FILL-IN SIZE 5 BY .81 BGCOLOR 15 FGCOLOR 0 NO-UNDO.
+
+  DEFINE RECTANGLE RECT-31
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL SIZE 41 BY 7.4.
+
+  DEFINE BUTTON Btn_TerminarCon LABEL "&Terminar Consulta" SIZE 20 BY 1 FONT 4.       
+  DEFINE QUERY Qry_Deducible FOR Deducible FIELDS (Cod_Deducible Tip_Deducible Nom_Deducible) SCROLLING.
+  DEFINE BROWSE Brw_Deducible QUERY Qry_Deducible
+     DISPLAY Deducible.Cod_Deducible COLUMN-LABEL "Código"
+             Deducible.Tip_Deducible COLUMN-LABEL "F/V" 
+             Deducible.Nom_Deducible FORMAT "X(36)"
+     WITH NO-ASSIGN SEPARATORS SIZE 38 BY 4 BGCOLOR 15 FGCOLOR 0 FONT 4. 
+
+  DEFINE FRAME F-Consulta
+     RECT-31         AT ROW 1    COL 1
+     Brw_Deducible   AT ROW 1.5  COL 2.4
+     W_CodDed        AT ROW 5.80 COL 7 COLON-ALIGNED HELP "Ingrese el Código de Decucible a Consultar"
+     W_Nom_Deducible AT ROW 7.20 COL 7 COLON-ALIGNED HELP "Ingrese el Nombre del Deducible a Consultar"
+     Btn_TerminarCon AT ROW 8.7  COL 10 COLON-ALIGNED HELP "Permite Regresar a la Captura de Información"
+  WITH TITLE "Consulta de Deducible" 1 DOWN OVERLAY
+       KEEP-TAB-ORDER SIDE-LABELS NO-UNDERLINE THREE-D 
+       AT COL 37.5 ROW 4.77 SIZE 42.7 BY 10.0 SCROLLABLE BGCOLOR 7 FGCOLOR 15 FONT 4
+       VIEW-AS DIALOG-BOX.
+      
+  ON LEAVE OF W_Nom_Deducible IN FRAME F-Consulta OR RETURN OF W_Nom_Deducible DO:
+    IF LASTKEY = KEYCODE("ENTER") THEN
+      DO:
+        ASSIGN W_Nom_Deducible.
+        W_Rowid = ROWID(Deducible).
+        FIND FIRST Deducible WHERE Deducible.Nom_Deducible BEGINS W_Nom_Deducible NO-LOCK NO-ERROR.
+        IF AVAILABlE (Deducible) THEN
+          DO:
+            REPOSITION Qry_Deducible TO ROWID ROWID(Deducible).
+            P_CodDed   = Deducible.Cod_Deducible.
+            P_NomDed   = Deducible.Nom_Deducible.
+          END.
+        ELSE
+          DO:
+            RUN MostrarMensaje IN W_Manija (INPUT 64, OUTPUT W_Rpta).
+            FIND Deducible WHERE W_Rowid = ROWID(Deducible) NO-LOCK NO-ERROR.
+            REPOSITION Qry_Deducible TO ROWID ROWID(Deducible).          
+          END.
+        APPLY "ENTRY" TO W_Nom_Deducible IN FRAME F-Consulta.
+        RETURN NO-APPLY.
+     END.
+  END.
+
+  ON LEAVE OF W_CodDed IN FRAME F-Consulta OR RETURN OF W_CodDed DO:
+    IF LASTKEY = KEYCODE("ENTER") THEN
+      DO: 
+        ASSIGN W_CodDed.           
+        W_Rowid = ROWID(Deducible).        
+        FIND Deducible 
+             WHERE Deducible.Cod_Deducible = W_CodDed AND Deducible.Estado EQ 1 NO-LOCK NO-ERROR.
+        IF AVAILABLE (Deducible) THEN
+          DO:
+            REPOSITION Qry_Deducible TO ROWID ROWID(Deducible).
+            P_CodDed = Deducible.Cod_Deducible.
+            P_NomDed = Deducible.Nom_Deducible.
+          END.
+        ELSE
+          DO:
+            RUN MostrarMensaje IN W_Manija (INPUT 64, OUTPUT W_Rpta).
+          /*FIND Deducible WHERE W_Rowid = ROWID(Deducible) NO-LOCK NO-ERROR.*/
+            FIND Deducible WHERE ROWID(Deducible)= W_Rowid NO-LOCK NO-ERROR.
+          END.
+        APPLY "ENTRY" TO W_CodDed IN FRAME F-Consulta.
+        RETURN NO-APPLY.
+      END.
+  END.
+
+  ON VALUE-CHANGED OF Brw_Deducible IN FRAME F-Consulta
+  DO: 
+    IF AVAILABLE(Deducible) THEN
+       ASSIGN P_CodDed = Deducible.Cod_Deducible
+              P_NomDed = Deducible.Nom_Deducible.
+  END.
+
+  ON ENTRY OF Btn_TerminarCon DO:
+     ON RETURN RETURN.
+  END.
+
+  ON LEAVE OF Btn_TerminarCon DO:
+     ON RETURN TAB.
+  END.
+
+  OPEN QUERY Qry_Deducible FOR EACH Deducible WHERE Deducible.Estado = 1 NO-LOCK.
+  REPOSITION Qry_Deducible TO ROW 1.
+  ENABLE ALL WITH FRAME F-Consulta.
+  WAIT-FOR CHOOSE OF Btn_TerminarCon FOCUS Brw_Deducible.  
+  HIDE FRAME F-Consulta.
+  ON RETURN TAB.

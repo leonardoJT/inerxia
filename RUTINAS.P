@@ -1,0 +1,1089 @@
+/*
+
+digitoVerificacion - Devuelve el dígito de verificación de un número de identificación enviado
+edad - Devuelve la edad dada una fecha de nacimiento
+
+*/
+
+DEFINE VAR W_NomMes AS CHARACTER EXTENT 12 INITIAL ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"].
+DEFINE VAR W_DiaMes AS INTEGER EXTENT 12 INITIAL [31,28,31,30,31,30,31,31,30,31,30,31].
+
+DEFINE SHARED VAR W_Usuario AS CHARACTER.
+DEFINE SHARED VAR W_Estacion AS CHARACTER.
+DEFINE SHARED VAR W_Fecha AS DATE.
+DEFINE SHARED VAR W_Agencia AS INTEGER.
+DEFINE SHARED VAR W_PathSpl AS CHARACTER.
+
+/* Dígito de verificación */
+PROCEDURE DigitoVerificacion:
+    DEFINE INPUT PARAMETER numDoc AS CHARACTER.
+    DEFINE OUTPUT PARAMETER dv AS INTEGER.
+
+    DEFINE VAR primos AS INTEGER EXTENT 15 INITIAL [71, 67, 59, 53, 47, 43, 41, 37, 29, 23, 19, 17, 13, 7, 3].
+    DEFINE VAR suma AS INTEGER.
+    DEFINE VAR cont AS INTEGER.
+
+    numDoc = STRING(INTEGER(numDoc),"999999999999999").
+
+    DO cont = 1 TO 15:
+        suma = suma + (INTEGER(SUBSTRING(numDoc,cont,1)) * primos[cont]).
+    END.
+
+    IF suma MOD 11 = 0 OR suma MOD 11 = 1 THEN
+        dv = suma MOD 11.
+    ELSE
+        dv = 11 - (suma MOD 11).
+
+END PROCEDURE.
+/* ---------------------- */
+
+/* Encuentra el saldo de una cuenta */
+PROCEDURE HallarSaldoCuenta:
+    DEFINE INPUT PARAMETER agenciaIni AS INTEGER.
+    DEFINE INPUT PARAMETER agenciaFin AS INTEGER.
+    DEFINE INPUT PARAMETER cenCostosIni AS INTEGER.
+    DEFINE INPUT PARAMETER cenCostosFin AS INTEGER.
+    DEFINE INPUT PARAMETER pCuenta AS CHARACTER.
+    DEFINE INPUT PARAMETER pYear AS INTEGER.
+    DEFINE INPUT PARAMETER pMes AS INTEGER FORMAT "99".
+    DEFINE OUTPUT PARAMETER pDB AS DECIMAL INITIAL 0.
+    DEFINE OUTPUT PARAMETER pCR AS DECIMAL INITIAL 0.
+    DEFINE OUTPUT PARAMETER saldoFinal AS DECIMAL INITIAL 0.
+
+    DEFINE VAR cont AS INTEGER.
+
+    FIND FIRST cuentas WHERE cuentas.cuenta = pCuenta NO-LOCK NO-ERROR.
+    IF AVAILABLE cuentas THEN DO:
+        FOR EACH sal_cuenta WHERE sal_cuenta.agencia >= agenciaIni
+                              AND sal_cuenta.agencia <= agenciaFin
+                              AND sal_cuenta.cen_costo >= cenCostosIni
+                              AND sal_cuenta.cen_costo <= cenCostosFin
+                              AND sal_cuenta.cuenta = pCuenta
+                              AND sal_cuenta.ano = pYear NO-LOCK:
+            saldoFinal = sal_cuenta.sal_inicial.
+
+            DO cont = 1 TO pMes:
+                IF cuentas.naturaleza = "DB" THEN
+                    saldoFinal = saldoFinal + sal_cuenta.db[cont] - sal_cuenta.cr[cont].
+                ELSE
+                    saldoFinal = saldoFinal - sal_cuenta.db[cont] + sal_cuenta.cr[cont].
+            END.
+        END.
+    END.
+
+END PROCEDURE.
+
+
+PROCEDURE HallarSdoMayor:
+    /*
+    */
+END PROCEDURE.
+
+
+PROCEDURE HallarSaldo:
+    DEFINE INPUT PARAMETER P_OfiIni LIKE Agencias.Agencia.
+    DEFINE INPUT PARAMETER P_OfiFin LIKE Agencias.Agencia.
+    DEFINE INPUT PARAMETER P_CenIni LIKE Cen_Costos.Cen_Costos.
+    DEFINE INPUT PARAMETER P_CenFin LIKE Cen_Costos.Cen_Costos.
+    DEFINE INPUT PARAMETER P_CtaTra LIKE Cuentas.cuenta.
+    DEFINE INPUT PARAMETER P_Ano LIKE Sal_Cuenta.Ano.
+    DEFINE INPUT PARAMETER P_Mes AS INTEGER FORMAT "99".
+    DEFINE OUTPUT PARAMETER P_SdoDeb LIKE Sal_Cuenta.Sal_Inicial INITIAL 0.
+    DEFINE OUTPUT PARAMETER P_SdoCre LIKE Sal_Cuenta.Sal_Inicial INITIAL 0.
+    DEFINE OUTPUT PARAMETER P_SdoAct LIKE Sal_Cuenta.Sal_Inicial  INITIAL 0.
+
+    DEFINE VARIABLE i AS INTEGER.
+
+    FOR EACH Sal_Cuenta WHERE Sal_Cuenta.Agencia GE P_OfiIni
+                        AND Sal_Cuenta.Agencia LE P_OfiFin
+                        AND Sal_Cuenta.Cen_Costos GE P_CenIni
+                        AND Sal_Cuenta.Cen_Costos LE P_CenFin
+                        AND Sal_Cuenta.Cuenta EQ P_CtaTra
+                        AND Sal_Cuenta.Ano EQ P_Ano NO-LOCK:
+        FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ P_CtaTra NO-LOCK NO-ERROR.
+        IF AVAILABLE(Cuentas) THEN DO:
+            P_SdoAct = Sal_Cuenta.Sal_Inicial.
+
+            DO i = 1 TO P_Mes BY 1:
+                IF Cuentas.Naturaleza EQ "DB" THEN
+                    P_SdoAct = P_SdoAct + DB[i] - Cr[i].
+                ELSE
+                    P_SdoAct = P_SdoAct - DB[i] + Cr[i].
+            END.
+
+            ASSIGN P_SdoCre = P_SdoCre + Cr[P_Mes]
+                   P_SdoDeb = P_SdoDeb + Db[P_Mes].
+        END.
+    END.
+END PROCEDURE.
+
+
+PROCEDURE HallarSdoTercero:
+    DEFINE INPUT PARAMETER P_Tercero AS CHARACTER.
+    DEFINE INPUT PARAMETER P_OfiIni AS INTEGER.
+    DEFINE INPUT PARAMETER P_OfiFin AS INTEGER.
+    DEFINE INPUT PARAMETER P_CenIni AS INTEGER.
+    DEFINE INPUT PARAMETER P_CenFin AS INTEGER.
+    DEFINE INPUT PARAMETER P_CtaTra AS CHARACTER.
+    DEFINE INPUT PARAMETER P_Ano AS INTEGER.
+    DEFINE INPUT PARAMETER P_Mes AS INTEGER FORMAT "99".
+    DEFINE OUTPUT PARAMETER P_SdoDeb AS DECIMAL INITIAL 0. /* Para eliminar */
+    DEFINE OUTPUT PARAMETER P_SdoCre AS DECIMAL INITIAL 0. /* Para eliminar */
+    DEFINE OUTPUT PARAMETER P_SdoAct AS DECIMAL INITIAL 0.
+
+    DEFINE VAR i AS INTEGER.
+
+    FIND FIRST cuentas WHERE cuentas.cuenta = p_ctaTra NO-LOCK NO-ERROR.
+    IF AVAILABLE cuentas THEN DO:
+        FOR EACH Anexos WHERE Anexos.Nit = P_Tercero
+                          AND Anexos.Agencia >= P_OfiIni
+                          AND Anexos.Agencia <= P_OfiFin
+                          AND Anexos.Cen_Costos >= P_CenIni
+                          AND Anexos.Cen_Costos <= P_CenFin
+                          AND Anexos.Cuenta = P_CtaTra
+                          AND Anexos.Ano = P_Ano NO-LOCK:
+            P_SdoAct = P_SdoAct + Anexos.Sdo_Inicial.
+
+            DO i = 1 TO P_Mes:
+                IF Cuentas.Naturaleza EQ "DB" THEN
+                    P_SdoAct = P_SdoAct + anexos.db[i] - anexos.cr[i].
+                ELSE
+                    P_SdoAct = P_SdoAct - anexos.db[i] + anexos.cr[i].
+            END.
+        END.
+    END.
+        
+END PROCEDURE.
+
+
+
+PROCEDURE Decodificar:
+    DEFINE INPUT PARAMETER P_Valor AS DECIMAL FORMAT "-ZZZ,ZZZ,ZZZ,ZZZ,ZZZ,ZZZ,ZZ9.99".
+    DEFINE INPUT PARAMETER P_Caracter AS CHARACTER.
+    DEFINE INPUT PARAMETER P_Entero AS INTEGER.
+    DEFINE INPUT PARAMETER P_Decimal AS INTEGER.
+    DEFINE INPUT  PARAMETER P_Formato AS INTEGER.
+    DEFINE OUTPUT PARAMETER P_Cadena AS CHARACTER INITIAL "" FORMAT "X(40)".
+
+    DEFINE VAR W_Numero AS CHARACTER INITIAL "" FORMAT "X(40)".
+
+    IF (P_Decimal > 12) THEN
+        P_Decimal = 12.
+    ELSE
+        IF (P_Decimal < 0) THEN
+            P_Decimal = 0.
+
+    P_Valor = TRUNCATE(P_Valor,P_Decimal).
+    W_Numero = TRIM(STRING(P_Valor,"->>>,>>>,>>>,>>>,>>>,>>>,>>>,>>9.999999999999")).
+
+    IF P_Formato = 0 OR (P_Formato = 1 AND P_Valor >= 0.00) THEN
+        P_Cadena = SUBSTRING(W_Numero,1,INDEX(W_Numero,".") - 1).
+    ELSE
+        IF P_Formato = 1 AND P_Valor < 0.00 THEN
+            P_Cadena = "(" + SUBSTRING(W_Numero,2,INDEX(W_Numero,".") - 2).
+        ELSE
+            IF (P_Formato = 2 OR P_Formato = 3) AND (P_Valor >= 0.00) THEN
+                P_Cadena = "$" + SUBSTRING(W_Numero,1,INDEX(W_Numero,".") - 1).
+            ELSE
+                IF P_Formato = 2 AND P_Valor < 0.00 THEN
+                    P_Cadena = "-$" + SUBSTRING(W_Numero,2,INDEX(W_Numero,".") - 2).
+                ELSE
+                    P_Cadena = "($" + SUBSTRING(W_Numero,2,INDEX(W_Numero,".") - 2).
+
+    IF P_Decimal > 0 THEN
+        P_Cadena = P_Cadena + "." + SUBSTRING(W_Numero,INDEX(W_Numero,".") + 1,P_Decimal).
+
+    IF (P_Formato = 1 OR P_Formato = 3) AND (P_Valor < 0) THEN
+        P_Cadena = P_Cadena + ")".
+
+    RUN Justificar(INPUT-OUTPUT P_Cadena,
+                   INPUT P_Caracter,
+                   INPUT P_Decimal + P_Entero,
+                   INPUT "I").
+
+END PROCEDURE.
+
+
+PROCEDURE Justificar:
+    DEFINE INPUT-OUTPUT PARAMETER P_Cadena AS CHARACTER.
+    DEFINE INPUT PARAMETER P_Caracter AS CHARACTER FORMAT "X".
+    DEFINE INPUT PARAMETER P_Tamano AS INTEGER.
+    DEFINE INPUT PARAMETER P_Lado AS CHARACTER.
+
+    DEFINE VAR W_Cadw AS CHARACTER INITIAL "".
+
+    P_Cadena = TRIM(P_cadena).
+
+    IF (P_Tamano - LENGTH(P_Cadena,"CHARACTER")) > 0 THEN DO:
+        IF CAPS(P_Lado) = "C" THEN
+            P_Tamano = INTEGER(TRUNCATE((P_Tamano - LENGTH(P_Cadena,"CHARACTER")) / 2,0)).
+        ELSE
+            P_Tamano = P_Tamano - LENGTH(P_Cadena).
+
+        W_Cadw = FILL(P_Caracter,P_Tamano).
+
+        IF CAPS(P_Lado) = "D" THEN
+            P_Cadena = P_Cadena + W_Cadw.
+        ELSE
+            P_Cadena = W_Cadw + P_Cadena.
+    END.
+END PROCEDURE.
+
+
+/*
+Nivelw = -1 halla una cuenta de mayor a partir de una subcuenta. Devuelve cta mayor y si es de mayor o movto
+Nivelw = 0 verifica si la cuenta ya existe en el plan contable.
+Nivelw = -2 devuelve el nivel de la cuenta en el plan contable.
+Nivel2 = -3 devuelve si la cuenta contiene subcuentas.
+*/
+PROCEDURE HallarCtaMayor:
+    DEFINE INPUT PARAMETER P_Cuentaw AS CHARACTER.
+    DEFINE OUTPUT PARAMETER P_CtaMayor AS CHARACTER INITIAL "".
+    DEFINE INPUT-OUTPUT PARAMETER P_Nivelw AS INTEGER.
+
+    DEFINE VAR W_Tam AS INTEGER INITIAL 0.
+
+    CASE P_Nivelw:
+        WHEN -2 THEN DO:
+            W_Tam = LENGTH(TRIM(P_Cuentaw)).
+
+            IF (W_Tam MOD 2) = 0 THEN
+                P_Nivelw = W_Tam / 2 + 1.
+            ELSE
+                IF W_Tam = 1 THEN
+                    P_Nivelw = 1.
+                ELSE
+                    P_Nivelw = ?.
+        END.
+
+        WHEN -1 THEN DO:
+            W_Tam = LENGTH(TRIM(P_Cuentaw)).
+
+            IF W_Tam > 1  and (W_Tam MOD 2) = 0 THEN DO:
+                IF W_Tam > 2 THEN
+                    P_CtaMayor = SUBSTRING(P_Cuentaw,1,W_Tam - 2).
+                ELSE
+                    IF W_Tam = 2 THEN
+                        P_CtaMayor = SUBSTRING(P_Cuentaw,1,1).
+            END.
+
+            FIND FIRST Cuentas WHERE Cuentas.Cuenta = P_CtaMayor NO-ERROR.
+            IF NOT AVAILABLE(Cuentas) THEN
+                P_CtaMayor = "".
+            ELSE
+                P_Nivelw = Cuentas.Tipo.
+        END.
+
+        WHEN 0 THEN
+            P_CtaMayor = P_Cuentaw.
+
+        WHEN -3 THEN DO:
+            FIND FIRST Cuentas WHERE Cuentas.Cuenta BEGINS P_Cuentaw NO-ERROR.
+            IF NOT AVAILABLE(Cuentas) THEN
+                P_CtaMayor = "".
+        END.
+    END CASE.
+
+    IF P_CtaMayor <> "" THEN DO:
+        FIND FIRST Cuentas WHERE Cuentas.cuenta = P_CtaMayor NO-ERROR.
+        IF NOT AVAILABLE(Cuentas) THEN
+            P_CtaMayor = "".
+    END.
+
+END PROCEDURE.
+
+
+PROCEDURE NombreCuenta:
+    DEFINE INPUT PARAMETER P_Cuenta AS CHAR.
+    DEFINE OUTPUT PARAMETER P_NomCta AS CHAR INITIAL "".
+
+    FIND FIRST Cuentas WHERE TRIM(Cuentas.Cuenta) = TRIM(P_Cuenta) NO-LOCK NO-ERROR.
+    IF AVAILABLE (Cuentas) THEN
+        P_NomCta = Cuentas.Nombre.
+    ELSE
+        P_NomCta = "Cuenta inexistente".
+
+END PROCEDURE.
+
+
+PROCEDURE NombreMes:
+    DEFINE INPUT PARAMETER P_Fecha AS DATE FORMAT "99/99/9999".
+    DEFINE OUTPUT PARAMETER P_NomMes AS CHARACTER INITIAL "".
+
+    DEFINE VAR P_Mes AS INTEGER FORMAT "99".
+    DEFINE VAR W_Ano AS CHARACTER INITIAL "" FORMAT "X(4)".
+    DEFINE VAR W_Dia AS CHARACTER INITIAL "28" FORMAT "X(2)".
+
+    ASSIGN W_Ano = STRING(YEAR(P_Fecha),"9999")
+           P_Mes = INTEGER(MONTH(P_Fecha)).
+
+    IF DAY(p_fecha) <= W_DiaMes[P_Mes] THEN
+        W_Dia = STRING(DAY(p_fecha),"99").
+    ELSE
+        W_Dia = STRING(W_DiaMes[P_Mes]," 99").
+
+
+    IF (P_Mes = 2) AND YEAR(P_Fecha) MOD 4 = 0 THEN
+        W_Dia = "29".
+
+    P_NomMes = w_dia + " de " + W_NomMes[P_Mes] + " de " + W_Ano.
+
+END PROCEDURE.
+
+
+PROCEDURE MostrarMensaje:
+    DEFINE INPUT PARAMETER P_Codigo AS INTEGER.
+    DEFINE OUTPUT PARAMETER P_Rpta AS LOGICAL INITIAL FALSE.
+
+    DEFINE VAR W_Mensaje AS CHARACTER FORMAT "X(200)".
+    DEFINE VAR W_Titulo AS CHARACTER INITIAL "Mensaje".
+    DEFINE VAR W_Clase AS INTEGER INITIAL 1.
+
+    FIND FIRST Men_Sistema WHERE Men_Sistema.Codigo = P_Codigo NO-LOCK NO-ERROR.
+    IF AVAILABLE(Men_Sistema) THEN DO:
+        IF Men_Sistema.Tipo = 2 THEN
+            RETURN.
+
+        ASSIGN W_Mensaje = Men_Sistema.Mensaje
+               W_Titulo = Men_Sistema.Titulo
+               W_Clase = Men_Sistema.Clase.
+    END.
+    ELSE
+        W_Mensaje = ".....!Para Este Codigo: " + STRING(P_Codigo,"99999") + " no hay ningun MENSAJE!....".
+
+    CASE W_Clase:
+        WHEN 1 THEN
+            MESSAGE W_Mensaje
+                VIEW-AS ALERT-BOX MESSAGE TITLE W_Titulo.
+
+        WHEN 2 THEN
+            MESSAGE W_Mensaje
+                VIEW-AS ALERT-BOX QUESTION BUTTONS OK-CANCEL TITLE W_Titulo UPDATE P_Rpta.
+
+        WHEN 3 THEN
+            MESSAGE W_Mensaje
+                VIEW-AS ALERT-BOX INFORMATION TITLE W_Titulo.
+
+        WHEN 4 THEN
+            MESSAGE W_Mensaje
+                VIEW-AS ALERT-BOX ERROR TITLE W_Titulo.
+
+        WHEN 5 THEN
+            MESSAGE W_Mensaje
+                VIEW-AS ALERT-BOX WARNING TITLE W_Titulo.
+    END CASE.
+END.
+
+
+PROCEDURE Pantalla:
+    DEFINE INPUT PARAMETER archivo AS CHARACTER.
+    
+    DEFINE BUTTON b-ok IMAGE-UP FILE "imagenes/Volver" LABEL "&Salir del Reporte".
+    DEFINE VARIABLE K_Bs AS CHARACTER FORMAT "X(15)" BGCOL 15 VIEW-AS FILL-IN LABEL "Buscar:".
+    DEFINE VARIABLE W_Ok AS LOGICAL.
+    DEFINE BUTTON Impresora IMAGE-UP FILE "imagenes/Impresora2" LABEL "Button 3" SIZE 6 BY 1.5 TOOLTIP "Salida a Impresora".
+    DEFINE VAR tecla AS LOGICAL INITIAL TRUE.
+    DEFINE VAR Rep-Editor AS CHARACTER VIEW-AS EDITOR INNER-CHARS /*107*/ 144 INNER-LINES /*35*/ 41 LARGE SCROLLBAR-HORIZONTAL SCROLLBAR-VERTICAL FONT 2.
+
+    DEFINE MENU POPUP-MENU-Rep-Editor
+        MENU-ITEM m_Buscar LABEL "Buscar (ctrl-f)"
+        MENU-ITEM m_Siguiente LABEL "Siguiente (F9)"
+        MENU-ITEM m_Anterior LABEL "Anterior (F8)"
+        RULE
+        MENU-ITEM m_Imprimir LABEL "Imprimir (ctrl-p)".
+
+    DEFINE FRAME dialogo1
+        b-ok AT ROW 1.05 COL 01
+        Impresora AT ROW 1.05 COL 7 HELP "Permite Enviar la Consulta de Información a la Impresora"
+        "Ingrese en la casilla en blanco la cadena de busqueda y luego la tecla tab " AT ROW 1.08 COL 14 FGCOLOR 15 FONT 4 BGCOLOR 18
+        K_Bs AT ROW 1.05 COL 67
+        Rep-editor AT ROW 2.50 COL 1 SKIP
+        WITH NO-LABELS NO-UNDERLINE THREE-D NO-BOX AT COL 1 ROW 1 SIZE 151 BY 28 BGCOLOR 17 FONT 5 VIEW-AS DIALOG-BOX SCROLLABLE.
+
+    
+    ENABLE ALL WITH FRAME Dialogo1.
+
+    ASSIGN Rep-Editor:POPUP-MENU IN FRAME Dialogo1 = MENU POPUP-MENU-Rep-Editor:HANDLE
+           Rep-Editor:READ-ONLY IN FRAME Dialogo1 = YES
+           Rep-Editor:SENSITIVE IN FRAME Dialogo1 = YES
+           FRAME Dialogo1:TITLE = "Listado por Monitor"
+           tecla = Rep-Editor:READ-FILE(Archivo) IN FRAME dialogo1.
+
+    ON LEAVE OF K_Bs DO:
+        ASSIGN FRAME Dialogo1 K_Bs.
+
+        W_Ok = Rep-Editor:SEARCH(K_Bs,33) IN FRAME Dialogo1.
+    END.
+
+    ON CTRL-F OF Rep-Editor IN FRAME Dialogo1 OR CHOOSE OF MENU-ITEM m_Buscar DO:
+        APPLY "entry" TO K_Bs.
+        RETURN NO-APPLY.
+    END.
+
+    ON F9 OF Rep-Editor IN FRAME Dialogo1 OR CHOOSE OF MENU-ITEM m_Siguiente DO:
+        W_Ok = Rep-Editor:SEARCH(K_Bs,33) IN FRAME Dialogo1.
+    END.
+
+    ON F8 OF Rep-Editor IN FRAME Dialogo1 OR CHOOSE OF MENU-ITEM m_Anterior DO:
+        W_Ok = Rep-Editor:SEARCH(K_Bs,34) IN FRAME Dialogo1.
+    END.
+
+    ON CTRL-P OF Rep-Editor IN FRAME Dialogo1 OR CHOOSE OF MENU-ITEM m_Imprimir OR CHOOSE OF Impresora DO:
+        RUN _osprint.r (INPUT ?,
+                        INPUT Archivo,
+                        INPUT 2,
+                        INPUT 1,
+                        INPUT 1,
+                        INPUT 99999,
+                        OUTPUT tecla).
+    END.
+
+    ON WINDOW-CLOSE OF FRAME Dialogo1 DO:
+        APPLY "CHOOSE":U TO B-Ok.
+        RETURN NO-APPLY.
+    END.
+
+    WAIT-FOR CHOOSE OF B-ok FOCUS B-ok.
+    DISABLE ALL WITH FRAME Dialogo1.
+    HIDE FRAME Dialogo1 NO-PAUSE.
+
+END PROCEDURE.
+
+
+PROCEDURE Pantalla2:
+    DEFINE INPUT PARAMETER archivo AS CHARACTER.
+
+    DEFINE BUTTON b-ok IMAGE-UP FILE "imagenes/Volver" LABEL "&Salir del Reporte".
+    DEFINE VARIABLE K_Bs AS CHARACTER FORMAT "X(15)" BGCOL 15 VIEW-AS FILL-IN LABEL "Buscar:".
+    DEFINE VARIABLE W_Ok AS LOGICAL.
+    DEFINE BUTTON Impresora IMAGE-UP FILE "imagenes/Impresora2" LABEL "Button 3" SIZE 6 BY 1.5 TOOLTIP "Salida a Impresora".
+    DEFINE VAR tecla AS LOGICAL INITIAL TRUE.
+    DEFINE VAR Rep-Editor AS CHARACTER VIEW-AS EDITOR INNER-CHARS 144 INNER-LINES 41 LARGE SCROLLBAR-HORIZONTAL SCROLLBAR-VERTICAL FONT 2.
+
+    DEFINE MENU POPUP-MENU-Rep-Editor
+        MENU-ITEM m_Buscar LABEL "Buscar (ctrl-f)"
+        MENU-ITEM m_Siguiente LABEL "Siguiente (F9)"
+        MENU-ITEM m_Anterior LABEL "Anterior (F8)"
+        RULE
+        MENU-ITEM m_Imprimir LABEL "Imprimir (ctrl-p)".
+
+    DEFINE FRAME dialogo1
+        b-ok AT ROW 1.05 COL 01
+        Impresora  AT ROW 1.05 COL 7 HELP "Permite Enviar la Consulta de Información a la Impresora"
+        "Ingrese en la casilla en blanco la cadena de busqueda y luego la tecla tab " AT ROW 1.08 COL 14 FGCOLOR 15 FONT 4 BGCOLOR 18
+        K_Bs AT ROW 1.05 COL 67
+        Rep-editor AT ROW 2.50 COL 1 SKIP
+        WITH NO-LABELS NO-UNDERLINE THREE-D NO-BOX AT COL 1 ROW 1 SIZE 151 BY 28 BGCOLOR 17 FONT 5 VIEW-AS DIALOG-BOX SCROLLABLE.
+
+    ENABLE ALL WITH FRAME Dialogo1.
+
+    ASSIGN Rep-Editor:POPUP-MENU IN FRAME Dialogo1 = MENU POPUP-MENU-Rep-Editor:HANDLE
+           Rep-Editor:READ-ONLY IN FRAME Dialogo1 = YES
+           Rep-Editor:SENSITIVE IN FRAME Dialogo1 = YES
+           FRAME Dialogo1:TITLE = "Listado por Monitor"
+           tecla = Rep-Editor:READ-FILE(Archivo) IN FRAME dialogo1.
+
+    ON LEAVE OF K_Bs DO:
+        ASSIGN FRAME Dialogo1 K_Bs.
+        W_Ok = Rep-Editor:SEARCH(K_Bs,33) IN FRAME Dialogo1.
+    END.
+
+    ON CTRL-F OF Rep-Editor IN FRAME Dialogo1 OR CHOOSE OF MENU-ITEM m_Buscar DO:
+        APPLY "entry" TO K_Bs.
+        RETURN NO-APPLY.
+    END.
+
+    ON F9 OF Rep-Editor IN FRAME Dialogo1 OR CHOOSE OF MENU-ITEM m_Siguiente DO:
+        W_Ok = Rep-Editor:SEARCH(K_Bs,33) IN FRAME Dialogo1.
+    END.
+
+    ON F8 OF Rep-Editor IN FRAME Dialogo1 OR CHOOSE OF MENU-ITEM m_Anterior DO:
+        W_Ok = Rep-Editor:SEARCH(K_Bs,34) IN FRAME Dialogo1.
+    END.
+
+    ON CTRL-P OF Rep-Editor IN FRAME Dialogo1 OR CHOOSE OF MENU-ITEM m_Imprimir OR CHOOSE OF Impresora DO:
+        RUN _osprint.r (INPUT ?,
+                        INPUT Archivo,
+                        INPUT 2,
+                        INPUT 1,
+                        INPUT 1,
+                        INPUT 99999,
+                        OUTPUT tecla).
+    END.
+
+    ON WINDOW-CLOSE OF FRAME Dialogo1 DO:
+        APPLY "CHOOSE":U TO B-Ok.
+        RETURN NO-APPLY.
+    END.
+
+    WAIT-FOR CHOOSE OF B-ok FOCUS B-ok.
+    DISABLE ALL WITH FRAME Dialogo1.
+    HIDE FRAME Dialogo1 NO-PAUSE.
+END PROCEDURE.
+
+
+PROCEDURE P-dispos:
+    DEFINE INPUT-OUTPUT PARAMETER Procname AS CHARACTER.
+    DEFINE INPUT-OUTPUT PARAMETER W_Opcion AS CHARACTER.
+
+    DEFINE BUTTON Archivo IMAGE-UP FILE "imagenes/r-save" LABEL "Button 4" SIZE 6 BY 1.62 TOOLTIP "Archivo".
+    DEFINE BUTTON Impresora IMAGE-UP FILE "imagenes/print-u" LABEL "Button 3" SIZE 6 BY 1.62 TOOLTIP "Impresora".
+    DEFINE BUTTON Pantalla DEFAULT IMAGE-UP FILE "imagenes/session" LABEL "Button 5" SIZE 6 BY 1.62 TOOLTIP "Pantalla".
+    DEFINE BUTTON HojaCalc DEFAULT IMAGE-UP FILE "imagenes/LogoExcel" LABEL "Button 5" SIZE 6 BY 1.62 TOOLTIP "Excel".
+    DEFINE RECTANGLE RECT-1 EDGE-PIXELS 4 GRAPHIC-EDGE SIZE 28 BY 0.05 BGCOLOR 18.
+    DEFINE RECTANGLE RECT-2 EDGE-PIXELS 4 GRAPHIC-EDGE SIZE 13 BY 2.42 BGCOLOR 18.
+
+    DEFINE FRAME F-dispositivo
+        Pantalla AT ROW 1.20 COL 4 HELP "Permite Enviar la Consulta de Información a la Pantalla"
+        "Pantalla" VIEW-AS TEXT SIZE 10 BY .62 AT ROW 1.20 COL 11 BGCOLOR 17 FGCOLOR 7 FONT 5
+        "Obtenga el informe inmediato" VIEW-AS TEXT SIZE 20 BY .62 AT ROW 1.85 COL 11 BGCOLOR 17 FGCOLOR 0 FONT 4
+        "con salida a su monitor!" VIEW-AS TEXT SIZE 20 BY .62 AT ROW 2.40 COL 11 BGCOLOR 17 FGCOLOR 0 FONT 4
+        "________________________________" AT ROW 2.85 COL 3 FGCOLOR 15
+        Impresora AT ROW 3.70 COL 4 HELP "Permite Enviar la Consulta de Información a la Impresora"
+        "Impresora" VIEW-AS TEXT SIZE 10 BY .62 AT ROW 3.79 COL 11 BGCOLOR 17 FGCOLOR 7 FONT 5
+        "Escoja el dispositivo de" VIEW-AS TEXT SIZE 20 BY .62 AT ROW 4.40 COL 11 BGCOLOR 17 FGCOLOR 0 FONT 4
+        "impresión y número de copias" VIEW-AS TEXT SIZE 20 BY .62 AT ROW 4.95 COL 11 BGCOLOR 17 FGCOLOR 0 FONT 4
+        "________________________________" AT ROW 5.55 COL 3 FGCOLOR 15
+        Archivo AT ROW 6.40 COL 4 HELP "Permite Enviar la Consulta de Información a un Archivo"
+        "Archivo" VIEW-AS TEXT SIZE 10 BY .62 AT ROW 6.40 COL 11 BGCOLOR 17 FGCOLOR 7 FONT 5
+        "Digite nombre del archivo y " VIEW-AS TEXT SIZE 20 BY .62 AT ROW 7.05 COL 11 BGCOLOR 17 FGCOLOR 0 FONT 4
+        "escoja la ruta de grabación!" VIEW-AS TEXT SIZE 20 BY .62 AT ROW 7.65 COL 11 BGCOLOR 17 FGCOLOR 0 FONT 4
+        "________________________________" AT ROW 8.25 COL 3 FGCOLOR 15
+        HojaCalc AT ROW 9.05 COL 4 HELP "Permite Enviar la Consulta de Información a un Archivo"
+        "Excel" VIEW-AS TEXT SIZE 10 BY .62 AT ROW 9.01 COL 11 BGCOLOR 17 FGCOLOR 7 FONT 5
+        "Envia la información a una  " VIEW-AS TEXT SIZE 20 BY .62 AT ROW 9.70 COL 11 BGCOLOR 17 FGCOLOR 0 FONT 4
+        "hoja de excel! " VIEW-AS TEXT SIZE 20 BY .62 AT ROW 10.25 COL 11 BGCOLOR 17 FGCOLOR 0 FONT 4
+        WITH  1 DOWN KEEP-TAB-ORDER OVERLAY SIDE-LABELS NO-UNDERLINE THREE-D AT COL 80.5 ROW 8.77 SIZE 33 BY 11.80 SCROLLABLE TITLE "Escoja el tipo de salida" BGCOLOR 17 FGCOLOR 0 VIEW-AS DIALOG-BOX FONT 4.
+
+    ON CHOOSE OF Archivo IN FRAME F-dispositivo DO:
+        W_Opcion = "A".
+
+        DEFINE VAR W_Tecla AS LOGICAL INITIAL TRUE.
+
+        CASE W_opcion:
+            WHEN "A" THENDO:
+                SYSTEM-DIALOG GET-FILE Procname
+                TITLE "Escoja el archivo"
+                FILTERS "Todos los Archivos (*.*)" W_PathSpl + "\*.txt"
+                INITIAL-DIR W_PathSpl
+                RETURN-TO-START-DIR
+                UPDATE W_Tecla.
+            END.
+        END CASE.
+    END.
+
+    ON WINDOW-CLOSE OF FRAME F-dispositivo DO:
+        W_Opcion = "".
+        APPLY "CLOSE":U TO THIS-PROCEDURE.
+        RETURN.
+    END.
+
+    ON CHOOSE OF HojaCalc IN FRAME F-dispositivo
+        W_Opcion = "E".
+    
+    ON CHOOSE OF Impresora IN FRAME F-dispositivo
+        W_Opcion = "I".
+
+    ON CHOOSE OF Pantalla IN FRAME F-dispositivo
+        W_Opcion = "P".
+
+    ENABLE ALL WITH FRAME F-Dispositivo.
+
+    WAIT-FOR CHOOSE OF Archivo 
+          OR CHOOSE OF Impresora 
+          OR CHOOSE OF Pantalla 
+          OR WINDOW-CLOSE OF CURRENT-WINDOW
+          OR CHOOSE OF HojaCalc.
+
+    DISABLE ALL WITH FRAME F-Dispositivo.
+    HIDE FRAME F-Dispositivo.
+
+END PROCEDURE.
+
+
+PROCEDURE P-GraLog:
+    DEFINE INPUT PARAMETER P_Cadena AS CHARACTER.
+
+    CREATE Logs.
+    ASSIGN Logs.Fecha = W_Fecha
+           Logs.Usuario = W_Usuario
+           Logs.Agencia = W_Agencia
+           Logs.HoraE = TIME
+           Logs.Observacion = P_Cadena NO-ERROR.
+END.
+
+
+PROCEDURE P-ValidarTrans:
+    DEFINE OUTPUT PARAMETER P_Permisos AS LOGICAL INITIAL FALSE.
+    DEFINE OUTPUT PARAMETER P_Autorizo AS CHARACTER INITIAL "".
+
+    DEFINE IMAGE yave
+        FILENAME "imagenes/seguridad.bmp":U SIZE 9.14 BY 2.46.
+
+    DEFINE VAR Nombre AS CHARACTER FORMAT "X(20)".
+    DEFINE VAR W_Rpta AS LOGICAL.
+    DEFINE VAR W_ClaveTra LIKE Usuarios.Clave.
+    DEFINE BUTTON Btn_Aceptar LABEL "&Aceptar " SIZE 10 BY 1.08 AUTO-GO.
+    DEFINE BUTTON Btn_Cancelar LABEL "&Cancelar" SIZE 10 BY 1.08 AUTO-ENDKEY.
+
+    DEFINE FRAME F_Validacion
+        yave AT ROW 1.5 COL 2
+        P_Autorizo LABEL "Usuario" AT ROW 01.5 COL 10  FORMAT "X(10)" HELP "Digite el Código del Usuario"  BGCOLOR 15 FGCOLOR 1
+        W_ClaveTra BLANK LABEL "Clave   " AT ROW 02.5 COL 10 BGCOLOR 15  HELP "Digite su clave Personal"
+        Btn_Aceptar AT ROW 01.2 COL 40 HELP "Confirma la Entrada al Sistema"
+        Btn_Cancelar AT ROW 02.5 COL 40 HELP "Cancela la Entrada al Sistema"
+        SKIP(0.5)
+        WITH SIDE-LABELS SIZE 52 BY 4.3 THREE-D BGCOL 17 FONT 4 TITLE "Validación de la Operación" FGCOLOR 0 VIEW-AS DIALOG-BOX OVERLAY.
+
+    ON RETURN TAB.
+    
+    ON LEAVE OF P_Autorizo DO:
+        ASSIGN P_Autorizo.
+
+        FIND FIRST Usuarios WHERE Usuarios.Usuario EQ P_Autorizo NO-LOCK NO-ERROR.
+        IF AVAILABLE(Usuarios) THEN
+            DISPLAY Usuarios.Nombre AT ROW 1.5 COL 25 FORMAT "X(20)" BGCOL 17 FGCOL 0
+                VIEW-AS TEXT WITH NO-LABEL FRAME F_Validacion.
+    END.
+
+    ON LEAVE OF W_ClaveTra DO:
+        ASSIGN W_ClaveTra.
+
+        IF LAST-EVENT:LABEL <> "SHIFT-TAB" AND LAST-EVENT:LABEL <> "MOUSE-SELECT-UP" THEN DO:
+            FIND FIRST Usuarios WHERE Usuarios.Usuario EQ P_Autorizo
+                                  AND Usuarios.Clave EQ ENCODE(W_ClaveTra)
+                                  AND Usuarios.Prioridad GE 5
+                                  AND Usuarios.Estado EQ 1 NO-LOCK NO-ERROR.
+            IF AVAILABLE(Usuarios) THEN DO:
+                P_Permisos = TRUE.
+                APPLY "CHOOSE" TO Btn_Aceptar.
+            END.
+            ELSE DO:
+                P_Permisos = FALSE.
+                RUN MostrarMensaje (INPUT 174,OUTPUT W_Rpta).
+                APPLY "ENTRY" TO P_Autorizo.
+                RETURN NO-APPLY.
+            END.
+
+            RETURN NO-APPLY.
+        END.
+    END.
+
+    ON ENTRY OF Btn_Aceptar, Btn_Cancelar DO:
+        ON RETURN RETURN.
+        ON TAB TAB. 
+    END.
+
+    ON LEAVE OF Btn_Aceptar, Btn_Cancelar DO:
+        ON RETURN TAB.
+    END.
+
+    ON CHOOSE OF Btn_Cancelar
+        ASSIGN P_Permisos = FALSE
+               P_Autorizo = "".
+
+    ENABLE ALL WITH FRAME F_Validacion.
+
+    WAIT-FOR WINDOW-CLOSE OF CURRENT-WINDOW OR CHOOSE OF Btn_Cancelar OR CHOOSE OF Btn_Aceptar FOCUS P_Autorizo.
+    HIDE FRAME F_Validacion NO-PAUSE.
+    ON RETURN TAB.
+
+END PROCEDURE.                                                                  
+
+
+PROCEDURE PartirValor:
+    DEFINE INPUT PARAMETER P_Valor AS CHAR.
+    DEFINE INPUT PARAMETER P_TamReg AS INTEGER.
+    DEFINE OUTPUT PARAMETER P_Reglon1 AS CHAR INITIAL "".
+    DEFINE OUTPUT PARAMETER P_Reglon2 AS CHAR INITIAL "".
+    DEFINE OUTPUT PARAMETER P_Reglon3 AS CHAR INITIAL "".
+
+    DEFINE VAR W_Reglon AS INTEGER INITIAL 1.
+    DEFINE VAR W_Ind AS INTEGER.
+    DEFINE VAR W_PosAct AS INTEGER.
+    DEFINE VAR W_PosAnt AS INTEGER INITIAL 0.
+
+    P_Valor = TRIM(P_Valor).
+
+    IF LENGTH(P_Valor) <= P_TamReg THEN
+        P_Reglon1 = P_Valor.
+    ELSE DO:
+        ASSIGN W_PosAct = P_TamReg
+               W_PosAnt = 1.
+
+        DO W_Reglon = 1 TO 3 BY 1:
+            DO W_Ind = W_PosAct TO 1 BY -1:
+                IF SUBSTRING(P_Valor,W_Ind,1) = " " THEN
+                    LEAVE.
+            END.
+
+            W_PosAct = W_Ind.
+
+            CASE W_Reglon:
+                WHEN 1 THEN P_Reglon1 = SUBSTRING(P_Valor,W_PosAnt,W_PosAct - W_PosAnt).
+                WHEN 2 THEN P_Reglon2 = SUBSTRING(P_Valor,W_PosAnt,W_PosAct - W_PosAnt).
+                WHEN 3 THEN P_Reglon3 = SUBSTRING(P_Valor,W_PosAnt,W_PosAct - W_PosAnt).
+            END CASE.
+
+            W_PosAnt = W_PosAct.
+            W_PosAct = W_PosAct + P_TamReg.
+
+            IF W_PosAnt > LENGTH(P_Valor) THEN
+                LEAVE.
+        END.
+    END.
+
+END PROCEDURE.
+
+
+PROCEDURE DiasPeriodo:
+    DEFINE INPUT PARAMETER P_PerDed AS INTEGER.
+    DEFINE OUTPUT PARAMETER P_NroDia AS INTEGER INITIAL 1.
+    DEFINE OUTPUT PARAMETER P_NroPer AS INTEGER INITIAL 1.
+    DEFINE OUTPUT PARAMETER P_NomPer AS CHAR INITIAL "".
+
+    CASE P_PerDed:
+        WHEN 0 THEN
+            ASSIGN P_NroPer = 360
+                   P_NomPer = "Diario".
+
+        WHEN 1 THEN
+            ASSIGN P_NroDia = 7
+                   P_NroPer = 52
+                   P_NomPer = "Semanal".
+
+        WHEN 2 THEN
+            ASSIGN P_NroDia = 10
+                   P_NroPer = 36
+                   P_NomPer = "Decadal".
+
+        WHEN 3 THEN
+            ASSIGN P_NroDia = 15
+                   P_NroPer = 24
+                   P_NomPer = "Quincenal".
+
+        WHEN 4 THEN
+            ASSIGN P_NroDia = 30
+                   P_NroPer = 12
+                   P_NomPer = "Mensual".
+
+        WHEN 5 THEN
+            ASSIGN P_NroDia = 60
+                   P_NroPer = 6
+                   P_NomPer = "Bimestral".
+
+        WHEN 6 THEN
+            ASSIGN P_NroDia = 90
+                   P_NroPer = 4
+                   P_NomPer = "Trimestral".
+
+        WHEN 7 THEN
+            ASSIGN P_NroDia = 120
+                   P_NroPer = 3
+                   P_NomPer = "Cuatrimestral".
+
+        WHEN 8 THEN
+            ASSIGN P_NroDia = 180
+                   P_NroPer = 2
+                   P_NomPer = "Semestral".
+
+        WHEN 9 THEN
+            ASSIGN P_NroDia = 360
+                   P_NomPer = "Anual".
+    END CASE.
+
+END PROCEDURE.
+
+
+PROCEDURE Cbte_Agencia:
+    DEFINE INPUT PARAMETER W_Pcbte LIKE Comprobantes.comprobante.
+    DEFINE INPUT PARAMETER W_PAgencia LIKE Agencias.Agencia.
+    DEFINE OUTPUT PARAMETER W_Pnumero LIKE Comprobantes.Secuencia.
+    DEFINE OUTPUT PARAMETER W_Perror AS LOGICAL.
+
+    W_Perror = TRUE.
+
+    REPEAT:
+        FIND FIRST Comprobantes WHERE Comprobantes.Agencia = W_PAgencia
+                                  AND Comprobantes.Comprobante = W_Pcbte NO-LOCK NO-ERROR.
+        IF AVAILABLE(Comprobantes) THEN
+            IF Comprobantes.Id_Consecutivo = 1 or Comprobantes.Id_Consecutivo = 2 THEN DO:
+                FIND CURRENT Comprobantes SHARE-LOCK NO-ERROR NO-WAIT.
+                IF AVAILABLE(Comprobante) THEN DO:
+                    DO TRANSACTION:
+                        W_Pnumero = Comprobantes.Secuencia + 1.
+                        Comprobantes.Secuencia = w_Pnumero.
+                        W_Perror = FALSE.
+                    END.
+
+                    RELEASE Comprobantes.
+                    LEAVE.
+                END.
+                ELSE
+                    NEXT.
+            END.
+            ELSE
+                LEAVE.
+        ELSE
+            IF LOCKED(Comprobantes) THEN
+                NEXT.
+            ELSE
+                LEAVE.
+   END.
+
+END PROCEDURE.
+
+
+PROCEDURE Superusuario:
+    DEFINE INPUT PARAMETER P_Agencia LIKE Agencias.Agencia.
+    DEFINE INPUT PARAMETER P_Usuario LIKE Usuarios.Usuario.
+    DEFINE OUTPUT PARAMETER P_Rpta AS LOGICAL.
+
+    P_Rpta = FALSE.
+
+    FIND FIRST usuarios WHERE Usuarios.Agencia EQ P_Agencia
+                          AND Usuarios.Id_OpeOfi EQ TRUE
+                          AND Usuarios.Usuario EQ P_Usuario
+                          AND Usuarios.Prioridad GT 2 NO-LOCK NO-ERROR.
+    IF AVAILABLE (Usuarios) THEN
+        P_Rpta = TRUE.
+
+END PROCEDURE.
+
+
+PROCEDURE buscarCuentaNIIF:
+    DEFINE INPUT PARAMETER vCuenta AS CHARACTER.
+    DEFINE OUTPUT PARAMETER vCuentaNIIF AS CHARACTER INITIAL "".
+
+    FIND FIRST cuentas WHERE cuentas.cuenta = vCuenta NO-LOCK NO-ERROR.
+    IF AVAILABLE cuentas THEN
+       vCuentaNIIF = cuentas.cuentaNIIF.
+
+END PROCEDURE.
+
+
+PROCEDURE valorAtraso:
+    DEFINE INPUT PARAMETER pId AS CHARACTER.
+    DEFINE INPUT PARAMETER pCodCredito AS INTEGER.
+    DEFINE INPUT PARAMETER pNumCredito AS INTEGER.
+    DEFINE INPUT PARAMETER pFecha AS DATE.
+    DEFINE OUTPUT PARAMETER pValAtraso AS DECIMAL.
+
+    IF pCodCredito <> 123 THEN DO:
+        FOR EACH CONTROL_pagos WHERE CONTROL_pagos.nit = pId
+                                 AND CONTROL_pagos.num_credito = pNumCredito
+                                 AND CONTROL_pagos.fec_vcto <= pFecha
+                                 AND CONTROL_pagos.id_PdoMes <> 2 NO-LOCK:
+            pValAtraso = pValAtraso + control_pagos.cuota - CONTROL_pago.cap_pagado.
+        END.
+    END.
+    ELSE DO:
+        FOR EACH facturacion WHERE facturacion.nit = pId
+                               AND facturacion.num_credito = pNumCredito
+                               AND facturacion.fec_pago <= pFecha
+                               AND facturacion.estado = 1 NO-LOCK:
+            pValAtraso = pValAtraso + Facturacion.cuota - Facturacion.pago_capital - Facturacion.pago_intCorriente - Facturacion.pago_intDifCobro - Facturacion.pago_mora.
+        END.
+    END.
+
+END PROCEDURE.
+
+
+PROCEDURE edad:
+    DEFINE INPUT PARAMETER fecNacimiento AS DATE.
+    DEFINE OUTPUT PARAMETER vEdad AS INTEGER.
+
+    vEdad = YEAR(w_fecha) - YEAR(fecNacimiento).
+
+    IF MONTH(w_fecha) < MONTH(fecNacimiento) THEN
+        vEdad = vEdad - 1.
+    ELSE DO:
+        IF MONTH(w_fecha) = MONTH(fecNacimiento) THEN DO:
+            IF DAY(w_fecha) < DAY(fecNacimiento) THEN
+                vEdad = vEdad - 1.
+        END.
+    END.
+
+END PROCEDURE.
+
+
+/* Autorización de transacciones */
+PROCEDURE p-AutorizacionTransaccion:
+    DEFINE INPUT PARAMETER pNivelRequerido AS INTEGER.
+    DEFINE OUTPUT PARAMETER pAutorizacion AS LOGICAL.
+    DEFINE OUTPUT PARAMETER pUsuarioAutoriza AS CHARACTER.
+
+    DEFINE IMAGE yave
+        FILENAME "imagenes/seguridad.bmp":U SIZE 9.14 BY 2.46.
+
+    DEFINE VAR Nombre AS CHARACTER FORMAT "X(20)".
+    DEFINE VAR W_Rpta AS LOGICAL.
+    DEFINE VAR password AS CHARACTER FORMAT "X(10)".
+    DEFINE BUTTON BtnAceptar LABEL "&Aceptar " SIZE 10 BY 1.08 AUTO-GO.
+    DEFINE BUTTON BtnCancelar LABEL "&Cancelar" SIZE 10 BY 1.08 AUTO-ENDKEY.
+
+    DEFINE FRAME F_Validacion
+            yave AT ROW 1.5 COL 2
+            pUsuarioAutoriza LABEL "Usuario" AT ROW 01.5 COL 10  FORMAT "X(10)" HELP "Digite el Código del Usuario"  BGCOLOR 15 FGCOLOR 1
+            password BLANK LABEL "Clave   " AT ROW 02.5 COL 10 BGCOLOR 15  HELP "Digite su clave personal"
+            BtnAceptar AT ROW 01.2 COL 40
+            BtnCancelar AT ROW 02.5 COL 40
+            SKIP(0.5)
+        WITH SIDE-LABELS SIZE 52 BY 4.3 THREE-D BGCOL 17 FONT 4 TITLE "Autorización de transacción" FGCOLOR 0 VIEW-AS DIALOG-BOX OVERLAY.
+
+    ON RETURN TAB.
+
+    ON LEAVE OF pUsuarioAutoriza DO:
+        ASSIGN pUsuarioAutoriza.
+
+        FIND FIRST Usuarios WHERE Usuarios.Usuario = pUsuarioAutoriza NO-LOCK NO-ERROR.
+        IF AVAILABLE(Usuarios) THEN
+            DISPLAY Usuarios.Nombre AT ROW 1.5 COL 25 FORMAT "X(20)" BGCOL 17 FGCOL 0 VIEW-AS TEXT WITH NO-LABEL FRAME F_Validacion.
+    END.
+
+    ON LEAVE OF password DO:
+        ASSIGN password.
+
+        IF LAST-EVENT:LABEL <> "SHIFT-TAB" AND LAST-EVENT:LABEL <> "MOUSE-SELECT-UP" THEN DO:
+            FIND FIRST Usuarios WHERE Usuarios.Usuario = pUsuarioAutoriza
+                                  AND Usuarios.Clave = ENCODE(password)
+                                  AND Usuarios.Prioridad >= pNivelRequerido
+                                  AND Usuarios.Estado = 1
+                                  AND usuarios.usuario <> w_usuario NO-LOCK NO-ERROR.
+            IF AVAILABLE(Usuarios) THEN DO:
+                pAutorizacion = TRUE.
+                APPLY "CHOOSE" TO BtnAceptar.
+            END.
+            ELSE DO:
+                IF pUsuarioAutoriza = w_usuario THEN
+                    MESSAGE "La operación no puede ser autorizada por el Usuario gestor de la Solicitud." SKIP
+                            "No se permite la operación."
+                        VIEW-AS ALERT-BOX INFO BUTTONS OK.
+                ELSE
+                    MESSAGE "El Usuario no posee los privilegios para autorizar esta transacción."
+                            "No se permite la operación."
+                        VIEW-AS ALERT-BOX INFO BUTTONS OK.
+
+                pAutorizacion = FALSE.
+                
+                APPLY "ENTRY" TO pUsuarioAutoriza.
+
+                RETURN NO-APPLY.
+            END.
+
+            RETURN NO-APPLY.
+        END.
+    END.
+
+    ON ENTRY OF BtnAceptar, BtnCancelar DO:
+        ON RETURN RETURN.
+        ON TAB TAB. 
+    END.
+
+    ON LEAVE OF BtnAceptar, BtnCancelar DO:
+        ON RETURN TAB.
+    END.
+
+    ON CHOOSE OF BtnCancelar
+        ASSIGN pAutorizacion = FALSE
+               pUsuarioAutoriza = "".
+
+    ENABLE ALL WITH FRAME F_Validacion.
+
+    WAIT-FOR WINDOW-CLOSE OF CURRENT-WINDOW OR CHOOSE OF BtnCancelar OR CHOOSE OF BtnAceptar FOCUS pUsuarioAutoriza.
+    HIDE FRAME F_Validacion NO-PAUSE.
+    ON RETURN TAB.
+
+END PROCEDURE.                                                                  
+
+/*Valida ID de clientes contra listas SARLAFT configuradas */
+/*PROCEDURE validarUsuarioSarlaft:
+    DEFINE INPUT PARAMETER DatoABuscar AS CHARACTER.
+    DEFINE OUTPUT PARAMETER W_Sarlaft AS LOG INIT FALSE. /* Retorna true o false dependiendo de si encontró coincidencia en lista restrictiva o no */
+    DEFINE INPUT PARAMETER Tipo AS INTEGER INIT 1.       /* Parámetro para clasificar llamado individual 1 o llamado en lote 2 (no genera message al usuario en cada coincidencia)*/
+    
+    DEFINE VAR id AS CHARACTER.
+    DEFINE VAR linea AS CHARACTER.
+    DEFINE VAR inicio AS INTEGER.
+    DEFINE VAR finaldelinea AS INTEGER.
+    DEFINE VAR CaracterAnterior AS CHARACTER.
+    DEFINE VAR CaracterPosterior AS CHARACTER.
+    DEFINE VAR enviado AS LOGICAL.
+    DEFINE VAR respuesta AS CHARACTER.
+    
+    ASSIGN id = "*" + DatoABuscar + "*".
+
+    FOR EACH cfg_contenidolistas, EACH cfg_listasSarlaft WHERE cfg_contenidolistas.IDLista = STRING(ROWID(cfg_listasSarlaft)) AND cfg_contenidolistas.linea MATCHES(id) AND cfg_listasSarlaft.Estado = 1:
+        IF INDEX(cfg_contenidolistas.linea, DatoABuscar) > 1 THEN
+            ASSIGN  CaracterAnterior = SUBSTRING(cfg_contenidolistas.linea, INDEX(cfg_contenidolistas.linea, DatoABuscar) - 1, 1).
+        ELSE
+            ASSIGN CaracterAnterior = " ".
+        
+        IF INDEX(cfg_contenidolistas.linea, DatoABuscar) <> LENGTH(cfg_contenidolistas.linea) - LENGTH(DatoABuscar) THEN
+            ASSIGN  CaracterPosterior = SUBSTRING(cfg_contenidolistas.linea, INDEX(cfg_contenidolistas.linea, DatoABuscar) + LENGTH(DatoABuscar), 1).
+        ELSE
+            ASSIGN  CaracterPosterior = " ".
+
+        DEFINE VARIABLE ceroascii    AS INTEGER   NO-UNDO.
+        DEFINE VARIABLE nueveascii    AS INTEGER   NO-UNDO.
+        DEFINE VARIABLE chChar1       AS CHARACTER NO-UNDO.
+        DEFINE VARIABLE chChar2       AS CHARACTER NO-UNDO.
+        
+        ASSIGN ceroascii = ASC("0")
+               nueveascii = ASC("9")
+               chChar1    = SUBSTRING(CaracterAnterior,1,1)
+               chChar2    = SUBSTRING(CaracterPosterior,1,1).                           
+        
+        IF NOT(ASC(chChar1) >= ceroascii AND ASC(chChar1) <= nueveascii) AND NOT(ASC(chChar2) >= ceroascii AND ASC(chChar2) <= nueveascii) AND chChar1 <> "/" THEN DO:
+            ASSIGN linea = cfg_contenidolistas.linea.
+
+            IF tipo <> 2 THEN
+                MESSAGE "OPERACIÓN RESTRINGIDA" SKIP
+                    "El número de identificación de esta persona fue encontrado en lista SARLAFT '"SKIP
+                    cfg_listasSarlaft.lista + "' en la siguiente línea:"SKIP
+                    linea SKIP
+                    "Informe al oficial de cumplimiento." SKIP
+                    VIEW-AS ALERT-BOX INFORMATION TITLE "Identificación en listas SARLAFT".
+    
+            CREATE coincidencias_ListasSarlaft.
+    
+            ASSIGN coincidencias_ListasSarlaft.coincidencia = DatoABuscar
+                   coincidencias_ListasSarlaft.idLista = string(ROWID(cfg_listasSarlaft))
+                   coincidencias_ListasSarlaft.linea = STRING(linea)
+                   coincidencias_ListasSarlaft.fecha = NOW.
+    
+            ASSIGN coincidencias_ListasSarlaft.usuario = W_Usuario.
+            ASSIGN coincidencias_ListasSarlaft.agencia = W_Agencia.
+            
+            RUN mail.r (INPUT "lcmartinez@fodun.com.co",
+                INPUT "Oficial de cumplimiento",
+                INPUT "",
+                INPUT "",
+                INPUT "",
+                INPUT "", 
+                INPUT "Nueva coincidencia en listas SARLAFT",
+                INPUT "Buen d&iacute;a,<br><br>Se ha detectado una nueva coincidencia en las listas SARLAFT.<br><br>Coincidencia: " + DatoABuscar +
+                       "<br>Lista: " + cfg_listasSarlaft.lista + "<br>L&iacute;nea: " + linea + "<br>Usuario que reporta: " + W_Usuario + "<br>Agencia: " + string(W_Agencia),
+                INPUT "",
+                OUTPUT enviado,
+                OUTPUT respuesta).
+
+            IF cfg_listasSarlaft.Tipo = "RES" THEN
+                W_Sarlaft = TRUE.    
+        END.
+    END.
+
+END PROCEDURE.*/
+
+
+PROCEDURE escribirLog:
+DEFINE INPUT PARAMETER pUsuario AS CHARACTER.
+DEFINE INPUT PARAMETER pMensaje AS CHARACTER.
+
+OUTPUT TO VALUE("logs\" + pUsuario + ".csv") APPEND.
+    EXPORT DELIMITER ";"
+        NOW
+        pMensaje.
+
+OUTPUT CLOSE.
+END PROCEDURE.

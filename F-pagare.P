@@ -1,0 +1,341 @@
+DEFINE INPUT PARAMETER WNit    LIKE Clientes.Nit.
+DEFINE INPUT PARAMETER WNumCre LIKE Creditos.Num_Credito.
+
+{INCLUIDO\VARIABLE.I "SHARED"}
+
+DEFINE VAR NomMes AS CHARACTER FORMAT "X(12)" EXTENT 12
+       INITIAL ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"].
+
+DEFINE VAR W_Puntero      AS ROWID.
+DEFINE VAR W_NomAgencia   AS CHARACTER FORMAT "X(45)".
+DEFINE VAR W_NomPagador   AS CHARACTER FORMAT "X(45)".
+DEFINE VAR W_NomEmpresa   AS CHARACTER FORMAT "X(45)".
+DEFINE VAR W_NomEmpresa2  AS CHARACTER FORMAT "X(45)".
+DEFINE VAR W_NomDeudor    AS CHARACTER FORMAT "X(45)".
+DEFINE VAR W_NomDeudor2   AS CHARACTER FORMAT "X(45)".
+DEFINE VAR W_NomDireccion AS CHARACTER FORMAT "X(90)".
+DEFINE VAR W_MontoLetras  AS CHARACTER FORMAT "X(90)".
+DEFINE VAR W_NomMes       AS CHARACTER FORMAT "X(12)".
+DEFINE VAR W_CiuAgencia   AS CHARACTER FORMAT "X(35)".
+DEFINE VAR W_MontoIzq     AS CHARACTER FORMAT "X(20)".
+
+DEFINE VAR AH_Atermino     LIKE Ahorros.Sdo_Disponible.
+DEFINE VAR AH_AlaVista     LIKE Ahorros.Sdo_Disponible.
+DEFINE VAR AH_Contractual  LIKE Ahorros.Sdo_Disponible.
+DEFINE VAR AH_Aportes      LIKE Ahorros.Sdo_Disponible.
+
+
+DEFINE VAR CR_Comercial    LIKE Ahorros.Sdo_Disponible.
+DEFINE VAR CR_Consumo      LIKE Ahorros.Sdo_Disponible.
+DEFINE VAR CR_Hipotecario  LIKE Ahorros.Sdo_Disponible.
+DEFINE VAR CR_MicroCredito LIKE Ahorros.Sdo_Disponible.
+
+DEFINE VAR AHT LIKE Ahorros.Sdo_Disponible.
+DEFINE VAR CRT LIKE Ahorros.Sdo_Disponible.
+DEFINE VAR TOT LIKE Ahorros.Sdo_Disponible.
+DEFI   VAR W_NPagare LIKE Creditos.Num_Credito.
+
+
+FOR EACH Ahorros WHERE
+         Ahorros.Nit             EQ WNit AND
+         Ahorros.Estado          EQ 1    AND
+         Ahorros.Fec_Cancelacion EQ ?    AND
+         Ahorros.FOR_Pago        EQ 2 NO-LOCK:
+   CASE Ahorros.Tip_Ahorro:
+     WHEN 1 THEN AH_AlaVista    = AH_AlaVista    + Ahorros.Cuota.
+     WHEN 2 THEN AH_Contractual = AH_Contractual + Ahorros.Cuota.
+     WHEN 3 THEN AH_ATermino    = AH_ATermino    + Ahorros.Cuota.
+     WHEN 4 THEN AH_Aportes     = AH_Aportes     + Ahorros.Cuota.
+   END CASE.
+   ASSIGN AHT = AHT + Ahorros.Cuota.
+          TOT = TOT + Ahorros.Cuota.
+END.
+
+FOR EACH Creditos WHERE
+         Creditos.Nit         EQ WNit AND
+         Creditos.Estado      EQ 2 AND
+         Creditos.Sdo_Capital GT 0 AND
+         Creditos.FOR_Pago    EQ 2 NO-LOCK:
+   CASE Creditos.Tip_Credito:
+     WHEN 1 THEN CR_Consumo      = CR_Consumo      + Creditos.Cuota.
+     WHEN 2 THEN CR_Comercial    = CR_Comercial    + Creditos.Cuota.
+     WHEN 3 THEN CR_Hipotecario  = CR_Hipotecario  + Creditos.Cuota.
+     WHEN 4 THEN CR_Microcredito = CR_Microcredito + Creditos.Cuota.
+   END CASE.
+   ASSIGN CRT = CRT + Creditos.Cuota.
+          TOT = TOT + Creditos.Cuota.
+END.
+
+FIND Clientes WHERE Clientes.Nit EQ WNit NO-LOCK NO-ERROR.
+IF NOT AVAILABLE Clientes THEN DO:
+   MESSAGE "No se encontró el cliente" VIEW-AS ALERT-BOX ERROR TITLE "Error pagare".
+   RETURN ERROR.
+END.
+W_NomDireccion = Clientes.DIR_Comercial.
+IF W_NomDireccion EQ "" THEN W_NomDireccion = Clientes.DIR_Residencia.
+W_NomDireccion = W_NomDireccion + ",".
+
+FIND Creditos WHERE Creditos.Num_Credito EQ WNumCre AND
+                    Creditos.Nit         EQ WNit NO-LOCK NO-ERROR.
+IF NOT AVAILABLE Creditos THEN DO:
+   MESSAGE "No se ha encontrado el crédito al cual se le" SKIP
+           "imprimirá el pagare." SKIP(1)
+           "Se cancela la operación de desembolso" VIEW-AS ALERT-BOX ERROR  TITLE "Error pagare".
+   RETURN ERROR.
+END.
+ELSE DO:
+  IF Creditos.For_Pago EQ 2 THEN DO:
+     FIND Empresas WHERE Empresas.Cod_Empresa EQ Clientes.Cod_Empresa NO-LOCK NO-ERROR.
+     IF NOT AVAILABLE Empresas THEN DO:
+        MESSAGE "Aunque el crédito es por nómina, el cliente" SKIP
+                "no se encuentra matriculado a ninguna empresa" SKIP(1)
+                "Se cancela la operación de desembolso" VIEW-AS ALERT-BOX ERROR.
+        RETURN ERROR.
+     END.
+  END.
+END.
+RUN MontoEsc.r (INPUT Creditos.Monto,INPUT 0, OUTPUT W_MontoLetras).
+W_MontoLetras = W_MontoLetras + "  ($" + STRING(Creditos.Monto,">>>,>>>,>>>,>>9") + ")".
+
+FIND Agencias WHERE Agencias.Agencia EQ W_Agencia AND Agencias.Estado EQ 1 NO-LOCK NO-ERROR.
+IF NOT AVAILABLE Agencias THEN DO:
+   MESSAGE "La Agencia para el desembolso no se encuentra" SKIP
+           "disponible. se cancela la operación de desembolso" VIEW-AS ALERT-BOX.
+END.
+ASSIGN W_NomAgencia = STRING(Agencias.Agencia,"999") + " - " + Agencias.Nombre
+       W_NPagare    = Creditos.Num_Credito.
+
+FIND Ubicacion WHERE Ubicacion.Ubicacion EQ Agencia.Ciudad AND Ubicacion.Tipo EQ "C" NO-LOCK NO-ERROR.
+IF AVAILABLE Ubicacion THEN
+   W_CiuAgencia = Ubicacion.Nombre.
+
+DEFINE VAR Listado AS CHARACTER INITIAL "".
+listado = W_PathSpl + "L_Pagare.Lst".
+{incluido\Imprimir.I "listado"}
+
+PROCEDURE ProcesoImprimir:
+ DISPLAY 
+ "Día/Mes/Año    PAGARÉ No." AT 1
+ /*Creditos.Pagare                         AT 27*/
+ W_NPagare                               AT 27
+ Creditos.Fec_Desembolso                 AT 2 SKIP(2)
+ "AGENCIA      :"                        AT 1
+ W_NomAgencia                            AT 16
+ "CUENTA No.   :"                        AT 1
+ Creditos.Num_Credito                    AT 16 FORMAT "9999999999" SKIP(2)
+ "El(Los) Asociado(s):"                  AT 1 SKIP(2)
+ "Nosostros,  identificados  como  aparece  al  pie  de  nuestras  firmas, domiciliados  en" AT 1
+ W_NomDireccion                          AT 1
+ "nos obligamos a pagar como  deudores solidarios  incondicional  e  irrevocablemente  a la" AT 1
+ "COOPERATIVA UNIVERSITARIA  BOLIVARIANA  o  a  su  orden,    la   suma   de  (en  letras):" AT 1
+ W_MontoLetras                           AT 1
+ "Moneda legal colombiana, junto con sus intereses a la tasa del" AT 1
+ Creditos.Tasa                           AT 71 FORMAT                 ">9.9999" 
+ "   % Anual"                            AT 80
+ "pagaderos por períodos mensuales vencidos que comienzan a causarse desde la fecha de esté" AT 1
+ "pagaré, El pago de la expresada cantidad, junto con los intereses se hará en" AT 1
+ Creditos.Plazo                          AT 80 FORMAT "99"
+ "cuotas"                                AT 84
+ "fijas consecutivas de $"               AT 1
+ Creditos.Cuota                          AT 27 FORMAT ">>>,>>>,>>9"
+ "cada una, comenzando el pago de la  primera el  día" AT 39
+ DAY(Creditos.Fec_Pago)                  AT 1 FORMAT "99"
+ "del mes de "                           AT 4
+ NomMes[MONTH(Creditos.Fec_Pago)]        AT 17 FORMAT "X(12)"
+ "del año "                              AT 30
+ YEAR(Creditos.Fec_Pago)                 AT 40 FORMAT "9999" SKIP(2)
+ 
+ "Para garantizar el pago de la obligación aquí contenida, constituimos derecho a favor de" AT 1
+ "la COOPERATIVA BOLIVARIANA  sobre  el  valor de los aportes y demás ahorros existentes a" AT 1
+ "mí(nuestro)  nombre,  con  el  fin de  garantizar el pago de cualquier  otra  obligación" at 1
+ "durante el término que dure el crédito, a partir de la firma de este pagaré." AT 1 SKIP(2)
+ 
+ "La COOPERATIVA UNIVERSITARIA  BOLIVARIANA, puede declarar vencido el plazo: a) por  mora  en" AT 1
+ "el  pago  de capital o de los intereses de esta obligación o de cualquier otra a nuestro" AT 1
+ "cargo.   b)  Sí  las  fuentes  de  pago y/o garantías (personales o reales) dejan de ser" AT 1
+ "suficiente respaldo de la obligación a juicio de la  COOPERATIVA UNIVERSITARIA  BOLIVARIANA." AT 1
+ "c)  Sí  las  garantías  reales  (bienes),  de  alguno de los deudores son perseguidos en" AT 1
+ "ejercicio  de  cualquier clase  de  acción.  d)  Por presentar información inexacta a la" AT 1
+ "COOPERATIVA UNIVERSITARIA  BOLIVARIANA. e) En los demás casos de ley. En estas circustancias" AT 1
+ "la  COOPERATIVA UNIVERSITARIA  BOLIVARIANA  o  quien represente sus derechos o cualquier" AT 1
+ "tenedor  legítimo  de  su  pagaré,   podrá  exigir  el  saldo  adeudado sin necesidad de" AT 1
+ "de declaración judicial." AT 1 SKIP(2)
+
+ "Renunciamos  expresamente  a  cualquier  clase de requerimiento y declaramos excusado el" AT 1
+ "protesto  de  este  pagaré, en concordancia con el artículo 697 del Código de Comercio y" AT 1
+ "142  del  Código  de  Procedimiento Civil, Serán  de nuestro  cargo las costas, costos y" AT 1
+ "honorarios del cobro, si diéremos lugar a ello." AT 1 SKIP(2)
+ 
+ "Autorizamos expresamente a la COOPERATIVA UNIVERSITARIA  BOLIVARIANA para que realice débito" AT 1
+ "de  cualquiera  de  mi(s) o nuestras cuentas  de ahorros y aportes sociales, por la suma" AT 1
+ "correspondiente  al  valor  de  las  cuotas  del  presente  pagaré   sobre  las   cuales" AT 1
+ "adicionalmente autorizamos descuentos para cubrir las cuotas ordinarias de  amortización" AT 1
+ "o abonar al valor de los saldos que se encuentran en mora." AT 1 SKIP(2)
+ 
+ "Autorizamos a la COOPERATIVA UNIVERSITARIA  BOLIVARIANA, para que reporte a las centrales de" AT 1
+ "riesgo  sobre  los  saldos  a nuestro cargo  con motivo de la obligación contenida en el" AT 1
+ "presente pagaré." AT 1 SKIP(2)
+ 
+ "En señal de aprobación firmamos solidaria y mancomunadamente: " AT 1
+ WITH FRAME X WIDTH 132 NO-LABELS NO-BOX USE-TEXT STREAM-IO.
+ PAGE.
+ 
+ IF Creditos.FOR_Pago EQ 2 THEN DO:
+    W_MontoIzq = STRING(Creditos.Monto,">>>,>>>,>>>,>>9").
+    W_Puntero = ROWID(Clientes).
+    FIND Clientes WHERE Clientes.Nit EQ Empresas.Nit_Pagador NO-LOCK NO-ERROR.
+    W_NomPagadoR = "".
+    IF AVAILABLE Clientes THEN
+       W_NomPagador = Clientes.Nombre + " " + Clientes.Apellido1 + " " + Clientes.Apellido2.
+    FIND Clientes WHERE Clientes.Nit EQ Empresas.Nit NO-LOCK NO-ERROR.
+    W_NomEmpresa = "".
+    IF AVAILABLE Clientes THEN
+       ASSIGN W_NomEmpresa  = Clientes.Nombre + " " + Clientes.Apellido1 + " " + Clientes.Apellido2
+              W_NomEmpresa2 = Clientes.Nombre + " " + Clientes.Apellido1 + " " + Clientes.Apellido2.
+    FIND Clientes WHERE ROWID(Clientes) EQ W_Puntero NO-LOCK NO-ERROR.
+    ASSIGN W_NomDeudor = Clientes.Nombre + " " + Clientes.Apellido1 + " " + Clientes.Apellido2
+           W_NomDeudor2 = Clientes.Nombre + " " + Clientes.Apellido1 + " " + Clientes.Apellido2.
+    DISPLAY SKIP(1)
+    "----------------------------------------------------------------------------------------" AT 1 SKIP(1)
+    "LIBRANZA - ORDEN DE RETENCIÓN No.   " AT 1
+    NEXT-VALUE(Sec_Libranza)               AT 49 FORMAT "9999999999" SKIP(2)
+    "         CIUDAD                  :"   AT 1
+    W_CiuAgencia                           AT 49
+    "         FECHA                   :"   AT 1
+    W_Fecha                                AT 49 FORMAT "99/99/9999"
+    "         CUENTA                  :"   AT 1
+    Creditos.Num_Credito                   AT 49 FORMAT "9999999999"
+    "         PAGARE                  :"   AT 1
+    Creditos.Pagare                        AT 49
+    "         EMPRESA                 :"   AT 1
+    W_NomEmpresa                           AT 49 FORMAT "X(25)"
+    "         PAGADOR O JEFE DE NOMINA:"   AT 1
+    W_NomPagador                           AT 49
+    "         NOMBRES Y APELLIDOS     :"   AT 1
+    W_NomDeudor                            AT 49
+    "         VALOR DEL CRÉDITO      $:"   AT 1
+    W_MontoIzq                             AT 49
+    "         TASA ANUAL              :"   AT 1
+    Creditos.Tasa                          AT 49 SKIP(2)
+     /*       1         2         3         4         5         6         7         8         9  
+     123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890*/
+    "Yo, " AT 1
+    W_NomDeudor2                           AT 6 FORMAT "X(35)"
+    ", en  mi  condición  de  empleado de la  empresa" AT 42
+    W_NomEmpresa2                          AT 1 FORMAT "X(35)"
+    "y  como  asociadode  la   COOPERATIVA  UNIVERSITARIA  BOLIVARIANA" AT 37
+    "CRÉDITO,  Entidad  Cooperativa  reconocida legalmente por  el Departamento Administrativo" AT 1
+    "Nacional de Cooperativas  DANCOOP,  según  Personería Jurídica No.0129 del 23 de marzo de" AT 1
+    "1964, me dirijo a ustedes para autorizar que  sobre  cualquier  suma que me deba pagar la" AT 1
+    "empresa  (salario,  prestaciones  sociales, bonificaciones e indemnizaciones, o cualquier" AT 1
+    "otra suma a pagar), se efectuen los siguientes descuentos y/o  saldos  pendientes a favor" AT 1
+    "de la COOPERATIVA UNIVERSITARIA  BOLIVARIANA:" AT 1 SKIP(1)
+    "       CUOTAS DE AHORRO                               CUOTAS DE CRÉDITO" AT 1
+    "A LA VISTA    :" AT 1
+    AH_AlaVista       AT 18 FORMAT ">>>,>>>,>>9"
+    "CONSUMO       :" AT 47
+    CR_Consumo        AT 65 FORMAT ">>>,>>>,>>9"
+    "CONTRACTUAL   :" AT 1
+    AH_Contractual    AT 18 FORMAT ">>>,>>>,>>9"
+    "COMERCIAL     :" AT 47
+    CR_Comercial      AT 65 FORMAT ">>>,>>>,>>9"
+    "A TERMINO     :" AT 1
+    AH_Atermino       AT 18 FORMAT ">>>,>>>,>>9"
+    "HIPOTECARIO   :" AT 47
+    CR_Hipotecario    AT 65 FORMAT ">>>,>>>,>>9"
+    "APORTES       :" AT 1
+    AH_Aportes        AT 18 FORMAT ">>>,>>>,>>9"
+    "MICROCRÉDITO  :" AT 47
+    CR_Microcredito   AT 65 FORMAT ">>>,>>>,>>9" SKIP(1)
+    "TOT.CUO.AHORRO:" AT 1
+    AHT               AT 18 FORMAT ">>>,>>>,>>9"
+    "TOT.CUO.CREDITO:" AT 47
+    CRT               AT 65 FORMAT ">>>,>>>,>>9" SKIP(1)
+    "TOT.DEDUCCION :" AT 1
+    Tot               AT 18 FORMAT ">>>,>>>,>>9" SKIP(1)
+    "La presente solicitud de autorización se fundamenta en el artículo  150 y 156  del Código" AT 1 
+    "Sustantivo del Trabajo - Ley 141/61- y los derechos que otorga la legislación cooperativa" AT 1
+    "vigente - ley 789/88, Artículos 142, 143 y 144 - a favor de las cooperativas." AT 1 SKIP(3)
+    "_______________________________________    ___________________________________________" AT 1
+    "Autorizo (Firma Asociado)                  Funcionario Cooperativa" AT 1
+    "C.C.                                       C.C" AT 1 SKIP(2)
+    "OBSERVACIONES EMPRESA (LEER AL REVERSO ANTES DE FIRMAR)" AT 1 SKIP(4)
+    "                                           ___________________________________________" AT 1
+    "                                                   FIRMA Y SELLO DE LA EMPRESA" AT 1
+    
+    WITH FRAME Y WIDTH 132 NO-LABELS USE-TEXT NO-BOX STREAM-IO.
+    PAGE.
+ END.
+ /*HOJA DE FIRMAS Y HUELLAS*/
+ DISPLAY
+ "                                   FIRMAS Y HUELLAS" AT 1 SKIP(2)
+ "________________________________________________________________________________________" AT 1 
+ "FIRMA Y CÉDULA DEL DEUDOR                                    HUELLA DEUDOR" AT 1 SKIP(6)
+ "----------------------------------------------------------------------------------------" AT 1
+ "DIRECCIÓN Y TELÉFONO DEUDOR" AT 1 SKIP(1)
+ "________________________________________________________________________________________" AT 1
+ "FIRMA Y CÉDULA DEL CODEUDOR 1                                HUELLA DEUDOR" AT 1 SKIP(6)
+ "----------------------------------------------------------------------------------------" AT 1
+ "DIRECCIÓN Y TELÉFONO CODEUDOR 1" AT 1 SKIP(1)
+ "________________________________________________________________________________________" AT 1
+ "FIRMA Y CÉDULA DEL CODEUDOR 2                                HUELLA DEUDOR" AT 1 SKIP(6)
+ "----------------------------------------------------------------------------------------" AT 1
+ "DIRECCIÓN Y TELÉFONO CODEUDOR 2" AT 1 SKIP(1)
+ "________________________________________________________________________________________" AT 1 SKIP(4)
+ "_________________________________________" AT 1
+ "Vo. Bo. EMPRESA" AT 1 SKIP(4)
+ "_________________________________________       ________________________________________" AT 1
+ "   COOPERATIVA UNIVERSITARIA  BOLIVARIANA" AT 1
+ WITH FRAME HUELLAS WIDTH 132 NO-LABELS USE-TEXT NO-BOX STREAM-IO.
+ PAGE.
+/*aspectos legales*/
+ DISPLAY
+ /*       1         2         3         4         5         6         7         8         9  
+ 123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890*/
+ "                                   ASPECTOS LEGALES" AT 1
+ "ARTÍCULO 150 CÓDIGO SUSTANTIVO DEL TRABAJO   Artículo 143: Para  los efectos del artículo" AT 1
+ "- LEY 141/61.                                anterior,    prestará   mérito  efecutivo la" AT 1
+ "                                             la relación   de  asociados deudores, con la" AT 1
+ "DESCUENTOS PERMITIDOS:  Son permitidos los   prueba  de   haber  sido  entregada  para el" AT 1
+ "conceptos  y  retenciones  por concepto de   descuento   con  antelación  de por lo menos" AT 1
+ "cuotas sindicales y  de  cooperativas y de   diez(10) días habiles." AT 1
+ "caja de ahorros autorizadas en forma legal" AT 1
+ "de  cuotas  con  destino  al seguro social   Artículo 144: Las deducciones a favor de las" AT 1
+ "obligatorio y de sanciones  disciplinarias   cooperativas   tendrán  prelación sobre otro" AT 1
+ "impuestas de conformidad con el reglamento   descuento  por   obligaciones civiles, salvo" AT 1
+ "de trabajo debidamente aprobado.             las judiciales  por alimentos." AT 1
+ "                                          " AT 1
+ "ARTÍCULO  156 :  Todo  salario  puede  ser    RECOMENDACIONES IMPORTANTES PARA EL MANEJO" AT 1
+ "enbargado  en  un  cincuenta  por ciento a      DE LOS DESCUENTOS EN LA LIBRANZA-ORDEN" AT 1
+ "favor    de   la   cooperativa  legalmente                    DE RETENCION" AT 1
+ "autorizados,  o  para   cubrir   pensiones   1.La  orden   de retención incluye de manera" AT 1
+ "alimenticias  que se  deban de conformidad     discriminada  todos los descuentos autori-" AT 1
+ "con  los  articulos 411 y concordantes del     zados  por  el  trabajador,  agrupados por" AT 1
+ "del Código Civil.                              subtotales de  ahorro y crédito,  así como" AT 1
+ "                                               el saldo que totaliza todos los descuentos" AT 1
+ "ARTÍCULO  142,143 Y 144  DE LA LEGISLACION     Esta presentación tiene por objeto facili-" AT 1
+ "Artículo 142:   Toda  persona,  empresa  o     tar la labor del empleado de  nómina,  que" AT 1
+ "entidad pública o privada, estará obligada     de  acuerdo  con  los códigos de descuento" AT 1
+ "a deducir y retener cualquier cantidad que     asignados   procederá   a tomar las infor-" AT 1
+ "que  haya  de  pagar  a sus trabajadores o     mación más conveniente." AT 1
+ "o pensionados, las sumas que éstos adeuden   2.Las órdenes  de  retención  se originan en" AT 1
+ "a  la  Cooperativa  y  que  la  obligación     los siguientes motivos:" AT 1
+ "conste  en  libranza,   títulos  valores y" AT 1
+ "y cualquier otro documento suscrito por el     * Por  Afiliación:  Cuando  el asociado se" AT 1
+ "deudor, quien para su efecto deberá dar su       vincula con la Cooperativa." AT 1
+ "consentimiento previo.                    " AT 1
+ "                                               * Por Novedades: Cuando se indican cambios" AT 1
+ "Parágrafo:    Las  personas,   empresas  o       de  cuota   y/o   saldo   por  cualquier" AT 1
+ "entidades   obligadas   a   retener  deben       descuento (Ahorro y Crédito)." AT 1
+ "entregar  las   sumas   retenidas   a   la" AT 1
+ "Cooperativa, simultáneamente  con  el pago     * Por Crédito: Cuando el asociado  realiza" AT 1
+ "que hace al trabajador o pensionado.Si por       operaciones de crédito." AT 1
+ "su culpa no lo hicieren,serán responsables" AT 1
+ "ante  la  Cooperativa  de  su   omisión  y     * Por Renuncia:   Cuando  el   asociado se" AT 1
+ "quedarán solidariamente deudores ante ésta       desvincula de la Cooperativa." AT 1
+ "de las sumas dejadas de retener o entrgar," AT 1
+ "junto con los intereses  de  la obligación" AT 1
+ "contraída con el deudor.                  " AT 1
+ WITH FRAME z WIDTH 132 NO-LABELS USE-TEXT NO-BOX STREAM-IO.
+END PROCEDURE.

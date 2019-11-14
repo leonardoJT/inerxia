@@ -1,0 +1,677 @@
+PROCEDURE HFDP:
+    /***************** HALLAR EL FUTURO DADO EL PRESENTE ********************
+    DESCRIPCION : Devuelve el valor futuro.
+    FORMULA     : Valor Futuro = Valor Presente * (1 + TASA)^PLAZO.
+    *************************************************************************/
+    DEFINE INPUT PARAMETER P_Monto AS DECIMAL FORMAT "->>>,>>>,>>>,>>9".
+    DEFINE INPUT PARAMETER P_Tasa AS DECIMAL FORMAT ">>9.9999999".
+    DEFINE INPUT PARAMETER P_Plazo AS INTEGER.
+    DEFINE OUTPUT PARAMETER P_Resultado AS DECIMAL FORMAT "->>>,>>>,>>>,>>9" INITIAL 0.
+
+    P_Resultado = ROUND(P_Monto * EXP(1 + P_Tasa,P_Plazo),4).
+END.
+
+
+
+PROCEDURE HPDF:
+    /***************** HALLAR PRESENTE DADO EL FUTURO ***********************
+    DESCRIPCION : Devuelve el valor Presente.
+    FORMULA     :                        Valor Futuro
+                 Valor Presente = -------------------------
+                                      (1 + TASA)^PLAZO.
+    *************************************************************************/
+    DEFINE INPUT PARAMETER P_Monto AS DECIMAL FORMAT "->>>,>>>,>>>,>>9.9999999".
+    DEFINE INPUT PARAMETER P_Tasa AS DECIMAL FORMAT ">>9.9999999".
+    DEFINE INPUT PARAMETER P_Plazo AS INTEGER.
+    DEFINE OUTPUT PARAMETER P_Resultado AS DECIMAL FORMAT "->>>,>>>,>>>,>>9" INITIAL 0.
+
+    P_Resultado = ROUND(P_Monto / (EXP(1 + P_Tasa,P_Plazo)),4).
+END.
+
+
+
+PROCEDURE HADP:
+    /*************** HALLAR ANUALIDAD DADO EL PRESENTE **********************
+    DESCRIPCION : Devuelve el valor CUOTA FIJA.
+                                            TASA (1 + TASA)^PLAZO
+    FORMULA     :  Cuota = Valor Presente -------------------------
+               		                        (1 + TASA)^(PLAZO) - 1
+    *************************************************************************/
+    DEFINE INPUT PARAMETER P_Monto AS DECIMAL FORMAT "->>>,>>>,>>>,>>9".
+    DEFINE INPUT PARAMETER P_Tasa AS DECIMAL FORMAT ">>9.9999999".
+    DEFINE INPUT PARAMETER P_Plazo AS INTEGER.
+    DEFINE OUTPUT PARAMETER P_Resultado AS DECIMAL FORMAT "->>>,>>>,>>>,>>9" INITIAL 0.
+
+    P_Resultado = ROUND((P_Monto * ((P_Tasa * EXP(P_Tasa + 1,P_Plazo)) / (EXP(P_Tasa + 1,P_Plazo) - 1))),6).
+END.
+
+
+
+PROCEDURE HPDA:
+    /**************  HALLAR PRESENTE DADO LA ANUALIDAD ***********************
+    DESCRIPCION : Devuelve el valor PRESENTE DADO la CUOTA FIJA.
+                                            (1 + TASA)^(PLAZO) - 1
+    FORMULA     : Valor Presente =  Cuota  -------------------------
+               		                        TASA (1 + TASA)^PLAZO
+    *************************************************************************/
+    DEFINE INPUT PARAMETER P_Cuota AS DECIMAL FORMAT "->>>,>>>,>>>,>>9".
+    DEFINE INPUT PARAMETER P_Tasa AS DECIMAL FORMAT ">>9.9999999".
+    DEFINE INPUT PARAMETER P_Plazo AS INTEGER.
+    DEFINE OUTPUT PARAMETER P_Resultado AS DECIMAL FORMAT "->>>,>>>,>>>,>>9" INITIAL 0.
+
+    P_Resultado = ROUND((P_Cuota * ((EXP(P_Tasa + 1,P_Plazo) - 1) / (P_Tasa * EXP(P_Tasa + 1,P_Plazo))) + 0.5),4).
+END.
+
+
+
+PROCEDURE HGPA:
+    /************* HALLAR GRADIENTE CON PROGRESION ARITMETICA ***************
+    DESCRIPCION : Devuelve el valor de CUOTA LINEAL.
+    *************************************************************************/
+    DEFINE INPUT PARAMETER P_Monto AS DECIMAL FORMAT "->>>,>>>,>>>,>>9".
+    DEFINE INPUT PARAMETER P_Tasa AS DECIMAL FORMAT ">>9.999999".
+    DEFINE INPUT PARAMETER P_Plazo AS INTEGER.
+    DEFINE INPUT PARAMETER P_Razon AS DECIMAL FORMAT "->>>,>>>,>>>,>>9.9999".
+    DEFINE OUTPUT PARAMETER P_Resultado  AS DECIMAL FORMAT "->>>,>>>,>>>,>>9" INITIAL 0.
+
+    DEFINE VAR W_VlrTra AS DECIMAL FORMAT ">>9.999999" INITIAL 0.
+
+    W_VlrTra = EXP(1 + P_Tasa,P_Plazo).
+
+    P_Resultado = ((W_VlrTra * P_Tasa) * (P_Monto - ((P_Razon / P_Tasa) * (((W_VlrTra - 1) / (W_VlrTra * P_Tasa)) - (P_Plazo / W_VlrTra))))) / (W_VlrTra - 1).
+
+END PROCEDURE.
+
+
+
+PROCEDURE HGPG:
+    /************* HALLAR GRADIENTE CON PROGRESION GEOMETRICA ***************
+    DESCRIPCION : Devuelve el valor de CUOTA GEOMETRICA.
+    FORMULA     : Cuota = (VP * (1 + TASA - RAZON) (1 + TASA)^(PLAZO) - 1
+    *************************************************************************/
+    DEFINE INPUT PARAMETER P_Monto AS DECIMAL FORMAT "->>>,>>>,>>>,>>9".
+    DEFINE INPUT PARAMETER P_Tasa AS DECIMAL FORMAT ">>9.999999".
+    DEFINE INPUT PARAMETER P_Plazo AS INTEGER.
+    DEFINE INPUT PARAMETER P_Razon AS DECIMAL FORMAT "->>>,>>>,>>>,>>9.9999".
+    DEFINE OUTPUT PARAMETER P_Resultado  AS DECIMAL FORMAT "->>>,>>>,>>>,>>9" INITIAL 0.
+
+    IF P_Razon = (P_Tasa + 1) THEN
+        P_Resultado = ROUND((P_Monto * (1 + P_Tasa)) / P_Plazo,4).
+    ELSE
+        P_Resultado = (((P_Monto * ((1 + P_Tasa) - P_Razon))) * EXP(1 + P_Tasa,P_Plazo)) / (EXP(1 + P_Tasa,P_Plazo) - EXP(P_Razon,P_Plazo)).
+
+END PROCEDURE.
+
+
+
+PROCEDURE HNCF:
+    /**************************  HALLA EL PLAZO DE UN CREDITO CON CUOTA FIJA ****************
+    DESCRIPCION : Devuelve el plazo de un credito dado la cuota, interes y el valor presente.
+    ****************************************************************************************/
+    DEFINE INPUT PARAMETER P_VP AS DECIMAL FORMAT "->>>,>>>,>>>,>>9".
+    DEFINE INPUT PARAMETER P_Cuota AS DECIMAL FORMAT "->>>,>>>,>>>,>>9".
+    DEFINE INPUT PARAMETER P_Tasa AS DECIMAL FORMAT ">>9.9999999".
+    DEFINE OUTPUT PARAMETER P_Resultado AS INTEGER INITIAL 0.
+
+    DEFINE VAR W_PlazoDec AS DECIMAL FORMAT ">>>>>9.99".
+
+    ASSIGN W_PlazoDec = (LOG(P_Cuota) - LOG(ABS(P_Cuota - (P_VP * P_Tasa)))) / LOG(1 + P_Tasa)
+           P_Resultado = W_PlazoDec + .5.
+
+END PROCEDURE.
+
+
+
+PROCEDURE HNCU:
+    /***********  HALLA EL PLAZO DE UN CREDITO CON CUOTA UNICA ******************************
+    DESCRIPCION : Devuelve el plazo de un credito dado la cuota, interes y el valor presente.
+    ****************************************************************************************/
+    DEFINE INPUT PARAMETER P_VP AS DECIMAL FORMAT "->>>,>>>,>>>,>>9".
+    DEFINE INPUT PARAMETER P_Cuota AS DECIMAL FORMAT "->>>,>>>,>>>,>>9".
+    DEFINE INPUT PARAMETER P_Tasa AS DECIMAL FORMAT ">>9.9999999".
+    DEFINE OUTPUT PARAMETER P_Resultado AS INTEGER INITIAL 0.
+
+    P_Resultado = LOG(P_Cuota / P_VP) / LOG(1 + P_Tasa).
+
+END PROCEDURE.
+
+
+
+PROCEDURE NVEF:
+    /****************************  TASA EFECTIVA  ****************************
+    DESCRIPCION : Devuelve la tasa efectiva de la tasa nominal VENCIDA.
+    FORMULA     : TASA EFECTIVA = (1 + TASA NOMINAL)^PERIODOS - 1.
+    *************************************************************************/
+    DEFINE INPUT PARAMETER P_TasaNominal AS DECIMAL FORMAT ">>9.9999999".
+    DEFINE INPUT PARAMETER P_periodos AS INTEGER.
+    DEFINE OUTPUT PARAMETER P_TasaEfectiva AS DECIMAL FORMAT "999.9999999".
+
+    P_TasaEfectiva = EXP(1 + (P_TasaNominal / P_periodos), p_periodos) - 1.
+
+END PROCEDURE.
+
+
+
+PROCEDURE NAEF:
+    /***************************  TASA EFECTIVA *****************************
+    DESCRIPCION : Devuelve la tasa efectiva de la nominal anticipada.
+    FORMULA     : TASA EFECTIVA = (1 / ((1 - TASAANTICIPADA )^PERIODOS)) - 1.
+    *************************************************************************/
+    DEFINE INPUT PARAMETER P_TasaAnticipada AS DECIMAL FORMAT ">>9.9999999".
+    DEFINE INPUT PARAMETER P_periodos AS INTEGER.
+    DEFINE OUTPUT PARAMETER P_TasaEfectiva AS DECIMAL FORMAT ">>9.9999999" INITIAL 0.
+
+    P_TasaEfectiva = (1 / EXP(1 - P_TasaAnticipada,P_Periodos)) - 1.
+
+END PROCEDURE.
+
+
+
+PROCEDURE EFNA:
+    /********************  TASA NOMINAL ANTICIPADA **************************
+    DESCRIPCION : Devuelve la tasa nominal anticipada de la tasa efectiva.
+    FORMULA     : TASA NOMINAL = 1 - ((1 / (TASA EFECTIVA + 1))^(1/PERIODOS)).
+    *************************************************************************/
+    DEFINE INPUT PARAMETER P_TasaEfectiva AS DECIMAL FORMAT ">>9.9999999".
+    DEFINE INPUT PARAMETER P_periodos AS DECIMAL FORMAT ">>9.9999999".
+    DEFINE OUTPUT PARAMETER P_NomAnticipada  AS DECIMAL FORMAT ">>9.9999999" INITIAL 0.
+    
+    P_NomAnticipada = 1 - (1 / EXP(P_TasaEfectiva + 1,1 / P_Periodos)).
+
+END PROCEDURE.
+
+
+
+PROCEDURE EFNA1:
+    /********************  TASA NOMINAL ANTICIPADA ***************************
+    DESCRIPCION : Devuelve la tasa nominal anticipada de la tasa efectiva.
+    FORMULA     : TASA NOMINAL = 1 - ((1 / (TASA EFECTIVA + 1))^(1/PERIODOS)).
+    *************************************************************************/
+    DEFINE INPUT PARAMETER P_TasaEfectiva AS DECIMAL FORMAT ">>9.9999999".
+    DEFINE INPUT PARAMETER P_periodos AS DECIMAL FORMAT ">>9.9999999".
+    DEFINE OUTPUT PARAMETER P_NomAnticipada AS DECIMAL FORMAT ">>9.9999999" INITIAL 0.
+
+    P_NomAnticipada = (1 - EXP(P_TasaEfectiva + 1, - (1 / P_PEriodos))) * P_PEriodos.
+
+END PROCEDURE.
+
+
+
+PROCEDURE EFNV:
+    /**********************  TASA NOMINAL VENCIDA **************************
+    DESCRIPCION : Devuelve la tasa nominal vencida de la tasa efectiva.
+    FORMULA     : TASA NOMINAL = ((TASA EFECTIVA + 1)^(1/PERIODOS)) - 1.
+    *************************************************************************/
+    DEFINE INPUT PARAMETER P_TasaEfectiva AS DECIMAL FORMAT "999.999999999".
+    DEFINE INPUT PARAMETER P_periodos AS DECIMAL FORMAT ">>9.999999999".
+    DEFINE OUTPUT PARAMETER P_Nominal AS DECIMAL FORMAT "999.999999999".
+
+    P_Nominal = (EXP(P_TasaEfectiva + 1,1 / P_Periodos)) - 1.
+
+END PROCEDURE.
+
+
+
+PROCEDURE HIGA:
+    /************* HALLAR INTERES DE UN GRADIENTE ARITMETICO *****************
+    DESCRIPCION : Devuelve el Interes total durante el plazo.
+    *************************************************************************/
+    DEFINE INPUT PARAMETER P_Pv AS DECIMAL FORMAT "->>>,>>>,>>>,>>9".
+    DEFINE INPUT PARAMETER P_Tasa AS DECIMAL FORMAT ">>9.999999".
+    DEFINE INPUT PARAMETER P_Cuota AS DECIMAL FORMAT "->>>,>>>,>>>,>>9".
+    DEFINE INPUT PARAMETER P_Periodo AS INTEGER.
+    DEFINE INPUT PARAMETER P_Razon AS DECIMAL FORMAT "->>>,>>>,>>>,>>9.9999".
+    DEFINE OUTPUT PARAMETER P_Resultado AS DECIMAL FORMAT "->>>,>>>,>>>,>>9" INITIAL 0.
+
+    IF P_Periodo <= 1 THEN
+        P_Resultado = P_Pv * P_Tasa.
+    ELSE DO:
+        P_Resultado = P_Cuota + (P_Razon * (P_Periodo - 1)).
+        P_Resultado = ((P_Cuota + P_Resultado) * (P_Periodo / 2)) - P_Pv.
+    END.
+
+END PROCEDURE.
+
+
+
+PROCEDURE HIGG:
+    /************* HALLAR INTERES DE UN GRADIENTE GEOMETRICO ****************
+    DESCRIPCION : Devuelve el Interes total durante el plazo.
+    *************************************************************************/
+    DEFINE INPUT PARAMETER P_Pv AS DECIMAL FORMAT "->>>,>>>,>>>,>>9".
+    DEFINE INPUT PARAMETER P_Tasa AS DECIMAL FORMAT ">>9.999999".
+    DEFINE INPUT PARAMETER P_Cuota AS DECIMAL FORMAT "->>>,>>>,>>>,>>9".
+    DEFINE INPUT PARAMETER P_Periodo AS INTEGER.
+    DEFINE INPUT PARAMETER P_Razon AS DECIMAL FORMAT "->>>,>>>,>>>,>>9.9999".
+    DEFINE OUTPUT PARAMETER P_Resultado AS DECIMAL FORMAT "->>>,>>>,>>>,>>9" INITIAL 0.
+
+    IF P_Periodo <= 1 THEN
+        P_Resultado = P_Pv * P_Tasa.
+    ELSE DO:
+        P_Resultado = P_Cuota * EXP(P_Razon,P_Periodo - 1).
+        P_Resultado = (((P_Resultado * P_Razon) - P_Cuota) / (P_Razon - 1)) - P_Pv.
+    END.
+
+END PROCEDURE.
+
+
+
+PROCEDURE TasaPerNom:
+    /*************************************************************************
+    DESCRIPCION : Devuelve la tasa nominal periodica.
+    *************************************************************************/
+    DEFINE INPUT PARAMETER P_Periodo AS INTEGER.
+    DEFINE INPUT PARAMETER P_TasaEf AS DECIMAL FORMAT ">>9.999999999".
+    DEFINE INPUT PARAMETER P_TipInt AS INTEGER.
+    DEFINE OUTPUT PARAMETER P_Resultado AS DECIMAL FORMAT ">>9.999999999" INITIAL 0.
+
+    P_Resultado = P_TasaEf / 100.
+
+    IF P_TipInt = 1 THEN
+        RUN EFNV(INPUT P_Resultado,INPUT P_Periodo,OUTPUT P_Resultado).
+    ELSE
+        RUN EFNA(INPUT P_Resultado,INPUT P_Periodo,OUTPUT P_Resultado).
+
+END PROCEDURE.
+
+
+
+PROCEDURE HallarTasa:
+    /****************************  HALLAR LA TASA ***************************
+    DESCRIPCION : Devuelve la tasa.
+    FORMULA     : TASA = RAIZ PLAZO (PRESENTE / CUOTA) - 1.
+    *************************************************************************/
+    DEFINE INPUT PARAMETER P_Vlr_Presente AS DECIMAL FORMAT "->>>,>>>,>>>,>>9.99" DECIMALS 10.
+    DEFINE INPUT PARAMETER P_Vlr_Futuro AS DECIMAL FORMAT "->>>,>>>,>>>,>>9.99" DECIMALS 10.
+    DEFINE INPUT PARAMETER P_Plazo AS INTEGER.
+    DEFINE OUTPUT PARAMETER P_Resultado AS DECIMAL FORMAT ">>9.99" DECIMALS 10 INITIAL 0.
+
+    P_Resultado = EXP(P_Vlr_Futuro / P_Vlr_Presente,1 / P_PLAZO) - 1.
+
+END PROCEDURE.
+
+
+
+PROCEDURE HCCC:
+    /*********  HALLAR CAPITAL DE UN PERIODO CON CAPITAL CONSTANTE **********
+    FORMULA : RESULTADO = (PV / N) + ((PV * i) * (1 - ((PERIODO - 1) / N))
+    *************************************************************************/
+    DEFINE INPUT PARAMETER P_VP AS DECIMAL FORMAT "->>>,>>>,>>>,>>9".
+    DEFINE INPUT PARAMETER P_Plazo AS DECIMAL FORMAT "->>>,>>>,>>>,>>9".
+    DEFINE INPUT PARAMETER P_Periodo AS INTEGER.
+    DEFINE INPUT PARAMETER P_Tasa AS DECIMAL FORMAT ">>9.9999999".
+    DEFINE OUTPUT PARAMETER P_Resultado AS DECIMAL FORMAT ">>>,>>>,>>>,>>9" INITIAL 0.
+
+    IF P_Plazo > 0 THEN
+        P_Resultado = (P_VP / P_Plazo) + ((P_Vp * P_Tasa) * (1 - ((P_Periodo - 1) / P_Plazo))).
+
+END PROCEDURE.
+
+
+
+PROCEDURE HCCF:
+    /************  HALLAR CAPITAL DE UN PERIODO CON CUOTA FIJA **************
+    FORMULA : RESULTADO = (Cuota - I) * ((1 + i)^(PERIODO - 1))
+    *************************************************************************/
+    DEFINE INPUT PARAMETER P_VP AS DECIMAL FORMAT "->>>,>>>,>>>,>>9.99".
+    DEFINE INPUT PARAMETER P_Cuota AS DECIMAL FORMAT "->>>,>>>,>>>,>>9.99".
+    DEFINE INPUT PARAMETER P_Periodo AS INTEGER.
+    DEFINE INPUT PARAMETER P_Tasa AS DECIMAL FORMAT ">>9.9999999".
+    DEFINE OUTPUT PARAMETER P_Resultado AS DECIMAL FORMAT ">>>,>>>,>>>,>>9.99" INITIAL 0.
+
+    IF P_Periodo = 1 THEN
+        P_Resultado = P_Cuota - (P_VP * P_Tasa).
+    ELSE
+        P_Resultado = (P_Cuota - (P_VP * P_Tasa)) * EXP(1 + P_Tasa,P_Periodo - 1).
+
+END PROCEDURE.
+
+
+
+PROCEDURE HallarTasPer:
+    /******************* HALLAR LA TASA PERIODICA  **************************
+    Devuelve la tasa Periodica apartir de la efectiva anual.
+    *************************************************************************/
+    DEFINE INPUT PARAMETER P_PerDed AS INTEGER.
+    DEFINE INPUT PARAMETER P_TasEfe AS DECIMAL.
+    DEFINE INPUT PARAMETER P_TipInt AS DECIMAL.
+    DEFINE OUTPUT PARAMETER P_TasaPer AS DECIMAL FORMAT ">>9.999999999".
+
+    CASE P_Perded:
+        WHEN 0 THEN /* 0 - Diario        */ RUN TasaPerNom (INPUT 360,INPUT P_TasEfe,INPUT P_TipInt,OUTPUT P_TasaPer).
+        WHEN 1 THEN /* 1 - Semanal       */ RUN TasaPerNom (INPUT 52,INPUT P_TasEfe,INPUT P_TipInt,OUTPUT P_TasaPer).
+        WHEN 2 THEN /* 2 - Decadal       */ RUN TasaPerNom (INPUT 36,INPUT P_TasEfe,INPUT P_TipInt,OUTPUT P_TasaPer).
+        WHEN 3 THEN /* 3 - Quincenal     */ RUN TasaPerNom (INPUT 24,INPUT P_TasEfe,INPUT P_TipInt,OUTPUT P_TasaPer).
+        WHEN 4 THEN /* 4 - Mensual       */ RUN TasaPerNom (INPUT 12,INPUT P_TasEfe,INPUT P_TipInt,OUTPUT P_TasaPer).
+        WHEN 5 THEN /* 5 - Bimensual     */ RUN TasaPerNom (INPUT 6,INPUT P_TasEfe,INPUT P_TipInt,OUTPUT P_TasaPer).
+        WHEN 6 THEN /* 6 - Trimestral    */ RUN TasaPerNom (INPUT 4,INPUT P_TasEfe,INPUT P_TipInt,OUTPUT P_TasaPer).
+        WHEN 7 THEN /* 7 - Cuatrimestral */ RUN TasaPerNom (INPUT 3,INPUT P_TasEfe,INPUT P_TipInt,OUTPUT P_TasaPer).
+        WHEN 8 THEN /* 8 - Semestral     */ RUN TasaPerNom (INPUT 2,INPUT P_TasEfe,INPUT P_TipInt,OUTPUT P_TasaPer).
+        WHEN 9 THEN /* 9 - Anual         */ RUN TasaPerNom (INPUT 1,INPUT P_TasEfe,INPUT P_TipInt,OUTPUT P_TasaPer).
+    END CASE.
+
+END PROCEDURE.
+
+
+PROCEDURE HallarPeriodo:
+    /******************* HALLAR LA TASA PERIODICA  **************************
+    Devuelve la tasa Periodica apartir de la efectiva anual.
+    *************************************************************************/
+    DEFINE INPUT PARAMETER P_PerPag AS INTEGER.
+    DEFINE INPUT PARAMETER P_Plazo AS INTEGER.
+    DEFINE OUTPUT PARAMETER P_NroDias AS INTEGER.
+    DEFINE OUTPUT PARAMETER P_NMeses AS INTEGER.
+    DEFINE OUTPUT PARAMETER P_NroPer AS INTEGER.
+    DEFINE OUTPUT PARAMETER P_NomPer AS CHARACTER FORMAT "X(15)".
+
+    CASE P_PerPag:
+        WHEN 0 THEN
+            ASSIGN P_NomPer = "Diario"
+                   P_NroDias = 1
+                   P_NMeses = P_Plazo / 30
+                   P_NroPer = 360.
+
+        WHEN 1 THEN
+            ASSIGN P_NomPer = "Semanal"
+                   P_NroDias = 7
+                   P_NMeses = P_Plazo / 4
+                   P_NroPer = 52.
+
+        WHEN 2 THEN
+            ASSIGN P_NomPer = "Decadal"
+                   P_NMeses = P_Plazo / 3
+                   P_NroDias = 10
+                   P_NroPer = 36.
+
+        WHEN 3 THEN
+            ASSIGN P_NomPer = "Quincenal"
+                   P_NroDias = 15
+                   P_NMeses = P_Plazo / 2
+                   P_NroPer = 24.
+
+        WHEN 4 THEN
+            ASSIGN P_NomPer = "Mensual"
+                   P_NroDias = 30
+                   P_NMeses = P_Plazo
+                   P_NroPer = 12.
+
+        WHEN 5 THEN
+            ASSIGN P_NomPer = "Bimensual"
+                   P_NroDias = 60
+                   P_NMeses = P_Plazo * 2
+                   P_NroPer = 6.
+
+        WHEN 6 THEN
+            ASSIGN P_NomPer = "Trimestral"
+                   P_NroDias = 90
+                   P_NMeses = P_Plazo * 3
+                   P_NroPer = 4.
+
+        WHEN 7 THEN
+            ASSIGN P_NomPer = "Cuamestral"
+                   P_NroDias = 120
+                   P_NMeses = P_Plazo * 4
+                   P_NroPer = 3.
+
+        WHEN 8 THEN
+            ASSIGN P_NomPer = "Semestral"
+                   P_NroDias = 180
+                   P_NMeses = P_Plazo * 6
+                   P_NroPer = 2.
+
+        WHEN 9 THEN
+            ASSIGN P_NomPer = "Anual"
+                   P_NroDias = 360
+                   P_NMeses = P_Plazo * 12
+                   P_NroPer = 1.
+    END CASE.
+
+END PROCEDURE.
+
+
+
+PROCEDURE HCPIA:
+    /***** HALLA LAS CUOTAS PERIODICAS CONSTANTES CON INCREMENTO ANUAL ******
+    *************************************************************************/
+    DEFINE INPUT PARAMETER P_Pv AS DECIMAL FORMAT "->>>,>>>,>>>,>>9".
+    DEFINE INPUT PARAMETER P_TasPer AS DECIMAL FORMAT ">>9.999999".
+    DEFINE INPUT PARAMETER P_TasAnu AS DECIMAL FORMAT ">>9,999999".
+    DEFINE INPUT PARAMETER P_Periodo AS INTEGER.
+    DEFINE INPUT PARAMETER P_PerAno AS INTEGER.
+    DEFINE INPUT PARAMETER P_Razon AS DECIMAL FORMAT "->,9999".
+    DEFINE OUTPUT PARAMETER P_Resultado AS DECIMAL FORMAT "->>>,>>>,>>>,>>9" INITIAL 0.
+
+    P_Resultado = P_Pv / (((1 - (1 / EXP(1 + P_TasPer,P_PerAno))) / P_TasPer) * ((EXP(P_Razon,P_Periodo) * (1 / EXP(1 + P_TasAnu,P_Periodo))) - 1) / ((P_Razon * (1 / (1 + P_TasAnu))) - 1)).
+
+END PROCEDURE.
+
+
+PROCEDURE HICPA:
+    /**********  HALLA EL INTERES DE LA CUOTA CON INCREMENTO PERIODICO **************
+    ********************************************************************************/
+    DEFINE INPUT PARAMETER P_Pv AS DECIMAL FORMAT "->>>,>>>,>>>,>>9".
+    DEFINE INPUT PARAMETER P_Anos AS INTEGER.
+    DEFINE INPUT PARAMETER P_Periodos AS INTEGER.
+    DEFINE INPUT PARAMETER P_Razon AS DECIMAL FORMAT "->,9999".
+    DEFINE INPUT  PARAMETER P_Cuota AS DECIMAL FORMAT "->>>,>>>,>>>,>>9".
+    DEFINE OUTPUT PARAMETER P_Resultado AS DECIMAL FORMAT "->>>,>>>,>>>,>>9.99" INITIAL 0.
+
+    P_Resultado = P_Periodos * (P_Cuota * ((EXP(P_Razon,P_Anos) - 1) / (P_Razon - 1))) - P_Pv.
+
+END PROCEDURE.
+
+
+
+PROCEDURE HCFA:
+    /***********************HALLA LA CUOTA FIJA ANTICIPADA************************
+    Hallar la tasa Nominal anticipadad.
+    FORMULA  : Interes Anticipado = [1 - ((1 / (TASA EFECTIVA + 1))^(1/PERIODOS))]
+    *********************************************************************************/
+    DEFINE INPUT PARAMETER P_VP AS DECIMAL FORMAT "->>>,>>>,>>>,>>9".
+    DEFINE INPUT PARAMETER P_Tasa AS DECIMAL FORMAT ">>9.9999999" INITIAL 0.
+    DEFINE INPUT PARAMETER P_periodos AS INTEGER.
+    DEFINE OUTPUT PARAMETER P_Resultado AS DECIMAL FORMAT ">>>,>>>,>>>,>>9.99".
+
+    P_Resultado = (P_VP * P_Tasa) / ((P_Tasa + 1) - (1 / EXP(1 + P_Tasa,P_Periodos - 1))).
+
+END PROCEDURE.
+
+
+
+PROCEDURE HMCFA:
+    /*********************** HALLA EL MONTO DE CUOTA FIJA ANTICIPADA ********************
+    *********************************************************************************/
+    DEFINE INPUT PARAMETER P_Cuota AS DECIMAL FORMAT "->>>,>>>,>>>,>>9".
+    DEFINE INPUT PARAMETER P_Tasa AS DECIMAL FORMAT ">>9.999999" INITIAL 0.
+    DEFINE INPUT PARAMETER P_periodos AS INTEGER.
+    DEFINE OUTPUT PARAMETER P_Resultado AS DECIMAL FORMAT "->>>,>>>,>>>,>>9.99".
+
+    P_Resultado = (P_Cuota * (P_Tasa + 1 - (1 / EXP(1 + P_Tasa,P_Periodos - 1)))) / P_Tasa.
+END PROCEDURE.
+
+
+PROCEDURE HNCFA:
+    /*******  HALLA EL PLAZO DE UN CREDITO CON CUOTA FIJA ANTICIPADA ************************
+    DESCRIPCION : Devuelve el plazo de un credito dado la cuota, interes y el valor presente.
+    ****************************************************************************************/
+    DEFINE INPUT PARAMETER P_VP AS DECIMAL FORMAT "->>>,>>>,>>>,>>9".
+    DEFINE INPUT PARAMETER P_Cuota AS DECIMAL FORMAT "->>>,>>>,>>>,>>9".
+    DEFINE INPUT PARAMETER P_Tasa AS DECIMAL FORMAT ">>9.9999999".
+    DEFINE OUTPUT PARAMETER P_Resultado AS INTEGER INITIAL 0.
+
+    P_Resultado = -1 * (LOG(1 + P_Tasa - ((P_Vp * P_Tasa) / P_cuota)) / LOG(1 + P_Tasa) - 1).
+
+END PROCEDURE.
+
+
+
+PROCEDURE HNCUA:
+    /*******  HALLA EL PLAZO DE UN CREDITO CON CUOTA UNICA ANTICIPADA ***********************
+    DESCRIPCION : Devuelve el plazo de un credito dado la cuota, interes y el valor presente.
+    ****************************************************************************************/
+    DEFINE INPUT PARAMETER P_VP AS DECIMAL FORMAT "->>>,>>>,>>>,>>9".
+    DEFINE INPUT PARAMETER P_Interes AS DECIMAL FORMAT "->>>,>>>,>>>,>>9".
+    DEFINE INPUT PARAMETER P_Tasa AS DECIMAL FORMAT ">>9.9999999".
+    DEFINE OUTPUT PARAMETER P_Resultado AS INTEGER INITIAL 0.
+
+    P_Resultado = LOG(1 / (1 + P_Tasa)) / LOG(1 - (P_Interes / P_VP)).
+
+END PROCEDURE.
+
+
+
+/****************************************/
+/* Busca el saldo proyectado y la mora. */
+/****************************************/
+PROCEDURE HSP:
+    DEFINE INPUT PARAMETER W_fec AS DATE NO-UNDO.
+    DEFINE INPUT PARAMETER salant AS DECIMAL NO-UNDO.
+    DEFINE INPUT parameter wcuo AS DECIMAL NO-UNDO.
+    DEFINE INPUT PARAMETER wsalfin AS DECIMAL NO-UNDO.
+    DEFINE INPUT PARAMETER wtas AS DECIMAL NO-UNDO.
+    DEFINE INPUT PARAMETER Wpla AS INTEGER NO-UNDO.
+    DEFINE INPUT PARAMETER Kpital AS DECIMAL NO-UNDO.
+    DEFINE OUTPUT PARAMETER P_Proyectado AS DECIMAL FORMAT "->>>,>>>,>>>,>>9" INITIAL 0 NO-UNDO.
+    DEFINE OUTPUT PARAMETER P_Atraso AS DECIMAL FORMAT "->>>,>>>,>>>,>>9" INITIAL 0 NO-UNDO.
+    DEFINE OUTPUT PARAMETER P_FecProy AS DATE NO-UNDO.
+    DEFINE OUTPUT PARAMETER P_Ubicacion AS DATE NO-UNDO.
+    DEFINE OUTPUT PARAMETER P_DiasAtraso AS DECIMAL FORMAT "->>>,>>>,>>>,>>9" INITIAL 0 NO-UNDO.
+
+    DEFINE VAR wint AS DECIMAL NO-UNDO.
+    DEFINE VAR wcap AS DECIMAL NO-UNDO.
+    DEFINE VAR w_pertra AS INTEGER NO-UNDO. 
+    DEFINE VAR fecuo AS DATE NO-UNDO.
+    DEFINE VAR wdia AS INTEGER NO-UNDO.
+    DEFINE VAR wmes AS INTEGER NO-UNDO. 
+    DEFINE VAR wano AS INTEGER NO-UNDO.
+    DEFINE VAR fecubi AS DATE NO-UNDO.
+    DEFINE VAR wmesant AS DATE NO-UNDO.
+    DEFINE VAR wdianormal AS INTEGER NO-UNDO.
+    DEFINE VAR NroProc AS INTEGER INITIAL 0 NO-UNDO.
+    DEFINE VAR NroProc1 AS INTEGER INITIAL 0 NO-UNDO.
+    DEFINE VAR NroProc2 AS INTEGER INITIAL 0 NO-UNDO.
+
+    /* Para compenzar la baja de interés e impacto en plan pagos. */
+    IF W_fec < DATE(07,1,2009) THEN
+        W_fec = w_fec + 45.
+    /*************/
+
+    fecuo  = w_fec. 
+
+    ASSIGN wmesant = TODAY - 30.
+    
+    ASSIGN wdia = DAY(FECUO)
+           Wmes = MONTH(fecuo)
+           wano = YEAR(fecuo).
+
+    IF wdia EQ 31 THEN
+        wdia = 30.
+
+    wdianormal = wdia.
+    fecubi = fecuo.
+
+    DO W_PerTra = 0 TO wpla BY 1:
+        IF fecuo lt wmesant OR nroproc NE 0 THEN do:
+            ASSIGN Wint = wsalfin * wtas / 1200
+                   wcap = wcuo - wint
+                   salant = wsalfin.
+
+            wsalfin = salant - wcap.
+        END.
+
+        wmes = wmes + 1.
+
+        IF wmes GT 12 THEN
+            ASSIGN wmes = 1
+                   wano = wano + 1.
+
+        IF wmes = 2 AND wdia GT 28 THEN
+            wdia = 28.
+        ELSE
+            wdia = wdianormal.
+
+        fecuo = DATE(wmes,wdia,wano).
+
+        /* Calcula proyectado */
+        IF fecuo GE wmesant THEN DO: /*arregla proyectado */
+            IF NroProc1 = 0 THEN DO:
+                P_fecProy = fecuo.
+                P_proyectado = wsalfin.
+                P_atraso = kpital - P_proyectado.
+                NroProc1 = 1.
+                Nroproc = NroProc + 1.
+            END.
+        END.
+
+        /* calcula propago  y proyectado*/
+        IF wsalfin LE Kpital THEN do:
+            IF NroProc2 = 0 THEN DO:
+                fecubi = fecuo.
+                P_Ubicacion = fecubi.
+                P_diasAtraso = TODAY - fecubi.
+                NroProc2 = 1.
+                Nroproc = NroProc + 1.
+            END.
+        END.
+
+        IF fecuo LT wmesant AND W_PerTra EQ wpla AND Nroproc1 = 0 THEN DO:
+            nroproc1 = 1.
+            nroProc = Nroproc + 1.
+        END.
+
+        IF kpital LE 0 THEN do:
+            w_pertra = wpla + 1.
+            nroproc = 2.
+        END.
+
+        IF NroProc = 2 THEN DO:  /* termina ciclo encontro 2 procesos. */
+            ASSIGN W_pertra = wpla + 1
+                   P_diasAtraso = TODAY - P_ubicacion
+                   P_atraso = kpital - P_proyectado.
+
+            /* 1. Por convenio o reglamento */
+            IF p_atraso LE 10000 THEN p_atraso = 0.
+            /********/
+
+            /* 2. Periodo de gracia empresa siempre */
+            p_diasAtraso = p_diasatraso - 20.
+            /********/
+
+            /* 3. margen para cubrir pagos de nomina mal aplicados*/
+            if p_atraso LE (wcuo * 0.50)  AND p_atraso GT 0 THEN
+                p_diasAtraso = 0.
+
+            IF p_diasAtraso LE 0 THEN
+                ASSIGN p_diasAtraso = 0
+                       p_atraso = 0.
+
+            IF p_atraso LE 0 THEN
+                ASSIGN p_diasAtraso = 0
+                       p_atraso = 0.
+
+            IF kpital LE 0 THEN
+                ASSIGN p_diasAtraso = 0
+                       p_atraso = 0.
+
+            IF p_proyectado LT 0 THEN
+                p_proyectado = 0.
+        END.
+    END.
+END.
+
+
+
+/************************************** HALLA CAPITAL MORA **********************************************************/
+PROCEDURE HSM:
+    DEFINE INPUT PARAMETER W_fec AS DATE NO-UNDO.       /* Fecha 1er Pago */
+    DEFINE INPUT parameter wcuo AS DECIMAL NO-UNDO.     /* Cuota */
+    DEFINE INPUT PARAMETER wtas AS DECIMAL NO-UNDO.     /* Tasa */
+    DEFINE INPUT PARAMETER Wpla AS DECIMAL NO-UNDO.     /* Plazo */
+    DEFINE INPUT PARAMETER WFrec AS INTEGER NO-UNDO.     /* Frecuencia de pago creditos.Per_Pago*/
+    DEFINE OUTPUT PARAMETER P_Proyectado AS DECIMAL FORMAT "->>>,>>>,>>>,>>9" INITIAL 0 NO-UNDO.
+
+    DEFINE VARIABLE WPeriodoTrans AS INTEGER NO-UNDO.
+
+    WPeriodoTrans = TRUNCATE((TODAY - w_fec) / wfrec, 0).
+    P_Proyectado = wcuo * (( exp((1 + wtas),(wpla - WPeriodoTrans)) - 1) / (wtas * exp ((1 + wtas),(wpla - WPeriodoTrans)))).
+END.

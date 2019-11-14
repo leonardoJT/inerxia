@@ -1,0 +1,8 @@
+/*-----------------------------------------------
+ File : Tercero_Nvo.P 
+ Programa : Ejecuta programa W-Tercero_Nvo.W
+--------------------------------------------------*/
+
+  DEFI VAR W_CedNit LIKE Clientes.Nit.
+
+  RUN W-Tercero_Nvo.R (INPUT-OUTPUT W_CedNit).

@@ -1,0 +1,1064 @@
+/*--------------------------------------------------------------------------
+ Programa creado por JOHN J. MONCADA PUERTA
+ Formatos globales: ACTUALIZADO EL 28 DE octubre DE 2005
+ 1.CDAT    2.NOTAMULTIPLE  3.TAC  4.COMPROBANTE EGRESO
+---------------------------------------------------------------------------*/                  
+{INCLUIDO\VARIABLE.I " shared"}
+DEFINE INPUT  PARAMETER P_Formato   AS CHARACTER FORMAT "X(10)".
+DEFINE INPUT  PARAMETER W_RowId     AS ROWID.
+DEFINE INPUT  PARAMETER W_ArcSalida AS CHARACTER FORMAT "X(30)".
+DEFINE INPUT  PARAMETER W_TasaEfe   AS DECIMAL.
+DEFINE INPUT  PARAMETER W_Desc      AS CHARACTER FORMAT "X(300)".
+DEFINE INPUT  PARAMETER W_SecImp    AS INTEGER FORMAT "9999999".
+DEFINE INPUT  PARAMETER W_transac   AS INTEGER.
+
+DEFINE VAR w_cpr     LIKE Mov_Contable.Comprobante.
+DEFINE VAR w_Ndcto   LIKE Mov_Contable.Num_Documento.
+DEFINE VAR w_Fec     LIKE Mov_Contable.Fec_Contable.
+DEFINE VAR w_usr     LIKE Mov_Contable.Usuario.
+DEFINE VAR w_nomnota AS CHARACTER FORMAT "X(20)".
+DEFINE VAR W_age     LIKE agencias.agencia.
+DEFINE VAR W_Municipio  AS CHARACTER FORMAT "X(35)" INITIAL "".
+
+
+DEFINE VAR wtipo        AS CHARACTER FORMAT "X(15)"  INITIAL "".
+DEFINE VAR wnombre      AS CHARACTER FORMAT "X(40)"  INITIAL "".
+DEFINE VAR Wtipoide     AS CHARACTER FORMAT "X(3)"   INITIAL "".
+DEFINE VAR Wnit         AS CHARACTER FORMAT "X(15)"  INITIAL "".
+DEFINE VAR wdir         AS CHARACTER FORMAT "X(70)"  INITIAL "".
+DEFINE VAR wtelres      AS CHARACTER FORMAT "X(30)"  INITIAL "".
+DEFINE VAR W_condicion  AS CHARACTER FORMAT "X(300)" INITIAL "".
+DEFINE VAR wdircom      AS CHARACTER FORMAT "x(70)"  INITIAL "".
+DEFINE VAR wtelcom      AS CHARACTER FORMAT "X(25)"  INITIAL "".
+DEFINE VAR zconteo      AS INTEGER INITIAL 1.
+DEFINE VAR W_SWNIT      AS LOGICAL   INITIAL FALSE.
+
+DEFI TEMP-TABLE salidaImp
+     FIELD detalle AS CHARACTER FORMAT "x(172)".
+
+CASE TRIM(P_Formato):
+    WHEN 'CDAT'     THEN RUN cdat.
+    WHEN 'NOTAMULT' THEN RUN notamultiple.
+    WHEN 'TAC'      THEN RUN TAC.
+    WHEN 'REGFIRMA' THEN RUN Reg_Firma.
+    WHEN 'NOTA2MUL' THEN 
+    DO:
+      FIND Mov_Contable WHERE ROWID(Mov_Contable) EQ W_RowId NO-LOCK NO-ERROR.
+      IF NOT AVAIL(Mov_Contable) THEN 
+      DO:
+        MESSAGE "El Apuntador del Reg-.Contable Inexistente...No hay Impresión." VIEW-AS ALERT-BOX INFO BUTTONS OK.
+        RETURN.
+      END.
+      ELSE 
+      DO:
+        ASSIGN w_cpr    = Mov_Contable.Comprobante
+               w_Ndcto  = Mov_Contable.Num_Documento 
+               w_Fec    = Mov_Contable.Fec_Contable  
+               w_usr    = Mov_Contable.Usuario
+               W_SecImp = Mov_Contable.Num_Documento
+               w_age    = Mov_Contable.Agencia.
+
+        FIND comprobantes WHERE comprobantes.agencia     EQ mov_contable.agencia AND
+                                comprobantes.comprobante EQ mov_contable.comprobante NO-LOCK NO-ERROR.
+        IF AVAILABLE(Comprobantes) THEN
+        DO: 
+          /*IF UPPER(trim(comprobantes.nombre)) BEGINS "NOTA" THEN*/
+          IF  trim(UPPER(comprobantes.nombre)) = "AJUSTE" THEN
+             W_Nomnota = "NOTA " + TRIM(UPPER(comprobantes.nombre)).
+          ELSE
+             W_Nomnota = TRIM(UPPER(comprobantes.nombre)).
+          /*ELSE
+            W_Nomnota = 'NOTA ' + TRIM(UPPER(comprobantes.nombre)).*/
+        END.
+        RUN nota2multiple.
+      END.
+    END.
+END.
+
+PROCEDURE cdat.
+  FIND ahorros WHERE ROWID(ahorros) EQ W_RowId NO-LOCK NO-ERROR.
+  DEFINE VAR W_Conjuncion AS CHARACTER FORMAT "X(1)".
+  DEFINE VAR W_VlrLetras  AS CHARACTER FORMAT "X(256)" INITIAL "".
+  DEFINE VAR W_VlrLetra1  AS CHARACTER FORMAT "X(70)" INITIAL "".
+  DEFINE VAR W_VlrLetra2  AS CHARACTER FORMAT "X(70)" INITIAL "".
+  DEFINE VAR W_VlrLetra3  AS CHARACTER FORMAT "X(70)" INITIAL "".
+  DEFINE VAR W_NomAgencia AS CHARACTER FORMAT "X(35)" INITIAL "".
+  DEFINE VAR W_Cadena     AS CHARACTER FORMAT "X(70)" INITIAL "".
+
+  RUN MontoEsc.r (INPUT round(Ahorros.sdo_disponible,0),INPUT 0,OUTPUT W_VlrLetras).
+  RUN PartirValor IN W_Manija (INPUT W_VlrLetras,INPUT 60,OUTPUT W_VlrLetra1,OUTPUT W_VlrLetra2,OUTPUT W_VlrLetra3). 
+  OUTPUT TO VALUE(W_ArcSalida).
+  
+
+  PUT "InIcIo" SKIP(1).
+  PUT "@p01 " ahorros.cue_ahorro                                SKIP(0).
+  W_Cadena = "@p02 " + TRIM(STRING(ahorros.sdo_disponible,">,>>>,>>>,>>9")).
+  PUT W_Cadena SKIP(0).
+  W_Cadena = "@d05 " + CAPS(TRIM(W_VlrLetra1)).
+  PUT W_Cadena   SKIP(0).
+  IF W_VlrLetra2 <> " " THEN DO:
+     W_Cadena = "@d05 " + CAPS(TRIM(W_VlrLetra2)).
+     PUT W_Cadena SKIP(0).
+  END.
+  IF W_VlrLetra3 <> " " THEN DO:
+     W_Cadena = "@d05 " + CAPS(TRIM(W_VlrLetra3)).
+     PUT W_Cadena SKIP(0). 
+  END.
+  IF ahorros.conjuncion THEN
+     W_Conjuncion = 'y'.
+  ELSE
+     W_Conjuncion = 'o'.
+  
+  FIND agencias WHERE agencias.Agencia EQ w_agencia NO-LOCK NO-ERROR.
+  IF AVAILABLE(agencias) THEN DO:
+     ASSIGN W_NomAgencia = "@p12 " + CAPS(TRIM(agencias.nombre))
+            W_Municipio  = TRIM(agencias.ciudad).
+     FIND FIRST ubicacion WHERE SUBSTR(ubicacion,1,5) EQ SUBSTR(W_Municipio,1,5) NO-LOCK NO-ERROR.
+     IF AVAILABLE(ubicacion) THEN
+        ASSIGN W_Municipio = "@p11 " + CAPS(TRIM(Ubicacion.nombre)). 
+  END.
+  PUT "@p10 " Ahorros.cue_ahorro  SKIP(0).
+  PUT W_Municipio   SKIP(0).
+  PUT W_NomAgencia  SKIP(0).
+
+  FIND FIRST clientes WHERE clientes.nit EQ ahorros.nit NO-LOCK NO-ERROR.
+  IF AVAILABLE(clientes) THEN DO:
+      W_Cadena = "@co01 " + CAPS(TRIM(clientes.nombre)) + ' ' + CAPS(TRIM(clientes.apellido1)) + ' ' + CAPS(TRIM(clientes.apellido2)).
+      PUT W_Cadena skip(0).
+      W_Cadena = "@co02 " + Clientes.Nit.
+      PUT W_Cadena SKIP(0). 
+  END.
+
+  FOR EACH relaciones WHERE relaciones.Nit EQ  ahorros.Nit  AND 
+    relaciones.cuenta       EQ ahorros.cue_ahorro         AND
+    relaciones.estado       EQ 1                          AND       
+    relaciones.cod_producto EQ ahorros.cod_ahorro         NO-LOCK:
+    FOR EACH clientes WHERE clientes.nit EQ relaciones.nit_relacion NO-LOCK:
+       w_Cadena = "@co03 " + W_Conjuncion.
+           /*SUBSTR(TRIM(relaciones.descripcion),1,1).*/
+       PUT W_Cadena skip(0).
+       W_Cadena = "@co01 " + CAPS(TRIM(clientes.nombre)) + ' ' + CAPS(TRIM(clientes.apellido1)) + ' ' + CAPS(TRIM(clientes.apellido2)).
+       PUT W_Cadena skip(0).
+       W_Cadena = "@co02 " + Clientes.Nit.
+       PUT W_Cadena SKIP(0).
+    END.
+  END. 
+  FIND FIRST clientes WHERE clientes.nit EQ ahorros.nit NO-LOCK NO-ERROR.
+  w_Cadena = "@co03 .".
+  PUT W_Cadena skip(0).
+  
+  W_Cadena = "@p20 " + TRIM(STRING(ROUND(Ahorros.Tasa,2),">>9.99")) + "%" .
+  PUT W_Cadena SKIP(0).
+  IF per_liquidacion EQ 1 THEN
+      PUT "@p21 Diario" SKIP(0).
+  ELSE IF per_liquidacion EQ 2 THEN
+         PUT "@p21 Mensual" SKIP(0).
+       ELSE IF per_liquidacion EQ 3 THEN
+              PUT "@p21 Trimestral" SKIP(0).
+            ELSE IF per_liquidacion EQ 4 THEN
+                    PUT "@p21 Semestral" SKIP(0).
+                 ELSE IF per_liquidacion EQ 5 THEN
+                         PUT "@p21 Anual" SKIP(0).
+                     ELSE 
+                          PUT "@p21 Al Vencimiento" SKIP(0).
+ /* W_Cadena = "@p22 (" + TRIM(REPLACE(W_VlrLetra1,"Pesos ML","Dias")) */
+  ASSIGN W_VlrLetras  = "" W_VlrLetra1  = "" W_VlrLetra2  = "" W_VlrLetra3  = "".
+  RUN MontoEsc.r (INPUT Ahorros.Plazo,INPUT 0,OUTPUT W_VlrLetras).
+  W_Cadena = "@p22 " + TRIM(REPLACE(W_VlrLetras,'Pesos ML','')) + "(" + STRING(Ahorros.Plazo) + ") Dias" .
+  PUT W_Cadena SKIP(0).
+  W_Cadena = "@p23 " + STRING(ROUND(W_TasaEfe,2),">9.99") + "%".
+  PUT W_Cadena SKIP(0).
+  W_Cadena = ' '.
+  IF Ahorros.Des_Intereses EQ 1 THEN
+     ASSIGN W_Cadena = "@p24 Cuenta de Ahorros".
+  ELSE IF Ahorros.For_Pago EQ 2 THEN
+          W_Cadena = "@p24 Crèdito".
+       ELSE
+          W_Cadena = "@p24 Cuentas x Pagar".
+  PUT W_Cadena SKIP(0).
+  IF Ahorros.Cue_destino NE "" THEN
+     W_Cadena = "@p25 " + TRIM(Ahorros.Cue_Destino).
+  ELSE
+     W_Cadena = "@p25 .". 
+
+  PUT W_Cadena SKIP(0).
+  W_Cadena = "@p30 " + STRING(YEAR(ahorros.fec_apertura))    + " / " + STRING(MONTH(ahorros.fec_apertura))    + " / " + STRING(DAY(ahorros.fec_apertura)) .
+  PUT W_Cadena SKIP(0).
+  W_Cadena = "@p31 " + STRING(YEAR(ahorros.Fec_Vencimiento)) + " / " + STRING(MONTH(Ahorros.Fec_Vencimiento)) + " / " + STRING(DAY(Ahorros.fec_Vencimiento)) .
+  PUT W_Cadena SKIP(1).
+  W_Cadena = "@p40 " + TRIM(STRING(ahorros.sdo_disponible)).
+  PUT W_Cadena SKIP(1).
+  PUT "FinDeDocumento" SKIP(0).
+  OUTPUT CLOSE.
+  RUN Imp_Formato.
+END PROCEDURE.
+
+/* ******************* */
+PROCEDURE notamultiple.
+/* ******************* */
+    DEFINE VAR W_NomAgencia AS CHARACTER FORMAT "X(35)" INITIAL "".
+    DEFINE VAR W_Direccion  AS CHARACTER FORMAT "X(50)" INITIAL "".
+    DEFINE VAR W_Telefono   AS CHARACTER FORMAT "X(20)" INITIAL "".
+    DEFINE VAR W_Cadena     AS CHARACTER FORMAT "X(70)" INITIAL "".
+    
+    DEFINE VAR W_NomPcto          AS   CHARACTER FORMAT "X(15)".
+    DEFINE VAR W_NitEnti          LIKE Clientes.Nit.
+    DEFINE VAR W_ConcatEnti       AS   CHARACTER FORMAT "X(57)".
+    DEFINE VAR W_TvrCheque        AS   DECIMAL   FORMAT ">>,>>>,>>>,>>9.99".
+    DEFINE VAR W_TvrEfec          AS   DECIMAL   FORMAT ">>,>>>,>>>,>>9.99".
+    DEFINE VAR W_DescOpe          AS   CHARACTER FORMAT "X(40)".
+    DEFINE VAR W_VrOpera          AS   DECIMAL   FORMAT ">>,>>>,>>>,>>>.99".
+    DEFINE VAR W_VrConsig         AS   DECIMAL   FORMAT ">>,>>>,>>>,>>>.99".
+    DEFINE VAR W_VrRetiro         AS   DECIMAL   FORMAT ">>,>>>,>>>,>>>.99".
+    DEFINE VAR W_PrimerCom        AS   CHARACTER FORMAT "X(100)" INITIAL "".
+    DEFINE VAR W_Comentario       AS   CHARACTER FORMAT "X(100)" INITIAL "".
+    DEFINE VAR W_Nomofi           AS   CHARACTER FORMAT "X(30)".
+    DEFINE VAR W_NomCli           AS   CHARACTER FORMAT "X(30)".
+    DEFINE VAR W_totopera         AS   DECIMAL   FORMAT ">>,>>>,>>>,>>>.99".
+    DEFINE VAR Total_Debito       LIKE Mov_Contable.db.
+    DEFINE VAR Total_Credito      LIKE Mov_Contable.db.
+
+    W_ArcSalida = "C:\temp\nota" + TRIM(W_Usuario) + ".txt".
+    FIND FIRST Taquilla WHERE Taquilla.Nro_Transaccion EQ W_SecImp
+                      NO-LOCK NO-ERROR.
+    IF NOT AVAILABLE(Taquilla) THEN DO:
+       MESSAGE "No se encuentra en taquilla el documento que desea imprimir."
+         VIEW-AS ALERT-BOX TITLE "Validación.(Formatos.p)".
+       RETURN.
+      END.
+
+    OUTPUT TO VALUE(W_ArcSalida).
+    PUT "InIcIo" SKIP(1).
+
+    FIND Agencias WHERE Agencia.agencia = Taquilla.agencia NO-LOCK NO-ERROR.
+    IF AVAILABLE(agencias) THEN DO:
+
+       ASSIGN W_NomAgencia = "@d01 " + TRIM(CAPS(agencias.nombre))  + " - " + STRING(Agencia.Agencia,"999")
+              W_Municipio  =  TRIM(agencias.ciudad)
+              W_Direccion  = "@d01 " + TRIM(agencias.direccion)
+              W_Telefono   = "@d01 Tel: " + TRIM(agencias.telefono).
+       FIND FIRST ubicacion WHERE SUBSTR(ubicacion,1,5) EQ SUBSTR(W_Municipio,1,5) NO-LOCK NO-ERROR.
+       IF AVAILABLE(ubicacion) THEN
+          ASSIGN W_Municipio = "@d01 " + CAPS(TRIM(Ubicacion.nombre)) + " - COLOMBIA". 
+    END.
+    PUT W_NomAgencia  SKIP(0).
+    PUT W_Direccion   SKIP(0).
+    PUT W_Telefono    SKIP(0).
+    PUT W_Municipio   SKIP(1).
+
+    PUT "@p02 NOTA MULTIPLE" SKIP(0).
+    PUT "@p03 " W_SecImp     SKIP(1).
+
+    IF W_Desc NE " " THEN DO:
+       W_cadena = "@d05 " + SUBSTRING(W_Desc,1,53). 
+       PUT W_Cadena SKIP(0).
+       IF SUBSTRING(W_Desc,54,17) NE " " THEN DO:
+         W_Cadena = "@d05 " + SUBSTRING(W_Desc,54,17).
+         PUT W_Cadena SKIP(1).
+       END.
+
+    END.
+    ELSE
+    DO:
+       W_Cadena = "@d05 NOTA MULTIPLE " + string(W_SecImp,"9999999").
+       PUT W_Cadena SKIP(0).
+    END.
+
+    W_Cadena = "@p06 " + STRING(DAY(Taquilla.Fec_Transaccion),"99") + "/" + STRING(MONTH(Taquilla.Fec_Transaccion),"99") + "/" + STRING(YEAR(Taquilla.Fec_Transaccion),"9999").
+    PUT W_Cadena SKIP(0).
+    W_Cadena = "@p07 " + STRING(TIME,"HH:MM:SS").
+    PUT W_cadena SKIP(0).
+    W_Cadena = "@p08 " + TRIM(Taquilla.usuario).
+    PUT W_cadena SKIP(0).
+
+    /*
+    W_Cadena = "@p08 " + TRIM(W_Usuario) + "/" + TRIM(W_Usuario).
+    PUT W_Cadena SKIP(1).
+    W_Cadena = "@p09 TAQUILLA" . 
+    PUT W_Cadena SKIP(1).
+    */
+    W_Cadena = "@p10 " + TRIM(Taquilla.Nro_cuenta).
+    PUT W_Cadena SKIP(1).
+
+    FOR EACH Taquilla WHERE Taquilla.Nro_Transaccion EQ W_SecImp
+         NO-LOCK
+                      BREAK BY Taquilla.Nro_Transaccion:
+        IF FIRST-OF(Taquilla.Nro_Transaccion) THEN DO:      
+           FIND Operacion WHERE Operacion.Cod_Operacion EQ Taquilla.Cod_Operacion
+                        NO-LOCK NO-ERROR.
+           IF AVAILABLE(Operacion) THEN
+             W_DescOpe = Operacion.Nom_Operacion.
+           ELSE
+             W_DescOpe = "Operación no Existe".
+           W_PrimerCom = TRIM(W_PrimerCom).
+         END.
+
+         IF Taquilla.Tip_Producto = 1 THEN DO:  /* Ahorros */
+           FIND Pro_ahorros WHERE Pro_Ahorros.Cod_Ahorro EQ Taquilla.Cod_Producto
+                              NO-LOCK NO-ERROR.
+           W_NomPcto = "".
+           IF AVAILABLE(Pro_Ahorros) THEN 
+             W_NomPcto = TRIM(Pro_Ahorros.Nom_Producto).
+
+           IF Taquilla.Naturaleza = "DB" THEN DO:  /* Es un Retiro */
+             ASSIGN w_VrOpera = 0.
+             IF Taquilla.Val_Cheque GT 0 THEN 
+               ASSIGN w_VrOpera = Taquilla.Val_Cheque
+                      W_TVrCheque = W_TVrCheque + Taquilla.Val_Cheque.
+             ELSE
+               ASSIGN w_VrOpera = Taquilla.Val_Efectivo
+                      W_TvrEfec  = W_TvrEfec + Taquilla.Val_Efectivo.
+             Total_Credito  = Total_Credito + w_VrOpera.
+           END.
+           ELSE DO:
+             IF Taquilla.Naturaleza = "CR" THEN DO:  /* Es una Consignacion */
+               ASSIGN w_VrOpera = 0.
+               IF Taquilla.Val_Cheque GT 0 THEN 
+                 ASSIGN w_VrOpera = Taquilla.Val_Cheque
+                        W_TVrCheque = W_TVrCheque + Taquilla.Val_Cheque.
+               ELSE
+                 ASSIGN w_VrOpera = Taquilla.Val_Efectivo
+                        W_TvrEfec  = W_TvrEfec + Taquilla.Val_Efectivo.
+               Total_Debito = Total_Debito + w_VrOpera.
+             END.
+           END.
+         END.
+         ELSE DO:
+           IF Taquilla.Tip_Producto = 2 OR Taquilla.Tip_Producto = 4 THEN DO:  /* Credito y Especiales */
+             IF Taquilla.Tip_Producto = 2 THEN DO:
+               FIND Pro_Creditos WHERE Pro_Creditos.Cod_Credito EQ Taquilla.Cod_Producto
+                                   NO-LOCK NO-ERROR.
+               W_NomPcto = "".
+               IF AVAILABLE(Pro_Creditos) THEN 
+                 W_NomPcto = TRIM(Pro_Creditos.Nom_Producto).
+             END.
+             ELSE DO:
+               FIND Pro_Especiales WHERE Pro_Especiales.Cod_Producto EQ Taquilla.Cod_Producto
+                                     AND Pro_Especiales.agencia      EQ  Taquilla.agencia
+                                 NO-LOCK NO-ERROR.
+               W_NomPcto = "".
+               IF AVAILABLE(Pro_Especiales) THEN 
+                 W_NomPcto = TRIM(Pro_Especiales.Nom_Producto).
+             END.
+
+             IF Taquilla.Naturaleza = "DB" THEN DO:  /* Es un cargo */
+               ASSIGN w_VrOpera = 0.
+               IF Taquilla.Val_Cheque GT 0 THEN 
+                 ASSIGN w_VrOpera = Taquilla.Val_Cheque
+                        W_TVrCheque = W_TVrCheque + Taquilla.Val_Cheque.
+               ELSE
+                 ASSIGN w_VrOpera = Taquilla.Val_Efectivo
+                        W_TvrEfec  = W_TvrEfec + Taquilla.Val_Efectivo.
+               Total_Credito  = Total_Credito + w_VrOpera.
+             END.
+             ELSE DO:
+               IF Taquilla.Naturaleza = "Cr" THEN DO:  /* Es un cargo */
+                 ASSIGN w_VrOpera = 0.
+                 IF Taquilla.Val_Cheque GT 0 THEN 
+                   ASSIGN w_VrOpera = Taquilla.Val_Cheque
+                          W_TVrCheque = W_TVrCheque + Taquilla.Val_Cheque.
+                 ELSE
+                   ASSIGN w_VrOpera = Taquilla.Val_Efectivo
+                          W_TvrEfec  = W_TvrEfec + Taquilla.Val_Efectivo.
+                 Total_Debito  = Total_Debito + w_VrOpera.
+               END.
+             END.
+           END.
+           ELSE DO:  /* Otros Pctos */
+             IF Taquilla.Naturaleza = "Cr" THEN DO:
+               ASSIGN w_VrOpera = 0.
+               IF Taquilla.Val_Cheque GT 0 THEN 
+                 ASSIGN w_VrOpera = Taquilla.Val_Cheque
+                        W_TVrCheque = W_TVrCheque + Taquilla.Val_Cheque.
+               ELSE
+                 ASSIGN w_VrOpera = Taquilla.Val_Efectivo
+                        W_TvrEfec  = W_TvrEfec + Taquilla.Val_Efectivo.
+               Total_Credito  = Total_Credito + w_VrOpera.
+             END.
+             ELSE DO:
+               IF Taquilla.Naturaleza = "Db" THEN DO:
+                 ASSIGN w_VrOpera = 0.
+                 IF Taquilla.Val_Cheque GT 0 THEN 
+                   ASSIGN w_VrOpera = Taquilla.Val_Cheque
+                          W_TVrCheque = W_TVrCheque + Taquilla.Val_Cheque.
+                 ELSE
+                   ASSIGN w_VrOpera = Taquilla.Val_Efectivo
+                          W_TvrEfec  = W_TvrEfec + Taquilla.Val_Efectivo.
+                 Total_Debito  = Total_Debito + w_VrOpera.
+               END.
+             END.
+           END.
+         END.
+         FIND Operacion WHERE Operacion.Cod_Operacion EQ Taquilla.Cod_Operacion
+                      NO-LOCK NO-ERROR.
+         IF AVAILABLE(Operacion) THEN
+           W_DescOpe = Operacion.Nom_Operacion.
+         ELSE
+           W_DescOpe = "Operación no Existe".
+         W_Comentario = CAPS(SUBSTRING(TRIM(W_DescOpe),1,16) + " " + TRIM(W_NomPcto)).
+
+         w_NomCli  = "".
+         W_NitEnti = "            ".
+         IF Taquilla.Nit NE "" THEN DO:
+             FIND FIRST Clientes WHERE Clientes.nit EQ Taquilla.Nit NO-LOCK NO-ERROR.
+             IF AVAILABLE Clientes THEN 
+                ASSIGN W_NitEnti = Clientes.Nit + "               "
+                       W_Nomcli  = CAPS(Clientes.Nombre + " " + Clientes.Apellido1 + " " + Clientes.Apellido2) + "                          ".
+
+             ELSE
+                W_Nomcli = W_Comentario + "                          ".
+         END.
+
+         IF Taquilla.Descripcion NE "" THEN
+            W_Comentario = Taquilla.Descripcion + "," + W_Comentario.
+         
+         W_Comentario = "@d20 " + TRIM(Taquilla.Cuenta) + " " + substr(W_NitEnti,1,11) + " " + SUBSTR(W_Nomcli,1,25) + " " + substr(Taquilla.Num_Documento,1,8) + "    ". 
+         IF Taquilla.Naturaleza = "Db" THEN         
+             W_Comentario = w_Comentario + STRING(W_VrOpera,">>>>,>>>,>>9").
+         ELSE
+             W_Comentario = W_Comentario + "          " + string(W_VrOpera,">>>>,>>>,>>9").
+         PUT W_Comentario SKIP(0).
+         
+         W_Comentario = "@d20 " + TRIM(Taquilla.Cta_Contra) + " " + substr(W_NitEnti,1,11) + " " + SUBSTR(W_Nomcli,1,25) + " " + SUBSTR(Taquilla.Num_Documento,1,8) + "    ". 
+         IF Taquilla.Naturaleza EQ "Cr" THEN DO:
+             W_Comentario = W_Comentario + string(W_VrOpera,">>>>,>>>,>>9").
+         END.
+         ELSE
+             W_Comentario = w_Comentario + "          " + STRING(W_VrOpera,">>>>,>>>,>>9").
+         PUT W_Comentario SKIP(0).
+         ASSIGN W_totopera= W_totopera + W_Vropera.
+    END.  
+    PUT "" SKIP(0).
+    W_Cadena = "@p25 " + STRING(W_totopera,">>>,>>>,>>9").
+    PUT W_Cadena SKIP(0).
+    W_Cadena = "@p26 " + STRING(W_totopera,">>>,>>>,>>9").
+    PUT W_cadena SKIP(1).
+    PUT "FinDeDocumento" SKIP(0).
+    OUTPUT CLOSE.
+    RUN imp_formato.
+END PROCEDURE.
+
+PROCEDURE nota2multiple.
+    DEFINE VAR W_Rpta2  AS LOGICAL.
+    DEFINE VAR TotDb     LIKE Mov_Contable.Db.
+    DEFINE VAR TotCr     LIKE Mov_Contable.Db.
+    IF w_desc = "" THEN
+       FOR EACH Mov_Contable WHERE Mov_Contable.Comprobante   EQ  w_cpr  
+                               AND Mov_Contable.Num_Documento EQ  w_Ndcto 
+                               AND Mov_Contable.Fec_Contable  EQ  w_Fec  
+                               AND Mov_Contable.Usuario       EQ  w_usr   
+                               AND Mov_contable.Agencia       EQ  w_age NO-LOCK
+                          BREAK BY Mov_Contable.Comentario: 
+         IF LAST-OF(Mov_Contable.Comentario) THEN 
+            W_Desc = W_Desc + TRIM(Mov_Contable.Comentario) + "/".
+       END.
+   
+           
+
+    FOR EACH Mov_Contable WHERE Mov_Contable.Comprobante   EQ  w_cpr  
+                            AND Mov_Contable.Num_Documento EQ  w_Ndcto 
+                            AND Mov_Contable.Fec_Contable  EQ  w_Fec  
+                            AND Mov_Contable.Usuario       EQ  w_usr   
+                            AND Mov_contable.Agencia       EQ  w_age NO-LOCK
+                                BREAK BY Mov_Contable.Comprobante: 
+        
+        ASSIGN TotDb  = TotDb  + Mov_Contable.Db
+               TotCr  = TotCr  + Mov_Contable.Cr.
+        
+        
+        IF FIRST-OF(Mov_Contable.Comprobante) THEN DO:
+           FIND Formatos WHERE Formatos.Agencia     EQ Mov_Contable.Agencia
+                           AND Formatos.Cod_Formato EQ Comprobantes.Cod_formato NO-LOCK NO-ERROR.
+
+           DEFINE VAR W_NomAgencia AS CHARACTER FORMAT "X(35)" INITIAL "".
+           DEFINE VAR W_Direccion  AS CHARACTER FORMAT "X(50)" INITIAL "".
+           DEFINE VAR W_Telefono   AS CHARACTER FORMAT "X(20)" INITIAL "".
+           DEFINE VAR W_Cadena     AS CHARACTER FORMAT "X(132)" INITIAL "".
+           DEFINE VAR W_Descrip    AS CHARACTER FORMAT "X(37)" INITIAL "".
+
+           DEFINE VAR W_NomPcto          AS   CHARACTER FORMAT "X(15)".
+           DEFINE VAR W_NitEnti          LIKE Clientes.Nit.
+           DEFINE VAR W_NomCli           AS   CHARACTER FORMAT "X(30)".
+
+           W_ArcSalida = W_pathspl + "nota" + TRIM(W_Usuario) + ".txt".
+
+           OUTPUT TO VALUE(W_ArcSalida).
+           PUT "InIcIo" SKIP(1).
+
+           FIND Agencias WHERE Agencia.agencia = Mov_Contable.agencia NO-LOCK NO-ERROR.
+           IF AVAILABLE(agencias) THEN DO:
+
+              ASSIGN W_NomAgencia = "@d01 " + TRIM(CAPS(agencias.nombre))  + " - " + STRING(Agencia.Agencia,"999")
+                     W_Municipio  =  TRIM(agencias.ciudad)
+                     W_Direccion  = "@d01 " + TRIM(agencias.direccion)
+                     W_Telefono   = "@d01 Tel: " + TRIM(agencias.telefono).
+              FIND FIRST ubicacion WHERE SUBSTR(ubicacion,1,5) EQ SUBSTR(W_Municipio,1,5) NO-LOCK NO-ERROR.
+              IF AVAILABLE(ubicacion) THEN
+                 ASSIGN W_Municipio = "@d01 " + CAPS(TRIM(Ubicacion.nombre)) + " - COLOMBIA". 
+           END.
+           PUT W_NomAgencia  SKIP(0).
+           PUT W_Direccion   SKIP(0).
+           PUT W_Telefono    SKIP(0).
+           PUT W_Municipio   SKIP(1).
+
+           W_Cadena = "@p02 " + TRIM(W_nomnota).
+           PUT W_Cadena SKIP(0).
+           PUT "@p03 " W_SecImp     SKIP(1).
+           
+           W_Cadena = "@d05 " + SUBSTRING(W_Desc,1,50).
+           PUT W_Cadena SKIP(0).
+           IF SUBSTRING(W_Desc,51,50) <> "" THEN DO:
+             W_Cadena = "@d05 " + SUBSTRING(W_Desc,51,50).
+             PUT W_Cadena SKIP(0).
+             IF SUBSTRING(W_Desc,101,50) <> "" THEN DO:         
+               W_Cadena = "@d05 " + SUBSTRING(W_Desc,101,50).
+               PUT W_Cadena SKIP(0).                  
+                 IF SUBSTRING(W_Desc,151,50) <> "" THEN DO:      
+                    W_Cadena = "@d05 " + SUBSTRING(W_Desc,151,50).
+                    PUT W_Cadena SKIP(1).                        
+                    IF SUBSTRING(W_Desc,201,50) <> "" THEN DO:       
+                       W_Cadena = "@d05 " + SUBSTRING(W_Desc,201,50).
+                       PUT W_Cadena SKIP(1).                    
+                       IF SUBSTRING(W_Desc,251,50) <> "" THEN DO:       
+                          W_Cadena = "@d05 " + SUBSTRING(W_Desc,251,50).
+                          PUT W_Cadena SKIP(1).                         
+                       END.                                             
+                       ELSE                                             
+                         PUT " " SKIP(0).                               
+                    END.                                             
+                    ELSE                                             
+                      PUT " " SKIP(0).                               
+                 END.
+                 ELSE                                               
+                   PUT " " SKIP(0).
+             END.
+             ELSE                                               
+               PUT " " SKIP(0).
+           END.                                               
+           ELSE                                               
+             PUT " " SKIP(0).
+
+
+           W_Cadena = "@p06 " + STRING(DAY(Mov_Contable.Fec_Contable),"99") + "/" + STRING(MONTH(Mov_Contable.Fec_Contable),"99") + "/" + STRING(YEAR(Mov_Contable.Fec_Contable),"9999").
+           PUT W_Cadena SKIP(0).
+           W_Cadena = "@p07 " + STRING(TIME,"HH:MM:SS").
+           PUT W_cadena SKIP(0).
+           W_Cadena = "@p08 " + TRIM(Mov_Contable.usuario).
+           PUT W_cadena SKIP(0).
+           W_Cadena = "@p10 " + STRING(W_SecImp).
+           PUT W_Cadena SKIP(1).
+        END.
+        W_NitEnti = "              ".
+        w_NomCli = "".
+        IF Mov_contable.nit NE "" THEN DO:
+           W_NitEnti = Mov_contable.Nit + "          ".
+           FIND FIRST Clientes WHERE Clientes.nit EQ Mov_contable.Nit NO-LOCK NO-ERROR.
+           IF AVAILABLE Clientes THEN 
+              W_Nomcli = CAPS(Clientes.Nombre + " " + Clientes.Apellido1 + " " + Clientes.Apellido2) + "                             ".
+        END.
+        ELSE
+             W_Nomcli = TRIM(Mov_contable.Comentario) + "                                     ".
+    
+
+        IF mov_contable.Doc_Referencia NE ? THEN
+           W_descrip = substr(mov_contable.Doc_Referencia,1,8) + "         "  .
+        ELSE
+           W_descrip = "              ".
+
+        /* TRIM(Mov_contable.Comentario) + " - " + TRIM(W_Nomcli) + "                                     ".*/
+        W_Cadena  = "@d20 " + TRIM(Mov_contable.Cuenta) + " " + substr(W_NitEnti,1,12) + " " + SUBSTR(W_NomCli,1,22) + " " + substr(W_descrip,1,8)+ " ". 
+        IF Mov_Contable.Db NE 0 THEN         
+            W_Cadena = w_cadena + STRING(Mov_Contable.Db,">>,>>>,>>>,>>9").
+        ELSE
+            W_Cadena = W_Cadena + "               "  + STRING(Mov_Contable.Cr,">>,>>>,>>>,>>9").
+        PUT W_Cadena SKIP(0).
+
+      IF LAST-OF(Mov_Contable.Comprobante) THEN DO:
+         PUT "" SKIP(0).
+         W_Cadena = "@p25 " + STRING(TotDb,">>,>>>,>>>,>>9").
+         PUT W_Cadena SKIP(0).
+         W_Cadena = "@p26 " + STRING(TotCr,">>,>>>,>>>,>>9").
+         PUT W_cadena SKIP(1).
+         
+         PUT "FinDeDocumento" SKIP(1).
+         OUTPUT CLOSE.
+         ASSIGN TotDb  = 0
+                TotCr  = 0.
+       END.
+
+    END.
+    
+    RUN imp_formato.
+END PROCEDURE.
+
+
+PROCEDURE TAC.
+  /* Actualizado el 14 de febrero para el formato OTH20050214.PS  JOHN MONCADA*/
+    FIND ahorros WHERE ROWID(ahorros) EQ W_RowId NO-LOCK NO-ERROR.
+    DEFINE VAR W_VlrLetras  AS CHARACTER FORMAT "X(256)" INITIAL "".
+    DEFINE VAR W_VlrLetra1  AS CHARACTER FORMAT "X(70)" INITIAL "".
+    DEFINE VAR W_VlrLetra2  AS CHARACTER FORMAT "X(70)" INITIAL "".
+    DEFINE VAR W_VlrLetra3  AS CHARACTER FORMAT "X(70)" INITIAL "".
+    DEFINE VAR W_NomAgencia AS CHARACTER FORMAT "X(35)" INITIAL "".
+    DEFINE VAR W_Cadena     AS CHARACTER FORMAT "X(70)" INITIAL "".
+    DEFINE VAR W_total      AS INTEGER   INITIAL 0.
+
+    OUTPUT TO VALUE(W_ArcSalida).
+
+    PUT "InIcIo" SKIP(1).
+    PUT "@p00 T.A.C." SKIP(0).
+    PUT "@p00a TITULO DE AHORRO CONTRACTUAL" SKIP(1).
+
+    PUT "@p01 " ahorros.cue_ahorro  SKIP(1).
+    FIND agencias WHERE agencias.Agencia EQ w_agencia NO-LOCK NO-ERROR.
+    IF AVAILABLE(agencias) THEN DO:
+       ASSIGN W_NomAgencia = "@p05 " + SUBSTR(TRIM(CAPS(agencias.nombre)),1,16)  
+              W_Municipio  =  TRIM(agencias.ciudad).
+       FIND FIRST ubicacion WHERE SUBSTR(ubicacion,1,5) EQ SUBSTR(W_Municipio,1,5) NO-LOCK NO-ERROR.
+       IF AVAILABLE(ubicacion) THEN
+          ASSIGN W_Municipio = "@p04 " + CAPS(TRIM(Ubicacion.nombre)). 
+    END.
+
+    PUT W_Municipio   SKIP(0).
+    PUT W_NomAgencia  SKIP(0).
+    FIND FIRST clientes WHERE clientes.nit EQ ahorros.nit NO-LOCK NO-ERROR.
+    IF AVAILABLE(clientes) THEN DO:
+        FIND ubicacion WHERE ubicacion EQ Clientes.Lugar_Residencia NO-LOCK NO-ERROR.
+        IF AVAILABLE(ubicacion) THEN
+           ASSIGN W_Municipio = CAPS(TRIM(Ubicacion.nombre)). 
+        ELSE 
+           ASSIGN W_Municipio = "".
+        W_Cadena = "@p10 " + CAPS(TRIM(clientes.nombre)) + ' ' + CAPS(TRIM(clientes.apellido1)) + ' ' + CAPS(TRIM(clientes.apellido2)).
+        PUT W_Cadena skip(0).
+        W_Cadena = "@p11 " + Clientes.Nit.
+        PUT W_Cadena SKIP(0). 
+        W_cadena = "@p12 " + TRIM(clientes.Dir_residencia) + " - " + W_Municipio.
+        PUT W_cadena SKIP(0).
+        W_Cadena = "@p13 " + TRIM(Clientes.Tel_Residencia).
+        PUT W_cadena SKIP(1).
+    END.
+
+
+    W_Cadena = "@p02 " + TRIM(STRING(ahorros.cuota,">,>>>,>>>,>>9")).
+    PUT W_Cadena SKIP(0).
+    W_total = ROUND(ahorros.cuota * (plazo / 30),0).
+    W_Cadena = "@p02a " + TRIM(STRING(W_total ,">,>>>,>>>,>>9")).
+    PUT W_Cadena SKIP(0).
+    
+    ASSIGN W_VlrLetras  = "" W_VlrLetra1  = "" W_VlrLetra2  = "" W_VlrLetra3  = "".
+    RUN MontoEsc.r (INPUT ahorros.cuota,INPUT 0,OUTPUT W_VlrLetras).
+    RUN PartirValor IN W_Manija (INPUT W_VlrLetras,INPUT 60,OUTPUT W_VlrLetra1,OUTPUT W_VlrLetra2,OUTPUT W_VlrLetra3). 
+    W_Cadena = "@d03 " + CAPS(TRIM(W_VlrLetra1)).
+    PUT W_Cadena   SKIP(0).
+    IF W_VlrLetra2 <> " " THEN DO:
+       W_Cadena = "@d03 " + CAPS(TRIM(W_VlrLetra2)).
+       PUT W_Cadena SKIP(0).
+    END.
+    IF W_VlrLetra3 <> " " THEN DO:
+       W_Cadena = "@d03 " + CAPS(TRIM(W_VlrLetra3)).
+       PUT W_Cadena SKIP(0). 
+    END.
+    ASSIGN W_VlrLetras  = "" W_VlrLetra1  = "" W_VlrLetra2  = "" W_VlrLetra3  = "".
+    RUN MontoEsc.r (INPUT W_total,INPUT 0,OUTPUT W_VlrLetras).
+    RUN PartirValor IN W_Manija (INPUT W_VlrLetras,INPUT 60,OUTPUT W_VlrLetra1,OUTPUT W_VlrLetra2,OUTPUT W_VlrLetra3). 
+    W_Cadena = "@d03a " + CAPS(TRIM(W_VlrLetra1)).
+    PUT W_Cadena   SKIP(0).
+    IF W_VlrLetra2 <> " " THEN DO:
+       W_Cadena = "@d03a " + CAPS(TRIM(W_VlrLetra2)).
+       PUT W_Cadena SKIP(0).
+    END.
+    IF W_VlrLetra3 <> " " THEN DO:
+       W_Cadena = "@d03a " + CAPS(TRIM(W_VlrLetra3)).
+       PUT W_Cadena SKIP(0). 
+    END.
+    PUT " " SKIP(0).
+    
+    ASSIGN W_VlrLetras  = "" W_VlrLetra1  = "" W_VlrLetra2  = "" W_VlrLetra3  = "".
+    RUN MontoEsc.r (INPUT Ahorros.Plazo,INPUT 0,OUTPUT W_VlrLetras).
+    RUN PartirValor IN W_Manija (INPUT W_VlrLetras,INPUT 60,OUTPUT W_VlrLetra1,OUTPUT W_VlrLetra2,OUTPUT W_VlrLetra3). 
+    W_Cadena = "@p07 " + TRIM(REPLACE(W_VlrLetras,'Pesos ML','')) + "(" + STRING(Ahorros.Plazo) + ") Dias" .
+    PUT W_Cadena SKIP(0).
+    W_Cadena = "@p08 " + TRIM(STRING(ROUND(Ahorros.Tasa,2),">>9.99")) + "%" .
+    PUT W_Cadena SKIP(0).
+    W_Cadena = "@p15 " + STRING(YEAR(ahorros.fec_apertura))    + " / " + STRING(MONTH(ahorros.fec_apertura))    + " / " + STRING(DAY(ahorros.fec_apertura)) .
+    PUT W_Cadena SKIP(0).
+    W_Cadena = "@p16 " + STRING(YEAR(ahorros.Fec_Vencimiento)) + " / " + STRING(MONTH(Ahorros.Fec_Vencimiento)) + " / " + STRING(DAY(Ahorros.fec_Vencimiento)) .
+    PUT W_Cadena SKIP(1).
+    W_Cadena = ' '.
+    W_Cadena = '@p20 .'.
+    PUT W_Cadena SKIP(0).
+    W_Cadena = "@p21 ." + TRIM(Ahorros.Cue_Destino).
+    PUT W_Cadena SKIP(1).
+    W_Cadena = "@p30 " + TRIM(STRING(W_total)).
+    PUT W_Cadena SKIP(1).
+    PUT "FinDeDocumento" SKIP(0).
+    OUTPUT CLOSE.
+    RUN imp_formato.
+END PROCEDURE.
+
+PROCEDURE reg_firma:
+    FIND ahorros WHERE ROWID(ahorros) EQ W_RowId NO-LOCK NO-ERROR.
+    DEFINE VAR W_NomAgencia AS CHARACTER FORMAT "X(35)"  INITIAL "".
+    DEFINE VAR W_NomPdcto   AS CHARACTER FORMAT "X(35)"  INITIAL "". 
+    DEFINE VAR W_Cadena     AS CHARACTER FORMAT "X(70)"  INITIAL "".
+    OUTPUT TO VALUE(W_ArcSalida).
+    PUT "InIcIo" SKIP(0).
+    PUT "@p01 " ahorros.cue_ahorros SKIP(0).
+    W_Cadena = "@p02 " + STRING(YEAR(ahorros.fec_apertura)) + " / " + STRING(MONTH(ahorros.fec_apertura)) + " / " + STRING(DAY(ahorros.fec_apertura)) .
+    PUT W_Cadena SKIP(0).
+
+    FIND agencias WHERE agencias.Agencia EQ w_agencia NO-LOCK NO-ERROR.
+    IF AVAILABLE(agencias) THEN DO:
+       ASSIGN W_NomAgencia = "@p05 " + CAPS(TRIM(agencias.nombre)).
+    END.
+    PUT W_NomAgencia  SKIP(0).
+
+    FIND FIRST pro_ahorros WHERE pro_ahorros.tip_ahorro = Ahorros.Tip_ahorro AND
+                                 pro_ahorros.cod_ahorro = Ahorros.Cod_ahorro NO-LOCK NO-ERROR.
+    IF AVAILABLE(Pro_ahorros) THEN
+       ASSIGN W_Cadena   = "@p06 " + CAPS(TRIM(Nom_Producto))
+              W_NomPdcto = CAPS(TRIM(Nom_Producto)).
+    ELSE
+       ASSIGN W_Cadena   = "@p06 SIN NOMBRE"
+              W_NomPdcto = " ".
+
+    PUT W_Cadena SKIP(0).
+
+    FIND FIRST clientes WHERE clientes.nit EQ ahorros.nit NO-LOCK NO-ERROR.
+    IF NOT AVAILABLE(clientes) THEN DO:
+        MESSAGE "El Apuntador Al cliente - Inexistente...No hay Impresión."
+            VIEW-AS ALERT-BOX INFO BUTTONS OK.
+        RETURN.
+    END.
+
+    IF Clientes.tipo_cliente = 1 THEN DO: /* Natural Mayor de Edad */ 
+      FIND varios WHERE varios.tipo = 27 AND varios.codigo = ahorros.trf NO-LOCK NO-ERROR.
+      w_condicion = TRIM(STRING(Varios.Codigo,"99") + " - " + TRIM(Varios.Descripcion)). 
+    END.
+    ELSE 
+      IF Clientes.tipo_cliente = 2 THEN DO: /* Natural Menor de Edad */ 
+        FIND varios WHERE varios.tipo = 28 AND varios.codigo = ahorros.trf NO-LOCK NO-ERROR.
+        w_condicion = TRIM(STRING(Varios.Codigo,"99") + " - " + TRIM(Varios.Descripcion)). 
+      END.
+      ELSE   /* Juridicas */
+      DO:
+        FIND varios WHERE varios.tipo = 29 AND varios.codigo = ahorros.trf NO-LOCK NO-ERROR.
+        w_condicion = TRIM(STRING(Varios.Codigo,"99") + " - " + TRIM(Varios.Descripcion)). 
+      END.
+
+    IF TRIM(Ahorros.TRF_Notas) NE " " THEN
+      w_condicion = TRIM(w_condicion) + " * NOTA:  " + TRIM(Ahorros.TRF_Notas).
+    ELSE
+      w_condicion = TRIM(w_condicion).
+     
+    FOR EACH relaciones WHERE relaciones.Nit EQ  ahorros.Nit   AND 
+       relaciones.cuenta       EQ ahorros.cue_ahorro           AND
+       relaciones.estado       EQ 1                            AND       
+       relaciones.cod_relacion EQ 7                            AND /* Autorizados */ 
+       relaciones.cod_producto EQ ahorros.cod_ahorro           NO-LOCK:
+       IF zconteo LE 4 THEN
+         IF Relaciones.Val_autorizado GT 0 AND zconteo LT 6 THEN
+            w_condicion = TRIM(W_Condicion) + "  Tope Aut(" + TRIM(STRING(zconteo)) + ")" + STRING(relaciones.val_autorizado,"zzz,zzz,zz9").
+       zconteo = zconteo + 1.
+    END.
+    zconteo     = 1.
+    IF UPPER(Clientes.Tipo_Identificacion) = "NIT" THEN DO:
+       W_Cadena = "@p07 " + CAPS(TRIM(clientes.nombre)) + ' ' + CAPS(TRIM(clientes.apellido1)) + ' ' + CAPS(TRIM(clientes.apellido2)).
+       W_SWNIT  = TRUE.
+       PUT W_Cadena SKIP(0). 
+       W_Cadena = "@p08 " + TRIM(ahorros.nit).
+       PUT W_Cadena SKIP(0).
+       CASE ahorros.tip_ahorro:
+           WHEN 1 THEN
+               W_NomPdcto = "A LA VISTA".
+           WHEN 2 THEN
+               W_NomPdcto = "CONTRACTUAL".
+           WHEN 3 THEN
+               W_NomPdcto = "A TERMINO".
+           WHEN 4 THEN
+               W_NomPdcto = "APORTES".
+       END.
+       w_cadena = "@p10 " + TRIM(W_NomPdcto).
+       PUT W_Cadena SKIP(0).
+       W_Cadena = "@p11 " + TRIM(Cue_ahorros).
+       PUT W_Cadena SKIP(0).
+       w_cadena = "@p13 X".
+       PUT w_cadena SKIP(0).
+       w_cadena = "@p14 A".
+       PUT W_Cadena SKIP(0).
+       RUN condicionTRF.
+       /*
+       FIND FIRST relaciones WHERE relaciones.Nit EQ  ahorros.Nit   AND 
+                  relaciones.cuenta       EQ ahorros.cue_ahorro           AND
+                  relaciones.estado       EQ 1                            AND       
+                  relaciones.cod_relacion EQ 7       /* 5 Rep legal */    AND /* Autorizados */ 
+                  relaciones.cod_producto EQ ahorros.cod_ahorro           NO-LOCK NO-ERROR.
+       IF available(Relaciones) AND relaciones.val_autorizado GT 0 THEN DO:
+          w_condicion = "Tope Aut(l): " + trim(STRING(relaciones.val_autorizado,"zzz,zzz,zz9")) + " " + TRIM(W_Condicion).
+       END.
+       ELSE
+       DO:
+          MESSAGE "Debe tener al menos un autorizado, porque se trata de una empresa" SKIP
+                  "Es imposible, imprimir la tarjeta de Registro de Firma"
+              VIEW-AS ALERT-BOX INFO BUTTONS OK.
+          OUTPUT CLOSE.
+          RETURN.
+       END.
+
+       RUN condicionTRF.
+       FIND clientes WHERE clientes.nit = relaciones.nit_relacion NO-LOCK NO-ERROR.
+       w_cadena = "@p20 " + "AUTORIZADO 1".
+       PUT w_cadena SKIP(0).                                                                                                 
+       w_cadena = "@p21 " + CAPS(TRIM(clientes.nombre)) + ' ' + CAPS(TRIM(clientes.apellido1)) + ' ' + CAPS(TRIM(clientes.apellido2)).
+       PUT w_cadena SKIP(0). 
+       w_cadena = "@p22 " + UPPER(Clientes.Tipo_Identificacion).
+       PUT w_cadena SKIP(0).                                                   
+       w_cadena = "@p23 " + TRIM(clientes.nit).
+       PUT w_cadena SKIP(0).                                                   
+       FIND FIRST ubicacion WHERE SUBSTR(ubicacion,1,5) EQ SUBSTR(TRIM(Clientes.Lugar_residencia),1,5) NO-LOCK NO-ERROR.
+       IF AVAILABLE(ubicacion) THEN
+          ASSIGN W_Municipio = CAPS(TRIM(Ubicacion.nombre)). 
+       ELSE
+          ASSIGN W_Municipio = "MEDELLIN".
+
+       w_cadena = "@p24 " + TRIM(Clientes.DIR_residencia) + " " + TRIM(W_Municipio).
+       PUT w_cadena SKIP(0).                                                   
+       w_cadena = "@p25 " + TRIM(Clientes.Tel_residencia).
+       PUT w_cadena SKIP(0).                                                   
+       FIND FIRST ubicacion WHERE SUBSTR(ubicacion,1,5) EQ SUBSTR(TRIM(Clientes.Lugar_residencia),1,5) NO-LOCK NO-ERROR.
+       IF AVAILABLE(ubicacion) THEN
+          ASSIGN W_Municipio = CAPS(TRIM(Ubicacion.nombre)). 
+       ELSE
+          ASSIGN W_Municipio = "MEDELLIN".
+
+       w_cadena = "@p26 " + TRIM(Clientes.Dir_comercial) + " " + TRIM(W_municipio). 
+       PUT w_cadena SKIP(0).
+       w_cadena = "@p27 " + TRIM(Clientes.tel_comercial).
+       PUT w_cadena SKIP(0).*/
+       zconteo = 1.
+       FOR EACH relaciones WHERE relaciones.Nit EQ  ahorros.Nit  AND 
+         relaciones.cuenta       EQ ahorros.cue_ahorro           AND
+         relaciones.estado       EQ 1                            AND       
+         relaciones.cod_relacion EQ 7                            AND /* Autorizados */ 
+         relaciones.cod_producto EQ ahorros.cod_ahorro           NO-LOCK:
+         IF zconteo LE 5 THEN DO:
+            RUN autorizados.
+            zconteo = zconteo + 1.
+         END.
+         ELSE 
+            MESSAGE "Se procesan los CINCO primeros autorizados!! " relaciones.nit_relacion VIEW-AS ALERT-BOX INFO BUTTONS OK.
+       END. /* Termina recorrido por la tabla de RELACIONES */
+    END.
+    ELSE 
+    DO:
+       W_SWNIT  = FALSE.
+       FIND FIRST ubicacion WHERE SUBSTR(ubicacion,1,5) EQ SUBSTR(TRIM(Clientes.Lugar_Expedicion),1,5) NO-LOCK NO-ERROR.
+       IF AVAILABLE(ubicacion) THEN
+          ASSIGN W_Municipio = CAPS(TRIM(Ubicacion.nombre)). 
+       ELSE
+          ASSIGN W_Municipio = "MEDELLIN".
+       /* @p07 y @p08  no se envian -   Valido solo para empresas  */
+       
+       CASE ahorros.tip_ahorro:
+         WHEN 1 THEN W_NomPdcto = "A LA VISTA".
+         WHEN 2 THEN W_NomPdcto = "CONTRACTUAL".
+         WHEN 3 THEN W_NomPdcto = "A TERMINO".
+         WHEN 4 THEN W_NomPdcto = "APORTES".
+       END.
+       w_cadena = "@p10 " + TRIM(W_NomPdcto).
+       PUT w_cadena  SKIP(0).
+       w_cadena = "@p11 " + TRIM(Cue_ahorros).
+       PUT w_cadena SKIP(0).
+       PUT "@p12 X" SKIP(0). /* Persona Natural */
+       PUT "@p14 A" SKIP(0).
+       RUN condicionTRF.
+       w_cadena = "@p20 " + "TITULAR".
+       PUT w_cadena SKIP(0).                                                                                                 
+       w_cadena = "@p21 " + CAPS(TRIM(clientes.nombre)) + ' ' + CAPS(TRIM(clientes.apellido1)) + ' ' + CAPS(TRIM(clientes.apellido2)).
+       PUT w_cadena SKIP(0). 
+       w_cadena = "@p22 " + UPPER(Clientes.Tipo_Identificacion).
+       PUT w_cadena SKIP(0).                                                   
+       w_cadena = "@p23 " + TRIM(clientes.nit).
+       PUT w_cadena SKIP(0).                                                   
+       FIND FIRST ubicacion WHERE SUBSTR(ubicacion,1,5) EQ SUBSTR(TRIM(Clientes.Lugar_residencia),1,5) NO-LOCK NO-ERROR.
+       IF AVAILABLE(ubicacion) THEN
+          ASSIGN W_Municipio = CAPS(TRIM(Ubicacion.nombre)). 
+       ELSE
+          ASSIGN W_Municipio = "MEDELLIN".
+
+       w_cadena = "@p24 " + TRIM(Clientes.DIR_residencia) + " " + TRIM(W_Municipio) + "." .
+       PUT w_cadena SKIP(0).                                                   
+       w_cadena = "@p25 " + TRIM(Clientes.Tel_residencia) + "." .
+       PUT w_cadena SKIP(0).                                                   
+       FIND FIRST ubicacion WHERE SUBSTR(ubicacion,1,5) EQ SUBSTR(TRIM(Clientes.Lugar_comercial),1,5) NO-LOCK NO-ERROR.
+       IF AVAILABLE(ubicacion) THEN
+          ASSIGN W_Municipio = CAPS(TRIM(Ubicacion.nombre)). 
+       ELSE
+          ASSIGN W_Municipio = "MEDELLIN".
+
+       w_cadena = "@p26 " + TRIM(Clientes.Dir_comercial) + " " + TRIM(W_municipio) + "." . 
+       PUT w_cadena SKIP(0).
+       w_cadena = "@p27 " + TRIM(Clientes.tel_comercial) + "." .
+       PUT w_cadena SKIP(0).
+       zconteo = 2.
+       FOR EACH   relaciones WHERE relaciones.Nit EQ  ahorros.Nit  AND 
+                  relaciones.cuenta       EQ ahorros.cue_ahorro    AND                           
+                  relaciones.estado       EQ 1                     AND                           
+                  relaciones.cod_relacion EQ 7                     AND /* Autorizados */         
+                  relaciones.cod_producto EQ ahorros.cod_ahorro    NO-LOCK:
+         IF zconteo LE 5 THEN DO:
+            RUN autorizados.
+            zconteo = zconteo + 1.
+         END.
+         ELSE 
+            MESSAGE "Se procesan los CUATRO primeros autorizados!! " relaciones.nit_relacion VIEW-AS ALERT-BOX INFO BUTTONS OK.
+       END.
+    END. /* del tipo de cliente */
+    FIND FIRST clientes WHERE clientes.nit EQ ahorros.nit NO-LOCK NO-ERROR.
+    PUT "FinDeDocumento" SKIP(0).
+    OUTPUT CLOSE.
+    RUN Imp_Formato.
+END PROCEDURE.
+
+PROCEDURE autorizados:
+  DEFINE VAR zlinea AS INTEGER INITIAL 0.
+  ASSIGN wtipo    = "" wnombre  = "" wtipoide = "" wnit     = "" wdir     = "" 
+         wtelres  = "" wdircom  = "" wtelcom  = "".
+  FIND clientes WHERE clientes.nit EQ relaciones.nit_relacion NO-LOCK NO-ERROR.
+  IF AVAILABLE(clientes) THEN DO:
+    FIND FIRST ubicacion WHERE SUBSTR(ubicacion,1,5) EQ SUBSTR(TRIM(Clientes.Lugar_Expedicion),1,5) NO-LOCK NO-ERROR.
+    IF AVAILABLE(ubicacion) THEN
+       ASSIGN W_Municipio = CAPS(TRIM(Ubicacion.nombre)). 
+    ELSE
+       ASSIGN W_Municipio = "MEDELLIN".
+
+     IF NOT w_swnit THEN
+        wtipo    = "AUTORIZADO " + TRIM(STRING(zconteo - 1)).
+     ELSE
+        wtipo    = "AUTORIZADO " + TRIM(STRING(zconteo)).
+
+     wnombre  = CAPS(TRIM(clientes.nombre)) + ' ' + CAPS(TRIM(clientes.apellido1)) + ' ' + CAPS(TRIM(clientes.apellido2)).
+     Wtipoide = UPPER(Clientes.Tipo_Identificacion).    
+     Wnit     = TRIM(clientes.nit).
+     FIND FIRST ubicacion WHERE SUBSTR(ubicacion,1,5) EQ SUBSTR(TRIM(Clientes.Lugar_residencia),1,5) NO-LOCK NO-ERROR.
+     IF AVAILABLE(ubicacion) THEN
+        ASSIGN W_Municipio = CAPS(TRIM(Ubicacion.nombre)). 
+     ELSE
+        ASSIGN W_Municipio = "MEDELLIN".
+               wdir        = TRIM(Clientes.DIR_residencia) + " " + TRIM(W_Municipio).
+               wtelres     = TRIM(Clientes.Tel_residencia).
+    
+     IF Clientes.Dir_comercial NE " " THEN DO:
+       wdircom = TRIM(Clientes.Dir_comercial) + " " + TRIM(W_municipio).
+       wtelcom = TRIM(Clientes.tel_comercial).
+     END.
+
+  END.
+  CASE zconteo:
+    WHEN 1 THEN zlinea = 20.
+    WHEN 2 THEN zlinea = 30.
+    WHEN 3 THEN zlinea = 50.
+    WHEN 4 THEN zlinea = 60.
+    WHEN 5 THEN zlinea = 70.
+  END.
+  DEFINE VAR W_cadena1 AS CHARACTER FORMAT "X(70)" INITIAL "".
+  W_cadena1 = "@p" + STRING(zlinea + 0,"99") + " " + wtipo.
+  PUT W_cadena1 SKIP(0).
+  W_cadena1 = "@p" + STRING(zlinea + 1,"99") + " " + wnombre.
+  PUT W_cadena1 SKIP(0).
+  W_cadena1 = "@p" + STRING(zlinea + 2,"99") + " " + wtipoide.    
+  PUT W_cadena1 SKIP(0).
+  W_cadena1 = "@p" + STRING(zlinea + 3,"99") + " " + wnit.
+  PUT W_cadena1 SKIP(0).
+  IF TRIM(wdir) NE " " THEN DO: 
+    W_Cadena1 = "@p" + STRING(zlinea + 4,"99") + " " + Wdir.
+    PUT W_cadena1 SKIP(0).
+  END.
+  IF TRIM(wtelres) NE " " THEN DO:
+     W_Cadena1 = "@p" + STRING(zlinea + 5,"99") + " " + wtelres.
+     PUT W_cadena1 SKIP(0).
+  END.
+  IF TRIM(wdircom) NE " " THEN DO:
+     W_Cadena1 = "@p" + STRING(zlinea + 6,"99") + " " + TRIM(Wdircom).
+     PUT W_cadena1 SKIP(0).
+  END.
+  IF TRIM(wtelcom) NE " " THEN DO:
+     W_Cadena1 = "@p" + STRING(zlinea + 7,"99") + " "  + TRIM(wtelcom).
+     PUT W_cadena1 SKIP(0).
+  END.
+  IF zlinea = 50 THEN
+     PUT "@p58 REVERSO"   SKIP(0).
+
+END PROCEDURE.
+
+PROCEDURE condicionTRF.
+  DEFINE VAR W_Cadena  AS CHARACTER FORMAT "X(70)" INITIAL "".
+  IF TRIM(w_condicion) NE " " THEN DO:
+    w_cadena = "@d40 " + SUBSTR(W_condicion,1,65).
+    PUT W_cadena SKIP(0).
+    IF SUBSTR(W_condicion,66,65) NE " " THEN DO:
+      w_cadena = "@d40 " + SUBSTR(W_condicion,66,65).
+      PUT W_cadena SKIP(0).
+      IF SUBSTR(W_condicion,131,65) NE " " THEN DO:
+        w_cadena = "@d40 " + SUBSTR(W_condicion,131,65).
+        PUT W_cadena SKIP(0).
+      END.
+    END.
+  END.
+END PROCEDURE.
+
+PROCEDURE imp_formato.
+    FOR EACH SalidaImp:
+        DELETE SalidaImp.
+    END.
+    DEFINE VARIABLE plano1 AS CHARACTER FORMAT "x(172)".
+    DEFINE VARIABLE plano2 AS CHARACTER FORMAT "x(172)".
+    /*
+    CASE TRIM(P_Formato):
+        WHEN 'CDAT'     THEN INPUT FROM VALUE(SEARCH("1\d\sicobel\objetos\CDAT20051028.ps")).     /* CDAT20050504.ps - CDAT20050413_rec.ps  sin rec:CDAT20050311.ps */
+        WHEN 'NOTAMULT' THEN INPUT FROM VALUE(SEARCH("\\172.28.1.201\d\sicobel\objetos\NCcx20051026.ps")).     /* NCcx20050425.ps */
+        WHEN 'NOTA2MUL' THEN INPUT FROM VALUE(SEARCH("\\172.28.1.201\d\sicobel\objetos\NCcx20051026.ps")).     /* NCcx20050316.ps */
+        WHEN 'TAC'      THEN INPUT FROM VALUE(SEARCH("\\172.28.1.201\d\sicobel\objetos\CTcx20050413_rec.ps")). /* sin rec: CTcx20050311.ps */
+        WHEN 'REGFIRMA' THEN INPUT FROM VALUE(SEARCH("\\172.28.1.201\d\sicobel\objetos\FCcx20051026.ps")).     /* Registro de Firmas FCcx20050923.ps*/
+    END.
+                
+      REPEAT:
+        CREATE SalidaImp.
+        IMPORT UNFORMATTED plano1.
+        ASSIGN SalidaImp.Detalle = TRIM(plano1).
+      END.
+    */ 
+    INPUT CLOSE.
+    INPUT FROM VALUE(W_ArcSalida).
+
+      REPEAT:
+        CREATE SalidaImp.
+        IMPORT UNFORMATTED plano2.
+        ASSIGN SalidaImp.Detalle = TRIM(plano2).
+      END.
+    INPUT CLOSE.
+    
+    DEFINE VAR salida AS CHARACTER FORMAT "X(150)".
+    salida = "c:\info_utrahuilca\formato" + TRIM(W_Usuario) + ".txt".
+    OUTPUT TO VALUE(salida).
+/*  OUTPUT TO VALUE("\\172.28.1.201\d\sicobel\objetos\arsalida.ps").*/
+    FOR EACH salidaImp:
+       PUT UNFORMATTED salidaImp.detalle AT 1.
+    END.
+    OUTPUT CLOSE.
+
+    DEFINE VAR comando  AS CHARACTER FORMAT "X(150)".
+    DEFINE VAR lineabat AS CHARACTER FORMAT "X(150)".
+    comando = "c:\info_utrahuilca\formato" + TRIM(W_Usuario) + ".bat" .
+    OUTPUT TO VALUE(comando).
+    lineabat = "c:\temp\prfile32.exe /q " + TRIM(salida).
+    PUT lineabat SKIP(0).
+    PUT "EXIT"   SKIP(0).
+    OUTPUT CLOSE.
+    OS-COMMAND VALUE(comando).
+/*  OS-COMMAND ("\\172.28.1.201\d\sicobel\objetos\impresion.bat").*/
+END PROCEDURE.
+
+/*******************************************************************************
+                      FIN DE LA LIBRERIA DE FORMATOS
+*******************************************************************************/

@@ -1,0 +1,113 @@
+/*  Prog.Modif_FecIni.P...*/
+  DEFI VAR Datos     AS CHARACTER FORMAT "X(80)".
+  DEFI VAR FecCont   AS DATE.
+  DEFI VAR FecIni    AS DATE.
+  DEFI VAR W_TasaUs  LIKE Indicadores.Tasa.
+  DEFI VAR W_NroDias AS INTEG FORM "9999".
+  DEFI VAR W_SiId1   AS LOG INIT FALSE.
+  DEFI VAR W_RowIdCr AS ROWID.
+  DEFI VAR W_RowIdPP AS ROWID.
+  DEFI VAR Cont AS INTEG.
+
+  DEFI TEMP-TABLE Tmp
+       FIELD Ced LIKE Creditos.Nit
+       FIELD Num LIKE Creditos.Num_Credito
+       FIELD FIni AS DATE
+       FIELD FDes AS DATE
+       FIELD Mont LIKE Creditos.Monto.
+
+
+  W_TasaUS = 20.54.
+ 
+  SESSION:SET-WAIT-STATE("GENERAL").
+         
+  INPUT FROM C:\InfRed\0001.Txt.
+  REPEAT:
+    IMPORT UNFORMATTED Datos NO-ERROR.
+    IF ERROR-STATUS:ERROR THEN DO:
+       MESSAGE "El Archivo tiene Problemas...Revise por favor" VIEW-AS ALERT-BOX.
+       LEAVE.
+    END.
+
+    CREATE Tmp.
+    ASSIGN Tmp.Ced  = SUBSTRING(Datos,1,12)
+           Tmp.FDes = DATE(INTEG(SUBSTRING(Datos,25,2)),INTEG(SUBSTRING(Datos,27,2)),INTEG(SUBSTRING(Datos,21,4)))           
+           Tmp.FIni = DATE(INTEG(SUBSTRING(Datos,17,2)),INTEG(SUBSTRING(Datos,19,2)),INTEG(SUBSTRING(Datos,13,4)))
+           Tmp.Mont = DEC(SUBSTRIN(Datos,29,12)).
+  END.
+
+  FOR EACH Tmp:
+      FIND FIRST Creditos WHERE Creditos.Nit         EQ TRIM(Tmp.Ced)
+                            AND Creditos.Fec_Desemb  EQ Tmp.FDes
+                            AND Creditos.Estado      EQ 2
+                            AND Creditos.Monto       EQ Tmp.Mont                            
+                            AND Creditos.Sdo_Capital GT 0
+                            AND Creditos.Fec_Desemb  LT DATE(10,1,2006) NO-ERROR.
+      IF NOT AVAIL(Creditos) THEN
+         NEXT.
+
+      IF Creditos.Fec_PagAnti EQ ? THEN
+         Creditos.Fec_PagAnti = Creditos.Fec_Desemb.
+
+      IF Creditos.Fec_PagAnti GE Tmp.FIni THEN
+         NEXT.
+
+      ASSIGN Creditos.Fec_PagAnti = Tmp.FIni
+             FecCont              = Tmp.FIni
+             FecIni               = Tmp.FIni
+             W_SiId1              = FALSE
+             W_NroDias            = 30
+             Cont                 = Cont + 1.
+
+      IF      Creditos.Per_Pago EQ 1 THEN                                               
+             W_NroDias = 7.                                                            
+      ELSE IF Creditos.Per_Pago EQ 2 THEN                                              
+             W_NroDias = 10.                                                           
+      ELSE IF Creditos.Per_Pago EQ 3 THEN                                              
+             W_NroDias = 15.                                                           
+                                                                                    
+      FOR EACH PlanPagos WHERE PlanPagos.Agencia   EQ Creditos.Agencia    
+                        AND PlanPagos.Nit          EQ Creditos.Nit        
+                        AND PlanPagos.Cod_Credito  EQ Creditos.Cod_Credito
+                        AND PlanPagos.Num_Credito  EQ Creditos.Num_Credito
+                        AND PlanPagos.Nro_Cuota    GT 0 BY PlanPagos.Nro_Cuota:
+          ASSIGN PlanPagos.Fec_Ini = FecCont.                  
+          RUN Halla_FecVcto.R (INPUT  FecIni,W_NroDias,FecCont,             
+                               OUTPUT FecCont).                
+          ASSIGN PlanPagos.Fec_Vcto = FecCont.                 
+                                                               
+          IF FecCont LT TODAY THEN                           
+             ASSIGN PlanPagos.Id_PdoMes = 2.                   
+          ELSE IF FecCont GT TODAY THEN                      
+             ASSIGN PlanPagos.Id_PdoMes = 0.                   
+                                                               
+          IF FecCont GE TODAY AND NOT W_SiId1 THEN           
+             ASSIGN W_SiId1             = TRUE                 
+                    PlanPagos.Id_PdoMes = 1.                   
+      END.
+
+      FIND LAST PlanPagos WHERE PlanPagos.Agencia      EQ Creditos.Agencia                       
+                            AND PlanPagos.Nit          EQ Creditos.Nit                           
+                            AND PlanPagos.Cod_Credito  EQ Creditos.Cod_Credito                   
+                            AND PlanPagos.Num_Credito  EQ Creditos.Num_Credito                   
+                            AND PlanPagos.Id_PdoMes    EQ 1 NO-ERROR.                            
+      IF NOT AVAIL(PlanPagos) THEN DO:                                                           
+         MESSAGE "No se Halló el Id_PdoMes = 1(Pdo.Transcurre) en el PlanPagos,Revise por favor." SKIP
+                 "Para Ced.y Num_Credito : " Creditos.Nit Creditos.Num_Credito
+             VIEW-AS ALERT-BOX INFO BUTTONS OK.                                                  
+         NEXT.                                                                                 
+      END.                                                                                       
+                                                                                                 
+      ASSIGN W_RowIdCr = ROWID(Creditos)                                                         
+             W_RowIdPP = ROWID(PlanPagos).                                                       
+                                                                                                 
+      RUN Halla_PagasFalt.R (INPUT W_RowIdCr,W_RowIdPP,W_TasaUs).                                
+                                                          
+      FIND CURRENT PlanPagos NO-LOCK NO-ERROR.                                                   
+  END.
+
+  MESSAGE "Procesó Reg.:" Cont
+      VIEW-AS ALERT-BOX INFO BUTTONS OK.
+
+  SESSION:SET-WAIT-STATE("").
+

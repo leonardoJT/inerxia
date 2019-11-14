@@ -1,0 +1,266 @@
+{Incluido\VARIABLE.I "SHARED"}
+
+RUN Rutinas.r PERSISTENT SET W_Manija.
+
+DEFINE INPUT PARAMETER W_Cbt1 AS INTEGER.
+DEFINE INPUT PARAMETER W_Doc1 AS INTEGER.
+DEFINE INPUT PARAMETER W_Doc2 AS INTEGER.
+DEFINE INPUT PARAMETER W_Ofi1 AS INTEGER.
+DEFINE INPUT PARAMETER pFecContable AS DATE.
+
+DEFINE TEMP-TABLE WCom
+    FIELD WCom AS CHARACTER.
+
+DEFINE VAR W_NCli AS CHARACTER FORMAT "X(15)".
+DEFINE VAR W_Enlace AS CHARACTER FORMAT "X(8)".
+DEFINE VAR W_NCta AS CHARACTER FORMAT "X(12)".
+DEFINE VAR W_Enc1 AS CHARACTER FORMAT "X(120)".
+DEFINE VAR W_Enc2 AS CHARACTER FORMAT "X(120)".
+DEFINE VAR W_Enc3 AS CHARACTER FORMAT "X(120)".
+DEFINE VAR W_Enc4 AS CHARACTER FORMAT "X(120)".
+DEFINE VAR W_Encabezado AS CHARACTER FORMAT "X(240)".
+DEFINE VAR W_NroDoc AS INTEGER.
+DEFINE VAR W_NomEntidad AS CHARACTER FORMAT "X(30)".
+DEFINE VAR W_NitEnti AS CHARACTER.
+DEFINE VAR W_ConcatEnti AS CHARACTER FORMAT "X(57)".
+DEFINE VAR W_PrimerCom AS CHARACTER FORMAT "X(100)".
+DEFINE VAR W_NomOfi AS CHARACTER FORMAT "X(30)".
+DEFINE VAR W_NomCli AS CHARACTER FORMAT "X(30)".
+DEFINE VAR W_sw AS LOGICAL.
+DEFINE VAR Movimiento_Debito AS DECIMAL FORMAT "->>>,>>>,>>>,>>9.99".
+DEFINE VAR Movimiento_Credito AS DECIMAL FORMAT "->>>,>>>,>>>,>>9.99".
+DEFINE VAR Total_Debito AS DECIMAL FORMAT "->>>,>>>,>>>,>>9.99".
+DEFINE VAR Total_Credito AS DECIMAL FORMAT "->>>,>>>,>>>,>>9.99".
+DEFINE VAR W_NomCbt AS CHARACTER.
+DEFINE VAR W_NomUsu AS CHARACTER.
+DEFINE VAR Listado AS CHARACTER.
+
+/* oakley */
+
+W_NroDoc = W_Doc2 - W_Doc1.
+
+FIND FIRST Comprobantes WHERE Comprobantes.Comprobante = W_Cbt1
+                          AND Comprobantes.Agencia = W_Ofi1 NO-LOCK NO-ERROR.
+IF AVAILABLE(Comprobantes) THEN
+    W_NomCbt = STRING(Comprobantes.Comprobante,"99") + " " + Comprobantes.Nombre.
+
+FIND LAST Mov_Contable WHERE Mov_Contable.Agencia EQ W_Ofi1
+                         AND Mov_Contable.Comprobante EQ W_Cbt1
+                         AND Mov_Contable.Num_Documento GE W_Doc1
+                         AND Mov_Contable.Num_Documento LE W_Doc2
+                         AND mov_contable.fec_contable = pFecContable NO-LOCK NO-ERROR.
+IF NOT AVAILABLE(Mov_Contable) THEN DO:
+    MESSAGE "No se halló Mov_Contable para agencia : " W_Ofi1 SKIP
+            "de Comprobante                        : " W_Cbt1 SKIP
+
+        /* oakley */
+
+            "de Num_Documento inicial              : " W_Doc1 SKIP
+            "de Num_Documento final                : " W_Doc2
+        VIEW-AS ALERT-BOX TITLE "Error en Prog.F-Ingreso.P, Impresión".
+
+    RETURN.
+END.
+
+FIND FIRST Usuarios WHERE Usuarios.Usuario EQ Mov_Contable.Usuario NO-LOCK NO-ERROR.
+IF AVAILABLE(Usuarios) THEN
+    W_NomUsu = Usuarios.Nombre.
+ELSE
+    W_NomUsu = "No encontro".
+
+W_NomOfi = "".
+W_ConcatEnti = "".
+
+FIND FIRST Agencias WHERE Agencias.Agencia = Mov_Contable.Agencia NO-LOCK NO-ERROR.
+IF AVAILABLE(Agencias) THEN DO:
+    W_NomOfi = Agencias.Nombre.
+
+    FIND FIRST Entidad WHERE Entidad.Entidad EQ Agencia.Entidad NO-LOCK NO-ERROR.
+    IF AVAILABLE(Entidad) THEN
+        ASSIGN W_NomEntidad = Entidad.Nombre
+               W_NitEnti = Entidad.Nit
+               w_ConcatEnti = TRIM(W_NomEntidad) + " " + "  Nit: " + w_NitEnti.
+END.
+
+FIND FIRST Clientes WHERE Clientes.nit EQ Mov_contable.Nit NO-LOCK NO-ERROR.
+IF AVAILABLE(Clientes) THEN
+    W_Nomcli = Clientes.Nombre + " " + Clientes.Apellido1 + " " + Clientes.Apellido2.
+
+DEFINE FRAME F-Encabezado HEADER
+    W_ConcatEnti                  AT COL  3 ROW 1
+    "Comprobante de       :"      AT COL  3 ROW 2
+    W_NomCbt                      AT COL 26 ROW 2
+    "Fecha:"                      AT COL 93 ROW 2
+    TODAY                         AT COL 99 ROW 2
+    "Agencia Nro          :"      AT COL  3 ROW 3
+    Mov_contable.Agencia          AT COL 26 ROW 3
+    W_NomOfi                      AT COL 31 ROW 3
+    "Hora :"                      AT COL 93 ROW 3 STRING(TIME,"HH:MM:SS") SKIP
+    "Pagina:"                     AT COL 93 ROW 4 PAGE-NUMBER FORMAT ">9"
+    "Documento Nro        :"      AT COL  3 ROW 4
+    Mov_Contable.Num_documento    AT COL 26 ROW 4
+    "Fecha Contabilizacion:"      AT COL  3 ROW 5
+    Mov_Contable.Fec_Contable     AT COL 26 ROW 5
+    "Usuario Digitador    :"      AT COL  3 ROW 6
+    W_NomUsu                      AT COL 26 ROW 6
+    "Titular              :"      AT COL 3 ROW 7
+    W_NomCli                      AT COL 26 ROW 7 FORMAT "X(100)"
+    "Encabezado           :"      AT COL  3 ROW 8
+    W_Enc1                        AT COL 26 ROW 8
+    W_Enc2                        AT COL 26 ROW 9
+    W_Enc3                        AT COL 26 ROW 10
+    W_Enc4                        AT COL 26 ROW 11
+    "Cuenta"                      AT COL  1 ROW 12
+    "C_C"                         AT COL 15 ROW 12
+    "NomCuenta"                   AT COL 20 ROW 12
+    "Nit"                         AT COL 34 ROW 12
+    "Nombre"                      AT COL 48 ROW 12
+    "Enlace"                      AT COL 66 ROW 12
+    "Débito"                      AT COL 87 ROW 12
+    "Crédito"                     AT COL 103 ROW 12
+    "Doc.Ref."                    AT COL 112 ROW 12 skip(1)
+    WITH DOWN WIDTH 300 FRAME F-Encabezado NO-LABEL NO-BOX NO-UNDERLINE PAGE-TOP USE-TEXT.
+
+DEFINE FRAME F_Movimiento
+    Mov_Contable.Cuenta           AT 1   FORMAT "X(14)"
+    mov_contable.cen_costos       AT 15  FORMAT "999"
+    W_NCta                        AT 20  FORMAT "X(13)"
+    Mov_Contable.Nit              AT 34  FORMAT "X(13)"
+    W_NCli                        AT 48  FORMAT "X(17)" 
+    W_Enlace                      AT 66  FORMAT "X(8)"
+    Movimiento_Debito             AT 75  FORMAT "->>,>>>,>>>,>>9.99"
+    Movimiento_Credito            AT 93  FORMAT "->>,>>>,>>>,>>9.99"
+    Mov_Contable.Doc_Referencia   AT 112 FORMAT "X(13)"
+    WITH 10 DOWN SIZE 150 BY 5 FRAME F_Movimiento USE-TEXT NO-BOX NO-LABEL STREAM-IO.
+
+DEFINE FRAME F-Totales HEADER
+    "Sumas Iguales: "                       AT COL 59 ROW 1
+    Total_Debito                            AT COL 73 ROW 1
+    Total_Credito                           AT COL 91 ROW 1
+    "Elaboró:______________________"        AT COL 2  ROW 5
+    "Aprobó:______________________"         AT COL 47 ROW 5
+    "Ordenó:______________________"         AT COL 92 ROW 5
+    WITH WIDTH 150 FRAME F-Totales PAGE-BOTTOM NO-LABEL NO-BOX NO-UNDERLINE USE-TEXT.
+
+/*Listado = W_PathSpl + "L_Ingreso.Lst".*/
+Listado = W_pathspl + "Informe" + TRIM(string(W_Doc1)).
+
+DEFINE VAR W_Dispositivo AS CHARACTER INITIAL "P".
+
+RUN P-DisPos IN W_Manija (INPUT-OUTPUT listado,INPUT-OUTPUT W_Dispositivo).
+
+IF W_Dispositivo = "" THEN
+    RETURN.
+
+OUTPUT TO VALUE(listado) NO-ECHO PAGED PAGE-SIZE 40.
+
+IF W_NroDoc = 0 THEN DO:
+    FOR EACH Mov_Contable FIELD (Agencia Comprobante Num_Documento DB CR Enlace Cuenta Cen_Costos Comentario Nit Fec_contable Doc_Referencia)
+                          WHERE Mov_Contable.Agencia EQ W_Ofi1
+                            AND Mov_Contable.Comprobante EQ W_Cbt1
+                            AND Mov_Contable.Num_Documento GE W_Doc1
+                            AND Mov_Contable.Num_Documento LE W_Doc2
+                            AND mov_contable.fec_contable = pFecContable NO-LOCK BREAK BY mov_contable.fec_contable DESCENDING
+                                                                                       BY Mov_contable.comprobante
+                                                                                       BY Mov_contable.Num_documento
+                                                                                       BY ROWID(Mov_Contable):
+        FIND FIRST WCom WHERE WCom EQ Mov_Contable.Comentario NO-ERROR.
+        IF NOT AVAILABLE WCom THEN DO:
+            CREATE WCom.
+            WCom.WCom = Mov_Contable.Comentario.
+        END.
+
+        IF LAST-OF(Mov_Contable.Num_Documento) THEN DO:
+            FOR EACH WCom:
+                W_Encabezado = W_Encabezado + WCom.WCom + ".".
+            END.
+
+            ASSIGN W_Enc1 = SUBSTRING(W_Encabezado,1,120)
+                   W_Enc2 = SUBSTRING(W_Encabezado,121,240)
+                   W_Enc3 = SUBSTRING(W_Encabezado,241,360)
+                   W_Enc4 = SUBSTRING(W_Encabezado,361,480).
+
+            EMPTY TEMP-TABLE WCom.
+
+            LEAVE.
+        END.
+    END.
+END.
+
+VIEW FRAME F-Encabezado.
+VIEW FRAME F-Totales.
+
+FOR EACH Mov_Contable FIELD (Agencia Comprobante Num_Documento DB CR Enlace Cuenta Cen_Costos Comentario Nit Fec_contable Doc_Referencia)
+                      WHERE Mov_Contable.Agencia EQ W_Ofi1
+                        AND Mov_Contable.Comprobante EQ W_Cbt1
+                        AND Mov_Contable.Num_Documento GE W_Doc1
+                        AND Mov_Contable.Num_Documento LE W_Doc2
+                        AND mov_contable.fec_contable = pFecContable NO-LOCK BREAK BY mov_contable.fec_contable DESCENDING
+                                                                                   BY Mov_contable.comprobante
+                                                                                   BY Mov_contable.Num_documento
+                                                                                   BY ROWID(Mov_Contable):
+    IF FIRST-OF(Mov_Contable.Num_documento) THEN
+        ASSIGN W_PrimerCom = TRIM(Mov_Contable.Comentario)
+               Total_Debito = 0
+               Total_Credito = 0.
+
+    IF Mov_Contable.DB GT 0 THEN
+        ASSIGN Movimiento_Debito = Mov_Contable.DB
+               Movimiento_Credito = 0
+               Total_Debito = Total_Debito + Mov_Contable.DB.
+    ELSE
+        ASSIGN Movimiento_Credito = Mov_Contable.CR
+               Movimiento_Debito = 0
+               Total_Credito = Total_Credito + Mov_Contable.CR.
+
+    W_NCli = "".
+
+    IF Mov_Contable.Nit NE "" THEN DO:
+        FIND FIRST Clientes WHERE Clientes.Nit EQ Mov_Contable.Nit NO-LOCK NO-ERROR.
+        IF AVAILABLE Clientes THEN
+            W_NCli = Clientes.Nombre + " " + Clientes.Apellido1 + " " + Clientes.Apellido2.
+    END.
+
+    W_NCta = "".
+
+    FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ Mov_Contable.Cuenta NO-LOCK NO-ERROR.
+    IF AVAILABLE Cuentas THEN
+        W_NCta = Cuentas.Nombre.
+
+    W_Enlace = "".
+
+    IF Mov_Contable.Enlace NE "" THEN
+        W_Enlace = Mov_Contable.Enlace.
+
+    DISPLAY Mov_Contable.Cuenta
+            mov_contable.cen_costos
+            W_NCta
+            Mov_contable.Nit
+            W_NCli
+            W_Enlace
+            Movimiento_Debito
+            Movimiento_Credito
+            Mov_Contable.Doc_Referencia
+      WITH FRAME F_Movimiento.
+
+    IF LAST-OF(mov_contable.fec_contable) THEN
+        LEAVE.
+END.
+
+OUTPUT CLOSE.
+
+IF W_Dispositivo = "P" THEN
+    RUN Pantalla IN W_Manija (INPUT Listado).
+    /*RUN Ptlla_Imprimir.R (INPUT listado).*/
+ELSE
+    IF W_Dispositivo = "I" THEN
+        RUN adecomm/_osprint.r (INPUT ?,
+                                INPUT listado,
+                                INPUT 8,
+                                INPUT 1,
+                                INPUT 1,
+                                INPUT 99999,
+                                OUTPUT W_sw).
+
+IF W_Dispositivo <> "A" THEN
+    OS-DELETE VALUE(LISTADO).

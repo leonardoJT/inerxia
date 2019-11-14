@@ -1,0 +1,484 @@
+/*Proggrama Utilitario: Util_Creditos.P 
+  Genera PlanPagos desde Créditos y actualiza variables en Créditos : Fec.ProxPago, 
+  Debidos pagar y pagados.  
+------------------------------------------------------------------------------------*/   
+  /*{Incluido\VARIABLE.I "SHARED"}*/
+  
+  DEFI TEMP-TABLE CopPP LIKE PlanPagos.
+  
+  DEFI VAR W_Fecha AS DATE.
+  DEFI VAR TotReg  AS INTEG FORM "9999999".
+  DEFI VAR CuoAdel LIKE Creditos.Cuo_Pagadas.
+  DEFI VAR W_Proyectado LIKE Creditos.Sdo_Proyectado.
+
+  DEFI VAR K          AS INTEG FORM "9999".
+  DEFI VAR J          AS INTEG FORM "9999".
+  DEFI VAR W_RowIdPP  AS ROWID.
+  DEFI VAR W_FecPP    AS DATE.
+  DEFI VAR W_Completo AS LOG INIT FALSE.
+  DEFI VAR W_Primera  AS LOG INIT FALSE.
+  DEFI VAR W_SiInt    AS LOG INIT FALSE.
+  DEFI VAR W_DiasCau  AS INTEG FORM "9999".
+
+  DEFI VAR CuoPag     AS INTEG FORM "9999". 
+  DEFI VAR W_Fec      AS DATE.
+  DEFI VAR W_FecProxP AS DATE.
+  DEFI VAR W_FecIni AS DATE.
+  DEFI VAR W_Mes    AS INTEG FORM "99".
+  DEFI VAR W_MesPP  AS INTEG FORM "99".
+  DEFI VAR W_Cap    LIKE Creditos.Sdo_Capital.
+  DEFI VAR W_CapTot LIKE Creditos.Sdo_Capital.
+  DEFI VAR W_IntTot LIKE Creditos.INT_Corrientes.
+  DEFI VAR W_DifInt LIKE Creditos.INT_Corrientes.
+  DEFI VAR W_IntFAcu LIKE Creditos.INT_Corrientes.
+
+  DEFINE TEMP-TABLE TmpAho
+         FIELD T_Fecha     LIKE Ahorros.Fec_Apertura             
+         FIELD T_Cuota     LIKE Ahorros.Cuota                      
+         FIELD T_CapAcu    LIKE Creditos.Sdo_Capital            
+         FIELD T_IntPdo    LIKE Creditos.INT_Corrientes   
+         FIELD T_CapPdo    LIKE Creditos.Sdo_Capital     
+         FIELD T_IntAcu    LIKE Creditos.INT_Corrientes.    
+    
+  OUTPUT TO C:\InfRed\ErrCred.Txt.
+
+  W_Fecha = TODAY.
+
+MESSAGE "Inicio Proceso Generar PlanPagos..., Primero se Borran todos los PlanPagos." 
+    VIEW-AS ALERT-BOX INFO BUTTONS OK.
+
+SESSION:SET-WAIT-STATE("General").
+  FOR EACH PlanPagos:
+      DELETE planPagos.
+  END. 
+
+MESSAGE "Fin del Borrado, Continue para generar PlanPagos."
+    VIEW-AS ALERT-BOX INFO BUTTONS OK.
+       
+  DISABLE TRIGGERS FOR LOAD OF creditos.
+    
+  FOR EACH Creditos BY Creditos.Nit:
+      IF Creditos.Sdo_Capital LE 0 
+      OR Creditos.Nit         LE "0"      
+      OR Creditos.Costas      LT 0 
+      OR Creditos.Cuota       LE 0
+      OR Creditos.Cuo_Pagadas LT 0
+      OR Creditos.Fec_Desembolso EQ ? OR STRING(Creditos.Fec_Desembolso) LE " "
+      OR Creditos.Int_Anticipado LT 0
+      OR Creditos.Int_Corrientes LT 0
+      OR Creditos.Int_DifCobro   LT 0 
+      OR Creditos.Int_MoraDifCob LT 0
+      OR Creditos.Int_MorCobrar  LT 0 
+      OR Creditos.Monto          LE 0
+      OR Creditos.Plazo          LE 0
+      OR Creditos.Polizas        LT 0 
+      OR Creditos.Tasa           LE 0
+      OR Creditos.Monto          LT Creditos.Sdo_Capital
+      OR (Creditos.Cuo_Pagadas    GT 0 AND Creditos.Monto EQ Creditos.Sdo_Capital) 
+      OR (Creditos.Int_Anticipado GT 0 AND (Creditos.INT_Corrientes + Creditos.Int_DifCobro GT 0)) THEN DO: 
+         DISPLAY  Creditos.Nit Creditos.Pagare Creditos.Num_credito Cod_credito " Error datos"
+           WITH FRAME F1 NO-LABELS NO-BOX.
+            
+         NEXT.   
+      END.
+
+      FOR EACH TmpAho: DELETE Tmpaho. END. 
+        
+      ASSIGN CuoPag   = 0
+             W_Fec    = Creditos.Fec_Desembolso
+             W_FecIni = Creditos.Fec_Desembolso
+             W_FecProxP = ?
+             W_Mes    = MONTH(W_Fec) + 1
+             W_IntTot   = 0
+             W_CapTot   = 0
+             W_Cap      = Creditos.Monto   /*Inicia Proyectado*/
+             W_Completo = FALSE
+             W_Primera  = FALSE
+             W_SiInt    = FALSE
+             W_DifInt   = 0
+             W_IntFAcu  = 0
+             Creditos.Sdo_CapPag   = Creditos.Monto - Creditos.Sdo_Capital
+             Creditos.Sdo_IntPag   = Creditos.Int_Anticipado
+             Creditos.Capital_Acum = 0.
+             
+           /*W_DiasCau = Creditos.Dias_Causados */ 
+
+      IF Creditos.Cuo_Pagadas GT 0 THEN DO:
+         CuoPag = Creditos.Cuo_Pagadas.
+            
+         RUN HastaCuoPag.
+
+         /*IF W_Completo THEN 
+            NEXT.  /*Está completo PlanPagos, debe tomar otro crédito*/*/
+      END.
+        
+      IF NOT W_Completo THEN
+         RUN HastaPlazo. 
+
+      FIND LAST PlanPagos WHERE PlanPagos.Agencia      = Creditos.Agencia     
+                            AND  PlanPAgos.Nit          = Creditos.Nit         
+                            AND  PlanPagos.Num_Credito  = Creditos.Num_credito 
+                            AND  PlanPagos.Cod_Credito  = Creditos.Cod_Credito 
+                            AND  PlanPagos.Id_PdoMes    = 1 NO-LOCK NO-ERROR.
+      IF AVAIL(PlanPagos) AND PlanPagos.Fec_Vcto + 1 LE W_Fecha THEN DO: 
+         DISPLAY  Creditos.Nit Creditos.Pagare Creditos.Num_credito creditos.Cod_Credito " Error Pdo-Actual"
+           WITH FRAME F3 NO-LABELS NO-BOX.
+            
+         NEXT.   
+      END.
+      ELSE IF NOT AVAIL(PlanPagos) THEN DO:
+         FIND LAST PlanPagos WHERE PlanPagos.Agencia    = Creditos.Agencia     
+                            AND  PlanPAgos.Nit          = Creditos.Nit         
+                            AND  PlanPagos.Num_Credito  = Creditos.Num_credito 
+                            AND  PlanPagos.Cod_Credito  = Creditos.Cod_Credito 
+                            AND  PlanPagos.Nro_Cuota    GE 0 NO-LOCK NO-ERROR.
+         IF AVAIL(PlanPagos) AND PlanPagos.Nro_Cuota NE Creditos.Plazo THEN DO: 
+            DISPLAY  Creditos.Nit Creditos.Pagare Creditos.Num_credito creditos.Cod_Credito " Error Pdo-Ultimo"
+              WITH FRAME F4 NO-LABELS NO-BOX.
+            
+            NEXT.   
+         END.
+         
+         IF NOT AVAIL(PlanPagos) THEN DO: 
+            DISPLAY  Creditos.Nit Creditos.Pagare Creditos.Num_credito Creditos.Cod_Credito " Error Falta Pdo-Ultimo"
+              WITH FRAME F4 NO-LABELS NO-BOX.
+            
+            NEXT.   
+         END.
+
+         CREATE CopPP.
+         BUFFER-COPY PlanPagos TO CopPP.
+         ASSIGN CopPP.Nro_Cuota = PlanPagos.Nro_Cuota + 1
+                CopPP.Id_PdoMes = 1
+                CopPP.Fec_Vcto  = DATE(MONTH(W_Fecha), DAY(Creditos.Fec_Desembolso),YEAR(W_Fecha)).
+
+         IF CopPP.Fec_Vcto + 1 LE W_Fecha THEN
+            CopPP.Fec_Vcto = CopPP.Fec_Vcto + 30.
+
+         CREATE PlanPagos.
+         BUFFER-COPY CopPP TO PlanPagos.
+
+         ASSIGN PlanPagos.Capital_Acum  = Creditos.Monto
+                Creditos.Capital_Acum   = Creditos.Monto
+                PlanPagos.Int_LiqAcum   = Creditos.INT_Corrientes + Creditos.Int_DifCobro
+                PlanPagos.Int_LiqPdo    = 0
+                PlanPagos.Capital_Pdo   = 0
+                PlanPagos.Int_MoraAcum  = Creditos.Int_MorCobrar    
+                PlanPagos.Pagos_IntAcum = Creditos.Int_Anticipado
+                Creditos.Int_LiqAcum    = Creditos.INT_Corrientes + Creditos.Int_DifCobro
+                Creditos.Sdo_Proyectado = 0
+                Creditos.Val_Atraso     = Creditos.Sdo_Capital - Creditos.Sdo_Proyectado
+                Creditos.Cuo_Atraso     = Creditos.Plazo - Creditos.Cuo_Pagadas.                
+      END.
+/*desde acà, para cuadrar Pagados acum de interes para Adelantados*/
+      IF Creditos.INT_Anticipado GT 0 AND Creditos.Sdo_Proyectado GT 0 THEN DO:
+         FIND LAST PlanPagos WHERE PlanPagos.Agencia    = Creditos.Agencia     
+                            AND  PlanPAgos.Nit          = Creditos.Nit         
+                            AND  PlanPagos.Num_Credito  = Creditos.Num_credito 
+                            AND  PlanPagos.Cod_Credito  = Creditos.Cod_Credito 
+                            AND  PlanPagos.Id_PdoMes    = 1 NO-ERROR.
+         IF Creditos.Cuo_Pagadas GE PlanPagos.Nro_Cuota THEN DO:
+            ASSIGN CuoAdel                 = Creditos.Cuo_Pagadas - PlanPagos.Nro_Cuota + 1
+                   Creditos.Sdo_IntPag     = 0
+                   PlanPagos.Pagos_IntAcum = 0
+                   W_Proyectado            = Creditos.Sdo_Proyectado.
+
+            DO K = 1 TO CuoAdel:
+               IF W_Proyectado GT 0 THEN
+                  ASSIGN Creditos.Sdo_IntPag     = Creditos.Sdo_IntPag +
+                                                   ROUND((W_Proyectado * ((Creditos.Tasa / 12) / 100)),0)
+                         PlanPagos.Pagos_IntAcum = Creditos.Sdo_IntPag
+                         W_Proyectado            = W_Proyectado - (Creditos.Cuota - 
+                                                   ROUND((W_Proyectado * ((Creditos.Tasa / 12) / 100)),0)).
+               ELSE LEAVE.
+            END.
+         END.
+      END.
+/*hasta acà*/
+  END.
+MESSAGE "Proceso terminó, Creó Nro.Reg en PlanPagos : " TotReg
+    VIEW-AS ALERT-BOX INFO BUTTONS OK.
+SESSION:SET-WAIT-STATE("").    
+    
+  /*------------------------*/
+ PROCEDURE HastaCuoPag:
+  DO K = 1 TO CuoPag:      
+        
+     W_FecIni = W_Fec.
+
+     RUN FecVcto.
+     
+     CREATE TmpAho.                                               
+     ASSIGN TmpAho.T_Fecha   = W_Fec
+            TmpAho.T_Cuota   = Creditos.Cuota
+            TmpAho.T_IntPdo  = ROUND(W_Cap * (Creditos.Tasa / 12) / 100,0)
+            W_IntTot         = W_IntTot + TmpAho.T_IntPdo
+            TmpAho.T_IntAcu  = W_IntTot                                  
+            TmpAho.T_CapPdo  = (TmpAho.T_Cuota - TmpAho.T_IntPdo)
+            W_CapTot         = W_CapTot + TmpAho.T_CapPdo
+            TmpAho.T_CapAcu  = W_CapTot
+            W_Cap            = W_Cap - TmpAho.T_CapPdo      /*Nuevo Proyectado*/
+            W_Mes            = MONTH(W_Fec) + 1.  
+            
+     IF K = CuoPag OR W_Fec GE W_Fecha OR W_Cap LE 0 THEN DO:  
+        RUN CrearPlan.
+
+        IF W_Fec + 1 LE W_Fecha THEN DO:    /*Ya cumplidos*/
+           ASSIGN PlanPagos.Id_PdoMes          = 2  
+                  PlanPagos.Capital_Acum       = W_CapTot 
+                  PlanPagos.Capital_Pdo        = W_CapTot
+                  PlanPagos.Cuo_Pagas          = CuoPag
+                  PlanPagos.Fec_ProxPago       = W_Fec
+                  PlanPagos.Pagos_CapitalAcum  = Creditos.Monto - Creditos.Sdo_capital
+                  PlanPagos.Pagos_CapitalPdo   = Creditos.Monto - Creditos.Sdo_capital
+                  Creditos.Capital_Acum        = W_CapTot
+                  Creditos.Sdo_Proyectado      = Creditos.Monto - Creditos.Capital_Acum
+                  Creditos.Fec_Pago       = W_Fec.
+
+           IF Creditos.INT_Corrientes GT 0 OR Creditos.Int_DifCobro GT 0 THEN DO:
+              ASSIGN PlanPagos.Int_LiqAcum = Creditos.INT_Corrientes + Creditos.Int_DifCobro
+                     PlanPagos.Int_LiqPdo  = Creditos.INT_Corrientes + Creditos.Int_DifCobro
+                     Creditos.Int_LiqAcum  = Creditos.INT_Corrientes + Creditos.Int_DifCobro
+                     W_SiInt               = TRUE
+                     W_DifInt              = 0
+                     W_IntFAcu             = 0.
+
+              IF PlanPagos.Int_LiqPdo GT TmpAho.T_IntPdo THEN
+                 ASSIGN PlanPagos.Int_LiqAcum = TmpAho.T_IntPdo 
+                        PlanPagos.Int_LiqPdo  = TmpAho.T_IntPdo
+                        W_DifInt              = Creditos.Int_LiqAcum - TmpAho.T_IntPdo
+                        W_IntFAcu             = TmpAho.T_IntPdo.
+           END.
+            
+           IF Creditos.Int_MorCobrar GT 0 THEN 
+              ASSIGN PlanPagos.Int_MoraAcum = Creditos.Int_MorCobrar    
+                     PlanPagos.Int_MoraPdo  = Creditos.Int_MorCobrar.
+
+           IF Creditos.Int_Anticipado GT 0 THEN
+              ASSIGN PlanPagos.Pagos_IntAcum = Creditos.Int_Anticipado
+                     PlanPagos.Pagos_IntPdo  = Creditos.Int_Anticipado.
+
+           ASSIGN W_FecProxP = W_Fec
+                  W_MesPP    = MONTH(W_FecProxP) + 1.
+
+           RUN FecProxP.
+
+           ASSIGN PlanPagos.Fec_ProxPago = W_FecProxP
+                  Creditos.Fec_Pago      = W_FecProxP.
+
+        END.
+        ELSE DO: /*Es el que transcurre,  si Int-Anticip gt 0 y DiasInt-Anticp gt 30 hallar Fec-ProxPag*/
+           ASSIGN PlanPagos.Id_PdoMes          = 1
+                  PlanPagos.Capital_Acum       = W_CapTot - TmpAho.T_CapPdo
+                  PlanPagos.Capital_Pdo        = 0
+                  PlanPagos.Cuo_Pagas          = CuoPag
+                  PlanPagos.Fec_ProxPago       = W_Fec
+                  PlanPagos.Pagos_CapitalAcum  = Creditos.Monto - Creditos.Sdo_capital
+                  PlanPagos.Pagos_CapitalPdo   = Creditos.Monto - Creditos.Sdo_capital
+                  Creditos.Capital_Acum        = W_CapTot - TmpAho.T_CapPdo
+                  Creditos.Sdo_Proyectado      = Creditos.Monto - Creditos.Capital_Acum
+                  Creditos.Val_Atraso          = Creditos.Sdo_Capital - Creditos.Sdo_Proyectado
+                  Creditos.Fec_Pago            = W_Fec.
+
+           IF Creditos.INT_Corrientes GT 0 OR Creditos.Int_DifCobro GT 0 THEN
+              ASSIGN PlanPagos.Int_LiqAcum = Creditos.INT_Corrientes + Creditos.Int_DifCobro
+                     PlanPagos.Int_LiqPdo  = 0
+                     Creditos.Int_LiqAcum  = Creditos.INT_Corrientes + Creditos.Int_DifCobro.
+
+           IF Creditos.Int_Anticipado GT 0 THEN
+              ASSIGN PlanPagos.Pagos_IntAcum = Creditos.Int_Anticipado
+                     PlanPagos.Pagos_IntPdo  = Creditos.Int_Anticipado.
+
+           IF Creditos.Int_MorCobrar GT 0 THEN 
+              ASSIGN PlanPagos.Int_MoraAcum = Creditos.Int_MorCobrar    
+                     PlanPagos.Int_MoraPdo  = Creditos.Int_MorCobrar.  
+
+           ASSIGN W_FecProxP = W_Fec
+                  W_MesPP    = MONTH(W_FecProxP) + 1.
+
+           RUN FecProxP.
+
+           ASSIGN PlanPagos.Fec_ProxPago = W_FecProxP
+                  Creditos.Fec_Pago      = W_FecProxP
+                  Creditos.Cuo_atraso    = PlanPagos.Nro_Cuota - CuoPag - 1.
+           
+           IF K LT Creditos.Plazo THEN DO:   /*Se deben llenar los futuros de una vez.queda completo*/
+              ASSIGN W_RowIDPP = ROWID(PlanPagos)       /*Si CuoPag GT K Guardar FechaVcto para FecProxPago*/
+                     W_FecPP   = ?.
+
+              DO J = K + 1 TO Creditos.Plazo:
+                 W_FecIni = W_Fec.
+                 
+                 RUN FecVcto.
+                 RUN CrearPlan.
+                 ASSIGN W_Mes               = MONTH(W_Fec) + 1
+                        PlanPagos.Nro_Cuota = J.
+
+                 IF CuoPag GT K AND CuoPag EQ J THEN
+                    W_FecPP = W_Fec.
+              END.
+              
+              IF W_FecPP NE ? THEN DO:
+                 FIND FIRST PlanPagos WHERE ROWID(PlanPagos) EQ W_RowidPP NO-ERROR.
+                 ASSIGN PlanPagos.Fec_ProxPago = W_FecPP
+                        Creditos.Fec_Pago      = W_FecPP.
+              END.
+
+              W_Completo = TRUE.
+
+           END.
+        
+        END.
+        LEAVE.               
+     END. 
+  END. /*Fin del DO*/
+ END PROCE.
+
+ /*-----------------------------*/  
+ PROCEDURE HastaPlazo:
+    DEFI VAR W_FecVja AS DATE.
+
+    IF W_FecProxP NE ? THEN
+       W_FecVja = W_FecProxP.
+    ELSE DO:
+       ASSIGN W_FecProxP = W_Fec
+              W_MesPP    = MONTH(W_FecProxP) + 1.
+
+       RUN FecProxP.
+       W_FecVja = W_FecProxP.
+    END.
+
+    DO K = CuoPag + 1 TO Creditos.Plazo:
+       W_FecIni = W_Fec.
+
+       RUN FecVcto.                                                               
+                                                                                  
+       CREATE TmpAho.                                                             
+       ASSIGN TmpAho.T_Fecha   = W_Fec                                            
+              TmpAho.T_Cuota   = Creditos.Cuota                                   
+              TmpAho.T_IntPdo  = ROUND(W_Cap * (Creditos.Tasa / 12) / 100,0)
+              W_IntTot         = W_IntTot + TmpAho.T_IntPdo                       
+              TmpAho.T_IntAcu  = W_IntTot                                         
+              TmpAho.T_CapPdo  = (TmpAho.T_Cuota - TmpAho.T_IntPdo)               
+              W_CapTot         = W_CapTot + TmpAho.T_CapPdo                       
+              TmpAho.T_CapAcu  = W_CapTot                                         
+              W_Cap            = W_Cap - TmpAho.T_CapPdo      /*Nuevo Proyectado*/
+              W_Mes            = MONTH(W_Fec) + 1.   
+
+       RUN CrearPlan.
+       ASSIGN PlanPagos.Int_MoraAcum       = Creditos.Int_MorCobrar                           
+              PlanPagos.Pagos_IntAcum      = Creditos.Int_Anticipado                          
+              PlanPagos.Pagos_CapitalAcum  = Creditos.Monto - Creditos.Sdo_capital
+              PlanPagos.Cuo_Pagas          = CuoPag
+              PlanPagos.Fec_ProxPago       = W_FecVja
+              Creditos.Fec_Pago            = W_FecVja.
+       
+       IF W_Fec + 1 LE W_Fecha THEN DO:    /*Ya cumplidos*/ 
+          ASSIGN PlanPagos.Id_PdoMes     = 2
+                 PlanPagos.Capital_Acum  = W_CapTot 
+                 PlanPagos.Capital_Pdo   = TmpAho.T_CapPdo
+                 Creditos.Capital_Acum   = W_CapTot
+                 PlanPagos.Int_LiqAcum   = Creditos.INT_Corrientes + Creditos.Int_DifCobro
+                 Creditos.Int_LiqAcum    = Creditos.INT_Corrientes + Creditos.Int_DifCobro
+                 Creditos.Sdo_Proyectado = Creditos.Monto - Creditos.Capital_Acum.
+
+          /*IF NOT W_SiInt THEN
+             ASSIGN W_SiInt                 = TRUE
+                    PlanPagos.Int_LiqPdo    = Creditos.INT_Corrientes + Creditos.Int_DifCobro.*/
+
+          IF W_DifInt GT 0 THEN DO:
+             IF W_DifInt GT TmpAho.T_IntPdo THEN
+                ASSIGN PlanPagos.Int_LiqPdo  = TmpAho.T_IntPdo
+                       W_IntFAcu             = W_IntFAcu + TmpAho.T_IntPdo
+                       PlanPagos.Int_LiqAcum = W_IntFAcu
+                       W_DifInt              = W_DifInt - TmpAho.T_IntPdo.
+             ELSE 
+                ASSIGN PlanPagos.Int_LiqPdo  = W_DifInt
+                       W_IntFAcu             = W_IntFAcu + W_DifInt
+                       PlanPagos.Int_LiqAcum = W_IntFAcu
+                       W_DifInt              = 0.
+          END.
+       END.
+       ELSE IF NOT W_Primera THEN    /*Transcurriendo*/
+          ASSIGN PlanPagos.Id_PdoMes     = 1
+                 PlanPagos.Capital_Acum  = W_CapTot - TmpAho.T_CapPdo
+                 PlanPagos.Capital_Pdo   = 0
+                 Creditos.Capital_Acum   = PlanPagos.Capital_Acum
+                 Creditos.Sdo_Proyectado = Creditos.Monto - Creditos.Capital_Acum
+                 PlanPagos.Int_LiqAcum   = Creditos.INT_Corrientes + Creditos.Int_DifCobro
+                 Creditos.Int_LiqAcum    = Creditos.INT_Corrientes + Creditos.Int_DifCobro
+                 PlanPagos.Int_LiqPdo    = 0
+                 Creditos.Val_Atraso     = Creditos.Sdo_capital - Creditos.Sdo_Proyectado
+                 W_Primera               = TRUE
+                 Creditos.Cuo_atraso     = PlanPagos.Nro_Cuota - CuoPag - 1.
+       ELSE   /*Futuros*/
+          ASSIGN PlanPagos.Id_PdoMes = 0.
+            
+    END.  /*Fin del DO*/
+ END PROCEDURE.
+
+    
+  /*-----------------------------*/  
+  PROCEDURE FecVcto:                    
+      DEFI VAR W_Ano    AS INTEG FORM "9999".                                                
+      DEFI VAR W_DiaIni AS INTEG FORM "99".                                                  
+                                                                                             
+      ASSIGN W_DiaIni = DAY(Creditos.Fec_Desembolso)
+             W_Ano    = YEAR(W_Fec).                                                         
+                                                                                             
+      IF W_Mes GT 12 THEN                                                                    
+         ASSIGN W_Mes = W_Mes - 12                                                           
+                W_Ano = YEAR(W_Fec) + 1.                                                     
+                                                                                             
+      IF W_DiaIni GT 30 THEN                                                                 
+         W_DiaIni = 30.                                                                      
+                                                                                             
+      IF W_DiaIni GT 28 AND W_Mes EQ 2 THEN                                                  
+         W_DiaIni = 28.                                                                      
+                                                                                             
+      ASSIGN W_Fec = DATE (W_Mes,W_DiaIni,W_Ano).                                            
+  END PROCEDURE.  
+
+
+  /*-----------------------------*/  
+  PROCEDURE FecProxP:                    
+      DEFI VAR W_Ano    AS INTEG FORM "9999".                                                
+      DEFI VAR W_DiaIni AS INTEG FORM "99".                                                  
+                                                                                             
+      ASSIGN W_DiaIni = DAY(Creditos.Fec_Desembolso)
+             W_Ano    = YEAR(W_Fec).                                                         
+                                                                                             
+      IF W_MesPP GT 12 THEN                                                                    
+         ASSIGN W_MesPP = W_MesPP - 12                                                           
+                W_Ano   = YEAR(W_FecProxP) + 1.                                                     
+                                                                                             
+      IF W_DiaIni GT 30 THEN                                                                 
+         W_DiaIni = 30.                                                                      
+                                                                                             
+      IF W_DiaIni GT 28 AND W_MesPP EQ 2 THEN                                                  
+         W_DiaIni = 28.                                                                      
+                                                                                             
+      ASSIGN W_FecProxP = DATE (W_MesPP,W_DiaIni,W_Ano).                                            
+  END PROCEDURE.  
+    
+/*------------------------*/
+  PROCEDURE CrearPlan:
+     CREATE PlanPagos.
+     ASSIGN PlanPagos.Nro_Cuota    = K 
+            PlanPagos.Agencia      = Creditos.Agencia          
+            PlanPAgos.Nit          = Creditos.Nit              
+            PlanPagos.Num_Credito  = Creditos.Num_credito          
+            PlanPagos.Pagare       = Creditos.Pagare        
+            PlanPagos.Cod_Credito  = Creditos.Cod_Credito           
+            PlanPagos.Tip_Credito  = Creditos.Tip_Credito
+            PlanPagos.Fec_Ini      = W_FecIni
+            PlanPagos.Fec_Vcto     = W_Fec            
+            /*PlanPagos.Fec_ProxPago = */
+            PlanPagos.Cuota        = Creditos.Cuota            
+            PlanPagos.Tasa         = Creditos.Tasa             
+            PlanPagos.Plazo        = Creditos.Plazo            
+            PlanPagos.Monto        = Creditos.Monto            
+            PlanPagos.Id_PdoMes    = 0
+            TotReg = TotReg + 1.
+  END PROCE.
+

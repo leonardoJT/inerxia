@@ -1,0 +1,100 @@
+/*******************************************************************
+ PROCEDIMIENTO: cheque
+ *******************************************************************/
+DEFINE INPUT PARAMETER P_Vctipo  AS CHARACTER FORMAT "X(1)"  NO-UNDO.
+DEFINE INPUT PARAMETER P_Nit     AS CHARACTER NO-UNDO.
+DEFINE INPUT PARAMETER P_Trans   AS INTEGER NO-UNDO.
+/***************************/
+DEFINE INPUT PARAMETER P_Monto1  AS CHAR FORMAT "X(60)".
+DEFINE INPUT PARAMETER P_Monto2  AS CHAR FORMAT "X(60)".
+DEFINE INPUT PARAMETER P_Nombre  AS CHAR FORMAT "X(90)".
+DEFINE INPUT PARAMETER P_Ciudad  AS CHAR FORMAT "X(12)".
+DEFINE INPUT PARAMETER P_Valor   AS DECIMAL FORMAT "*,***,***,***.99".
+DEFINE INPUT PARAMETER P_Coment  AS CHAR FORMAT "X(60)".
+
+DEFINE VARIABLE Ano AS character FORMAT "X(4)".
+DEFINE VARIABLE P_Nom2 LIKE P_Nombre.
+DEFINE VARIABLE P_Val2 LIKE P_Valor.
+DEFINE VARIABLE P_Tit1 AS CHARACTER FORMAT "X(18)" INITIAL "A Favor de      : ".
+DEFINE VARIABLE P_Tit2 AS CHARACTER FORMAT "X(18)" INITIAL "Por un valor de : ".
+DEFINE VAR procname  AS CHARACTER FORMAT "X(132)" INITIAL "temporal.txt".
+ DEFINE VAR W_Rpta             AS   LOGICAL. 
+
+ {Incluido\VARIABLE.I "SHARED"}
+
+ASSIGN Ano     = STRING(YEAR(W_Fecha))
+       P_Val2  = P_Valor
+       P_Nom2  = P_Nombre.
+
+ASSIGN P_Nombre = TRIM(P_Nombre) + " **************************".
+IF TRIM(P_Monto2) = "" THEN
+   ASSIGN P_Monto1 = TRIM(P_Monto1) + " ****"
+          P_Monto2 = "***************************".
+ELSE
+   ASSIGN P_Monto2 = TRIM(P_Monto2) + "*****".
+
+  DEFINE VARIABLE Cheque AS CHARACTER FORMAT "X(50)".
+  Cheque = W_PathSpl + "F_Cheque.Lst".
+
+  DEFINE VAR W_Dispositivo AS CHARACTER INITIAL "P". 
+
+  RUN P-DisPos IN W_Manija (INPUT-OUTPUT Cheque, INPUT-OUTPUT W_Dispositivo).
+  IF W_Dispositivo = "" THEN
+     RETURN.
+  IF W_Dispositivo = "I" THEN
+   DO:
+     Cheque = "Printer".
+     SYSTEM-DIALOG PRINTER-SETUP.
+   END.
+
+  OUTPUT TO VALUE(Cheque) NO-ECHO PAGED PAGE-SIZE 40. /*22*/
+  IF P_Valor GT 0 THEN
+   DO:
+    DISPLAY 
+      Ano                        AT ROW 4 COL 34 FORMAT "X(4)" 
+      STRING(MONTH(TODAY),">9")  AT ROW 4 COL 40 FORMAT "X(2)" 
+      STRING(DAY(TODAY),">9")    AT ROW 4 COL 44 FORMAT "X(2)" 
+      P_Valor                    AT ROW 4 COL 50
+      P_Nombre                   AT ROW 6 COL 7 
+      P_Monto1                   AT ROW 9 COL 7
+      P_Monto2                   AT ROW 11 COL 1
+       "*"                       AT ROW 16 COL 1
+      P_Coment                   AT ROW 25 COL 2
+      P_Tit1                     AT ROW 26 COL 2
+      P_Nom2                     AT ROW 26 COL 25
+      P_Tit2                     AT ROW 27 COL 2
+      P_Val2                     AT ROW 27 COL 25
+      TODAY                      AT ROW 28 COL 2
+    WITH PAGE-TOP FRAME  F-cheq width 120 NO-LABELS NO-BOX USE-TEXT.
+   END.
+  ELSE  
+   DO:
+    DISPLAY 
+       "*"                        AT ROW 16 COL 1
+    WITH PAGE-TOP FRAME  F-cheq width 120 NO-LABELS NO-BOX USE-TEXT.
+   END.
+OUTPUT CLOSE.
+
+  IF W_Dispositivo = "P" THEN  
+     RUN Ptlla_Imprimir.R(INPUT Cheque).
+
+  IF W_Dispositivo <> "A" THEN
+    OS-DELETE VALUE(Cheque).
+
+/*output to c:\docmemo\cheque1.txt.
+PUT CONTROL chr(27) + "@". 
+PUT CONTROL chr(27) + "f" + chr(1) + chr(37) + chr(10). 
+PUT CONTROL chr(27) + "!" + chr(1). 
+PUT CONTROL chr(27) + "c" + "0" + chr(4).
+PUT CONTROL chr(27) + "L".
+PUT CONTROL chr(27) + "V" + chr(1).
+PUT CONTROL chr(27) + "T" + chr(51).
+
+PUT SKIP(1) STRING(YEAR(TODAY) - 1900)   AT 46 FORMAT "X(2)"
+            STRING(MONTH(TODAY),">9")  AT 50 FORMAT "X(2)"
+            STRING(DAY(TODAY),">9")  AT 54 FORMAT "X(2)"
+            P_Valor AT 62 "***" AT 77.
+PUT SKIP P_No mbre AT 8.
+PUT SKIP(1) P_Monto1 AT 10 SKIP(1) P_Monto2 AT 3.
+
+PUT CONTROL chr(12) + chr(12) + chr(0) + chr(13) + chr(0).*/

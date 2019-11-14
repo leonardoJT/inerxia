@@ -1,0 +1,104 @@
+/*se debe ejecutar en la multiactiva */
+MESSAGE "Consolida multiactiva" VIEW-AS ALERT-BOX.
+DEFINE TEMP-TABLE TSALDOM LIKE SAL_CTACON.
+DEFINE TEMP-TABLE TSALDOF LIKE SAL_CTACON.
+DEFINE TEMP-TABLE tcuenta LIKE cuentas.
+/*DISABLE TRIGGERS FOR LOAD OF SAL_CTACON.*/
+
+/* borro consolidado */
+for each sal_ctacon:
+    delete sal_ctacon.
+end.
+
+/* sube cuentas financieras */
+INPUT  FROM c:\info_juriscoop\cuenta.d.
+REPEAT:
+    CREATE tcuenta.
+    IMPORT tcuenta.
+END.
+
+/* ***************************/
+/* 1. baja saldo de multiactiva */
+/* ***************************/
+OUTPUT TO C:\info_juriscoop\SAL_multi.D.
+FOR EACH SAL_CUENTA WHERE AÑO = 2008:
+    EXPORT SAL_CUENTA.
+END.
+OUTPUT CLOSE.
+/*
+/* ***************************/
+/* 2. baja saldo de Financiera */
+/* ***************************/
+CONNECT financiera.
+OUTPUT TO C:\SAL_FINAN.D.
+FOR EACH SAL_CUENTA WHERE AÑO = 2008:
+    EXPORT SAL_CUENTA.
+END.
+*/
+/* ***************************/
+/* 3. Leo los temporal  */
+/* ***************************/
+/* 3.1 multiactiva               */
+INPUT FROM C:\info_juriscoop\SAl_MULTI.D.
+REPEAT:
+    CREATE TSALDOM.
+    IMPORT TSALDOM.
+END.
+
+/* 3.2 FINANCIERA               */
+INPUT FROM C:\info_juriscoop\SAL_FINAN.D.
+REPEAT:
+    CREATE TSALDOF.
+    IMPORT TSALDOF.
+END.
+
+DEFINE VARIABLE ctamul LIKE cuentas.cuenta.
+/* ***************************/
+/* 4. Consolido en temporal  */
+/* ***************************/
+OUTPUT TO c:\info_juriscoop\inconcuenta.txt.
+DEFINE VARIABLE KI AS INTEGER.
+FOR EACH TSALDOF :
+    FIND FIRST TCUENTA WHERE TCUENTA.CUENTA = TSALDOF.CUENTA NO-LOCK NO-ERROR.
+    IF AVAILABLE(tCUENTA) THEN DO:
+        ctamul = TCUENTA.Cta_Homologada.
+        IF tsaldof.cuenta = "612005" THEN ctamul = "960505".
+        IF ctamul NE "16909550" THEN DO:
+           IF SUBSTRING(TSALDOF.CUENTA,1,6) = "259570" THEN DO:
+              FIND FIRST TCUENTA WHERE TCUENTA.CUENTA = Tcuenta.cta_homologada NO-LOCK NO-ERROR.
+              IF AVAILABLE(tcuenta) THEN
+                 ctamul = TCUENTA.Cta_Homologada.
+              ELSE DISPLAY tsaldof.cuenta "no existe en cuentas".
+           END.
+        END.
+        FIND FIRST TSALDOM WHERE tsaldom.agencia = tsaldof.agencia and
+                                 tsaldom.cen_costo = tsaldof.cen_costo AND
+                                 TSALDOM.CUENTA = ctamul NO-ERROR.
+        IF NOT AVAILABLE(TSALDOM) THEN DO:
+           CREATE TSALDOM.
+           ASSIGN TSALDOM.CUENTA = TCUENTA.Cta_Homologada
+                  TSALDOM.CEN_COSTO = TSALDOF.CEN_COSTO
+                  TSALDOM.ANO =       TSALDOF.ANO
+                  TSALDOM.AGENCIA =   TSALDOF.AGENCIA.
+        END.
+        ASSIGN TSALDOM.SAL_INICIAL = TSALDOM.SAL_INICIAL + TSALDOF.SAL_INICIAL.
+        DO KI = 1 TO 12:
+              ASSIGN TSALDOM.DB[KI] = TSALDOM.DB[KI] + TSALDOF.DB[KI]
+                     TSALDOM.CR[KI] = TSALDOM.CR[KI] + TSALDOF.CR[KI].
+        END.
+    END.
+    ELSE DISPLAY TSALDOF.AGENCIA tsaldof.cuenta "no existe en cuentas-1".
+END.
+OUTPUT CLOSE.
+/* ***************************/
+/* 5. LLevo a base de datos Sal_ctacont */
+/* ***************************/
+/* borro archivo sal_ctacon.*/
+
+FOR EACH TSALDOM :
+    CREATE SAL_CTACON.
+    BUFFER-COPY TSALDOM TO SAL_CTACON.
+
+END.
+
+MESSAGE "fin proceso " VIEW-AS ALERT-BOX.

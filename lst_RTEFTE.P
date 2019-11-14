@@ -1,0 +1,30 @@
+    OUTPUT TO C:\rteftenov.TXT.
+    DEFINE VARIABLE totret LIKE mov_ahorros.val_efectivo.
+    FOR EACH mov_ahorros WHERE cod_operacion = 010102042 AND fecha     GE date(11,01,2006) 
+                                                         AND fecha Le date(11,30,2006) 
+                                                         AND COD_AHORRO = 4 
+                                                         AND month(fecha) = 11 /*BREAK BY fecha*/:
+        FIND FIRST AHORROS WHERE AHORROS.NIT = MOV_AHORROS.NIT AND
+                                 AHORROS.CUE_AHORRO = MOV_AHORROS.CUE_AHORRO AND
+                                 AHORROS.COD_AHORRO = 4 NO-ERROR.
+        IF AVAILABLE(AHORROS) THEN DO:
+           PUT  AHORROS.Agencia ";"
+                   AHORROS.Cue_Ahorros ";"
+                   AHORROS.Nit            ";"
+                   AHORROS.FEC_APERTURA      ";"
+                   AHORROS.Fec_UltLiquidacion   ";"
+                   AHORROS.Per_Liquidacion         ";"
+                   AHORROS.PLAZO                      ";"
+                   AHORROS.TASA                          ";"
+                   AHORROS.MONTO_APERTURA  ";"
+                   Val_Efectivo SKIP.
+           ASSIGN totret = totret + val_efectivo.
+        END.
+    /* IF LAST-OF(mov_ahorros.fecha) THEN DO:
+         DISPLAY fecha totret.
+         ASSIGN totret = 0.
+     END.*/
+     
+END.
+DISPLAY totret.
+OUTPUT CLOSE.

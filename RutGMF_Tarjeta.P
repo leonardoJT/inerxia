@@ -1,0 +1,662 @@
+DEFINE INPUT PARAMETER P_GrabarEE AS LOGICAL NO-UNDO. /* False NO Actualiza, True SI  */
+DEFINE INPUT PARAMETER P_Agencia1 AS INTEGER. /* Agencia con la cuel se ingreso al Menu */
+DEFINE INPUT PARAMETER P_Agencia2 AS INTEGER. /* Agencia del Producto que se esta Afectando */
+DEFINE INPUT PARAMETER P_Tipo AS INTEGER FORMAT "9". /* 1 - Ahorros, 2 - Créditos, 3 - Contable, 4 - Inversiones */
+
+/* oakley */
+
+DEF INPUT PARAMETER P_Cod_Ahorro LIKE Ahorros.Cod_Ahorro.
+DEF INPUT PARAMETER P_Nit LIKE Ahorros.Nit.
+DEF INPUT PARAMETER P_Cue_Ahorro LIKE Ahorros.Cue_Ahorro. /* Cue_Ahorro o Cta-Contable */
+DEF INPUT PARAMETER P_CodOpe LIKE Operacion.Cod_Operacion. /* Solo Para las contables */
+DEF INPUT PARAMETER P_Valor LIKE Creditos.Cuota. /* Valor base a aplicarle el GMF  */
+DEF INPUT PARAMETER P_Cpte LIKE Mov_Ahorros.Cpte.
+DEF INPUT PARAMETER P_NumDoc LIKE Mov_Ahorros.Num_Documento.
+DEF INPUT PARAMETER P_Descrip LIKE Mov_Ahorros.Descrip.
+DEF INPUT PARAMETER P_CapInt AS INT FORM "9". /* 0 - Capital, 1 Intereses... Solo Ahorros */
+DEF INPUT PARAMETER P_EfeCheq AS INT FORM "9". /* 0 - Efectivo, 1 - Cheque, 2 - Traslado */
+DEF OUTPUT PARAMETER P_ValorGMF LIKE Creditos.Cuota INIT 0. /* Devuelve el impuesto a cargo del cliente-ahorros */
+
+{Incluido/VARIABLE.I "SHARED"}
+{Incluido/VARCON.I "SHARED"}
+        
+DEF BUFFER BPro_ahorros FOR pro_ahorros.
+DEF VAR W_SubsidioGov AS INT NO-UNDO.
+DEF VAR W_SubsidioUtra AS INT NO-UNDO.
+DEF VAR CtasConfig LIKE Cuentas.Cuenta EXTENT 5.
+DEF VAR GtoImpto LIKE Creditos.Cuota INIT 0.
+DEF VAR GMFCalculado LIKE Creditos.Cuota INIT 0.
+DEF VAR PorAplic LIKE Deducible.Valor.
+DEF VAR W_Valor LIKE Creditos.Cuota INIT 0.
+DEF VAR BaseClient LIKE Creditos.Cuota INIT 0.
+DEF VAR BaseEntid LIKE Creditos.Cuota INIT 0.
+DEF VAR W_Cta LIKE Cuentas.Cuenta.
+DEF VAR W_AcuRet LIKE Mov_GMF.VrAcum_RetMes INIT 0.
+DEF VAR W_NvaBase LIKE Ahorros.Val_RetMes INIT 0.
+DEF VAR W_Val_RetMes LIKE Ahorros.Val_RetMes INIT 0.
+DEF VAR W_NvaBaseExe LIKE Ahorros.Val_RetMes INIT 0.
+DEF VAR W_BaseCliente LIKE Ahorros.Val_RetMes INIT 0.
+DEF VAR W_BaseUTRA LIKE Ahorros.Val_RetMes INIT 0.
+
+FIND FIRST Operacion WHERE Operacion.Cod_operacion EQ P_CodOpe NO-LOCK NO-ERROR.
+IF AVAIL Operacion THEN
+    FIND FIRST Deducible WHERE Deducible.Cod_Deducible EQ Operacion.Cod_Deducible NO-LOCK NO-ERROR.
+
+IF AVAIL Deducible THEN
+    PorAplic = Deducible.Valor.
+
+IF NOT AVAIL Operacion OR NOT AVAIL Deducible THEN DO:
+    MESSAGE "La operaciòn : " P_CodOpe " debe tener configurado el Deducible GMF." SKIP
+            "Falta està Operaciòn o falta el Deducible. El G.M.F no fue aplicado."
+        VIEW-AS ALERT-BOX ERROR.
+
+    RETURN ERROR.
+END.
+
+IF P_Agencia1 <= 0 OR P_Agencia2 <= 0 OR P_Tipo <= 0 OR P_Nit <= "0" OR P_Cue_Ahorro <= "0" OR P_NumDoc <= "0" OR P_Valor <= 0 OR P_Cpte <= 0 THEN DO:
+    MESSAGE "Los parámetros son obligatorios, revise por favor el llamado al programa RutGMF.r." SKIP
+            "Faltan uno o más parámetros. La deducción del GMF se cancela." SKIP
+            "p_agencia1:" P_Agencia1 SKIP
+            "p_agencia2:" P_Agencia2 SKIP
+            "p_tipo:" P_Tipo SKIP
+            "P_Nit " P_Nit SKIP
+            "P_Cue_Ahorro " P_Cue_Ahorro SKIP
+            "P_NumDoc " P_NumDoc SKIP
+            "P_Valor " P_Valor SKIP
+            "P_Cpte " P_Cpte
+        VIEW-AS ALERT-BOX ERROR.
+
+    RETURN ERROR.
+END.
+
+IF P_Tipo EQ 1 THEN DO: /* Retiro de Ahorros*/
+    IF P_Cod_Ahorro LE 0 THEN DO:
+        MESSAGE "Los parámetros son obligatorios, revise por favor el llamado al programa RutGMF.P" SKIP
+                "Falta el parámetro Cod-Pdcto para ahorros. El G.M.F no fue aplicado."
+            VIEW-AS ALERT-BOX ERROR.
+
+        RETURN ERROR.
+
+        /* oakley */
+
+    END.
+
+    FIND FIRST Ahorros WHERE Ahorros.Nit EQ P_Nit
+                         AND Ahorros.Cod_Ahorro EQ P_Cod_Ahorro
+                         AND Ahorros.Cue_Ahorro EQ P_Cue_Ahorro
+                         AND Ahorros.Agencia EQ P_Agencia2 NO-ERROR.
+    
+    FIND FIRST Pro_Ahorros WHERE Pro_Ahorros.Cod_Ahorro EQ P_Cod_Ahorro NO-LOCK NO-ERROR.
+
+    IF (NOT AVAIL Ahorros OR NOT AVAIL Pro_Ahorros) AND P_CapInt NE 1 THEN DO:
+        MESSAGE "El Pdcto de ahorros y la Cuenta de Ahorros deben existir activos." SKIP
+                "Revise por favor. El G.M.F no fue aplicado..."
+            VIEW-AS ALERT-BOX ERROR.
+
+        RETURN ERROR.
+    END.
+
+    IF (AVAIL Pro_Ahorros AND Pro_Ahorros.Id_GMF = 2) OR (AVAIL Ahorros AND Ahorros.Id_Tesoro_Nacional) THEN
+        RETURN.
+
+    FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ Pro_Ahorros.Cta_GtoGMF NO-LOCK NO-ERROR.
+    IF AVAIL Cuentas THEN
+        FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ Pro_Ahorros.Cta_XPagarGMF NO-LOCK NO-ERROR.
+
+    IF NOT AVAIL Cuentas THEN DO:
+        MESSAGE "Para el Cod-Producto ahorros :" P_Cod_Ahorro SKIP
+                "Las Ctas-Contables : " Pro_Ahorros.Cta_GtoGMF " Y " Pro_Ahorros.Cta_XPagarGMF SKIP
+                "Cuentas-Contables para GastoGMF y CxPGMF ...deben existir activas." SKIP
+                "Revise por favor. El G.M.F no fue aplicado..."
+            VIEW-AS ALERT-BOX ERROR.
+
+        RETURN ERROR.
+    END.
+
+    FIND FIRST CortoLargo WHERE CortoLargo.Agencia EQ P_Agencia2
+                            AND CortoLargo.Clase_Producto EQ 1
+                            AND CortoLargo.Cod_Producto EQ Pro_Ahorros.Cod_Ahorro
+                            AND CortoLargo.Plazo_Inicial GE 0 NO-LOCK NO-ERROR.
+    ASSIGN CtasConfig[1] = CortoLargo.Cta_AsoAd       /*Cta-base de Capital-Retiro*/
+           CtasConfig[2] = Pro_Ahorros.Cta_GtoGMF     /*Cta-Gasto Entidad*/
+           CtasConfig[3] = Pro_Ahorros.Cta_XPagarGMF. /*Cta x Pag GMF*/
+    
+    IF Pro_Ahorros.Tip_Ahorro NE 4 THEN DO:
+        FIND FIRST Liqui_Int WHERE Liqui_Int.Clase_Producto EQ 1 AND Liqui_Int.Cod_Producto EQ CortoLargo.Cod_Producto NO-LOCK NO-ERROR.
+        CtasConfig[4] = Liqui_Int.CtaCr_LiqAso.  /*Cta-base de Los Intereses Por Pagar-Retiro*/
+    END.
+    IF ERROR-STATUS:ERROR THEN DO:
+        MESSAGE "Para el Cod-Producto ahorros :" P_Cod_Ahorro SKIP
+                "Las configuraciones en Corto largo y Liqui_Int deben estar completas."
+                "Revise por favor. El G.M.F no fue aplicado..."
+            VIEW-AS ALERT-BOX ERROR.
+
+        RETURN ERROR.
+    END.
+
+    FIND FIRST Clientes WHERE Clientes.Nit EQ P_Nit NO-LOCK NO-ERROR.
+
+    RUN EEAhorros NO-ERROR.
+
+    IF ERROR-STATUS:ERROR THEN DO:
+        MESSAGE "El procedimiento EEAhorros Presentó errores"
+            VIEW-AS ALERT-BOX INFO BUTTONS OK.
+
+        RETURN ERROR.
+    END.
+END.
+ELSE
+    IF P_Tipo EQ 3 THEN DO: /*Dèbitos Contables*/
+        FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ P_Cue_Ahorro NO-LOCK NO-ERROR.
+        FIND FIRST Operacion WHERE Operacion.Cod_Operacion EQ P_CodOpe NO-LOCK NO-ERROR.
+        IF NOT AVAIL Cuentas OR NOT AVAIL Operacion THEN DO:
+            MESSAGE "La Cuenta Contable: " P_Cue_Ahorro " y el Cod-Operaciòn: " P_CodOpe " ...deben existir activas." SKIP
+                    "Revise por favor. El G.M.F no fue aplicado..."
+                VIEW-AS ALERT-BOX ERROR.
+            
+            RETURN ERROR.
+        END.
+
+        FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ Operacion.Cta_GtoGMF NO-LOCK NO-ERROR.
+        IF AVAIL Cuentas THEN
+            FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ Operacion.Cta_XPagarGMF NO-LOCK NO-ERROR.
+
+        IF NOT AVAIL Cuentas THEN DO:
+            MESSAGE "Para el Cod-Operaciòn :" P_CodOpe SKIP
+                    "Las Ctas-Contables : " Operacion.Cta_GtoGMF " Y " Operacion.Cta_XPagarGMF SKIP
+                    "Cuentas-Contables para GastoGMF y CxPGMF ...deben existir activas." SKIP
+                    "Revise por favor. El G.M.F no fue aplicado..."
+                VIEW-AS ALERT-BOX ERROR.
+            
+            RETURN ERROR.
+        END.
+
+        ASSIGN CtasConfig[1] = P_Cue_Ahorro             /*CtaContable base*/
+               CtasConfig[2] = Operacion.Cta_GtoGMF     /*Cta-Gasto Entidad*/
+               CtasConfig[3] = Operacion.Cta_XPagarGMF. /*Cta x Pag GMF*/
+
+        RUN EEACargoEntidad NO-ERROR.
+
+        IF ERROR-STATUS:ERROR THEN DO:
+            MESSAGE "El procedimiento EEACargoEntidad presentó errores"
+                VIEW-AS ALERT-BOX INFO BUTTONS OK.
+
+            RETURN ERROR.
+        END.
+    END.
+    ELSE DO:
+        MESSAGE "El GMF solo està programado para Ahorros y Contables" SKIP
+                "Revise por favor. El G.M.F no fue aplicado" VIEW-AS ALERT-BOX ERROR.
+        
+        RETURN ERROR.
+    END.
+
+RETURN.  /*Fin Prog.principal*/
+
+PROCEDURE EEACargoEntidad: /*GMF Contables y ahorros a cargo de la Entidad*/
+    ASSIGN GtoImpto = ROUND(P_Valor * PorAplic,0)
+           P_ValorGMF = 0
+           BaseEntid = P_Valor
+           W_Valor = GtoImpto
+           W_Cta = CtasConfig[2].
+
+    IF NOT P_GrabarEE THEN DO:
+        P_ValorGMF = 0.
+        RETURN.
+    END.
+
+    IF W_Valor GT 0 THEN DO:
+        RUN DetalleEE.  /*Mov_GMF*/
+        RUN MovCont.   /*Mov_Contable Db */
+        RUN MovCont.   /*Mov_Contable Cr*/
+
+        ASSIGN Mov_Contable.Cuenta = CtasConfig[3]
+               Mov_Contable.Db = 0
+               Mov_Contable.Cr = W_Valor.
+    END.
+
+    RETURN.
+END PROCEDURE.
+
+PROCEDURE EEAhorros:  /*GMF Ahorros*/
+    /*giocam*/
+    FIND FIRST BPro_Ahorros WHERE BPro_Ahorros.tip_ahorro EQ Ahorros.tip_ahorro
+                              AND BPro_Ahorros.Cod_ahorro EQ Ahorros.Cod_ahorro NO-LOCK NO-ERROR.
+    IF AVAIL BPro_Ahorros THEN DO:
+        IF Ahorros.Exento_3xm THEN
+            W_SubsidioGov  = BPro_Ahorros.VrTope_ExentoEE.
+
+        IF Ahorros.Id_Mesada_Pensional THEN
+            W_SubsidioUtra = BPro_Ahorros.VrTope_ExentoPension.
+        ELSE
+            IF Ahorros.Id_Subsidio_Entidad THEN DO:
+                IF Ahorros.Ind_Tipo_Subsidio = 1 THEN
+                    W_SubsidioUtra = BPro_Ahorros.Vr_Subsidio_GMF.
+                ELSE
+                    W_SubsidioUtra = 999999999.
+            END.
+    END.
+
+    /*Enero 2/07 GAER*/
+    IF P_CapInt EQ 0 /* 0 Capital, 1 Intereses...Solo Ahorros */ AND AVAIL Ahorros
+                                                                 AND Ahorros.Exento_3xm /* Cuenta Subsidiada x el Gobierno */
+                                                                 AND (Ahorros.Val_RetMes + P_Valor) LE W_SubsidioGov /* Todo el retiro es exento */ THEN DO:
+        P_ValorGMF = 0.
+
+        IF NOT P_GrabarEE THEN
+            RETURN.
+
+        RUN DetalleEE.  /*Mov_GMF*/
+        
+        Mov_GMF.VrBase_Exenta = P_Valor.
+
+        RETURN.
+    END.
+    ELSE
+        IF P_CapInt EQ 0 AND ((AVAIL Ahorros AND Ahorros.Exento_3xm) OR (AVAIL Ahorros AND Ahorros.Id_Subsidio_Entidad)) THEN DO:
+            /*IF Ahorros.Val_RetMes GE Pro_Ahorros.VrTope_ExentoEE THEN DO: Total retiro es grabado a cargo del cliente */
+            IF W_SubsidioGov > 0 AND W_SubsidioUtra > 0 THEN DO:
+                /* Retiros CON Subsidio del Gobierno y CON Subsidio de la Entidad */
+                RUN Ver_Ahorros1.
+                RETURN.
+            END.
+
+            IF W_SubsidioGov > 0 AND W_SubsidioUtra = 0 THEN DO:
+                /* Retiros CON Subsidio del Gobierno y SIN Subsidio de la Entidad */
+                RUN Ver_Ahorros2.
+                RETURN.
+            END.
+
+            IF W_SubsidioGov = 0 AND W_SubsidioUtra > 0 THEN DO:
+                /* Retiros SIN Subsidio del Gobierno y CON Subsidio de la Entidad */
+                W_Val_RetMes = Ahorros.Val_RetMes.
+                
+                RUN Ver_Ahorros3.
+                RETURN.
+            END.
+        END.
+
+    /*Hasta aca Enero 2/07 GAER*/
+    IF AVAIL Ahorros AND Ahorros.Exento_3xm
+                      OR (P_CapInt EQ 1 AND NOT AVAIL Ahorros)
+                      OR (P_CapInt EQ 1 AND AVAIL Ahorros AND Ahorros.Tip_Ahorro EQ 3)
+                      OR (P_CapInt NE 1 AND Pro_Ahorros.Id_GMF EQ 0) THEN DO:
+        RUN EEACargoEntidad NO-ERROR.
+        IF ERROR-STATUS:ERROR THEN DO:
+            MESSAGE "Procedimiento EEACargoEntidad presentó errores(2)"
+                VIEW-AS ALERT-BOX INFO BUTTONS OK.
+            
+            RETURN ERROR.
+        END.
+
+        P_ValorGMF = 0.
+
+        RETURN.
+    END.
+
+    /*Continua ahorros solo a cargo del cliente */
+    IF (Pro_Ahorros.Id_GMF NE 0 AND P_CapInt NE 1) THEN DO:  /*El total GMF es a cargo del Cliente*/
+        IF Ahorros.Sdo_Disponible LE 0 THEN DO:
+            /*MESSAGE "No existe Saldo-disponible para Debitar El GMF + el Retiro de la Cta-Ahorros." SKIP
+                    "Revise por favor. El G.M.F no fue aplicado..."
+                VIEW-AS ALERT-BOX ERROR.
+            
+            RETURN ERROR.*/
+        END.
+
+        ASSIGN GMFCalculado = ROUND(P_Valor * PorAplic,0)
+               P_ValorGMF = GMFCalculado
+               BaseClient = P_Valor
+               W_AcuRet = Ahorros.Val_RetMes
+               W_Valor = GMFCalculado
+               W_Cta = CtasConfig[1] NO-ERROR.
+
+        IF NOT P_GrabarEE THEN DO:
+            IF GMFCalculado LE 0 THEN
+                P_ValorGMF = 0.
+
+            RETURN.
+        END.
+
+        IF W_Valor LE 0 THEN
+            RETURN.
+
+        IF P_CapInt EQ 1 AND Ahorros.INT_Pagar - GMFCalculado LT 0 THEN DO:
+            MESSAGE "No existe Saldo en Intereses X_Pagar para Debitar El GMF." SKIP
+                    "Revise por favor. El G.M.F no fue aplicado.."
+                VIEW-AS ALERT-BOX ERROR.
+
+            RETURN ERROR.
+        END.
+        ELSE
+            IF Ahorros.Sdo_Disponible - GMFCalculado LT 0 THEN DO:
+                /*MESSAGE "No existe Saldo-disponible para Debitar El GMF." SKIP
+                        "Revise por favor. El G.M.F no fue aplicado.."
+                    VIEW-AS ALERT-BOX ERROR.
+
+                RETURN ERROR.*/
+            END.
+
+        IF P_CapInt EQ 1 THEN
+            W_Cta = CtasConfig[4]. /*Por Intereses a Cargo del Cliente*/
+
+        RUN DetalleEE. /*Mov_GMF*/
+
+        RUN MovCont.   /*Mov_Contable Db */
+        RUN MovCont.   /*Mov_Contable Cr*/
+
+        ASSIGN Mov_Contable.Cuenta = CtasConfig[3]
+               Mov_Contable.Db = 0
+               Mov_Contable.Cr = W_Valor.
+
+        RUN ActAhorros.  /*Actualiza Dèbito en Cta-ahorros y Mov_ahorros*/
+        
+        RETURN.
+    END.
+END PROCEDURE.
+
+PROCEDURE Ver_Ahorros1: /* Retiros CON Subsidio del Gobierno y CON Subsidio de la Entidad */
+    /*Total retiro es grabado a cargo del cliente */
+    IF Ahorros.Val_RetMes GE W_SubsidioGov THEN DO:
+        W_Val_RetMes = Ahorros.Val_RetMes - W_SubsidioGov.
+        RUN Ver_Ahorros3.
+    END.
+    ELSE DO:
+        /* Aplica el GMF al valor no subsidiado mirando el subsidio de la entidad */
+        ASSIGN W_NvaBase = (Ahorros.Val_RetMes + P_Valor) - W_SubsidioGov
+               W_NvaBaseExe = P_Valor - W_NvaBase
+               P_Valor = W_NvaBase.
+
+        RUN Ver_Ahorros3.
+    END.
+END PROCEDURE.
+
+PROCEDURE Ver_Ahorros2: /* Retiros CON Subsidio del Gobierno y SIN Subsidio de la Entidad */
+    IF Ahorros.Val_RetMes GE W_SubsidioGov THEN DO: /*Total retiro es grabado a cargo del cliente */
+        ASSIGN GMFCalculado = ROUND(P_Valor * PorAplic,0)
+               P_ValorGMF = GMFCalculado
+               BaseClient = P_Valor
+               W_AcuRet = Ahorros.Val_RetMes
+               W_Valor = GMFCalculado
+               W_Cta = CtasConfig[1] NO-ERROR.
+    END.
+    ELSE DO:  /* Grabado la diferencia */
+        ASSIGN W_NvaBase = (Ahorros.Val_RetMes + P_Valor) - W_SubsidioGov /*giocam*/
+               W_NvaBaseExe = P_Valor - W_NvaBase
+               GMFCalculado = ROUND(W_NvaBase * PorAplic,0)
+               P_ValorGMF = GMFCalculado
+               BaseClient = W_NvaBase
+               W_AcuRet = Ahorros.Val_RetMes
+               W_Valor = GMFCalculado
+               W_Cta = CtasConfig[1] NO-ERROR.
+    END.
+
+    IF NOT P_GrabarEE THEN DO:
+        IF GMFCalculado LE 0 THEN
+            P_ValorGMF = 0.
+        RETURN.
+    END.
+
+    IF Ahorros.Sdo_Disponible - GMFCalculado LT 0 THEN DO:
+        MESSAGE "No existe Saldo-disponible para Debitar El GMF." SKIP
+                "Revise por favor. El G.M.F no fue aplicado.." VIEW-AS ALERT-BOX ERROR.
+
+        RETURN ERROR.
+    END.
+
+    RUN DetalleEE. /*Mov_GMF*/
+
+    Mov_GMF.VrBase_Exenta = W_NvaBaseExe.
+
+    RUN MovCont.   /*Mov_Contable Db */
+    RUN MovCont.   /*Mov_Contable Cr*/
+
+    ASSIGN Mov_Contable.Cuenta = CtasConfig[3]
+           Mov_Contable.Db = 0
+           Mov_Contable.Cr = W_Valor.
+
+    RUN ActAhorros.  /*Actualiza Dèbito en Cta-ahorros y Mov_ahorros*/
+END PROCEDURE.
+
+PROCEDURE Ver_Ahorros3: /* Retiros SIN Subsidio del Gobierno y CON Subsidio de la Entidad */
+    /*Todo el GMF a la DIAN */
+    ASSIGN GMFCalculado = ROUND(P_Valor * PorAplic,0)
+           P_ValorGMF = GMFCalculado
+           BaseClient = P_Valor
+           W_AcuRet = W_Val_RetMes
+           W_Valor = GMFCalculado
+           W_Cta = CtasConfig[3] NO-ERROR.
+
+    /*IF NOT P_GrabarEE THEN DO:
+        IF GMFCalculado LE 0 THEN
+            P_ValorGMF = 0.
+        RETURN.
+    END.*/
+
+    IF P_GrabarEE THEN DO:
+        RUN DetalleEE. /*Mov_GMF*/
+        Mov_GMF.VrBase_Exenta = W_NvaBaseExe.
+    END.
+
+    IF P_GrabarEE THEN DO:
+        RUN MovCont.   /*Mov_Contable Cr*/
+        ASSIGN Mov_Contable.Db = 0
+               Mov_Contable.Cr = W_Valor.
+    END.
+
+    /*Si todo el retiro es subsidiado Graba todo el GMF a cargo de la entidad */
+    IF W_Val_RetMes + P_Valor LE W_SubsidioUtra THEN DO:
+        W_Cta = CtasConfig[2].
+        
+        IF P_GrabarEE THEN DO:
+            RUN DetalleEE. /*Mov_GMF*/
+            RUN MovCont.   /*Mov_Contable Db*/
+        END.
+        ELSE DO:
+            P_ValorGMF = 0.
+            RETURN.
+        END.
+
+    END.
+    ELSE DO:
+        /* Calcula la parte a cargo del cliente y la parte a cargo de la entidad */
+        IF W_Val_RetMes > W_SubsidioUtra THEN
+            W_BaseCliente = P_Valor.
+        ELSE
+            ASSIGN W_BaseCliente = (W_Val_RetMes + P_Valor) - W_SubsidioUtra
+                   W_BaseUTRA = P_Valor - W_BaseCliente.
+
+        /* Graba la parte del GMF a cargo de la entidad */
+        IF W_BaseUTRA > 0 THEN DO:
+            ASSIGN GMFCalculado = ROUND(W_BaseUTRA * PorAplic,0)
+                   P_ValorGMF = GMFCalculado
+                   BaseClient = W_NvaBaseExe
+                   W_AcuRet = W_Val_RetMes
+                   W_Valor = GMFCalculado
+                   W_Cta = CtasConfig[2] NO-ERROR.
+
+            IF P_GrabarEE THEN DO:
+                RUN DetalleEE. /*Mov_GMF*/
+                Mov_GMF.VrBase_Exenta = W_NvaBaseExe.
+            END.
+
+            IF P_GrabarEE THEN
+                RUN MovCont.   /*Mov_Contable Db*/
+        END.
+
+        /* Graba la parte del GMF a cargo del Cliente */
+        ASSIGN GMFCalculado = ROUND(W_BaseCliente * PorAplic,0)
+               P_ValorGMF = GMFCalculado
+               BaseClient = W_NvaBaseExe
+               W_AcuRet = W_Val_RetMes
+               W_Valor = GMFCalculado
+               W_Cta = CtasConfig[1] NO-ERROR.
+
+        IF Ahorros.Sdo_Disponible - GMFCalculado LT 0 THEN DO:
+            MESSAGE "No existe Saldo-disponible para Debitar El GMF." SKIP
+                    "Revise por favor. El G.M.F no fue aplicado.."
+                VIEW-AS ALERT-BOX ERROR.
+
+            RETURN ERROR.
+        END.
+
+        IF P_GrabarEE THEN DO:
+            RUN DetalleEE.  /*Mov_GMF*/
+            Mov_GMF.VrBase_Exenta = W_NvaBaseExe.
+            RUN MovCont.    /*Mov_Contable Db */
+        END.
+
+        IF P_GrabarEE THEN
+            RUN ActAhorros. /*Actualiza Dèbito en Cta-ahorros y Mov_ahorros*/
+        ELSE DO:
+            IF GMFCalculado LE 0 THEN
+                P_ValorGMF = 0.
+            RETURN.
+        END.
+    END.
+END PROCEDURE.
+
+PROCEDURE ActAhorros: /*Debita Cta-Ahorros y graba Mov_Ahorros*/
+    MESSAGE 1
+        VIEW-AS ALERT-BOX INFO BUTTONS OK.
+    IF P_CapInt NE 1 THEN
+        ASSIGN Ahorros.Sdo_Disponible = Ahorros.Sdo_Disponible - GMFCalculado
+               Ahorros.Sdo_Minimo = Ahorros.Sdo_Minimo - GMFCalculado
+               Ahorros.Fec_UltTrans = W_Fecha
+               Ahorros.Val_RetDia = Ahorros.Val_RetDia + GMFCalculado
+               Ahorros.Val_RetMes = Ahorros.Val_RetMes + GMFCalculado.
+    ELSE
+        Ahorros.INT_Pagar = Ahorros.INT_Pagar - GMFCalculado.
+
+    CREATE Mov_Ahorros.
+    ASSIGN Mov_Ahorros.Agencia = Ahorros.Agencia
+           Mov_Ahorros.Age_Destino = P_Agencia1
+           Mov_Ahorros.Age_Fuente = W_Agencia
+           Mov_Ahorros.Cod_Ahorro = Ahorros.Cod_Ahorro
+           Mov_Ahorros.Cue_Ahorros = Ahorros.Cue_Ahorro
+           Mov_Ahorros.Fecha = W_Fecha
+           Mov_Ahorros.Hora = TIME
+           Mov_Ahorros.Nit = Ahorros.Nit
+           Mov_Ahorros.Num_Documento = P_NumDoc
+           Mov_Ahorros.Sdo_Disponible = Ahorros.Sdo_Disponible
+           Mov_Ahorros.Usuario = W_Usuario
+           Mov_Ahorros.Val_Efectivo = GMFCalculado
+           Mov_Ahorros.Cod_Operacion = P_CodOpe
+           Mov_Ahorros.Cpte = P_Cpte
+           Mov_Ahorros.Descrip = "GMF " + P_Descrip.
+        
+    CREATE movProductos.
+    ASSIGN movProductos.agencia = ahorros.agencia
+           movProductos.comprobante = P_Cpte
+           movProductos.estado = 1
+           movProductos.fecha = w_fecha
+           movProductos.id_producto = ahorros.cue_ahorros
+           movProductos.nit = ahorros.nit
+           movProductos.num_documento = INTEGER(P_NumDoc)
+           movProductos.tipo_producto = 1
+           movProductos.tipo_transaccion = 2.
+        
+    IF P_CapInt NE 1 THEN
+        movProductos.sdo_disponible = GMFCalculado.
+    ELSE
+        movProductos.INT_pagar = GMFCalculado.
+
+    MESSAGE 2
+        VIEW-AS ALERT-BOX INFO BUTTONS OK.
+        
+END PROCEDURE.
+
+PROCEDURE DetalleEE: /*Graba detalle en Mov_GMF*/
+  CREATE Mov_GMF.
+  ASSIGN Mov_GMF.Agencia            = P_Agencia2
+         Mov_GMF.Agencia_Tx         = P_Agencia1
+         Mov_GMF.Documento          = P_NumDoc
+         Mov_GMF.Fecha              = W_Fecha
+         Mov_GMF.Hora               = TIME
+         Mov_GMF.Descrip            = "GMF " + P_Descrip
+         Mov_GMF.Id_EfChTras        = P_EfeCheq
+         Mov_GMF.Nit                = P_Nit
+         Mov_GMF.Porc_Impto         = PorAplic
+         Mov_GMF.Renglon            = 0
+         Mov_GMF.Tipo_Pdcto         = P_Tipo
+         Mov_GMF.VrAcum_RetMes      = W_AcuRet
+         Mov_GMF.Cod_Pdcto          = P_Cod_Ahorro
+         Mov_GMF.Cpte               = P_Cpte
+         Mov_GMF.CtaDb_ImptoCliente = CtasConfig[1]
+         Mov_GMF.CtaDb_ImptoEntidad = CtasConfig[2]
+         Mov_GMF.Cta_ContableCr     = CtasConfig[3]
+         Mov_GMF.Cta_PdctoOContab   = P_Cue_Ahorro
+         Mov_GMF.VrBase_Cliente     = BaseClient
+         Mov_GMF.VrBase_Entidad     = BaseEntid
+         Mov_GMF.VrBase_Exenta      = 0
+         Mov_GMF.VrImpto_Cliente    = GMFCalculado
+         Mov_GMF.VrImpto_Entidad    = GtoImpto.
+  IF P_CapInt EQ 1 THEN  /*Solo si es por Intereses de ahorro*/
+     ASSIGN Mov_GMF.Cta_PdctoOContab   = CtasConfig[4]
+            Mov_GMF.CtaDb_ImptoCliente = CtasConfig[4]
+            Mov_GMF.Cod_Pdcto          = 900 + Mov_GMF.Cod_Pdcto.
+END PROCEDURE.
+
+PROCEDURE MovCont: /*Graba Mov_Contable*/
+    
+  CREATE Mov_Contable.
+  ASSIGN Mov_Contable.Agencia       = P_Agencia2             
+         Mov_Contable.Cuenta        = W_Cta
+         Mov_Contable.Nit           = P_Nit
+         Mov_Contable.Fec_Contable  = W_Fecha                        
+         Mov_Contable.Comentario    = "GMF " + P_Descrip 
+         Mov_Contable.Usuario       = W_Usuario                      
+         Mov_Contable.Cen_Costos    = W_Cencosgral                   
+         Mov_Contable.Destino       = P_Agencia1                      
+         Mov_Contable.Comprobante   = P_Cpte         
+         Mov_Contable.Num_Documento = INT(P_NumDoc)
+         Mov_Contable.Doc_Refer     = STRING(P_NumDoc)
+         Mov_Contable.Fec_Grabacion = TODAY                          
+         Mov_Contable.Hora          = TIME                           
+         Mov_Contable.Estacion      = W_Estacion               
+         Mov_Contable.Db            = W_Valor.  
+
+END PROCEDURE.
+  
+PROCEDURE Grabar_TarDeb:
+  DEF INPUT PARAMETER wvlrTrans  LIKE ahorros.sdo_disponible.
+  DEF INPUT PARAMETER wdesTrans  AS CHARACTER.
+  DEF INPUT PARAMETER wtipoTrans AS INT.
+  DEF VAR wvlrmonTD AS CHA INIT '0000000000000'.
+  DEF VAR wsecTD    AS CHA INIT '0000000000000'.
+  DEF VAR wsdoTD    AS CHA INIT '0000000000000'.
+  DEF VAR wdisTD    AS CHA INIT '0000000000000'.
+  DEF VAR wretcode  AS INT INIT -1.
+  IF wtipotrans NE 0 THEN DO:
+     FIND CURRENT ahorros  NO-LOCK NO-ERROR.
+     CREATE TarjetaDebito.
+     ASSIGN TarjetaDebito.Agencia         = w_agencia       
+            TarjetaDebito.Usuario         = w_usuario       
+            TarjetaDebito.Comprobante     = P_Cpte          
+            TarjetaDebito.Num_Documento   = INT(P_NumDoc) 
+            TarjetaDebito.Fec_Contable    = TODAY           
+            TarjetaDebito.Hora            = TIME            
+            TarjetaDebito.Comentario      = wdesTrans
+            TarjetaDebito.Aplicado        = NO       
+            TarjetaDebito.ManBiometrico   = 1        
+            TarjetaDebito.TipoTransaccion = wtipotrans
+            TarjetaDebito.Nit             = P_Nit     
+            TarjetaDebito.Cue_Ahorros     = TRIM(Ahorros.cue_ahorros)
+            TarjetaDebito.TarjetaDB       = Ahorros.TarjetaDB                
+            TarjetaDebito.Monto           = wvlrTrans                        
+            TarjetaDebito.Secuencia       = "000000000000"                   
+            TarjetaDebito.SdoTotal        = 0                                
+            TarjetaDebito.SdoDispon       = 0                                
+            TarjetaDebito.RetCode         = -1.
+     wvlrmonTD = STRING(wvlrtrans,'9999999999999').
+     RUN TranWebCaja(1,wtipotrans,TRIM(ahorros.nit),TRIM(ahorros.cue_ahorros),ahorros.TarjetaDB,
+                     wvlrmonTD,INPUT-OUTPUT wsecTD,INPUT-OUTPUT wsdoTD,INPUT-OUTPUT wdisTD,OUTPUT wretcode).
+     IF wretcode = 0 THEN 
+        ASSIGN TarjetaDebito.Secuencia = wsecTD 
+               TarjetaDebito.SdoTotal  = ROUND(decimal(wsdoTD) / 100, 2)
+               TarjetaDebito.SdoDispon = ROUND(decimal(wdisTD) / 100, 2)
+               TarjetaDebito.RetCode   = wretcode
+               TarjetaDebito.Aplicado  = YES.
+     RELEASE TarjetaDebito.
+  END.
+END PROCEDURE.

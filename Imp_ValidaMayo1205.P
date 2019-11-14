@@ -1,0 +1,112 @@
+/*Programa Imp_Valida.P : Imprime en validadora Formato o Cheque.*/    
+    
+    
+    DEFINE INPUT PARAMETER P_FtoCheq  AS INTEGER FORMAT "9".        /*0 Formato, 1 Cheque*/
+    DEFINE INPUT PARAMETER P_Agencia  AS CHAR    FORMAT "X(3)".
+    DEFINE INPUT PARAMETER P_TipPro   AS INTEGER FORMAT "9".
+    DEFINE INPUT PARAMETER P_Cuenta   AS CHAR    FORMAT "X(14)".
+    DEFINE INPUT PARAMETER P_Descrip  AS CHAR    FORMAT "X(30)".
+    DEFINE INPUT PARAMETER P_Benef    AS CHAR    FORMAT "X(30)".
+    DEFINE INPUT PARAMETER P_NomPto   AS CHAR    FORMAT "X(26)".
+    DEFINE INPUT PARAMETER P_NroTx    AS INTEG   FORMAT "99999999".
+    DEFINE INPUT PARAMETER P_Valor    AS DECIMAL FORMAT "****,***,**9.99".
+    DEFINE INPUT PARAMETER P_VrCheq   AS DECIMAL.
+    DEFINE INPUT PARAMETER P_ICheque  AS CHAR    FORMAT "X(30)".   /*Prog.Ejecutable para el Cheque*/
+    
+   {Incluido/Variable.I "SHARED"}
+
+   {Incluido/VARCON.I   "SHARED"}   
+
+    DEFINE VAR W_FecTra  AS CHAR FORMAT "X(20)".
+    DEFI   VAR EfeCheq   AS CHAR FORMAT "X(12)" INIT " - EFECTIVO".
+    
+    ASSIGN W_FecTra  = " " + STRING(W_Fecha,"99/99/9999") + "-" + STRING(TIME,"HH:MM:SS AM").
+            
+
+    IF P_VrCheq GT 0 THEN
+       EfeCheq = " - CHEQUE".
+
+    IF P_FtoCheq EQ 0 THEN
+       RUN ImpFto.
+    ELSE 
+       RUN ImpCheque.
+
+    RETURN.
+
+PROCEDURE ImpFto:
+    MESSAGE "Inserte Documento Para Validar la Operación" SKIP
+            "Del Producto : " P_NomPto
+            VIEW-AS ALERT-BOX INFORMATION BUTTONS OK TITLE "Validar Transacción".
+
+    REPEAT:
+       OUTPUT TO PRINTER. /*LPT1.*/    /*COM1.*/       /* c:\memosf\valic.txt.*/
+
+       PUT CONTROL CHR(27) + "@". 
+       PUT CONTROL CHR(27) + "f" + CHR(1) + CHR(37) + CHR(10). 
+       PUT CONTROL CHR(27) + "!" + CHR(1). 
+       PUT CONTROL CHR(27) + "c" + "0" + CHR(4).
+       PUT CONTROL CHR(27) + "L".
+       PUT CONTROL CHR(27) + "V" + CHR(1).
+       PUT CONTROL CHR(27) + "T" + CHR(48).
+
+       PUT SKIP(6).
+       PUT "      No.Trans." P_NroTx W_FecTra              SKIP.
+       /*PUT "Agencia:"  P_Agencia SKIP.*/
+       PUT "      Cliente:"  P_Benef                       SKIP.
+       PUT "      Pcto   :"  P_NomPto                      SKIP.
+       PUT "      No.Cuenta: "  P_Agencia "-" P_Cuenta     SKIP.
+       PUT "      Desc." P_Descrip                         SKIP.
+
+       IF P_TipPro EQ 0 THEN
+          PUT "      Valor : " P_Valor
+              EfeCheq SKIP.
+       
+       IF P_TipPro EQ 1 THEN DO:
+          PUT "      Valor     : " P_Valor
+              EfeCheq    SKIP.
+          /*PUT "Disponible: " P_SdoDispo SKIP.*/
+       END.
+       
+       IF P_TipPro EQ 2 THEN 
+          PUT "      Vlr.Pagado:" P_Valor
+              EfeCheq SKIP.
+       
+       IF P_TipPro EQ 4 THEN 
+          PUT "      Vlr.Pagado:" P_Valor
+              EfeCheq SKIP.
+
+       PUT "      Id_Cajero : " W_Usuario.
+       
+
+       PUT CONTROL CHR(12).
+       PUT CONTROL CHR(27) + "q".
+
+       OUTPUT CLOSE.
+
+       RUN MostrarMensaje IN W_Manija(INPUT 262,OUTPUT W_Rpta).
+       IF NOT W_Rpta THEN
+          LEAVE.
+    END.
+
+END PROCEDURE.
+
+
+PROCEDURE ImpCheque:
+    MESSAGE "Inserte Cheque a Imprimir" SKIP
+            "Del Producto : " P_NomPto
+            VIEW-AS ALERT-BOX INFORMATION BUTTONS OK TITLE "Imp-Cheque en Validadora".
+
+    DEFINE VAR W_Cadena AS CHARACTER FORMAT "X(150)".
+    DEFINE VAR W_Monto1 AS CHARACTER FORMAT "X(70)".
+    DEFINE VAR W_Monto2 AS CHARACTER FORMAT "X(70)".
+    DEFINE VAR W_Monto3 AS CHARACTER FORMAT "X(70)".
+    DEFINE VAR W_Rpta   AS LOGICAL.
+
+    RUN MontoEsc.r (INPUT P_Valor, INPUT 0, OUTPUT W_Cadena).
+    RUN PartirValor IN W_Manija (INPUT W_Cadena,INPUT 70,OUTPUT W_Monto1,OUTPUT W_Monto2,OUTPUT W_Monto3).
+   
+    RUN VALUE(P_ICheque) 
+        (W_Monto1, W_Monto2, P_Benef, W_Ciudad, P_Valor, " ", 1).
+                                                 
+
+END PROCEDURE.

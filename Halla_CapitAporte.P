@@ -1,0 +1,169 @@
+/* Programa : Halla_CapitAporte.P.
+   Descrip. : Halla Aportes para Creditos y Promedio de Ah.a la Vista.
+   Junio 8/05 GAER.    
+-------------------------------------------------------------------*/
+   DEFI INPUT  PARAM W_Prod     LIKE Creditos.Cod_Credito.
+   DEFI INPUT  PARAM W_Ced      LIKE Ahorros.Nit.
+   DEFI INPUT  PARAM W_Monto    LIKE Creditos.Monto.
+   DEFI INPUT  PARAM W_CreCanc  LIKE Ahorros.Sdo_Dispon.
+   DEFI OUTPUT PARAM W_SdoApor  LIKE Ahorros.Sdo_Dispon INIT 0.
+   DEFI OUTPUT PARAM W_ReqPtmo  LIKE Ahorros.Sdo_Dispon INIT 0.
+   DEFI OUTPUT PARAM W_PromedDD LIKE Ahorros.Sdo_Dispon INIT 0.
+   DEFI OUTPUT PARAM W_FaltApor LIKE Ahorros.Sdo_Dispon INIT 0.
+   W_FaltApor = 0.
+  IF W_Prod = 540 OR W_Prod = 541 THEN RETURN.
+
+   {Incluido/Variable.I "SHARED"}
+   DEFI VAR W_Falta     LIKE Ahorros.Sdo_Dispon INIT 0.
+   DEFI VAR W_ReqPtmo2  LIKE Ahorros.Sdo_Dispon INIT 0.
+   DEFI VAR W_SdoNav    LIKE Ahorros.Sdo_Dispon INIT 0.
+   DEFI VAR W_FACTOR    AS INTEGER INITIAL 0.
+   DEFI VAR w_vlrcre    AS DECIMAL INITIAL 0.
+   DEFI VAR w_calculo   AS DECIMAL INITIAL 0.
+   
+
+   FIND FIRST Pro_Creditos   WHERE Pro_Creditos.Cod_Credito   EQ W_Prod NO-LOCK NO-ERROR.
+   FIND FIRST Cfg_RegCredito WHERE Cfg_RegCredito.Cod_Credito EQ W_Prod NO-LOCK NO-ERROR.
+
+   FOR EACH Ahorros WHERE Ahorros.Nit        EQ W_Ced                        
+                      AND Ahorros.Tip_Ahorro EQ 4 NO-LOCK:              
+       ASSIGN W_SdoApor = W_SdoApor + (Ahorros.Sdo_Disponible + Ahorros.Sdo_Canje).                                                                 
+   END.
+
+      w_factor = 20.
+   /*CASE W_Prod :
+       WHEN 5 THEN w_factor = 15.
+       WHEN 10 OR WHEN 11 OR WHEN 22 OR WHEN 524 OR WHEN 529 OR WHEN 55 THEN w_factor = 6.
+       WHEN 571 THEN w_factor = 10.
+       WHEN 15 OR WHEN 20 THEN w_factor = 5.
+       WHEN 40 OR WHEN 45 THEN w_factor = 4.
+       WHEN 12 OR WHEN 13 OR WHEN 14 OR WHEN 48 OR WHEN 49 OR WHEN 526 OR WHEN 527 OR WHEN 528 THEN w_factor = 10.
+       WHEN 50 OR WHEN 51 OR WHEN 52 OR WHEN 53 OR WHEN 521 OR WHEN 522 OR WHEN 523 THEN w_factor = 8.
+       WHEN 80 OR WHEN 85 THEN w_factor = 1.
+       WHEN 90 OR WHEN 95 THEN w_factor = 2.
+       WHEN 572 OR WHEN 573 THEN w_factor = 20.
+   END CASE.*/
+   IF w_factor NE 0 THEN DO:
+      /*FOR EACH creditos WHERE creditos.nit = W_Ced AND estado = 2 NO-LOCK:
+        w_vlrcre = w_vlrcre + creditos.sdo_capital.
+      END. */
+      /* W_ReqPtmo = ROUND( (w_monto + w_vlrcre - W_CreCanc) / w_factor,0). */
+      W_ReqPtmo = ROUND(w_monto / w_factor,0). 
+      IF W_ReqPtmo GT w_sdoapor THEN 
+        W_FaltApor = W_ReqPtmo - W_SdoApor.
+      ELSE  
+        W_FaltApor = 0.  
+   END.
+     W_FaltApor = 0. /* no cobra aportes */
+
+   /*FOR EACH Ahorros WHERE Ahorros.Nit        EQ W_Ced                        
+                      AND Ahorros.Cod_Ahorro EQ 4 NO-LOCK:              
+       ASSIGN W_SdoNav = W_SdoNav + (Ahorros.Sdo_Dispon + Ahorros.Sdo_Canje).    /*Aho-Navid*/                                                             
+   END.
+
+
+   FOR EACH Ahorros WHERE Ahorros.Nit                              EQ W_Ced                        
+                      AND Ahorros.Cod_Ahorro                       EQ 3         /*Cta-Aho*/
+                      AND (Ahorros.Sdo_Dispon + Ahorros.Sdo_Canje) GT 0
+                      AND (W_Fecha - Ahorros.Fec_Apertura)         GE 90 NO-LOCK:              
+       RUN Halla_Promedio.                                               
+   END.
+  
+   ASSIGN W_PromedDD = ROUND(W_PromedDD,0)
+          W_ReqPtmo  = W_Monto - (W_SdoNav + W_PromedDD)         
+          W_ReqPtmo  = ROUND(W_ReqPtmo / Pro_Creditos.Multiplicador,0).         
+
+   IF W_SdoApor LT W_ReqPtmo THEN                                      
+      ASSIGN W_FaltApor = W_ReqPtmo - W_SdoApor.          
+   ELSE                                                         
+      W_FaltApor = 0.       
+
+   IF W_MONTO GE 0       AND  W_MONTO LE 1000000 THEN W_ReqPtmo = W_monto * 0.1.
+   IF W_MONTO Gt 1000000 AND  W_MONTO LE 3000000 THEN W_ReqPtmo = W_monto * 0.07.
+   IF W_MONTO Gt 3000000 AND  W_MONTO LE 5000000 THEN W_ReqPtmo = W_monto * 0.05.
+   IF W_MONTO Gt 5000000  THEN W_ReqPtmo = W_monto * 0.03. 
+   
+   IF W_SdoApor LT W_ReqPtmo THEN                                      
+      W_FaltApor = W_ReqPtmo - W_SdoApor.          
+   ELSE                                                         
+      W_FaltApor = 0.     */
+      
+ RETURN.
+
+/*--------Promedio Ult.trimestre Ah.a la vista*/
+PROCEDURE Halla_Promedio:
+    DEFI VAR SdoIni LIKE Mov_Ahorros.Sdo_Dispon INIT 0.
+    DEFI VAR FecControl AS DATE INIT ?.
+    DEFI VAR W_Dias     AS INTEG FORM "99999" INIT 0.
+    DEFI VAR T_Dias     AS INTEG FORM "99999" INIT 0.
+
+    FOR EACH Mov_Ahorros WHERE Mov_Ahorros.Agencia      EQ Ahorros.Agencia      AND
+                               Mov_Ahorros.Cod_Ahorro   EQ Ahorros.Cod_Ahorro   AND
+                               Mov_Ahorros.Cue_Ahorros  EQ Ahorros.Cue_Ahorros  AND
+                               Mov_Ahorros.Fecha + 91   EQ W_Fecha NO-LOCK
+                      BY Mov_Ahorros.Hora:
+        ASSIGN SdoIni     = Mov_Ahorros.Sdo_Dispon   /*Queda asignado el último de esta fecha*/
+               W_PromedDD = Mov_Ahorros.Sdo_Dispon
+               FecControl = Mov_Ahorros.Fecha.
+    END.
+
+    IF FecControl EQ ? THEN     /*No asignó el recorrido anterior*/
+       FOR EACH Mov_Ahorros WHERE Mov_Ahorros.Agencia   EQ Ahorros.Agencia      AND
+                               Mov_Ahorros.Cod_Ahorro   EQ Ahorros.Cod_Ahorro   AND
+                               Mov_Ahorros.Cue_Ahorros  EQ Ahorros.Cue_Ahorros  AND
+                               Mov_Ahorros.Fecha + 90   LE W_Fecha NO-LOCK
+                            BY Mov_Ahorros.Fecha BY Mov_Ahorros.Hora:
+           ASSIGN SdoIni     = Mov_Ahorros.Sdo_Dispon   /*Queda asignado el último de la fecha respectiva*/
+                  W_PromedDD = Mov_Ahorros.Sdo_Dispon
+                  FecControl = Mov_Ahorros.Fecha.
+    END.
+
+    IF FecControl EQ ? THEN DO:    /*No asignó el recorrido anterior*/
+       FIND FIRST Mov_Ahorros WHERE Mov_Ahorros.Agencia EQ Ahorros.Agencia      AND
+                               Mov_Ahorros.Cod_Ahorro   EQ Ahorros.Cod_Ahorro   AND
+                               Mov_Ahorros.Cue_Ahorros  EQ Ahorros.Cue_Ahorros  AND
+                               Mov_Ahorros.Fecha        GE W_Fecha - 90 NO-LOCK NO-ERROR.
+       IF AVAIL(Mov_Ahorros) THEN DO:
+          FIND FIRST Operacion WHERE Operacion.Cod_Operacion EQ Mov_Ahorros.Cod_Operacion NO-LOCK NO-ERROR.
+
+          IF Operacion.Tipo_Operacion EQ 1 THEN
+             ASSIGN SdoIni = Mov_Ahorros.Sdo_Dispon - (Val_Efectivo + Val_Cheque)
+                    W_PromedDD = SdoIni.
+          ELSE 
+             ASSIGN SdoIni = Mov_Ahorros.Sdo_Dispon + (Val_Efectivo + Val_Cheque)
+                    W_PromedDD = SdoIni.
+
+          /*ASSIGN FecControl = Mov_Ahorros.Fecha. */
+       END.
+    END.
+
+    IF FecControl LT (W_Fecha - 90) OR FecControl EQ ? THEN
+       FecControl = (W_Fecha - 91).
+    
+    FOR EACH Mov_Ahorros WHERE Mov_Ahorros.Agencia      EQ Ahorros.Agencia      AND
+                               Mov_Ahorros.Cod_Ahorro   EQ Ahorros.Cod_Ahorro   AND
+                               Mov_Ahorros.Cue_Ahorros  EQ Ahorros.Cue_Ahorros  NO-LOCK
+                        BREAK  BY Mov_Ahorros.Fecha BY Mov_Ahorros.Hora:
+        IF LAST-OF(Mov_Ahorros.Fecha) AND (Mov_Ahorros.Fecha + 90) GE W_Fecha THEN DO:
+           IF Mov_Ahorros.Fecha GT FecControl THEN DO:
+              ASSIGN W_Dias     = Mov_Ahorros.Fecha - FecControl 
+                     T_Dias     = T_Dias + W_Dias
+                     W_PromedDD = W_PromedDD + (W_Dias * SdoIni)
+                     SdoIni     = Mov_Ahorros.Sdo_Dispon
+                     FecControl = Mov_Ahorros.Fecha.
+              
+              IF FecControl EQ W_Fecha THEN
+                 W_PromedDD = W_PromedDD + SdoIni.
+           END.
+        END.
+    END.
+
+    IF T_Dias LT 91 THEN 
+       ASSIGN W_Dias     = 92 - T_Dias
+              W_PromedDD = W_PromedDD + (W_Dias * (Ahorros.Sdo_Dispon + Ahorros.Sdo_Canje)).
+
+    ASSIGN W_PromedDD = W_PromedDD / 91.
+
+    IF W_PromedDD LE 0 THEN
+       ASSIGN W_PromedDD = 0.
+END PROCE.

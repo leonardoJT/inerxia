@@ -1,0 +1,1589 @@
+DEFINE INPUT PARAMETER P_Grabar AS LOG.
+DEFINE INPUT PARAMETER P_Age AS INTEGER.
+DEFINE INPUT PARAMETER P_Pcto AS INTEGER.
+DEFINE INPUT PARAMETER P_Ced AS CHARACTER.
+DEFINE INPUT PARAMETER P_NumCred AS INTEGER.
+DEFINE INPUT PARAMETER P_VrAbono AS DECIMAL.
+DEFINE INPUT PARAMETER P_Cpte AS INTEGER.
+DEFINE INPUT PARAMETER P_NroDoc AS CHARACTER.
+DEFINE INPUT PARAMETER P_EfeCheq AS INTEGER FORMAT "9".   /*0 Efectivo, 1 Cheque*/
+DEFINE INPUT PARAMETER P_RecNOInd AS INTEGER FORMAT "9".   /*0 RecNomina 1 Rec-Individual*/
+
+/*Paràmetros Output*/
+DEFINE OUTPUT PARAMETER P_Poliza AS DECIMAL.
+DEFINE OUTPUT PARAMETER P_Honora AS DECIMAL.
+DEFINE OUTPUT PARAMETER P_Costas AS DECIMAL.
+DEFINE OUTPUT PARAMETER P_IMorDifC AS DECIMAL.
+DEFINE OUTPUT PARAMETER P_IMora AS DECIMAL.
+DEFINE OUTPUT PARAMETER P_IDifCob AS DECIMAL.
+DEFINE OUTPUT PARAMETER P_ICte AS DECIMAL.
+DEFINE OUTPUT PARAMETER P_IAntic AS DECIMAL. /*Si P_IAntic(-) Neg.son cargos*/
+DEFINE OUTPUT PARAMETER P_Capit AS DECIMAL.
+DEFINE OUTPUT PARAMETER P_VlrNoDist AS DECIMAL.
+
+{Incluido/Variable.I "SHARED"}
+{Incluido/VARCON.I "SHARED"}
+
+DEFINE VAR W_DifInter AS DECIMAL.
+DEFINE VAR W_DebePag AS DECIMAL.
+DEFINE VAR W_SobraPagK AS DECIMAL.
+DEFINE VAR W_TasaUs AS DECIMAL.
+DEFINE VAR Ctas_CtaPro AS CHARACTER.
+DEFINE VAR Ctas_CtaHon AS CHARACTER.
+DEFINE VAR Ctas_CtaPol AS CHARACTER.
+DEFINE VAR Ctas_CtaCos AS CHARACTER.
+DEFINE VAR Ctas_CtaLiq AS CHARACTER.
+DEFINE VAR Ctas_CtaIng AS CHARACTER.
+DEFINE VAR Ctas_IntMor AS CHARACTER.
+DEFINE VAR Ctas_MorIng AS CHARACTER.
+DEFINE VAR Ctas_DifCoD AS CHARACTER.
+DEFINE VAR Ctas_DifCoH AS CHARACTER.
+DEFINE VAR Ctas_Oper AS INTEGER.
+DEFINE VAR PdoAnt AS INTEGER.
+DEFINE VAR W_SiFecVcto AS LOGICAL.
+DEFINE VAR W_RowidPAnt AS ROWID.
+DEFINE VAR W_CuoPagCtr AS INTEGER.
+DEFINE VAR W_VdoK AS INTEGER.
+DEFINE VAR INT_MGracia AS INTEGER.
+DEFINE VAR Dias_amover AS INTEGER.
+
+/* oakley */
+
+  DEFINE VARIABLE CuotasMover AS INTEGER     NO-UNDO.
+  DEFINE VARIABLE NewFecPago AS DATE        NO-UNDO.
+
+  DEFI TEMP-TABLE Cop_PlanPago NO-UNDO LIKE PlanPagos . 
+  DEFI TEMP-TABLE Cop_PPago2   NO-UNDO LIKE PlanPagos . 
+
+  DEFI VAR W_SiUlt    AS LOG INIT FALSE.
+  DEFI VAR W_OpCgoInt LIKE Operacion.Cod_Operacion.
+  W_OpCgoInt = 020102006.    /*Op.para cargar-traslado de anticipados al cancelarlos*/
+
+  DEFI VAR W_OpAboCred LIKE Operacion.Cod_Operacion EXTENT 8.
+  ASSIGN W_OpAboCred [1] = 020101001   /*Abonos a capital Créditos*/
+         W_OpAboCred [2] = 020101002   /*Abonos a IntMora Créditos*/   
+         W_OpAboCred [3] = 020101003   /*Abonos a IntCtes Créditos*/    
+         W_OpAboCred [4] = 020101004   /*Abonos a IntDifCob Créditos*/  
+         W_OpAboCred [5] = 020101005   /*Abonos a IntAntic. Créditos*/  
+         W_OpAboCred [6] = 020101006   /*Abonos a Polizas Créditos*/    
+         W_OpAboCred [7] = 020101007   /*Abonos a Honorarios Créditos*/ 
+         W_OpAboCred [8] = 020101008.  /*Abonos a CostasJ.Créditos*/   
+  
+  DEFI VAR W_Desc     LIKE Mov_Creditos.Descrip.
+  DEFI VAR SdoTot     LIKE Creditos.Cuota INITIAL 0.
+  DEFI VAR PorDist    LIKE Creditos.Cuota INITIAL 0.
+  DEFI VAR W_Valor    LIKE Creditos.Cuota INITIAL 0.
+  DEFI VAR W_Cta      LIKE Cuentas.Cuenta.
+  DEFI VAR W_Oper     LIKE Mov_Creditos.Cod_Operacion.
+  DEFI VAR W_RowidPP  AS ROWID. 
+  DEFI VAR W_Trasl    AS LOG INIT FALSE.
+  
+  DEFI VAR CuoPagasM2 AS INTEG FORM "9999"         INIT 0.
+  DEFI VAR SdoIntAnt  LIKE Creditos.Int_Anticipado INIT 0.
+  DEFI VAR SdoDifCob  LIKE Creditos.Int_DifCobro   INIT 0. 
+  DEFI VAR SdoIntCte  LIKE Creditos.Int_Corriente  INIT 0.
+  DEFI VAR SdoCapit   LIKE Creditos.Sdo_Capital    INIT 0.
+  DEFI VAR W_CuoPaga  LIKE Creditos.Cuo_Pagadas    INIT 0.
+  DEFI VAR W_FecVcto  LIKE Creditos.Fec_Pago.   
+
+  DEFI VAR W_Tasa     LIKE PlanPagos.Tasa.
+  DEFI VAR W_CapPag   LIKE PlanPagos.Pagos_CapitalAcum.  /*Los Pagados-K*/
+  DEFI VAR W_IntPag   LIKE PlanPagos.Pagos_IntAcum.      /*Los Pagados-Int*/
+  DEFI VAR W_AcuInt   LIKE PlanPagos.Int_LiqAcum.        /*Los Debido Pagar-Int*/
+  DEFI VAR W_AcuCap   LIKE PlanPagos.Capital_Acum.       /*Los Debido Pagar-K*/
+  DEFI VAR W_SdoPro   LIKE PlanPagos.Monto.
+  DEFI VAR VrPdoInt   LIKE Creditos.Cuota INIT 0.
+  DEFI VAR VrPdoCap   LIKE Creditos.Cuota INIT 0.
+
+  /*Agosto 31/05 Gaer, Para pagos adelantados liquidar con Usura si mayor a la del Pagare*/
+  FIND Entidad WHERE Entidad.Entidad EQ W_Entidad NO-LOCK NO-ERROR.
+  FIND FIRST Indicadores WHERE Indicadores.Indicador EQ Entidad.Ind_Usura
+                           AND Indicadores.Estado    EQ 1 
+                           AND Indicadores.FecVcto   GE W_Fecha NO-LOCK NO-ERROR.
+  IF NOT AVAILABLE(Indicadores) THEN DO:
+     MESSAGE "Falta Indicador de Usura Vigente, No se permite el abono al Credito."
+         VIEW-AS ALERT-BOX TITLE "Programa AboCredito.P".
+     RETURN ERROR.
+  END.
+  
+  W_TasaUs = Indicadores.Tasa.
+  RUN EFNV IN W_ManFin  (INPUT W_TasaUs / 100, 12, OUTPUT W_TasaUS).
+  W_TasaUS = W_TasaUS * 1200.
+  /*Hasta aca Agosto 31/05 Gaer, Compara con la del Credito en Proced.CicloCuotas*/
+
+  FIND Creditos WHERE Creditos.Agencia      EQ P_Age
+                  AND Creditos.Nit          EQ P_Ced
+                  AND Creditos.Cod_Credito  EQ P_Pcto
+                  AND Creditos.Num_Credito  EQ P_NumCred NO-ERROR.
+  IF  NOT AVAILABLE(Creditos)
+  OR (AVAILABLE(Creditos) AND Creditos.Sdo_Capital LE 0)
+  OR  P_VrAbono LE 0 THEN DO: 
+      MESSAGE "Crédito No-Existe, ó está Cancelado, ó no Se Recibió Valor para Distribuir..." SKIP
+              "                                     Distribución cancelada..." SKIP
+              "Creditos.Cod_Credito :"  Creditos.Cod_Credito SKIP
+              "Creditos.Num_Credito : " Creditos.Num_Credito SKIP
+              VIEW-AS ALERT-BOX ERROR TITLE "Validación en AboCredito.P".
+      P_VlrNoDist = P_VrAbono.
+      RETURN ERROR.
+  END.
+  
+
+  /*rutina para evaluar la fecha de prox pago */
+
+  /*
+  IF Creditos.Per_Pago EQ 1 THEN
+       Dias_amover = 7.
+    ELSE IF Creditos.Per_Pago EQ 2 THEN
+       Dias_amover = 10.
+    ELSE IF Creditos.Per_Pago EQ 3 THEN
+       Dias_amover = 15.
+   */
+
+
+  ASSIGN NewFecPago = creditos.Fec_Pago.
+
+  Dias_amover = 0.
+  CASE Creditos.Per_Pago:
+      WHEN 1 THEN Dias_amover = 7.
+      WHEN 2 THEN Dias_amover = 10.
+      WHEN 3 THEN Dias_amover = 15.
+      WHEN 4 THEN Dias_amover = 30.
+      WHEN 5 THEN Dias_amover = 60.
+      WHEN 6 THEN Dias_amover = 90.
+      WHEN 7 THEN Dias_amover = 120.
+      WHEN 8 THEN Dias_amover = 180.
+      WHEN 9 THEN Dias_amover = 360.
+      OTHERWISE Dias_amover = 0.
+  END CASE.
+    
+  /*
+   /* 
+  =TRUNCAR(B2/E2)+SI(RESIDUO(B2;E2)/E2>0,95;1;0)
+  IF INTEGER(P_vrabono / cuota) GE 0.98 THEN Dias_amover = Dias_amover * INTEGER(P_vrabono / cuota).*/
+  /*IF P_vrAbono GE (cuota * 0.98) THEN Dias_amover = Dias_amover.*/
+    
+  DEFINE VARIABLE W_Residuo AS DECIMAL     NO-UNDO.
+  w_residuo = (P_vrabono MODULO cuota ) / cuota.        
+            
+    
+  IF INTEGER(P_vrabono / cuota) GE 0.98 THEN Dias_amover = Dias_amover * ((TRUNCATE(P_vrabono / cuota,0) + IF (w_residuo ge 0.98) THEN 1 ELSE 0)).
+  ELSE dias_amover = 0.
+  /* fin rutina revisar*/
+  */
+
+
+/*********************************************************************************************************************************
+
+                                              CAMBIA FECHA DE PAGO - WILLIAM MARTINEZ RUIZ 02-12-2008
+
+*******************************************************************************************************************************/
+
+  
+  IF ((P_vrabono MODULO Cuota) / Cuota) > 0.98 THEN DO:
+        CuotasMover = TRUNCATE(P_vrabono / Cuota, 0) + 1.
+    END.
+    ELSE DO:
+        CuotasMover = TRUNCATE(P_vrabono / Cuota, 0).
+    END.
+    ASSIGN Dias_amover = Dias_amover * CuotasMover.
+
+    CASE dias_amover:
+        WHEN 15 THEN DO:
+            IF DAY(NewFecPago) GE 4 AND DAY(NewFecPago) LE 6 THEN DO:
+                NewFecPago = DATE(MONTH(NewFecPago), 20, YEAR(NewFecPago)).
+            END.
+            ELSE IF DAY(NewFecPago) GE 19 AND DAY(NewFecPago) LE 21 THEN DO:
+                IF MONTH(NewFecPago) NE 12 THEN DO:
+                    NewFecPago = DATE(MONTH(NewFecPago) + 1, 5, YEAR(NewFecPago)).
+                END.
+                ELSE DO:
+                    NewFecPago = DATE(1, 5, YEAR(NewFecPago) + 1).
+                END.
+            END.
+            ELSE DO:
+                    NewFecPago = NewFecPago + Dias_amover.
+            END.
+        END.
+        WHEN 30 THEN DO:                                                            /* Mover 30 Dias */
+            IF MONTH(NewFecPago) NE 12 THEN DO:
+                IF MONTH(NewFecPago) EQ 2 OR MONTH(NewFecPago) EQ 4 OR MONTH(NewFecPago) EQ 6 OR MONTH(NewFecPago) EQ 9 OR MONTH(NewFecPago) EQ 11 THEN DO:
+                    IF MONTH(NewFecPago) EQ 2 AND DAY(NewFecPago) EQ 28 THEN DO:
+                        NewFecPago = DATE(MONTH(NewFecPago) + 1, 30, YEAR(NewFecPago)).
+                    END.
+                    ELSE DO:
+                        NewFecPago = DATE(MONTH(NewFecPago) + 1, DAY(NewFecPago), YEAR(NewFecPago)).
+                    END.
+                    
+                END.
+                ELSE DO:
+                    IF MONTH(NewFecPago) EQ 1 THEN DO:          /* Enero */
+                        IF DAY(NewFecPago) GT 28 THEN DO:
+                            NewFecPago = DATE(MONTH(NewFecPago) + 1, 28, YEAR(NewFecPago)).
+                        END.
+                        ELSE DO:
+                            NewFecPago = DATE(MONTH(NewFecPago) + 1, DAY(NewFecPago), YEAR(NewFecPago)).
+                        END.
+                    END.
+                    ELSE DO:
+                        IF DAY(NewFecPago) GT 30 THEN DO:       /* Meses de 30 dias */
+                            NewFecPago = DATE(MONTH(NewFecPago) + 1, 30, YEAR(NewFecPago)).
+                        END.
+                        ELSE DO:
+                            NewFecPago = DATE(MONTH(NewFecPago) + 1, DAY(NewFecPago), YEAR(NewFecPago)).
+                        END.
+                    END.
+                END.
+
+            END.
+            ELSE DO:
+                NewFecPago = DATE(1, DAY(NewFecPago), YEAR(NewFecPago) + 1).    /* Cambia de Diciembre a Enero */
+            END.
+        END.
+        OTHERWISE DO:
+            ASSIGN NewFecPago = NewFecPago + Dias_amover.
+        END.
+
+    END CASE.
+
+
+    /********************************************************************************************************************************/
+
+
+
+  FIND LAST PlanPagos WHERE PlanPagos.Agencia      EQ Creditos.Agencia    
+                        AND PlanPagos.Nit          EQ Creditos.Nit        
+                        AND PlanPagos.Cod_Credito  EQ Creditos.Cod_Credito
+                        AND PlanPagos.Num_Credito  EQ Creditos.Num_Credito
+                        AND PlanPagos.Id_PdoMes    EQ 1 NO-ERROR.
+  IF NOT AVAILABLE(PlanPagos) THEN DO:
+     MESSAGE "La Tabla PlanPagos para el Pdo-Actual No Existe" SKIP
+             "Distribución cancelada" CREDITOS.NIT CREDITOS.NUM_CREDITO
+              VIEW-AS ALERT-BOX ERROR TITLE "Validación en AboCredito.P".
+      P_VlrNoDist = P_VrAbono.
+      RETURN ERROR.
+  END.
+
+  FIND Pro_Creditos WHERE Pro_Creditos.Cod_Credito EQ Creditos.Cod_Credito NO-LOCK NO-ERROR.
+  IF Pro_Creditos.Id_PerGracia AND Dia_Gracia GT 0 THEN
+     ASSIGN INT_MGracia = ROUND((((Creditos.Monto * Creditos.Tasa) / 36000) * Dia_Gracia) / Creditos.Plazo,0).
+
+  ASSIGN PdoAnt      = PlanPagos.Nro_Cuota - 1
+         W_RowIdPAnt = ROWID(PlanPagos).
+
+  IF  PlanPagos.Fec_Inic  EQ W_Fecha
+  AND PlanPagos.Nro_Cuota GT 1
+  AND PlanPagos.Nro_Cuota LE Creditos.Plazo THEN DO:
+      FIND LAST PlanPagos WHERE PlanPagos.Agencia  EQ Creditos.Agencia    
+                        AND PlanPagos.Nit          EQ Creditos.Nit        
+                        AND PlanPagos.Cod_Credito  EQ Creditos.Cod_Credito
+                        AND PlanPagos.Num_Credito  EQ Creditos.Num_Credito
+                        AND PlanPagos.Id_PdoMes    EQ 2
+                        AND PlanPagos.Nro_Cuota    EQ PdoAnt NO-ERROR.
+     IF NOT AVAILABLE(PlanPagos) THEN DO:
+        MESSAGE "La Tabla PlanPagos para el Pdo-Anterior No Existe..." SKIP
+              "                                     Distribución cancelada..."
+              VIEW-AS ALERT-BOX ERROR TITLE "Validación en AboCredito.P".
+        P_VlrNoDist = P_VrAbono.
+        RETURN ERROR.
+     END.
+
+     ASSIGN W_SiFecVcto = TRUE.            
+  END.
+
+  RUN ConfigCtas NO-ERROR.
+  IF ERROR-STATUS:ERROR THEN
+     RETURN ERROR.
+
+  IF NOT P_Grabar THEN DO:
+     FIND CURRENT Creditos  NO-LOCK NO-ERROR.
+     FIND CURRENT PlanPagos NO-LOCK NO-ERROR.
+  END.
+
+Abono:
+DO TRANSACTION ON ERROR UNDO Abono:
+  ASSIGN SdoTot  = Creditos.Honorarios     + Creditos.Costas         + Creditos.Polizas        +
+                   Creditos.Int_MorCobrar  + Creditos.Int_MoraDifCob + Creditos.Int_Corrientes +
+                   Creditos.Int_DifCobro   + Creditos.Sdo_Capital    - Creditos.Int_Anticipado 
+         PorDist = P_VrAbono. 
+
+  IF PorDist GE SdoTot THEN DO:     /*El pagaré se Cancela totalmente*/
+     ASSIGN P_VlrNoDist             = PorDist - SdoTot
+            P_Poliza                = Creditos.Polizas
+            P_Honora                = Creditos.Honorarios
+            P_Costas                = Creditos.Costas
+            P_IMora                 = Creditos.Int_MorCobrar 
+            P_IMorDifC              = Creditos.Int_MoraDifCob
+            P_IDifCob               = Creditos.Int_DifCobro
+            P_ICte                  = Creditos.Int_Corrientes
+            P_IAntic                = Creditos.Int_Anticipado * -1   /*para cargar por cancelac.*/
+            P_Capit                 = Creditos.Sdo_Capital.
+
+     IF NOT P_Grabar THEN 
+        RETURN.
+     
+     ASSIGN Creditos.Polizas        = 0
+            Creditos.Honorarios     = 0
+            Creditos.Costas         = 0
+            Creditos.Int_MorCobrar  = 0
+            Creditos.Int_MoraDifCob = 0
+            Creditos.Int_DifCobro   = 0
+            Creditos.Int_Corrientes = 0
+            Creditos.Int_Anticipado = 0
+            Creditos.Sdo_Capital    = 0
+            Creditos.Fec_CanceTot   = W_Fecha       
+            Creditos.Fec_UltPag     = W_Fecha       
+            Creditos.Cuo_Pagadas    = Creditos.Plazo.
+      IF creditos.cod_credito NE 570 OR creditos.cod_credito NE 870 THEN /*  Control para cupo rotativo  */
+            Creditos.Estado         = 3.       
+      ELSE  Creditos.Estado         = 2.       
+     
+     RUN GrabaPlanPag NO-ERROR.
+     RUN MovCreditos NO-ERROR.     
+
+     IF Creditos.Sistema         EQ 2 
+     OR Creditos.Plazo           EQ 1 THEN
+        Creditos.Cuo_Pagadas = 1.
+     ELSE Creditos.Cuo_Pagadas = Creditos.Plazo.
+
+     FIND FIRST Creditos WHERE Creditos.Nit    EQ P_Ced
+                      AND Creditos.Sdo_capital GT 0 NO-LOCK NO-ERROR.
+     IF NOT AVAILABLE(Creditos) THEN DO:                             /*Preguntar a Nelson si se cambia estado a los aportes*/
+        FOR EACH Ahorros WHERE Ahorros.Nit            EQ P_Ced
+                           AND Ahorros.Tip_Ahorro     EQ 4
+                           AND Ahorros.Detalle_Estado EQ 08:
+           ASSIGN Ahorros.Detalle_Estado = 2.
+        END.
+     END.
+
+     RETURN.
+  END.
+
+  /*IF (SdoTot - P_VrAbono) LE Creditos.Cuota THEN   /*Pagando la Ultima cuota*/
+     ASSIGN W_SiUlt = TRUE.    Ya lo controla Proc.Halla_FaltanConSdo*/
+
+  IF Creditos.Honorarios     + Creditos.Costas        +      /*No son del Plan de Pagos Inicial*/
+     Creditos.Polizas        + Creditos.Int_MorCobrar + 
+     Creditos.Int_MoraDifCob GT 0 THEN DO:                  /*C/Saldo se agota totalmente*/ 
+     IF PorDist GE Creditos.Honorarios AND Creditos.Honorarios GT 0 THEN 
+        ASSIGN P_Honora  = Creditos.Honorarios
+               PorDist   = PorDist - P_Honora.
+     ELSE IF Creditos.Honorarios GT 0 THEN
+        ASSIGN P_Honora  = PorDist
+               PorDist   = 0.
+
+     IF PorDist GT 0 THEN DO:
+        IF PorDist GE Creditos.Costas AND Creditos.Costas GT 0 THEN 
+           ASSIGN P_Costas = Creditos.Costas
+                  PorDist  = PorDist - P_Costas.
+        ELSE IF Creditos.Costas GT 0 THEN
+           ASSIGN P_Costas = PorDist
+                  PorDist  = 0.
+
+        IF PorDist GT 0 THEN DO:                                      
+           IF PorDist GE Creditos.Polizas AND Creditos.Polizas GT 0 THEN
+              ASSIGN P_Poliza = Creditos.Polizas
+                     PorDist  = PorDist - P_Poliza.           
+           ELSE IF Creditos.Polizas GT 0 THEN                          
+              ASSIGN P_Poliza = PorDist                       
+                     PorDist  = 0.
+                     
+           IF  PorDist GT 0 AND Creditos.Int_MoraDifCob GT 0
+           AND PorDist GE Creditos.Int_MoraDifCob THEN
+              ASSIGN P_IMorDifC  = Creditos.Int_MoraDifCob
+                     PorDist     = PorDist - P_IMorDifC.           
+           ELSE IF PorDist GT 0 AND Creditos.Int_MoraDifCob GT 0 THEN                          
+              ASSIGN P_IMorDifC  = PorDist                       
+                     PorDist     = 0.         
+                      
+           IF  PorDist GT 0 AND Creditos.Int_MorCobrar GT 0
+           AND PorDist GE Creditos.Int_MorCobrar THEN
+              ASSIGN P_IMora  = Creditos.Int_MorCobrar
+                     PorDist  = PorDist - P_IMora.           
+           ELSE IF PorDist GT 0 AND Creditos.Int_MorCobrar GT 0 THEN                          
+              ASSIGN P_IMora  = PorDist                       
+                     PorDist  = 0.                                 
+        END.
+     END.
+  END.
+
+  IF PorDist LE 0 THEN DO:
+     IF NOT P_Grabar THEN 
+        RETURN.
+     
+     ASSIGN Creditos.Polizas        = Creditos.Polizas        - P_Poliza 
+            Creditos.Honorarios     = Creditos.Honorarios     - P_Honora
+            Creditos.Costas         = Creditos.Costas         - P_Costas 
+            Creditos.Int_MorCobrar  = Creditos.Int_MorCobrar  - P_IMora
+            Creditos.Int_MoraDifCob = Creditos.Int_MoraDifCob - P_IMorDifC.
+            
+     RUN GrabaPlanPag NO-ERROR.
+     RUN MovCreditos  NO-ERROR.
+
+     RETURN.
+  END.
+
+ /* IF Creditos.Sistema         EQ 2    /*Cuota-Unica*/
+  OR Creditos.Plazo           EQ 1    /*O Pagando la Ultima Cuota*/
+  OR Creditos.Cuo_Pagadas + 1 GE Creditos.Plazo
+  OR (PlanPagos.Nro_Cuota     GE Creditos.Plazo AND (Creditos.Int_Corrientes + Creditos.Int_DifCobro) LE 0)
+  OR W_SiUlt                  THEN DO:       /*Agotan Intereses, Resto capital*/  Comentariado Oct.5/06*/
+
+  DO:     /*Agotan Intereses, Resto capital, Desde Oct.5/06 No-Respeta Liq. X PlanPagos*/
+          /*Resta 1o.Intereses del Pdo.actual para los vencidos, Nov.2/06 GAER*/
+     ASSIGN W_DebePag = Creditos.Sdo_Capital - Creditos.Sdo_Proyect WHEN 
+                        Creditos.Sdo_Capital GT Creditos.Sdo_Proyect.
+
+     IF W_DebePag GT Creditos.Sdo_Capital THEN
+        W_DebePag = Creditos.Sdo_Capital.
+
+     ASSIGN W_DebePag  = W_DebePag + (Creditos.Int_Corrientes + Creditos.Int_DifCobro)
+            W_DifInter = 0.
+     
+     IF PorDist LT W_DebePag  THEN DO:   /*a los vencidos les Debe tomar los INT_LiqPdo*/
+        IF PlanPagos.INT_LiqPdo GE Creditos.Int_Corrientes THEN
+           W_DifInter = Creditos.Int_Corrientes.
+        ELSE 
+           W_DifInter = PlanPagos.INT_LiqPdo. 
+
+        IF W_DifInter GT PorDist THEN
+           W_DifInter = PorDist.        
+     END.
+     /*Hasta acá Nov.2/06*/
+
+     IF PorDist GE (Creditos.Int_Corrientes + Creditos.Int_DifCobro) THEN
+        ASSIGN P_IDifCob               = Creditos.Int_DifCobro
+               P_ICte                  = Creditos.Int_Corrientes
+               PorDist                 = PorDist - (P_IDifCob + P_ICte).
+     ELSE IF PorDist GT 0 THEN DO:
+        IF PorDist GE Creditos.Int_DifCobro THEN
+           ASSIGN P_IDifCob               = Creditos.Int_DifCobro
+                  PorDist                 = PorDist - P_IDifCob.
+        ELSE 
+           ASSIGN P_IDifCob               = PorDist
+                  PorDist                 = 0.
+
+        IF PorDist GT 0 AND PorDist GE Creditos.Int_Corrientes THEN
+           ASSIGN P_ICte                  = Creditos.Int_Corrientes
+                  PorDist                 = PorDist - P_ICte.
+        ELSE IF PorDist GT 0 AND Creditos.Int_Corrientes GT 0 THEN
+           ASSIGN P_ICte                  = PorDist 
+                  PorDist                 = 0.
+     END.
+
+     IF W_DifInter GT 0 AND P_ICte GT 0 THEN DO:
+        IF W_DifInter GE P_ICte THEN
+           ASSIGN W_DifInter = P_ICte
+                  P_ICte     = 0 
+                  P_Capit    = W_DifInter.          /*Intereses son para capital Vdo.*/
+        ELSE 
+           ASSIGN P_ICte  = P_ICte - W_DifInter 
+                  P_Capit = W_DifInter.             /*Intereses son para capital Vdo.*/
+
+        IF Creditos.Sdo_Capital LE P_Capit THEN /*Por si se Presenta para que quede Sdo_capital con 1 Peso*/
+           ASSIGN W_SobraPagK = (P_Capit - Creditos.Sdo_Capital) + 1
+                  P_Capit     = P_Capit -  W_SobraPagK     /*Resta de Capital para + a Intereses*/
+                  P_ICte      = P_ICte  +  W_SobraPagK.
+     END.
+         
+     IF PorDist GT 0 THEN    /*Resto para Capital, y no alcanza para cancelarlo(por la Condic.inicial*/
+        ASSIGN P_Capit  = P_Capit + PorDist     /*Suma porque pudo haber Abono a Capital con la variable W_DifInter*/
+               PorDist  = 0.
+
+     IF NOT P_Grabar THEN 
+        RETURN.
+     
+     ASSIGN Creditos.Polizas        = Creditos.Polizas        - P_Poliza 
+            Creditos.Honorarios     = Creditos.Honorarios     - P_Honora
+            Creditos.Costas         = Creditos.Costas         - P_Costas 
+            Creditos.Int_MorCobrar  = Creditos.Int_MorCobrar  - P_IMora
+            Creditos.Int_MoraDifCob = Creditos.Int_MoraDifCob - P_IMorDifC
+            Creditos.Int_DifCobro   = Creditos.Int_DifCobro   - P_IDifCob
+            Creditos.Int_Corriente  = Creditos.Int_Corrientes - P_ICte
+            Creditos.Sdo_Capital    = Creditos.Sdo_Capital    - P_Capit
+            W_RowidPP = ROWID(PlanPagos).
+
+     RUN GrabaPlanPag NO-ERROR.   /*Oct.5/06*/
+     RUN MovCreditos  NO-ERROR.   /*Oct.5/06*/
+
+   /* RETURN. */  /*Oct.5/06*/
+/*-----------------------------------------------Como no respeta Liq.x PP no continua*/
+
+     IF PlanPagos.Nro_Cuota GE Creditos.Plazo THEN  
+        FIND FIRST PlanPagos WHERE PlanPagos.Agencia   EQ Creditos.Agencia    
+                           AND PlanPagos.Nit          EQ Creditos.Nit                        
+                           AND PlanPagos.Cod_Credito  EQ Creditos.Cod_Credito                   
+                           AND PlanPagos.Num_Credito  EQ Creditos.Num_Credito                   
+                           AND PlanPagos.Id_PdoMes    EQ 2                  /*Cumplidos*/ 
+                           AND PlanPagos.Nro_Cuota    GT 0
+                           AND Creditos.Sdo_Capital   GE (Creditos.Monto - PlanPagos.Capital_Acum)
+                                                           NO-LOCK NO-ERROR.
+     ELSE DO:
+         FIND LAST PlanPagos WHERE PlanPagos.Agencia EQ Creditos.Agencia    
+                           AND PlanPagos.Nit          EQ Creditos.Nit                        
+                           AND PlanPagos.Cod_Credito  EQ Creditos.Cod_Credito                   
+                           AND PlanPagos.Num_Credito  EQ Creditos.Num_Credito                   
+                           AND PlanPagos.Id_PdoMes    LE 1                  /*1o.en Transc.y futuros*/  
+                           AND PlanPagos.Nro_Cuota    EQ Creditos.Plazo NO-LOCK NO-ERROR. 
+         IF NOT AVAIL(PlanPagos) THEN
+            FIND LAST PlanPagos WHERE PlanPagos.Agencia EQ Creditos.Agencia    
+                           AND PlanPagos.Nit          EQ Creditos.Nit                        
+                           AND PlanPagos.Cod_Credito  EQ Creditos.Cod_Credito                   
+                           AND PlanPagos.Num_Credito  EQ Creditos.Num_Credito                   
+                           AND PlanPagos.Id_PdoMes    EQ 2                  /*2o.en Cumplidos*/  
+                           AND PlanPagos.Nro_Cuota    EQ Creditos.Plazo NO-LOCK NO-ERROR. 
+     END.
+     
+
+    /* Modificado william 02-12-2008 */
+     ASSIGN Creditos.Fec_Pago    = NewFecPago
+            W_FecVcto            = Creditos.Fec_Pago.
+     /* Modifica para que el proximo pago sea el actual + periodo. */
+     IF AVAIL(PlanPagos) THEN
+        ASSIGN /*Creditos.Fec_Pago    = NewFecPago /*Creditos.Fec_Pago + Dias_amover*/
+               W_FecVcto            = Creditos.Fec_Pago */
+             /*Creditos.Fec_Pago    = W_FecVcto*/
+               Creditos.Cuo_pagadas = PlanPagos.Nro_Cuota - 1.
+
+
+
+     FIND PlanPagos WHERE ROWID(PlanPagos) EQ W_RowidPP NO-ERROR.
+
+     RUN GrabaPlanPag NO-ERROR.
+     RUN MovCreditos  NO-ERROR.
+
+     IF W_SiUlt THEN DO: /*Halla la Ultima para Fec-Proxpago*/
+        FIND FIRST PlanPagos WHERE PlanPagos.Agencia  EQ Creditos.Agencia    
+                           AND PlanPagos.Nit          EQ Creditos.Nit                        
+                           AND PlanPagos.Cod_Credito  EQ Creditos.Cod_Credito                   
+                           AND PlanPagos.Num_Credito  EQ Creditos.Num_Credito 
+                           AND PlanPagos.Id_PdoMes    LT 3 
+                           AND PlanPagos.Nro_Cuota    EQ Creditos.Plazo NO-LOCK NO-ERROR.
+        IF AVAIL(PlanPagos) THEN DO:
+           ASSIGN W_FecVcto            = PlanPagos.Fec_Vcto
+                  Creditos.Fec_Pago    = W_FecVcto.
+
+
+           FIND LAST PlanPagos WHERE PlanPagos.Agencia      EQ Creditos.Agencia    
+                                 AND PlanPagos.Nit          EQ Creditos.Nit        
+                                 AND PlanPagos.Cod_Credito  EQ Creditos.Cod_Credito
+                                 AND PlanPagos.Num_Credito  EQ Creditos.Num_Credito
+                                 AND PlanPagos.Id_PdoMes    EQ 1 NO-ERROR.         
+           IF AVAIL(PlanPagos) THEN 
+              ASSIGN Creditos.Cuo_pagadas   = Creditos.Plazo - 1
+                     PlanPagos.Fec_ProxPago = W_FecVcto
+                     PlanPagos.Cuo_Pagas    = Creditos.Plazo - 1.
+        END.
+     END.     
+
+     RETURN.
+  END.
+
+  /*Continua Capital e Intereses para cuota fija*/
+  ASSIGN W_RowidPP = ROWID(PlanPagos)     /*Captura el Vigente, para hallar otro PP con Ult_Pagada + 1*/
+         SdoDifCob = Creditos.Int_DifCobro 
+         SdoIntCte = Creditos.Int_Corriente
+         SdoCapit  = Creditos.Sdo_Capital
+         SdoIntAnt = Creditos.Int_Anticipado
+         W_CuoPaga   = Creditos.Cuo_Pagadas 
+         W_CuoPagCtr = PlanPagos.Nro_Cuota - 1
+         W_FecVcto   = Creditos.Fec_Pago.    
+
+  /*Abril 28/05 GAER, Antes halla la Ult_Pagada correcta*/
+  RUN Cuo_PagasOK.
+  /*Fin Abril 28/05 GAER*/
+
+  /*Continua Ciclo Interes-Capital Cuota X Cuota, desde Ult_Pagada + 1*/
+  RUN CicloCuotas NO-ERROR.
+
+  IF PorDist GT 0 THEN
+     ASSIGN P_VlrNoDist = PorDist.
+
+  /*Abril 25/05 GAER, Si hay Capital-vencido e Int-Anticipado cubre con los Int-Anticipados que le alcance
+    hasta el Capital-vencido*/
+  IF  P_IAntic GT 0 
+  AND Creditos.Capital_Acum GT (Creditos.Sdo_CapPag + P_Capit) THEN DO:
+      W_VdoK = Creditos.Capital_Acum - (Creditos.Sdo_CapPag + P_Capit).
+
+      IF P_IAntic GE W_VdoK THEN
+         ASSIGN P_Capit  = P_Capit  + W_VdoK
+                P_IAntic = P_IAntic - W_VdoK.
+      ELSE
+         ASSIGN P_Capit  = P_Capit  + P_IAntic
+                P_IAntic = 0.
+  END.
+  /*Fin Abril 25/05 GAER*/
+  
+  IF NOT P_Grabar THEN
+     RETURN.
+
+  ASSIGN Creditos.Polizas        = Creditos.Polizas        - P_Poliza 
+         Creditos.Honorarios     = Creditos.Honorarios     - P_Honora 
+         Creditos.Costas         = Creditos.Costas         - P_Costas    
+         Creditos.Int_MorCobrar  = Creditos.Int_MorCobrar  - P_IMora 
+         Creditos.Int_MoraDifCob = Creditos.Int_MoraDifCob - P_IMorDifC    
+         Creditos.Int_DifCobro   = Creditos.Int_DifCobro   - P_IDifCob   
+         Creditos.Int_Corriente  = Creditos.Int_Corrientes - P_ICte      
+         Creditos.Sdo_Capital    = Creditos.Sdo_Capital    - P_Capit
+         Creditos.Int_Anticipado = Creditos.Int_Anticipado + P_IAntic
+         Creditos.Cuo_Pagadas    = W_CuoPaga    
+         Creditos.Fec_Pago       = W_FecVcto.
+  
+
+
+
+
+  FIND PlanPagos WHERE ROWID(PlanPagos) EQ W_RowidPP NO-ERROR.
+
+  RUN GrabaPlanPag NO-ERROR.
+  RUN MovCreditos  NO-ERROR.  
+  
+  RETURN.
+
+END.  /*Fin Tx*/
+
+
+/*Fin del Programa, Inician Procedimientos internos*/ 
+/*------------------------------------------------------------------------------------------------------*/
+  
+  /*----------------------*/
+  PROCEDURE CicloCuotas:        /*Inicia con los Acumulados a hoy (Pdo que transcurre)*/
+    DEFI VAR W_PdoLiq AS INTEG FORM "99" INIT 12.
+  
+    IF PorDist LE 0 THEN
+       RETURN.
+
+    IF Creditos.Per_Pago EQ 1 THEN
+       W_PdoLiq = 52.
+    ELSE IF Creditos.Per_Pago EQ 2 THEN
+       W_PdoLiq = 36.
+    ELSE IF Creditos.Per_Pago EQ 3 THEN
+       W_PdoLiq = 24.
+         
+    ASSIGN W_CapPag   = Creditos.Sdo_CapPag             
+           W_IntPag   = Creditos.Sdo_IntPag             
+           W_AcuInt   = PlanPagos.Int_LiqAcum
+           W_AcuCap   = PlanPagos.Capital_Acum
+           W_SdoPro   = Creditos.Monto - PlanPagos.Capital_Acum - (PlanPagos.Cuota - Creditos.Cuota).
+ 
+    IF Creditos.Tasa GT W_TasaUS THEN   
+       W_Tasa  = W_TasaUS / (W_PdoLiq * 100).
+    ELSE
+       W_Tasa  = Creditos.Tasa / (W_PdoLiq * 100).    
+           
+    /*Si son iguales trabaja con Pdo que transcurre es la que va a pagar*/
+    IF PlanPagos.Nro_Cuota EQ Creditos.Cuo_Pagadas + 1 THEN   /*Debe Calcular todo el Pdo, no se ha vencido*/
+       RUN HallaCapInt NO-ERROR.
+    ELSE DO:  /*Halla la Prox.a pagar, 1o.Con Pdo ya cumplido */
+       FIND LAST PlanPagos WHERE PlanPagos.Agencia EQ Creditos.Agencia    
+                        AND PlanPagos.Nit          EQ Creditos.Nit        
+                        AND PlanPagos.Cod_Credito  EQ Creditos.Cod_Credito
+                        AND PlanPagos.Num_Credito  EQ Creditos.Num_Credito
+                        AND PlanPagos.Id_PdoMes    EQ 2                  /*= 2 es Pdo ya cumplido */
+                        AND PlanPagos.Nro_Cuota    EQ Creditos.Cuo_Pagadas + 1 NO-LOCK NO-ERROR.
+       IF NOT AVAILABLE(PlanPagos) THEN DO:  /*Debe calcular el Pdo porque no se ha vencido*/
+          ASSIGN W_CuoPaga = W_CuoPagCtr. 
+          RUN HallaCapInt NO-ERROR.
+
+          FIND LAST PlanPagos WHERE PlanPagos.Agencia EQ Creditos.Agencia    /*Para hallar Fec-ProxPago*/
+                           AND PlanPagos.Nit          EQ Creditos.Nit        
+                           AND PlanPagos.Cod_Credito  EQ Creditos.Cod_Credito
+                           AND PlanPagos.Num_Credito  EQ Creditos.Num_Credito
+                           AND PlanPagos.Id_PdoMes    EQ 0                  /*= 0 es Pdo Futuro */
+                           AND PlanPagos.Nro_Cuota    EQ W_CuoPagCtr + 2 NO-LOCK NO-ERROR.
+          IF NOT AVAILABLE(PlanPagos) THEN /*No debe darse*/  
+             FIND LAST PlanPagos WHERE PlanPagos.Agencia EQ Creditos.Agencia    /*Para hallar Fec-ProxPago*/
+                              AND PlanPagos.Nit          EQ Creditos.Nit        
+                              AND PlanPagos.Cod_Credito  EQ Creditos.Cod_Credito
+                              AND PlanPagos.Num_Credito  EQ Creditos.Num_Credito
+                              AND PlanPagos.Id_PdoMes    LT 3                  /*En Cualquiera*/
+                              AND PlanPagos.Nro_Cuota    GE 0 NO-LOCK NO-ERROR.
+       END.
+       ELSE  /*Son los ya vencidos liquidados completos*/
+          ASSIGN W_AcuInt = PlanPagos.Int_LiqAcum 
+                 W_AcuCap = PlanPagos.Capital_Acum.
+    END.
+
+    RUN AbonaCapInt NO-ERROR.
+    
+    ASSIGN CuoPagasM2 = W_CuoPaga + 1.
+
+    IF PorDist LE 0 THEN
+       RETURN.
+    ELSE DO:
+       RUN DoCiclo NO-ERROR.   /*Debe iterar hasta agotar*/
+
+       RETURN.
+    END.
+  END PROCEDURE.
+
+  /*-------------------------*/
+  PROCEDURE HallaCapInt:   /*Calcula y adiciona a los debido pagar con BaseLiq W_SdoPro*/
+     IF W_SdoPro GT 0 THEN DO:
+        ASSIGN W_AcuInt = W_AcuInt + (ROUND((W_SdoPro * W_Tasa) + INT_MGracia,0)).
+        
+        IF AVAIL(PlanPagos) THEN
+           W_AcuCap = W_AcuCap + (PlanPagos.Cuota - (ROUND((W_SdoPro * W_Tasa) + INT_MGracia,0))).           
+        ELSE 
+           W_AcuCap = W_AcuCap + (Creditos.Cuota  - (ROUND((W_SdoPro * W_Tasa) + INT_MGracia,0))).
+     END.
+  END PROCEDURE.
+
+  /*-------------------------*/
+  PROCEDURE AbonaCapInt:              /*Distribuye I y K de cada Pdo-Cuota*/
+      ASSIGN VrPdoInt = 0
+             VrPdoCap = 0.
+
+      IF PorDist LE 0 THEN
+         RETURN.
+
+      /*Lo que deben de c/cuota*/
+      ASSIGN VrPdoInt = (W_AcuInt - W_IntPag) WHEN (W_AcuInt - W_IntPag) GT 0.
+      ASSIGN VrPdoCap = (W_AcuCap - W_CapPag) WHEN (W_AcuCap - W_CapPag) GT 0.
+
+      IF VrPdoInt GT 0 THEN DO:
+         IF PorDist GE VrPdoInt THEN DO:
+            IF SdoIntAnt GT 0 THEN
+               ASSIGN P_IAntic  = P_IAntic  + VrPdoInt
+                      W_IntPag  = W_IntPag  + VrPdoInt
+                      SdoIntAnt = SdoIntAnt + VrPdoInt
+                      PorDist   = PorDist   - VrPdoInt
+                      VrPdoInt  = 0.
+            ELSE DO:
+               /*1o.Int-DifCobro*/
+               IF SdoDifCob GT 0 THEN DO:  /*Abril 26/05*/
+                  IF VrPdoInt GE SdoDifCob THEN
+                     ASSIGN P_IDifCob = P_IDifCob + SdoDifCob
+                            W_IntPag  = W_IntPag  + SdoDifCob
+                            VrPdoInt  = VrPdoInt  - SdoDifCob
+                            PorDist   = PorDist   - SdoDifCob
+                            SdoDifCob = 0.                           
+                  ELSE
+                     ASSIGN P_IDifCob = P_IDifCob + VrPdoInt
+                            W_IntPag  = W_IntPag  + VrPdoInt
+                            SdoDifCob = SdoDifCob - VrPdoInt
+                            PorDist   = PorDist   - VrPdoInt
+                            VrPdoInt  = 0.
+               END.
+
+               /*Luego Int-Corrientes*/
+               IF VrPdoInt GT 0 AND SdoIntCte GT 0 THEN DO:                   /*Abril 26/05*/
+                  IF VrPdoInt GE SdoIntCte THEN
+                     ASSIGN P_ICte    = P_ICte    + SdoIntCte
+                            W_IntPag  = W_IntPag  + SdoIntCte
+                            VrPdoInt  = VrPdoInt  - SdoIntCte
+                            PorDist   = PorDist   - SdoIntCte
+                            SdoIntCte = 0.                           
+                  ELSE
+                     ASSIGN P_ICte    = P_ICte    + VrPdoInt
+                            W_IntPag  = W_IntPag  + VrPdoInt
+                            SdoIntCte = SdoIntCte - VrPdoInt
+                            PorDist   = PorDist   - VrPdoInt
+                            VrPdoInt  = 0.
+               END.
+
+               IF VrPdoInt GT 0 THEN
+                  ASSIGN P_IAntic  = P_IAntic  + VrPdoInt
+                         W_IntPag  = W_IntPag  + VrPdoInt
+                         SdoIntAnt = SdoIntAnt + VrPdoInt
+                         PorDist   = PorDist   - VrPdoInt
+                         VrPdoInt  = 0.
+            END.
+         END.
+         ELSE DO:  
+            IF SdoIntAnt GT 0 THEN
+               ASSIGN P_IAntic  = P_IAntic  + PorDist
+                      W_IntPag  = W_IntPag  + PorDist
+                      SdoIntAnt = SdoIntAnt + PorDist
+                      PorDist   = 0.
+            ELSE DO:
+               /*1o.Int-DifCobro*/
+               IF PorDist GT 0 AND SdoDifCob GT 0 THEN DO:      /*Abril 26/05*/
+                  IF PorDist GE SdoDifCob THEN
+                     ASSIGN P_IDifCob = P_IDifCob + SdoDifCob
+                            W_IntPag  = W_IntPag  + SdoDifCob
+                            PorDist   = PorDist   - SdoDifCob
+                            SdoDifCob = 0.                           
+                  ELSE
+                     ASSIGN P_IDifCob = P_IDifCob + PorDist
+                            W_IntPag  = W_IntPag  + PorDist
+                            SdoDifCob = SdoDifCob - PorDist
+                            PorDist   = 0.
+               END.
+               /*Luego Int-Corrientes*/
+               IF PorDist GT 0 AND SdoIntCte GT 0 THEN DO:  /*Abril 26/05*/
+                  IF PorDist GE SdoIntCte THEN
+                     ASSIGN P_ICte    = P_ICte    + SdoIntCte
+                            W_IntPag  = W_IntPag  + SdoIntCte
+                            PorDist   = PorDist   - SdoIntCte
+                            SdoIntCte = 0.                
+                  ELSE
+                     ASSIGN P_ICte    = P_ICte    + PorDist
+                            W_IntPag  = W_IntPag  + PorDist
+                            SdoIntCte = SdoIntCte - PorDist
+                            PorDist   = 0.
+               END.               
+               
+               IF PorDist GT 0 THEN
+                  ASSIGN P_IAntic  = P_IAntic  + PorDist
+                         W_IntPag  = W_IntPag  + PorDist
+                         SdoIntAnt = SdoIntAnt + PorDist
+                         PorDist   = 0.
+            END.
+         END.
+      END.
+      
+      IF VrPdoCap GT 0 AND PorDist GT 0 AND SdoCapit GT 0 THEN DO:
+         IF PorDist GE VrPdoCap THEN
+            PorDist = PorDist - VrPdoCap.
+         ELSE
+            ASSIGN VrPdoCap = PorDist
+                   PorDist  = 0.
+
+         IF VrPdoCap GE SdoCapit THEN   /*No debe darse, por control inicial*/
+            ASSIGN P_Capit   = P_Capit  + SdoCapit
+                   W_CapPag  = W_CapPag + SdoCapit
+                   SdoCapit  = 0.
+         ELSE 
+            ASSIGN P_Capit  = P_Capit  + VrPdoCap
+                   W_CapPag = W_CapPag + VrPdoCap
+                   SdoCapit = SdoCapit - VrPdoCap.
+      END.
+      
+      IF (W_AcuCap - W_CapPag) LE 1000 AND AVAIL(PlanPagos) THEN DO:
+         ASSIGN W_CuoPaga = PlanPagos.Nro_Cuota     
+                W_FecVcto = PlanPagos.Fec_Vcto.           
+
+         IF PlanPagos.Nro_Cuota GE Creditos.Plazo THEN DO:   
+            ASSIGN W_CuoPaga = Creditos.Plazo - 1.
+            FIND LAST PlanPagos WHERE PlanPagos.Agencia  EQ Creditos.Agencia    
+                              AND PlanPagos.Nit          EQ Creditos.Nit        
+                              AND PlanPagos.Cod_Credito  EQ Creditos.Cod_Credito
+                              AND PlanPagos.Num_Credito  EQ Creditos.Num_Credito
+                              AND PlanPagos.Id_PdoMes    LE 1                  /*1o.en Transc.y futuros*/
+                              AND PlanPagos.Nro_Cuota    EQ Creditos.Plazo NO-LOCK NO-ERROR.
+            IF AVAIL(PlanPagos) THEN
+               W_FecVcto = PlanPagos.Fec_Vcto.
+            ELSE DO:
+               FIND LAST PlanPagos WHERE PlanPagos.Agencia  EQ Creditos.Agencia                              
+                                 AND PlanPagos.Nit          EQ Creditos.Nit                                  
+                                 AND PlanPagos.Cod_Credito  EQ Creditos.Cod_Credito                          
+                                 AND PlanPagos.Num_Credito  EQ Creditos.Num_Credito                          
+                                 AND PlanPagos.Id_PdoMes    EQ 2              /*2o.en Cumplidos*/ 
+                                 AND PlanPagos.Nro_Cuota    EQ Creditos.Plazo NO-LOCK NO-ERROR.              
+               IF AVAIL(PlanPagos) THEN                                                                      
+                  W_FecVcto = PlanPagos.Fec_Vcto.                                                            
+            END.
+         END.
+         ELSE DO:  
+            FIND LAST PlanPagos WHERE PlanPagos.Agencia  EQ Creditos.Agencia    
+                              AND PlanPagos.Nit          EQ Creditos.Nit        
+                              AND PlanPagos.Cod_Credito  EQ Creditos.Cod_Credito
+                              AND PlanPagos.Num_Credito  EQ Creditos.Num_Credito
+                              AND PlanPagos.Id_PdoMes    LE 1                /*1o.en Transc.y futuros*/
+                              AND PlanPagos.Nro_Cuota    EQ W_CuoPaga + 1 NO-LOCK NO-ERROR.
+            IF AVAIL(PlanPagos) THEN
+               W_FecVcto = PlanPagos.Fec_Vcto.
+            ELSE DO:
+               FIND LAST PlanPagos WHERE PlanPagos.Agencia  EQ Creditos.Agencia                    
+                                 AND PlanPagos.Nit          EQ Creditos.Nit                        
+                                 AND PlanPagos.Cod_Credito  EQ Creditos.Cod_Credito                
+                                 AND PlanPagos.Num_Credito  EQ Creditos.Num_Credito                
+                                 AND PlanPagos.Id_PdoMes    EQ 2                  /*2o.en Cumplidos*/
+                                 AND PlanPagos.Nro_Cuota    EQ W_CuoPaga + 1 NO-LOCK NO-ERROR.     
+               IF AVAIL(PlanPagos) THEN                                                            
+                  W_FecVcto = PlanPagos.Fec_Vcto.                                                  
+            END.
+         END.
+      END.
+  END PROCEDURE.
+
+  /*Itera desde K(Creditos.Cuo_Pagadas + 2) hasta agotar*/
+  /*-------------------------*/
+  PROCEDURE DoCiclo:
+     DEFI VAR K  AS INTEG FORM "9999" INIT 0.
+
+     IF PorDist LE 0 THEN
+        RETURN.
+
+     DO K = CuoPagasM2 TO Creditos.Plazo + 5:
+        /*halla 1o. en los cumplidos*/
+        FIND LAST PlanPagos WHERE PlanPagos.Agencia   EQ Creditos.Agencia    
+                           AND PlanPagos.Nit          EQ Creditos.Nit        
+                           AND PlanPagos.Cod_Credito  EQ Creditos.Cod_Credito
+                           AND PlanPagos.Num_Credito  EQ Creditos.Num_Credito
+                           AND PlanPagos.Id_PdoMes    EQ 2  /*1o. los cumplidos*/                  
+                           AND PlanPagos.Nro_Cuota    EQ K NO-LOCK NO-ERROR.
+        IF AVAIL(PlanPagos) THEN DO:  /*Trabaja con los Hallados*/
+           ASSIGN W_AcuInt = PlanPagos.Int_LiqAcum  
+                  W_AcuCap = PlanPagos.Capital_Acum.
+
+           IF K = Creditos.Plazo AND (SdoDifCob + SdoIntCte) GT 0 THEN
+              W_AcuInt = W_AcuInt + (SdoDifCob + SdoIntCte).
+        END.
+        ELSE DO:
+           ASSIGN W_SdoPro = Creditos.Monto - W_AcuCap.
+
+           /*RUN HallaCapInt NO-ERROR.   Pasò a Luego de HallarPP para trabajar con Cuota OK*/
+
+           /*Para hallar Fec-ProxPago Y Cuo_Pagas en el que está Transcurriendo y/o en los futuros*/
+           FIND LAST PlanPagos WHERE PlanPagos.Agencia   EQ Creditos.Agencia        
+                              AND PlanPagos.Nit          EQ Creditos.Nit            
+                              AND PlanPagos.Cod_Credito  EQ Creditos.Cod_Credito    
+                              AND PlanPagos.Num_Credito  EQ Creditos.Num_Credito    
+                              AND PlanPagos.Id_PdoMes    LE 1   /*Transcurre o Futuro*/               
+                              AND PlanPagos.Nro_Cuota    EQ K NO-LOCK NO-ERROR.     
+           IF NOT AVAIL(PlanPagos) THEN     /*No debe darse*/                                            
+              FIND LAST PlanPagos WHERE PlanPagos.Agencia EQ Creditos.Agencia    /*Para hallar Fec-ProxPago*/
+                               AND PlanPagos.Nit          EQ Creditos.Nit                                    
+                               AND PlanPagos.Cod_Credito  EQ Creditos.Cod_Credito                            
+                               AND PlanPagos.Num_Credito  EQ Creditos.Num_Credito                            
+                               AND PlanPagos.Id_PdoMes    LT 3                  /*En Cualquiera*/            
+                               AND PlanPagos.Nro_Cuota    GE 0 NO-LOCK NO-ERROR.   /*Con Cuota GE 0*/    
+           RUN HallaCapInt NO-ERROR.   /*Debe Calcularlos*/
+        END.
+
+        RUN AbonaCapInt NO-ERROR.
+      
+        IF PorDist LE 0 THEN
+           LEAVE.
+
+        /*Si sobra PorDist pasa a la sgte NEXT del DO:*/
+    END.
+  END PROCEDURE.
+
+  /*-------------------------Run a Grabar Mov_Creditos y Mov_Contables*/
+  PROCEDURE MovCreditos:
+    IF P_Poliza GT 0 THEN DO:
+       ASSIGN W_Cta   = Ctas_CtaPol
+              W_Valor = P_Poliza
+              W_Oper  = W_OpAboCred[6]
+              W_Desc  = "Abono para Polizas".
+       RUN GrabaMov NO-ERROR.
+    END.
+
+    IF P_Costas GT 0 THEN DO:
+       ASSIGN W_Cta   = Ctas_CtaCos
+              W_Valor = P_Costas
+              W_Oper  = W_OpAboCred[8]
+              W_Desc  = "Abono para CostasJ".
+       RUN GrabaMov  NO-ERROR.
+    END.
+
+    IF P_Honora GT 0 THEN DO:
+       ASSIGN W_Cta   = Ctas_CtaHon
+              W_Valor = P_Honora
+              W_Oper  = W_OpAboCred[7]
+              W_Desc  = "Abono para Honorarios".
+       RUN GrabaMov  NO-ERROR.    
+    END.
+
+    IF P_IMora  GT 0 THEN DO:
+       ASSIGN W_Cta   = Ctas_IntMor
+              W_Valor = P_IMora 
+              W_Oper  = W_OpAboCred[2]
+              W_Desc  = "Abono para Int-X-Mora". 
+       RUN GrabaMov  NO-ERROR.
+    END.
+
+    IF P_IMorDifC GT 0 THEN DO:
+       ASSIGN W_Cta   = Ctas_MorIng
+              W_Valor = P_IMorDifC
+              W_Oper  = W_OpAboCred[2]
+              W_Desc  = "Abono IntMora-DifCobro". 
+       RUN GrabaMov  NO-ERROR.
+       
+       ASSIGN W_Cta   = Ctas_DifCoD            /*Sigue el traslado de ctas-orden*/
+              W_Trasl = TRUE.
+       RUN GrabaMov  NO-ERROR.
+       
+       ASSIGN W_Trasl = TRUE
+              W_Cta   = Ctas_DifCoH.
+       RUN GrabaMov  NO-ERROR.
+       ASSIGN Mov_Contable.Cr = 0      
+              Mov_Contable.Db = W_Valor.
+    END.    
+        
+    IF P_IDifCob GT 0 THEN DO:
+       ASSIGN W_Cta   = Ctas_CtaIng
+              W_Valor = P_IDifCob 
+              W_Oper  = W_OpAboCred[4]
+              W_Desc  = "Abono para IntCtes-DifCobro".
+       RUN GrabaMov  NO-ERROR.
+       
+       ASSIGN W_Cta   = Ctas_DifCoD            /*Sigue el traslado de ctas-orden*/
+              W_Trasl = TRUE.
+       RUN GrabaMov  NO-ERROR.
+       
+       ASSIGN W_Trasl = TRUE
+              W_Cta   = Ctas_DifCoH.
+       RUN GrabaMov  NO-ERROR. 
+       ASSIGN Mov_Contable.Cr  = 0      
+              Mov_Contable.Db  = W_Valor.
+    END.
+    
+    IF P_ICte GT 0 THEN DO:
+       ASSIGN W_Cta   = Ctas_CtaLiq
+              W_Valor = P_ICte
+              W_Oper  = W_OpAboCred[3]
+              W_Desc  = "Abono para Int-Corriente".
+       RUN GrabaMov  NO-ERROR.
+    END.
+
+    IF P_Capit GT 0 THEN DO:
+       ASSIGN W_Cta   = Ctas_CtaPro
+              W_Valor = P_Capit
+              W_Oper  = W_OpAboCred[1]
+              W_Desc  = "Abono para Capital".           
+       RUN GrabaMov  NO-ERROR.
+    END.
+
+    IF P_IAntic NE 0 THEN DO:
+       ASSIGN W_Valor = P_IAntic
+              W_Oper  = W_OpAboCred[5]
+              W_Desc  = "Abono para Int-Anticipado".
+       RUN GrabaMov  NO-ERROR.
+       IF W_Valor LT 0 THEN DO:
+          ASSIGN Mov_Contable.Cr             = 0
+                 Mov_Contable.Db             = W_Valor * -1
+                 Mov_Contable.Comentario     = "Reversa Int-Anticipado"
+                 Mov_Creditos.Cod_Operacion = W_OpCgoInt
+                 Mov_Creditos.Descrip       = "Reversa Int-Anticipado"
+                 Mov_Creditos.Val_Efectivo  = Mov_Creditos.Val_Efectivo * -1      
+                 Mov_Creditos.Val_Cheque    = Mov_Creditos.Val_Cheque   * -1.
+       END.
+         
+    END.
+  END PROCEDURE.
+
+  /*--------------------------Crea Mov_Creditos y Mov_Contables*/
+PROCEDURE GrabaMov:
+
+  IF P_RecNOInd EQ 1 THEN DO:   /*Abril 1/06 GAER Solo Si es Rec-Individual, Cuando es Rec-Nòmina lo*/
+    CREATE Mov_Contable.                          /*Realiza el Prog.Contab_RecLibr.P*/
+    ASSIGN Mov_Contable.Agencia      = Creditos.Agencia             
+         Mov_Contable.Cuenta         = W_Cta         
+         Mov_Contable.Nit            = Creditos.Nit
+         Mov_Contable.Fec_Contable   = W_Fecha                        
+         Mov_Contable.Comentario     = W_Desc          
+         Mov_Contable.Usuario        = W_Usuario                      
+         Mov_Contable.Cen_Costos     = W_Cencosgral                   
+         Mov_Contable.Destino        = W_Agencia                      
+         Mov_Contable.Comprobante    = P_Cpte       
+         Mov_Contable.Num_Documento  = INTEG(P_NroDoc)  
+         Mov_Contable.Doc_Refer      = STRING(Creditos.Pagare)
+         Mov_Contable.Enlace         = STRING(Creditos.Num_Credito)
+         Mov_Contable.Fec_Grabacion  = TODAY                          
+         Mov_Contable.Hora           = TIME                           
+         Mov_Contable.Estacion       = W_Estacion               
+         Mov_Contable.Cr             = W_Valor NO-ERROR. 
+
+    IF ERROR-STATUS:ERROR THEN DO:
+       MESSAGE Creditos.Agencia            
+               W_Cta                       
+               Creditos.Nit                
+               W_Fecha                     
+               W_Desc                      
+               W_Usuario                   
+               W_Cencosgral                
+               W_Agencia                   
+               P_Cpte                      
+               INTEG(P_NroDoc)             
+               STRING(Creditos.Num_Credito)
+               STRING(Creditos.Num_Credito)
+               TODAY                       
+               TIME                        
+               W_Estacion                  
+               W_Valor SKIP                    
+               "Error al grabar Mov_Contable, rectifique la Cuenta : " W_Cta SKIP
+               "Debe existir activa... No se permite la operaciòn..." SKIP
+               "                    Programa AboCredito.P."
+         VIEW-AS ALERT-BOX INFO BUTTONS OK.
+       RETURN ERROR.
+    END.
+  END.
+
+    IF W_Trasl THEN DO: /*Solo trasl DifCob y Anticip*/
+       W_Trasl = FALSE.
+       RETURN.
+    END.
+    
+    CREATE Mov_Creditos.
+    ASSIGN Mov_Creditos.Agencia       = Creditos.Agencia
+           Mov_Creditos.Cod_Credito   = Creditos.Cod_Credito
+           Mov_Creditos.Nit           = Creditos.Nit
+           Mov_Creditos.Num_Credito   = Creditos.Num_Credito
+           Mov_Creditos.Ofi_Destino   = Creditos.agencia
+           Mov_Creditos.Ofi_Fuente    = W_Agencia
+           Mov_Creditos.Pagare        = Creditos.Pagare
+           Mov_Creditos.Fecha         = W_Fecha
+           Mov_Creditos.Hora          = TIME
+           Mov_Creditos.Num_Documento = P_NroDoc           
+           Mov_Creditos.Usuario       = W_Usuario
+           Mov_Creditos.Int_Corriente = Creditos.Int_Corriente
+           Mov_Creditos.Int_MorCobrar = Creditos.Int_MorCobrar + Creditos.Int_MoraDifCob
+           Mov_Creditos.Sdo_Capital   = Creditos.Sdo_Capital
+           Mov_Creditos.Val_Efectivo  = W_Valor
+           Mov_Creditos.Cpte          = P_Cpte
+           Mov_Creditos.Cod_Operacion = W_Oper
+           Mov_Creditos.Descrip       = W_Desc + "-Efectivo".
+           
+    IF P_EfeCheq EQ 1 THEN
+       ASSIGN Mov_Creditos.Val_Efectivo = 0
+              Mov_Creditos.Val_Cheque   = W_Valor
+              Mov_Creditos.Descrip      = W_Desc + "-Cheque".
+
+    IF ERROR-STATUS:ERROR THEN DO:
+       MESSAGE "Error al grabar Mov_Creditos, rectifique la operación : " W_Oper SKIP
+             "Debe existir activa... No se permite la operaciòn..."
+         VIEW-AS ALERT-BOX INFO BUTTONS OK.
+       RETURN ERROR.
+    END.
+
+ END PROCEDURE.
+
+  /*--------------------------*/
+  PROCEDURE GrabaPlanPag:
+     DEFI VAR W_RowIdPPT AS ROWID.
+     DEFI VAR W_RowIdCre AS ROWID.
+
+     ASSIGN PlanPagos.Pagos_CapitalAcum = PlanPagos.Pagos_CapitalAcum + P_Capit
+            PlanPagos.Pagos_CapitalPdo  = PlanPagos.Pagos_CapitalPdo  + P_Capit
+            PlanPagos.Pagos_IntAcum     = PlanPagos.Pagos_IntAcum     + P_ICte + P_IDifCob  + P_IAntic       
+            PlanPagos.Pagos_IntPdo      = PlanPagos.Pagos_IntPdo      + P_ICte + P_IDifCob  + P_IAntic
+            PlanPagos.Pagos_MoraAcum    = PlanPagos.Pagos_MoraAcum    + (P_IMora + P_IMorDifC)
+            PlanPagos.Pagos_MoraPdo     = PlanPagos.Pagos_MoraPdo     + (P_IMora + P_IMorDifC)
+            PlanPagos.Pagos_OtrosAcum   = PlanPagos.Pagos_OtrosAcum   + P_Poliza + P_Honora + P_Costas
+            PlanPagos.Pagos_OtrosPdo    = PlanPagos.Pagos_OtrosPdo    + P_Poliza + P_Honora + P_Costas
+            PlanPagos.Cuo_Pagas         = Creditos.Cuo_Pagadas
+            PlanPagos.Fec_ProxPago      = Creditos.Fec_Pago
+            Creditos.Sdo_CapPag         = Creditos.Sdo_CapPag         + P_Capit
+            Creditos.Sdo_IntMor         = Creditos.Sdo_IntMor         + (P_IMora + P_IMorDifC)
+            Creditos.Sdo_IntPag         = Creditos.Sdo_IntPag         + (P_IDifCob + P_ICte + P_IAntic)
+            Creditos.Fec_UltPag         = W_Fecha
+            Creditos.Val_Atraso         = 0
+            Creditos.Dias_Atraso        = 0
+            W_RowIdPPT                  = ROWID(PlanPagos)
+            W_RowIdCre                  = ROWID(Creditos).
+                     
+     ASSIGN Creditos.Val_Atraso = Creditos.Sdo_Capital - Creditos.Sdo_Proyectado WHEN Creditos.Sdo_Capital GT Creditos.Sdo_Proyectado.     
+                                                  
+    /*
+     IF Creditos.Sdo_Capital GT 0 THEN
+        RUN Halla_PagasFalt.R (INPUT W_RowIdCre,W_RowIdPPT,W_TasaUs).   /*Oct.5/06*/ */
+
+    ASSIGN Creditos.Fec_Pago    = NewFecPago.   /* Agregado William Martinez Ruiz */
+
+
+     FIND PlanPagos WHERE ROWID(PlanPagos) EQ W_RowIdPPT NO-ERROR.
+
+     IF Creditos.Sdo_Capital GT 0 THEN DO:
+        IF Creditos.Cuo_Pagadas GE Creditos.Plazo THEN   
+           ASSIGN Creditos.Cuo_Pagadas = Creditos.Plazo - 1
+                  PlanPagos.Cuo_Pagas  = Creditos.Cuo_Pagadas.
+
+        ASSIGN PlanPagos.Cuo_Pagas    = Creditos.Cuo_Pagadas
+               PlanPagos.Fec_ProxPago = Creditos.Fec_Pago
+               Creditos.Cuo_Atraso    = PlanPagos.Nro_Cuota - (Creditos.Cuo_Pagadas + 1)
+               Creditos.Dias_Atraso   = W_Fecha - PlanPagos.Fec_ProxPago.
+
+        IF PlanPagos.Nro_Cuota GT Creditos.Plazo THEN                   
+           Creditos.Cuo_Atraso = Creditos.Plazo - Creditos.Cuo_Pagadas + 1.
+
+        IF Creditos.Cuo_Atraso LT 0 AND Creditos.Val_Atraso LE 0 THEN DO:
+           ASSIGN Creditos.Cuo_Atraso = 0.        
+           IF Creditos.Fec_Pago LT W_Fecha THEN DO:
+               ASSIGN Creditos.Fec_Pago      = PlanPagos.Fec_Vcto
+                      PlanPagos.Fec_ProxPago = Creditos.Fec_Pago.
+
+           END.
+        END.
+
+       /* IF Creditos.Val_Atraso GT 0 THEN DO:
+           IF Creditos.Cuo_Atraso LE 0 THEN
+              ASSIGN Creditos.Cuo_Atraso = 1.
+
+           IF Creditos.Cuo_Atraso GT 0 AND Creditos.Fec_Pago GE W_Fecha THEN  /*Por si se presenta*/
+              ASSIGN Creditos.Fec_Pago      = Creditos.Fec_Pago - 30
+                     PlanPagos.Fec_ProxPago = Creditos.Fec_Pago
+                     Creditos.Dias_Atraso   = W_Fecha - Creditos.Fec_Pago.
+        END.*/
+     END.
+
+    /* RETURN. */  /*Oct.5/06*/
+
+/*--------------No necesario */
+     IF  Creditos.Val_Atraso  LE 0
+     AND Creditos.Cuo_Pagadas LT (PlanPagos.Nro_Cuota - 1) THEN DO:
+         ASSIGN Creditos.Fec_Pago      = PlanPagos.Fec_Inic
+                PlanPagos.Fec_ProxPago = Creditos.Fec_Pago
+                PlanPagos.Cuo_Pagas    = PlanPagos.Nro_Cuota - 1     
+                Creditos.Cuo_Pagadas   = PlanPagos.Cuo_Pagas
+                Creditos.Cuo_Atraso    = 0
+                Creditos.Dias_Atraso   = 0.
+     END.
+
+     IF Creditos.Cuo_Pagadas GE Creditos.Plazo THEN   
+        ASSIGN Creditos.Cuo_Pagadas = Creditos.Plazo - 1
+               PlanPagos.Cuo_Pagas  = Creditos.Cuo_Pagadas.
+     
+     IF PlanPagos.Nro_Cuota GT Creditos.Plazo THEN                   
+        Creditos.Cuo_Atraso = Creditos.Plazo - Creditos.Cuo_Pagadas. 
+                                                                     
+     IF (Creditos.Sistema    EQ 2 OR Creditos.Plazo EQ 1)            
+     AND Creditos.Val_Atraso GT 0 THEN                               
+         Creditos.Cuo_Atraso = 1.                                    
+                                                                     
+     ASSIGN Creditos.Cuo_Atraso  = 0 WHEN Creditos.Cuo_Atraso  LT 0. 
+     ASSIGN Creditos.Dias_Atraso = 0 WHEN Creditos.Dias_Atraso LT 0. 
+     ASSIGN Creditos.Val_Atraso  = 0 WHEN Creditos.Val_Atraso  LT 0.   
+
+     IF W_SiFecVcto THEN DO:
+        CREATE Cop_PlanPago.
+        BUFFER-COPY PlanPagos TO Cop_PlanPago.
+
+        FIND PlanPagos WHERE ROWID(PlanPagos) EQ W_RowIdPAnt NO-ERROR.
+        CREATE Cop_PPago2.
+        BUFFER-COPY PlanPagos TO Cop_PPago2.
+
+        BUFFER-COPY Cop_PlanPago TO PlanPagos. 
+        ASSIGN PlanPagos.Fec_Vcto         = Cop_PPago2.Fec_Vcto                                                                                  
+               PlanPagos.Fec_Ini          = Cop_PPago2.Fec_Ini                                               
+               PlanPagos.Id_PdoMes        = 1                                                                                 
+               PlanPagos.Nro_Cuota        = Cop_PPago2.Nro_Cuota    
+               PlanPagos.Cuota            = Creditos.Cuota                   
+               PlanPagos.Capital_Pdo      = 0                                
+               PlanPagos.Cargos_Pdo       = 0                     
+               PlanPagos.Int_LiqPdo       = 0                           
+               PlanPagos.Int_MoraPdo      = 0                         
+               PlanPagos.Pagos_CapitalPdo = 0                         
+               PlanPagos.Pagos_IntPdo     = 0                         
+               PlanPagos.Pagos_MoraPdo    = 0                         
+               PlanPagos.Pagos_OtrosPdo   = 0. 
+
+        IF ERROR-STATUS:ERROR THEN DO:
+           MESSAGE "Error al grabar PlanPagos, BUFFER-COPY" SKIP 
+                   "rectifique si existe el Pdo.actual." SKIP
+               "No se permite la operaciòn..."
+             VIEW-AS ALERT-BOX INFO BUTTONS OK.
+           RETURN ERROR.
+        END.         
+     END.
+
+     /*RUN Reversa_AporteDiferido.  Comentariado Oct.5/06*/
+END PROCEDURE.
+
+/*--------Configuraciòn ctas-contables*/
+PROCEDURE ConfigCtas:
+  FIND FIRST CortoLargo WHERE CortoLargo.Agencia        EQ Creditos.Agencia
+                          AND CortoLargo.Clase_Producto EQ 2
+                          AND CortoLargo.Cod_Producto   EQ Creditos.Cod_Credito
+                          AND CortoLargo.Plazo_Inicial  GE 0 NO-LOCK NO-ERROR.
+  IF NOT AVAIL(CortoLargo) THEN DO:                        
+     MESSAGE "Falta configurar en Cortolargo pdcto: " Creditos.Cod_Credito SKIP
+             "Para la agencia                     : " Creditos.Agencia     SKIP
+             "No se permite la operaciòn..."
+         VIEW-AS ALERT-BOX INFO BUTTONS OK.
+     RETURN ERROR.
+  END.
+  IF creditos.tip_credito LE 4 THEN DO:
+      FIND FIRST Liqui_Int WHERE Liqui_Int.Clase_Producto EQ 2                                                                 
+                             AND Liqui_Int.Cod_Producto   EQ CortoLargo.Cod_Producto NO-LOCK NO-ERROR. 
+                                                       
+      IF NOT AVAIL(Liqui_Int) THEN DO:                        
+         MESSAGE "Falta configurar en Liqui_Int pdcto: " Creditos.Cod_Credito SKIP
+                 "No se permite la operaciòn..."
+             VIEW-AS ALERT-BOX INFO BUTTONS OK.
+         RETURN ERROR.
+      END.
+  END.
+  IF CortoLargo.Cta_AsoAd  LE "0" THEN DO:
+     MESSAGE "Falta cuenta CortoLargo.Cta_AsoAd."
+         VIEW-AS ALERT-BOX INFO BUTTONS OK.
+     RETURN ERROR.
+  END.
+  IF CortoLargo.Cta_SyA  LE "0" THEN DO:
+     MESSAGE "Falta cuenta CortoLargo.Cta_SyA."
+         VIEW-AS ALERT-BOX INFO BUTTONS OK.
+     RETURN ERROR.
+  END.
+  IF CortoLargo.Cta_HonorariosDB  LE "0" THEN DO:
+     MESSAGE "Falta cuenta CortoLargo.Cta_HonorariosDB."
+         VIEW-AS ALERT-BOX INFO BUTTONS OK.
+     RETURN ERROR.
+  END.
+  IF CortoLargo.Cta_PolizasDB  LE "0" THEN DO:
+     MESSAGE "Falta cuenta CortoLargo.Cta_PolizasDB."
+         VIEW-AS ALERT-BOX INFO BUTTONS OK.
+     RETURN ERROR.
+  END.
+  IF CortoLargo.Cta_CostasDB  LE "0" THEN DO:
+     MESSAGE "Falta cuenta CortoLargo.Cta_CostasDB."
+         VIEW-AS ALERT-BOX INFO BUTTONS OK.
+     RETURN ERROR.
+  END.
+  IF CortoLargo.Cta_VigGarAd  LE "0" THEN DO:
+     MESSAGE "Falta cuenta CortoLargo.Cta_VigGarAd."
+         VIEW-AS ALERT-BOX INFO BUTTONS OK.
+     RETURN ERROR.
+  END.
+  IF CortoLargo.Cta_ContrapartidaGar  LE "0" THEN DO:
+     MESSAGE "Falta cuenta CortoLargo.Cta_ContrapartidaGar."
+         VIEW-AS ALERT-BOX INFO BUTTONS OK.
+     RETURN ERROR.
+  END.
+  IF Liqui_Int.CtaDb_LiqAso LE "0" THEN DO:
+     MESSAGE "Falta cuenta Liqui_Int.CtaDb_LiqAso."
+         VIEW-AS ALERT-BOX INFO BUTTONS OK.
+     RETURN ERROR.
+  END.
+  IF Liqui_Int.CtaCr_LiqAso  LE "0" THEN DO:
+     MESSAGE "Falta cuenta Liqui_Int.CtaCr_LiqAso."
+         VIEW-AS ALERT-BOX INFO BUTTONS OK.
+     RETURN ERROR.
+  END.
+  IF Liqui_Int.CtaInt_AntAso LE "0" THEN DO:
+     MESSAGE "Falta cuenta Liqui_Int.CtaInt_AntAso."
+         VIEW-AS ALERT-BOX INFO BUTTONS OK.
+     RETURN ERROR.
+  END.
+  IF Liqui_Int.CtaDb_MoraAso LE "0" THEN DO:
+     MESSAGE "Falta cuenta Liqui_Int.CtaDb_MoraAso."
+         VIEW-AS ALERT-BOX INFO BUTTONS OK.
+     RETURN ERROR.
+  END.
+  IF Liqui_Int.CtaCr_MoraAso LE "0" THEN DO:
+     MESSAGE "Falta cuenta Liqui_Int.CtaCr_MoraAso."
+         VIEW-AS ALERT-BOX INFO BUTTONS OK.
+     RETURN ERROR.
+  END.
+  IF Liqui_Int.CtaDb_DifCobAso LE "0" THEN DO:
+     MESSAGE "Falta cuenta Liqui_Int.CtaDb_DifCobAso."
+         VIEW-AS ALERT-BOX INFO BUTTONS OK.
+     RETURN ERROR.
+  END.
+  IF Liqui_Int.CtaCr_DifCobAso LE "0" THEN DO:
+     MESSAGE "Falta cuenta Liqui_Int.CtaCr_DifCobAso."
+         VIEW-AS ALERT-BOX INFO BUTTONS OK.
+     RETURN ERROR.
+  END.
+ /* IF Liqui_Int.Cod_Operacion LE 0 THEN DO:
+     MESSAGE "Falta Liqui_Int.Cod_Operacion."
+         VIEW-AS ALERT-BOX INFO BUTTONS OK.
+     RETURN ERROR.
+  END.*/
+
+  ASSIGN Ctas_CtaPro = CortoLargo.Cta_AsoAd                                                                            
+         Ctas_CtaHon = CortoLargo.Cta_HonorariosDB                                                                     
+         Ctas_CtaPol = CortoLargo.Cta_PolizasDB                                                                        
+         Ctas_CtaCos = CortoLargo.Cta_CostasDB                                                                         
+         Ctas_CtaLiq = Liqui_Int.CtaDb_LiqAso                                                                          
+         Ctas_CtaIng = Liqui_Int.CtaCr_LiqAso                                                                          
+         Ctas_IntMor = Liqui_Int.CtaDb_MoraAso
+         Ctas_MorIng = Liqui_Int.CtaCr_MoraAso                                     
+         Ctas_DifCoD = Liqui_Int.CtaDb_DifCobAso                                                                       
+         Ctas_DifCoH = Liqui_Int.CtaCr_DifCobAso                                                                       
+         Ctas_Oper   = Liqui_Int.Cod_Operacion.  
+
+END PROCEDURE.
+
+/*--------------------*/
+PROCEDURE Cuo_PagasOK:   /*Si está adelantado toma Pagadas la que está transc., 
+                           El proceso arriba Itera futuras*/
+  DEFI VAR W_RowidPPOK AS ROWID.
+
+  ASSIGN W_RowidPPOK = ROWID(PlanPagos) WHEN AVAIL PlanPagos.
+
+  IF Creditos.Monto EQ Creditos.Sdo_Proyect THEN DO:
+     IF P_Grabar THEN
+        ASSIGN Creditos.Cuo_pagadas = 0.
+
+     W_CuoPaga = 0.
+     RETURN.
+  END.
+
+  FOR EACH PlanPagos WHERE PlanPagos.Agencia      EQ Creditos.Agencia        
+                       AND PlanPagos.Nit          EQ Creditos.Nit            
+                       AND PlanPagos.Cod_Credito  EQ Creditos.Cod_Credito    
+                       AND PlanPagos.Num_Credito  EQ Creditos.Num_Credito  /*Solo Cumplidas y Transc.*/
+                       AND (PlanPagos.Id_PdoMes   EQ 1 OR PlanPagos.Id_PdoMes EQ 2) NO-LOCK
+                           BY PlanPagos.Nro_Cuota DESCEND: 
+      IF Creditos.Sdo_Capital LE (Creditos.Monto - PlanPagos.Capital_Acum) THEN DO:
+         IF P_Grabar THEN
+            ASSIGN Creditos.Cuo_pagadas = PlanPagos.Nro_Cuota - 1.
+
+         ASSIGN W_CuoPaga = PlanPagos.Nro_Cuota - 1.
+         LEAVE.
+      END.                                                 
+  END.
+
+  FIND PlanPagos WHERE ROWID(PlanPagos) EQ W_RowidPPOK NO-ERROR.
+
+END PROCE.
+
+PROCEDURE Mov_ContabAho:
+
+  ASSIGN Mov_Contable.Agencia        = Ahorros.Agencia             
+         Mov_Contable.Nit            = Ahorros.Nit
+         Mov_Contable.Fec_Contable   = W_Fecha                        
+         Mov_Contable.Comentario     = "Reversa Aporte-Diferido"          
+         Mov_Contable.Usuario        = W_Usuario                      
+         Mov_Contable.Cen_Costos     = W_Cencosgral                   
+         Mov_Contable.Destino        = W_Agencia                      
+         Mov_Contable.Comprobante    = P_Cpte       
+         Mov_Contable.Num_Documento  = INTEG(P_NroDoc)  
+         Mov_Contable.Doc_Refer      = STRING(P_NumCred)
+         Mov_Contable.Enlace         = STRING(P_NumCred)
+         Mov_Contable.Fec_Grabacion  = TODAY                          
+         Mov_Contable.Hora           = TIME                           
+         Mov_Contable.Estacion       = W_Estacion.
+
+  ASSIGN Mov_Ahorros.Agencia       = Ahorros.Agencia
+         Mov_Ahorros.Cod_Ahorro    = Ahorros.Cod_Ahorro
+         Mov_Ahorros.Cue_Ahorros   = Ahorros.Cue_Ahorros
+         Mov_Ahorros.Nit           = Ahorros.Nit
+         Mov_Ahorros.Fecha         = W_Fecha
+         Mov_Ahorros.Hora          = TIME
+         Mov_Ahorros.Num_Documento = P_NroDoc
+         Mov_Ahorros.Age_Fuente    = W_Agencia
+         Mov_Ahorros.Age_Destino   = Ahorros.Agencia
+         Mov_Ahorros.Usuario       = W_Usuario
+         Mov_Ahorros.Val_Cheque    = 0
+         Mov_Ahorros.Descrip       = "Reversa Aporte-Diferido"
+         Mov_Ahorros.Cpte          = P_Cpte
+         Mov_Ahorros.Sdo_Dispon    = Ahorros.Sdo_Disponible + Ahorros.Sdo_Canje.
+END PROCE.
+
+
+/*-----------------------------------------*/  
+/*Invocado desde Procedimiento ?*/
+PROCEDURE Reversa_AporteDiferido:
+/*   DEFI VAR Vr_Reversa LIKE Mov_Contable.Db INIT 0.
+
+   FIND FIRST Ahorros WHERE Ahorros.Nit            EQ P_Ced
+                        AND Ahorros.Tip_Ahorro     EQ 4 
+                        AND Ahorros.Cod_Ahorro     EQ 7
+                        AND Ahorros.Sdo_Disponible GT 0 NO-ERROR.
+   IF  NOT AVAIL(Ahorros)
+   OR (AVAIL(Creditos) AND Creditos.Cod_Credito EQ 7) 
+   OR (AVAIL(Creditos) AND Creditos.Cod_Credito EQ 20) THEN 
+       RETURN.
+        
+   FIND FIRST Operacion WHERE /*busca operacion de Retiro de ahorros*/
+           STRING(Operacion.Cod_Operacion,"999999999") BEGINS "010102" AND
+                  Operacion.Ctrl_EfeChe    EQ     1 AND 
+                  Operacion.Estado         EQ     1 AND 
+                  Operacion.Id_SYA         EQ     NO NO-LOCK NO-ERROR.
+   IF NOT AVAILABLE Operacion THEN DO:
+      MESSAGE "No se encontró la operación de Retiro" SKIP
+              "de ahorros para Reversar aportes Diferidos." SKIP(1)
+               VIEW-AS ALERT-BOX TITLE "Informativo en Prog.AboCredito.P". 
+      RETURN ERROR.
+   END.
+
+   FIND FIRST CortoLargo WHERE 
+         CortoLargo.Agencia           EQ P_Age AND
+         CortoLargo.Cod_Producto      EQ 7 AND
+         CortoLargo.Clase_Producto    EQ 1  AND
+         CortoLargo.Cta_AsoAd         NE "" NO-LOCK NO-ERROR.
+   IF NOT AVAILABLE CortoLargo THEN DO:
+      MESSAGE "No se halló CORTOLARGO para Aportes Diferidos" SKIP
+              "En Prog.AboCredito.P" VIEW-AS ALERT-BOX ERROR. 
+      RETURN ERROR.
+   END.
+
+   IF NOT W_SinDeuda THEN DO:
+      IF Ahorros.Cuota LE 0 THEN DO:
+         IF Creditos.Sdo_Capital GT 0 THEN
+            Ahorros.Cuota = ROUND(Ahorros.Sdo_Disponible  / (Creditos.Plazo - Creditos.Cuo_pagadas),0).
+         ELSE 
+            Ahorros.Cuota = Ahorros.Sdo_Disponible. 
+      END.
+      ASSIGN Vr_Reversa = Ahorros.Cuota.
+   END.
+   ELSE 
+      ASSIGN Vr_Reversa = Ahorros.Sdo_Disponible.   
+
+   IF Vr_Reversa GT Ahorros.Sdo_Disponible THEN
+      Vr_Reversa = Ahorros.Sdo_Disponible.
+   
+   ASSIGN Ahorros.Sdo_Disponible     = Ahorros.Sdo_Disponible - Vr_Reversa
+          Ahorros.Fec_Ulttransaccion = W_Fecha.
+   
+   IF Ahorros.Sdo_Disponible LE 0 AND Ahorros.Sdo_Canje LE 0 THEN
+      ASSIGN Ahorros.Fec_Cancelacion    = W_Fecha
+             Ahorros.Estado             = 2      
+             Ahorros.Detalle_Estado     = 9. 
+
+   FIND CURRENT Ahorros NO-LOCK NO-ERROR.
+
+   CREATE Mov_Contable.
+   CREATE Mov_Ahorros.
+
+   RUN Mov_ContabAho.
+   ASSIGN Mov_Ahorros.Val_Efectivo = Vr_Reversa
+          Mov_Ahorros.Cod_operac   = Operacion.Cod_operacion
+          Mov_Contable.Db          = Vr_Reversa
+          Mov_Contable.Cuenta      = CortoLargo.Cta_AsoAd.
+
+   FIND FIRST Ahorros WHERE Ahorros.Nit            EQ P_Ced
+                        AND Ahorros.Cod_Ahorro     EQ 10
+                        AND Ahorros.Estado         EQ 1  NO-ERROR.
+   IF NOT AVAIL(Ahorros) THEN DO:
+      CREATE Ahorros.
+      ASSIGN Ahorros.Agencia   = P_Age
+           Ahorros.Nit         = P_Ced
+           Ahorros.Tip_Ahorro  = 4            
+           Ahorros.Cod_Ahorro  = 10 
+           Ahorros.Cue_Ahorros = P_Ced
+           Ahorros.Fec_Apertur = W_Fecha
+           Ahorros.Detalle_Estado = 2
+           Ahorros.Estado         = 1
+           Ahorros.Sdo_Inicial    = Vr_Reversa
+           Ahorros.Cuota          = 0
+           Ahorros.Plazo          = 9999.
+   END.
+   ELSE IF Ahorros.Estado NE 1 OR Ahorros.Detalle_Estado NE 2 THEN
+      ASSIGN Ahorros.Detalle_Estado = 2
+           Ahorros.Estado         = 1
+           Ahorros.Sdo_Inicial    = Vr_Reversa
+           Ahorros.Cuota          = 0
+           Ahorros.Plazo          = 9999.
+  
+   FIND FIRST CortoLargo WHERE 
+         CortoLargo.Agencia           EQ P_Age              AND
+         CortoLargo.Cod_Producto      EQ Ahorros.Cod_Ahorro AND
+         CortoLargo.Clase_Producto    EQ 1  AND
+         CortoLargo.Cta_AsoAd         NE "" NO-LOCK NO-ERROR.
+   IF NOT AVAILABLE CortoLargo THEN DO:
+      MESSAGE "No se halló CORTOLARGO para Aportes Ordinarios," SKIP
+              "En Programa AboCredito.P." VIEW-AS ALERT-BOX ERROR. 
+      RETURN ERROR.
+   END.
+
+   FIND FIRST Operacion WHERE /*busca operacion de Consignación de ahorros*/
+           STRING(Operacion.Cod_Operacion,"999999999") BEGINS "010101" AND
+                  Operacion.Ctrl_EfeChe    EQ     1 AND 
+                  Operacion.Estado         EQ     1 AND 
+                  Operacion.Id_SYA         EQ     NO NO-LOCK NO-ERROR.
+   IF NOT AVAILABLE Operacion THEN DO:
+      MESSAGE "No se encontró la operación de Consignación" SKIP
+              "de ahorros para Reversar aportes Diferidos." SKIP(1)
+               VIEW-AS ALERT-BOX TITLE "Informativo en Prog.AboCredito.P". 
+      RETURN ERROR.
+   END.
+
+   ASSIGN Ahorros.Sdo_Disponible     = Ahorros.Sdo_Disponible + Vr_Reversa
+          Ahorros.Fec_Ulttransaccion = W_Fecha.
+   
+   FIND CURRENT Ahorros NO-LOCK NO-ERROR.
+
+   CREATE Mov_Contable.
+   CREATE Mov_Ahorros.
+
+   RUN Mov_ContabAho.
+   ASSIGN Mov_Ahorros.Val_Efectivo = Vr_Reversa
+          Mov_Ahorros.Cod_operac   = Operacion.Cod_operacion
+          Mov_Contable.Cr          = Vr_Reversa
+          Mov_Contable.Cuenta      = CortoLargo.Cta_AsoAd.
+          */
+END PROCE.

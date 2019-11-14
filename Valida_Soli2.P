@@ -1,0 +1,142 @@
+/*-----------------Programa Valida_Soli.P---------------------------------- 
+  Politicas y Reglamento por Linea de Credito, definidas en la tabla 
+  Cfg_RegCredito; Aplicadas a la radicacion de cada Solicitud de Credito.
+
+  Input Parameters : Linea de Credito, Ced/Nit del Solicitante, Monto, Plazo,
+                     Agencia de la Solicitud, Forma de Pago, Pdo.de Pago                    
+  Output Parameters: Retorna Variable W_Valida igual a TRUE, si no cumple las
+                     condiciones parametrizadas en el respectivo registro de
+                     la tabla Cfg_RegCredito.     
+  Author           : GAER
+  Created          : Octubre 19/2005.
+  
+  - Se actualizan las periodicidades de pago - Leonardo G. Ocampo - 13/07/2010
+-------------------------------------------------------------------------------*/
+
+/* Parameters Definitions */
+DEFI INPUT PARAM P_Linea LIKE Pro_Creditos.Cod_Credito.
+DEFI INPUT PARAM P_Monto LIKE Creditos.Monto.
+DEFI INPUT PARAM P_Plazo LIKE Creditos.Plazo.
+DEFI INPUT PARAM P_PdoPag LIKE Creditos.Per_Pago.
+DEFI OUTPUT PARAM W_Valida AS LOG INIT FALSE.
+
+DEFI TEMP-TABLE CCfg_RegCredito LIKE Cfg_RegCredito.
+
+/* Local Variable Definitions */
+{Incluido/Variable.I "SHARED"}
+
+      /* oakley */
+
+   DEFI VAR K          AS   INTEG FORM "9"         INIT 0.        
+   DEFI VAR Tot_Aporte LIKE Ahorros.Sdo_Disponible INIT 0.
+   DEFI VAR Wk_Edad    AS   INTEG FORM "9999"      INIT 0.
+
+   CASE P_PdoPag:
+       WHEN 1 THEN P_Plazo = P_Plazo * 7. /* Semanal */
+       WHEN 2 THEN P_Plazo = P_Plazo * 10. /* Decadal */
+       WHEN 3 THEN P_Plazo = P_Plazo * 15. /* Quincenal */
+       WHEN 4 THEN P_Plazo = P_Plazo * 30. /* Mensual */
+       WHEN 5 THEN P_Plazo = P_Plazo * 60. /* Bimestral */
+       WHEN 6 THEN P_Plazo = P_Plazo * 90. /* Trimestral */
+       WHEN 7 THEN P_Plazo = P_Plazo * 120. /* Cuatrimestral */
+       WHEN 8 THEN P_Plazo = P_Plazo * 180. /* Semestral */
+       WHEN 9 THEN P_Plazo = P_Plazo * 360. /* Anual */
+   END CASE.
+
+FIND FIRST Pro_Creditos       WHERE Pro_Creditos.Cod_Credito       EQ P_Linea  NO-LOCK NO-ERROR.
+   FIND FIRST Cfg_OrigRegCredito WHERE Cfg_OrigRegCredito.Cod_Credito EQ P_Linea  NO-LOCK NO-ERROR.
+   
+   IF NOT AVAIL(Pro_Creditos) OR NOT AVAIL(Cfg_OrigRegCredito) OR (AVAIL(Cfg_OrigRegCredito) AND Cfg_OrigRegCredito.Id_Vigente NE 0) THEN DO:
+      MESSAGE "La línea debe existir en Pro_Creditos, " P_Linea SKIP
+              "y en Cfg_OrigRegCredito y con Id.de vigente."    SKIP
+              "                      Se retorna variable W_Valida como ERROR."
+               VIEW-AS ALERT-BOX TITLE "ERROR En Prog.Valida_Soli.P".
+      ASSIGN W_Valida = TRUE.
+      RETURN.
+   END.
+
+   /*Feb.9/06 GAER  Copia a la temporal la Original si tiene Ced/Nit = a la solicitud
+                    de lo contrario trabaja con la tabla operativa*/
+   FIND FIRST Cfg_RegCredito WHERE Cfg_RegCredito.Cod_Credito EQ P_Linea  NO-LOCK NO-ERROR.
+   CREATE CCfg_RegCredito.
+   BUFFER-COPY Cfg_RegCredito TO CCfg_RegCredito.
+   
+   RELEASE Cfg_OrigRegCredito.
+   RELEASE Cfg_RegCredito.
+   /*Hasta aca Feb.9/06*/
+
+   /*Trabaja siempre con la Tabla temporal*/
+    IF P_Monto LE CCfg_RegCredito.Rangos_Monto[1] THEN DO:
+      IF P_Plazo GT CCfg_RegCredito.Rangos_Plazo[1] THEN DO: 
+         MESSAGE "Para el monto solicitado solo se permite un Plazo hasta "                                  
+                  CCfg_RegCredito.Rangos_Plazo[1] " Dias." SKIP                                                                               
+                 "                      Se Retorna Variable W_Valida como ERROR."                            
+                  VIEW-AS ALERT-BOX TITLE "ERROR En Prog.Valida_Soli.P".                                         
+         ASSIGN W_Valida = TRUE.                                                                                   
+      END.
+   END.                                                                                                   
+   ELSE
+   IF P_Monto LE CCfg_RegCredito.Rangos_Monto[2] THEN DO:
+      IF P_Plazo GT CCfg_RegCredito.Rangos_Plazo[2] THEN DO: 
+         MESSAGE "Para el monto solicitado solo se permite un Plazo hasta "                                  
+                  CCfg_RegCredito.Rangos_Plazo[2] " Dias." SKIP                                                                               
+                 "                      Se Retorna Variable W_Valida como ERROR."                            
+                  VIEW-AS ALERT-BOX TITLE "ERROR En Prog.Valida_Soli.P".                                         
+         ASSIGN W_Valida = TRUE.                                                                                                                                                                        
+      END.
+   END.                                                                                                   
+   ELSE
+   IF P_Monto LE CCfg_RegCredito.Rangos_Monto[3] THEN DO:
+      IF P_Plazo GT CCfg_RegCredito.Rangos_Plazo[3] THEN DO: 
+         MESSAGE "Para el monto solicitado solo se permite un Plazo hasta "                                  
+                 CCfg_RegCredito.Rangos_Plazo[3] " Dias." SKIP                                                                               
+                 "                      Se Retorna Variable W_Valida como ERROR."                            
+                 VIEW-AS ALERT-BOX TITLE "ERROR En Prog.Valida_Soli.P".                                         
+         ASSIGN W_Valida = TRUE.                                                                                                                                                                               
+      END.
+   END.                                                                                                   
+   ELSE
+   IF P_Monto LE CCfg_RegCredito.Rangos_Monto[4] THEN DO:
+      IF P_Plazo GT CCfg_RegCredito.Rangos_Plazo[4] THEN DO:    
+         MESSAGE "Para el monto solicitado solo se permite un Plazo hasta "                                  
+                  CCfg_RegCredito.Rangos_Plazo[4] " Dias." SKIP                                                                               
+                 "                      Se Retorna Variable W_Valida como ERROR."                            
+                  VIEW-AS ALERT-BOX TITLE "ERROR En Prog.Valida_Soli.P".                                         
+         ASSIGN W_Valida = TRUE. 
+      END.
+   END.                                                                                                   
+   ELSE
+   IF P_Monto LE CCfg_RegCredito.Rangos_Monto[5] THEN DO:
+      IF P_Plazo GT CCfg_RegCredito.Rangos_Plazo[5] THEN DO: 
+         MESSAGE "Para el monto solicitado solo se permite un Plazo hasta "                                  
+                  CCfg_RegCredito.Rangos_Plazo[5] " Dias." SKIP                                                                               
+                 "                      Se Retorna Variable W_Valida como ERROR."                            
+                  VIEW-AS ALERT-BOX TITLE "ERROR En Prog.Valida_Soli.P".                                         
+         ASSIGN W_Valida = TRUE. 
+      END.
+   END. 
+   ELSE DO:
+      MESSAGE "No Existe Rango Para el Monto y Plazo solicitado." SKIP          
+              "                      Se Retorna Variable W_Valida como ERROR."                            
+               VIEW-AS ALERT-BOX TITLE "ERROR En Prog.Valida_Soli.P".                                         
+      ASSIGN W_Valida = TRUE. 
+   END.
+   IF  CCfg_RegCredito.Plazo_MinMax[1] GT 0 AND CCfg_RegCredito.Plazo_MinMax[1] GT P_Plazo THEN DO:
+       MESSAGE "La Linea Exige un Plazo Minimo en Dias de : " CCfg_RegCredito.Plazo_MinMax[1]   SKIP
+               "                      Se Retorna Variable W_Valida como ERROR."
+           VIEW-AS ALERT-BOX TITLE "ERROR En Prog.Valida_Soli.P".
+       ASSIGN W_Valida = TRUE.
+   END.
+   IF  CCfg_RegCredito.Plazo_MinMax[2] GT 0 AND CCfg_RegCredito.Plazo_MinMax[2] LT P_Plazo THEN DO:
+       MESSAGE "La Linea Exige un Plazo Maximo en Dias de : " CCfg_RegCredito.Plazo_MinMax[2]   SKIP
+               "                      Se Retorna Variable W_Valida como ERROR."
+           VIEW-AS ALERT-BOX TITLE "ERROR En Prog.Valida_Soli.P".
+       ASSIGN W_Valida = TRUE.
+   END.
+   IF  CCfg_RegCredito.Monto_MinMax[1] GT 0 AND CCfg_RegCredito.Monto_MinMax[1] GT P_Monto THEN DO:
+       MESSAGE "La Linea Exige un Monto Minimo de $ : " CCfg_RegCredito.Monto_MinMax[1]   SKIP
+               "                      Se Retorna Variable W_Valida como ERROR."
+           VIEW-AS ALERT-BOX TITLE "ERROR En Prog.Valida_Soli.P".
+       ASSIGN W_Valida = TRUE.
+   END.
+   

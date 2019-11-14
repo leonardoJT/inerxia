@@ -1,0 +1,173 @@
+DEF INPUT-OUTPUT PARAMETER P_Monto LIKE Solicitud.Monto.
+DEF INPUT-OUTPUT PARAMETER P_Plazo LIKE Solicitud.Plazo.
+DEF INPUT-OUTPUT PARAMETER P_Cuota LIKE Solicitud.Cuota.
+DEF INPUT-OUTPUT PARAMETER P_TotInt LIKE Solicitud.Monto.
+DEF INPUT-OUTPUT PARAMETER P_TasaEf LIKE Solicitud.Tasa FORMAT "999.9999999".
+DEF INPUT PARAMETER P_Razon LIKE Solicitud.Incremento.
+DEF INPUT PARAMETER P_Gracia LIKE Solicitud.Per_Gracia.
+DEF INPUT PARAMETER P_PerDed AS INT.
+DEF INPUT PARAMETER P_Rforma AS INT.
+DEF INPUT PARAMETER P_TipInt AS INT.
+DEF INPUT PARAMETER P_Sistema LIKE Solicitud.Sistema.
+
+DEF SHARED VAR W_ManFin AS HANDLE.
+DEF SHARED VAR W_Manija AS HANDLE.
+DEF VAR W_Tasa AS DEC INIT 0 FORMAT "999.9999999".
+DEF VAR W_EfeTra AS DEC INIT 0 FORMAT "999.9999999".
+DEF VAR PlazoW AS INT.
+DEF VAR W_NroDias AS INT.
+DEF VAR P_NMeses AS INT.
+DEF VAR W_PdoAno AS INT.
+DEF VAR W_NomPer AS CHAR FORMAT "X(15)".
+
+W_EfeTra = (P_TasaEf / 100).
+
+RUN HallarPeriodo IN W_ManFin (INPUT P_Perded,
+                               INPUT PlazoW,
+                               OUTPUT W_NroDias,
+                               OUTPUT P_NMeses,
+                               OUTPUT W_PdoAno,
+                               OUTPUT W_NomPer).
+
+RUN TasaPerNom IN W_ManFin (INPUT W_PdoAno,
+                            INPUT P_TasaEf,
+                            INPUT P_TipInt,
+                            OUTPUT W_Tasa).
+
+P_TasaEf = (W_Tasa * 100).
+
+/* oakley */
+
+CASE P_Sistema:
+    WHEN 1 THEN
+        IF P_TipInt = 1 THEN
+            RUN P-CuotaFija.
+        ELSE
+            RUN P-CuotaFijaAnticipada.
+
+    WHEN 2 THEN
+        IF P_TipInt = 1
+            THEN RUN P-CuotaUnica.
+        ELSE
+            RUN P-CuotaUnicaAnticipada.
+
+    WHEN 3 THEN RUN P-CuotaInteresSimple.
+    WHEN 4 THEN RUN P-CapitalConstante.
+    WHEN 5 THEN RUN P-AumentoAritmetico.
+    WHEN 6 THEN RUN P-AumentoPorcentual.
+    WHEN 7 THEN RUN P-AumentoAnual.
+    WHEN 8 THEN RUN P-PeriodoGracia.
+    WHEN 9 THEN RUN P-TasaVariable.
+END CASE.
+
+PROCEDURE P-CuotaFija:
+    CASE P_RForma:
+        WHEN 1 THEN RUN HPDA IN W_ManFin (INPUT P_Cuota,INPUT W_Tasa, INPUT P_Plazo,OUTPUT P_Monto).
+        WHEN 2 THEN RUN HNCF IN W_ManFin (INPUT P_Monto,INPUT P_Cuota,INPUT W_Tasa, OUTPUT P_Plazo).
+        WHEN 3 THEN RUN HADP IN W_ManFin (INPUT P_Monto,INPUT W_Tasa, INPUT P_Plazo,OUTPUT P_Cuota).
+    END CASE.
+
+    P_TotInt = (P_Cuota * P_Plazo) - P_Monto.
+END.
+
+PROCEDURE P-CuotaFijaAnticipada:
+    CASE P_RForma:
+        WHEN 1 THEN RUN HMCFA IN W_ManFin (INPUT P_Cuota,INPUT W_Tasa, INPUT P_Plazo,OUTPUT P_Monto).
+        WHEN 2 THEN RUN HNCFA IN W_ManFin (INPUT P_Monto,INPUT P_Cuota,INPUT W_Tasa, OUTPUT P_Plazo).
+        WHEN 3 THEN RUN HCFA  IN W_ManFin (INPUT P_Monto,INPUT W_Tasa, INPUT P_Plazo,OUTPUT P_Cuota).
+    END CASE.
+
+    P_TotInt = (P_Cuota * P_Plazo) + (P_Monto * W_Tasa) - P_Monto.
+END.
+
+PROCEDURE P-CuotaUnica:
+    DEFINE VAR plazoEnDias AS INTEGER.
+    DEFINE VAR tasaDiaria AS DECIMAL.
+
+    CASE P_RForma:
+        WHEN 1 THEN RUN HPDF IN W_ManFin (INPUT P_Cuota,INPUT W_Tasa, INPUT P_Plazo,OUTPUT P_Monto).
+        WHEN 2 THEN RUN HNCU IN W_ManFin (INPUT P_Monto,INPUT P_Cuota,INPUT W_Tasa, OUTPUT P_Plazo).
+        WHEN 3 THEN DO:
+            IF p_sistema = 2 THEN DO:
+                /* Como el sistema capitaliza diariamente, se deben enviar las variables en días */
+                plazoEnDias = p_plazo * W_NroDias.
+
+                /*tasaDiaria = W_Tasa / W_NroDias.*/
+
+                RUN HallarTasPer IN W_ManFin (INPUT 0, /* Periodo de liquidación diaria */
+                                              INPUT w_efeTra * 100,
+                                              INPUT P_TipInt,
+                                              OUTPUT tasaDiaria).
+
+                RUN HFDP IN W_ManFin (INPUT P_Monto,INPUT tasaDiaria, INPUT plazoEnDias,OUTPUT P_Cuota).
+            END.
+            ELSE DO:
+                RUN HFDP IN W_ManFin (INPUT P_Monto,INPUT W_Tasa, INPUT P_Plazo,OUTPUT P_Cuota).
+            END.
+        END.
+    END CASE.
+
+    P_TotInt = P_Cuota - P_Monto.
+END PROCEDURE.
+  
+  PROCEDURE P-CuotaUnicaAnticipada:
+    CASE P_RForma:
+      WHEN 1 THEN P_Monto = (P_Cuota * W_Tasa) / W_Tasa.
+      WHEN 2 THEN RUN HNCUA IN W_ManFin (INPUT P_Monto,INPUT P_Monto * W_Tasa,INPUT W_EfeTra,OUTPUT P_Plazo).
+      WHEN 3 THEN P_Cuota = P_Monto.
+    END CASE.
+    P_TotInt = P_Monto * W_Tasa.
+  END PROCEDURE.
+  
+  PROCEDURE P-CapitalConstante:
+    CASE P_RForma:
+      WHEN 1 THEN P_Monto = P_Cuota * P_Plazo.
+      WHEN 2 THEN P_Plazo = P_Monto / P_Cuota.
+      WHEN 3 THEN P_Cuota = P_Monto / P_Plazo.
+    END CASE.
+    ASSIGN P_TotInt = (P_Monto *  W_Tasa) * ((P_Plazo + 1) / 2)
+           P_Cuota  =  P_Cuota + (P_Monto * W_Tasa).
+  END PROCEDURE.               
+  
+  PROCEDURE P-CuotaInteresSimple:
+    CASE P_RForma:
+      WHEN 1 THEN P_Monto = P_Cuota / W_Tasa.
+      WHEN 2 THEN P_Plazo = (P_Cuota - P_Monto) / (P_Monto * W_Tasa).
+      WHEN 3 THEN P_Cuota = P_Monto * W_Tasa.
+    END CASE.
+    P_TotInt = P_Cuota * P_Plazo.
+  END PROCEDURE.
+                              
+  PROCEDURE P-AumentoAritmetico:
+    RUN HGPA IN W_ManFin (INPUT P_Monto,INPUT W_Tasa,INPUT P_Plazo,INPUT P_Razon,OUTPUT P_Cuota). 
+    RUN HIGA IN W_ManFin (INPUT P_Monto,INPUT W_Tasa,INPUT P_Cuota,INPUT P_Plazo,INPUT P_Razon,OUTPUT P_TotInt).
+  END PROCEDURE. 
+
+  PROCEDURE P-AumentoPorcentual:
+    RUN HGPG IN W_ManFin (INPUT P_Monto,INPUT W_Tasa,INPUT P_Plazo,INPUT P_Razon,OUTPUT P_Cuota).
+    RUN HIGG IN W_ManFin (INPUT P_Monto,INPUT W_Tasa,INPUT P_Cuota,INPUT P_Plazo,INPUT P_Razon,OUTPUT P_TotInt).
+  END PROCEDURE.          
+                        
+  PROCEDURE P-AumentoAnual:
+    DEF VAR W_NroPer AS INT INIT 0.
+    DEF VAR W_NroDia AS INT INIT 0.
+    DEF VAR W_NomPer AS CHAR INIT "".
+  
+    RUN DiasPeriodo IN W_Manija (INPUT P_PerDed,OUTPUT W_NroDia,OUTPUT W_NroPer,OUTPUT W_NomPer).
+    RUN HCPIA IN W_ManFin (INPUT P_Monto,INPUT W_Tasa,INPUT W_EfeTra,INPUT P_Plazo / W_NroPer,INPUT W_NroPer,INPUT P_Razon,OUTPUT P_Cuota).
+    RUN HICPA IN W_ManFin (INPUT P_Monto,INPUT P_Plazo / W_NroPer,INPUT W_NroPer,INPUT P_Razon,INPUT P_Cuota,OUTPUT P_TotInt).
+  END PROCEDURE.
+  
+  PROCEDURE P-PeriodoGracia:
+    DEF VAR W_Vp AS DEC FORMAT "->>>,>>>,>>>,>>9" INIT 0.
+    
+    RUN HFDP IN W_ManFin (INPUT P_Monto,INPUT W_Tasa,INPUT P_Gracia,OUTPUT W_Vp).
+    RUN HADP IN W_ManFin (INPUT W_Vp,INPUT W_Tasa,INPUT P_Plazo - P_Gracia,OUTPUT P_Cuota).
+    P_TotInt = (W_Vp - P_Monto) + ((P_Cuota * (P_Plazo - P_Gracia)) - W_Vp).
+  END PROCEDURE.
+  
+  PROCEDURE P-TasaVariable:     
+    P_TotInt = P_Monto * W_Tasa.     
+    P_Cuota  = P_Monto / P_Plazo.
+    IF P_TipInt = 1 THEN P_Cuota = P_Cuota + P_TotInt.
+  END PROCEDURE.

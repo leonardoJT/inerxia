@@ -1,0 +1,60 @@
+DEFINE TEMP-TABLE posicion
+     FIELD nit LIKE clientes.nit
+     FIELD deposito AS DECIMAL FORMAT "99999999999"
+     FIELD creditos AS DECIMAL FORMAT "99999999999"
+     FIELD aportes  AS DECIMAL FORMAT "99999999999".
+
+INPUT FROM c:\nit.txt.
+REPEAT:
+    CREATE posicion.
+    IMPORT posicion.
+END.
+
+FOR EACH posicion:
+    FOR EACH ahorros WHERE posicion.nit = ahorros.nit AND 
+                           ahorros.estado = 1 AND 
+                           ahorros.sdo_disponible GT 0:
+
+         IF cod_ahorro NE 1 THEN posicion.deposito = posicion.deposito + ahorros.sdo_disponible.
+         ELSE posicion.aportes = posicion.aportes + ahorros.sdo_disponible.
+    END.
+
+    FOR EACH creditos WHERE posicion.nit = creditos.nit AND 
+                         creditos.estado = 2 AND 
+                         creditos.sdo_capital GT 0:
+              posicion.creditos = posicion.creditos + CREDITOS.sdo_capital.
+    END.
+END.
+
+/* INFORME */
+
+OUTPUT TO C:\POSICION.CSV.
+       PUT "COOPERATIVA DE AHORRO Y CREDITO CREAR LTDA CREARCOP" SKIP
+           "NIT 890.981.459-4" SKIP
+           "POSICION NETA DIRECTIVOS" SKIP
+           TODAY SKIP.
+           
+       PUT " " ";"
+           "IDENT."  ";" 
+           "APELLIDO1" ";"
+           "APELLIDO2" ";"
+           "NOMBRE"     ";"
+           "DEPOSITOS"         ";"
+           "COLOCACIONES"          ";"
+           "APORTES"  ";"
+           "POSICION " SKIP.
+FOR EACH POSICION:
+    FIND FIRST clientes WHERE clientes.nit = posicion.nit NO-ERROR.
+    IF AVAILABLE(clientes) THEN DO:
+       PUT "C" ";"
+           POSICION.NIT ";" 
+           CLIENTES.APELLIDO1 ";"
+           CLIENTES.APELLIDO2 ";"
+           CLIENTES.NOMBRE     ";"
+           DEPOSITO         ";"
+           CREDITOS          ";"
+           APORTES          ";"
+           (DEPOSITO + APORTES - CREDITOS) FORMAT "-99999999999"  SKIP.
+    END.
+END.
+OUTPUT TO CLOSE.
