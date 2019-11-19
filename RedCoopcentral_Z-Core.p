@@ -279,55 +279,7 @@ DO:
 
                             /* Ahorro Permanente */
                             IF ttRecibir.tipo_ah = 'AP' THEN DO:
-                                FIND FIRST ahorros WHERE ahorros.nit = ttRecibir.documento
-                                                     AND ahorros.tip_ahorro = 2
-                                                     AND ahorros.cue_ahorros = ttRecibir.cuenta
-                                                     AND ahorros.estado = 1 NO-LOCK NO-ERROR.
-                                IF AVAILABLE ahorros THEN DO:
-                                    FIND FIRST comprobantes WHERE comprobantes.comprobante = vComprobante NO-ERROR.
-                                    IF AVAILABLE(comprobantes) THEN DO:
-                                        comprobantes.secuencia = comprobantes.secuencia + 1.
-                                        vNumDocumento = comprobantes.secuencia.
-                                    END.
 
-                                    /* oakley - Consultar si sobre el Ahorro Permanente se  pueden hacer retiros por la red */
-                                    RUN p-retiroAhorro_aLaVista.r (INPUT ahorros.agencia,
-                                                                   INPUT ahorros.nit,
-                                                                   INPUT ahorros.cod_ahorro,
-                                                                   INPUT ahorros.cue_ahorros,
-                                                                   INPUT ahorros.nit,
-                                                                   INPUT vValEfectivo,
-                                                                   INPUT vValCheque,
-                                                                   INPUT vComprobante,
-                                                                   INPUT vNumDocumento,
-                                                                   INPUT ttRecibir.descripcion + " - " + ttRecibir.cTerminal,
-                                                                   INPUT ahorros.nit,
-                                                                   INPUT ttRecibir.usuario,
-                                                                   OUTPUT pError) NO-ERROR.
-
-                                    IF pError = FALSE THEN DO:
-                                        CREATE mov_contable.
-
-                                        RUN movContable.
-
-                                        /* Transacciòn en oficina propia */
-                                        IF ttRecibir.canal = "OFI" AND ttRecibir.dispositivo = "PROPIO" THEN DO:
-                                            Mov_Contable.Agencia = usuarios.agencia.
-                                            Mov_Contable.Destino = usuarios.agencia.
-                                            mov_contable.cuenta = vCuentaCaja. /* O cheque */
-                                        END.
-                                        /* Transacción externa */
-                                        ELSE DO:
-                                            mov_contable.agencia = 1.
-                                            mov_contable.destino = 1.
-                                            Mov_Contable.Cuenta = vCuentaCompensacion.
-                                            Mov_Contable.Nit = nitCompensacion.
-                                        END.
-
-                                        mov_contable.cr = vValEfectivo + vValCheque.
-                                        mov_contable.usuario = ttRecibir.usuario.
-                                    END.
-                                END.
                             END.
 
                         END.

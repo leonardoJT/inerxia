@@ -1,0 +1,26 @@
+  FIELD Agencia LIKE Inversiones.Agencia VALIDATE ~
+  FIELD Cod_Compensa LIKE Inversiones.Cod_Compensa VALIDATE ~
+  FIELD Estacion LIKE Inversiones.Estacion VALIDATE ~
+  FIELD Fec_apertura LIKE Inversiones.Fec_apertura VALIDATE ~
+  FIELD Fec_cancelacion LIKE Inversiones.Fec_cancelacion VALIDATE ~
+  FIELD Fec_procausacion LIKE Inversiones.Fec_procausacion VALIDATE ~
+  FIELD Fec_proliquidacion LIKE Inversiones.Fec_proliquidacion VALIDATE ~
+  FIELD Fec_prorroga LIKE Inversiones.Fec_prorroga VALIDATE ~
+  FIELD Fec_proximaValoracion LIKE Inversiones.Fec_proximaValoracion VALIDATE ~
+  FIELD Fec_UltCausacion LIKE Inversiones.Fec_UltCausacion VALIDATE ~
+  FIELD Fec_ultima LIKE Inversiones.Fec_ultima VALIDATE ~
+  FIELD Fec_UltimaValoracion LIKE Inversiones.Fec_UltimaValoracion VALIDATE ~
+  FIELD Fec_UltLiquidacion LIKE Inversiones.Fec_UltLiquidacion VALIDATE ~
+  FIELD Fec_vencimiento LIKE Inversiones.Fec_vencimiento VALIDATE ~
+  FIELD Int_Causado LIKE Inversiones.Int_Causado VALIDATE ~
+  FIELD Int_Pagar LIKE Inversiones.Int_Pagar VALIDATE ~
+  FIELD Nit LIKE Inversiones.Nit VALIDATE ~
+  FIELD Nro_inversion LIKE Inversiones.Nro_inversion VALIDATE ~
+  FIELD Plazo LIKE Inversiones.Plazo VALIDATE ~
+  FIELD Sdo_Actual LIKE Inversiones.Sdo_Actual VALIDATE ~
+  FIELD Sdo_Inicial LIKE Inversiones.Sdo_Inicial VALIDATE ~
+  FIELD Sdo_Valoracion LIKE Inversiones.Sdo_Valoracion VALIDATE ~
+  FIELD Tasa LIKE Inversiones.Tasa VALIDATE ~
+  FIELD Usuario LIKE Inversiones.Usuario VALIDATE ~
+  FIELD Val_valoracion LIKE Inversiones.Val_valoracion VALIDATE ~
+  FIELD Cod_Producto LIKE Inversiones.Cod_Producto VALIDATE 

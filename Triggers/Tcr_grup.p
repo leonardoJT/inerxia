@@ -1,0 +1,2 @@
+TRIGGER PROCEDURE FOR CREATE OF Grupos.
+ASSIGN Grupos.Grupo = NEXT-VALUE(Sec_Grupos).

@@ -1,0 +1,10 @@
+  /*********** INCLUDE PARA CANCELAR LA VALIDACION ******************/
+  DEFINE VAR W_WidSel AS HANDLE.
+  
+  IF NOT VALID-HANDLE(LAST-EVENT:WIDGET-ENTER) THEN
+     RETURN.
+     
+  W_WidSel = LAST-EVENT:WIDGET-ENTER.
+  IF W_WidSel:NAME = "Btn-Cancel"
+  OR W_WidSel:NAME = "Btn_Ayuda"  THEN
+     RETURN.

@@ -1229,6 +1229,9 @@ DEFINE FRAME F_Ahorros
      wcomenTdb AT ROW 9.5 COL 58 COLON-ALIGNED NO-LABEL WIDGET-ID 6
      Imp_UtraMas AT ROW 16.12 COL 54 WIDGET-ID 66
      BUTTON-123 AT ROW 4.38 COL 53.86 WIDGET-ID 88
+     "Fecha de Activacion" VIEW-AS TEXT
+          SIZE 14.29 BY .81 AT ROW 3.5 COL 39.86 WIDGET-ID 42
+          BGCOLOR 18 FGCOLOR 15 
      "Fecha de DesActivacion" VIEW-AS TEXT
           SIZE 17 BY .81 AT ROW 3.46 COL 55.72 WIDGET-ID 44
           BGCOLOR 18 FGCOLOR 15 
@@ -1241,9 +1244,6 @@ DEFINE FRAME F_Ahorros
           BGCOLOR 18 FGCOLOR 15 
      "Titular:" VIEW-AS TEXT
           SIZE 5 BY .77 AT ROW 2.38 COL 4.72 WIDGET-ID 12
-     "G.M.F." VIEW-AS TEXT
-          SIZE 5 BY .81 AT ROW 3.5 COL 12.86 WIDGET-ID 36
-          BGCOLOR 18 FGCOLOR 15 
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1 ROW 1
@@ -1253,14 +1253,14 @@ DEFINE FRAME F_Ahorros
 
 /* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
 DEFINE FRAME F_Ahorros
+     "G.M.F." VIEW-AS TEXT
+          SIZE 5 BY .81 AT ROW 3.5 COL 12.86 WIDGET-ID 36
+          BGCOLOR 18 FGCOLOR 15 
      "  Tipo" VIEW-AS TEXT
           SIZE 5 BY .81 AT ROW 4.77 COL 34 WIDGET-ID 78
           BGCOLOR 18 FGCOLOR 15 
      "Maneja Mesadas Pensionales?" VIEW-AS TEXT
           SIZE 21 BY .69 AT ROW 8.23 COL 4.43 WIDGET-ID 82
-     "Fecha de Activacion" VIEW-AS TEXT
-          SIZE 14.29 BY .81 AT ROW 3.5 COL 39.86 WIDGET-ID 42
-          BGCOLOR 18 FGCOLOR 15 
      RECT-274 AT ROW 1.27 COL 102
      RECT-275 AT ROW 1.27 COL 1.72
      RECT-281 AT ROW 19.54 COL 53
@@ -1277,58 +1277,6 @@ DEFINE FRAME F_Ahorros
          SIZE 117.43 BY 22.54
          BGCOLOR 17 FONT 4
          DEFAULT-BUTTON BtnDone.
-
-DEFINE FRAME F_Atermino
-     AT_Monto AT ROW 1.15 COL 11.86 COLON-ALIGNED
-     AT_Puntos AT ROW 1.27 COL 41 COLON-ALIGNED
-     F-FecVenc AT ROW 2.08 COL 12 COLON-ALIGNED WIDGET-ID 2
-     AT_Plazo AT ROW 3.15 COL 12 COLON-ALIGNED
-     AT_VerTasa AT ROW 4.23 COL 5 COLON-ALIGNED NO-LABEL
-     AT_Destino_Intereses AT ROW 5.77 COL 4 NO-LABEL
-     BT_DesAT AT ROW 6.65 COL 4
-     AT_AgenciaDestino AT ROW 7.77 COL 15 COLON-ALIGNED
-     AT_ProductoDestino AT ROW 8.62 COL 15 COLON-ALIGNED
-     AT_CuentaDestino AT ROW 9.46 COL 15 COLON-ALIGNED
-     AT_NombreDestino AT ROW 10.31 COL 15 COLON-ALIGNED
-     " Destino de los Intereses" VIEW-AS TEXT
-          SIZE 22 BY .81 AT ROW 5.04 COL 5
-          FGCOLOR 7 
-     RECT-277 AT ROW 5.46 COL 2
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 2 ROW 11.92
-         SIZE 51 BY 11.23
-         BGCOLOR 17 FONT 5
-         TITLE "A Termino".
-
-DEFINE FRAME F_Alavista
-     AV_Monto AT ROW 1.15 COL 14.14 COLON-ALIGNED HELP
-          "Valor de Apertura de la Cuenta"
-     AV_Cuota AT ROW 1.15 COL 36.43 COLON-ALIGNED
-     AV_Puntos AT ROW 2.15 COL 7 COLON-ALIGNED NO-LABEL
-     AV_VerTasa AT ROW 2.15 COL 14 COLON-ALIGNED NO-LABEL
-     AP_PeriodoPago AT ROW 3.81 COL 3 NO-LABEL
-     AP_FormaPago AT ROW 5.69 COL 6 NO-LABEL
-     AP_AgenciaDebito AT ROW 6.46 COL 9 COLON-ALIGNED
-     AP_ProductoDebito AT ROW 7.31 COL 9 COLON-ALIGNED
-     AP_CuentaDebito AT ROW 8.15 COL 9 COLON-ALIGNED
-     AP_NombreDebito AT ROW 9 COL 9 COLON-ALIGNED
-     Bt_DebitoAP AT ROW 9.88 COL 4
-     AP_FechaDebito AT ROW 10.04 COL 33 COLON-ALIGNED
-     " Forma de Pago de la Cuota" VIEW-AS TEXT
-          SIZE 25 BY .62 AT ROW 5.08 COL 3
-          FGCOLOR 7 
-     " Periodo de Pago de la Cuota" VIEW-AS TEXT
-          SIZE 27 BY .81 AT ROW 3 COL 3
-          FGCOLOR 7 
-     RECT-280 AT ROW 5.46 COL 2
-     RECT-283 AT ROW 3.27 COL 2
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 2 ROW 11.92
-         SIZE 51 BY 11.23
-         BGCOLOR 17 FONT 5
-         TITLE "Ahorros a la Vista y Aportes".
 
 DEFINE FRAME F_Contractual
      F-AporOblig AT ROW 1.04 COL 14 COLON-ALIGNED WIDGET-ID 4
@@ -1365,6 +1313,58 @@ DEFINE FRAME F_Contractual
          SIZE 51 BY 11.42
          BGCOLOR 17 FONT 4
          TITLE "Programado".
+
+DEFINE FRAME F_Alavista
+     AV_Monto AT ROW 1.15 COL 14.14 COLON-ALIGNED HELP
+          "Valor de Apertura de la Cuenta"
+     AV_Cuota AT ROW 1.15 COL 36.43 COLON-ALIGNED
+     AV_Puntos AT ROW 2.15 COL 7 COLON-ALIGNED NO-LABEL
+     AV_VerTasa AT ROW 2.15 COL 14 COLON-ALIGNED NO-LABEL
+     AP_PeriodoPago AT ROW 3.81 COL 3 NO-LABEL
+     AP_FormaPago AT ROW 5.69 COL 6 NO-LABEL
+     AP_AgenciaDebito AT ROW 6.46 COL 9 COLON-ALIGNED
+     AP_ProductoDebito AT ROW 7.31 COL 9 COLON-ALIGNED
+     AP_CuentaDebito AT ROW 8.15 COL 9 COLON-ALIGNED
+     AP_NombreDebito AT ROW 9 COL 9 COLON-ALIGNED
+     Bt_DebitoAP AT ROW 9.88 COL 4
+     AP_FechaDebito AT ROW 10.04 COL 33 COLON-ALIGNED
+     " Forma de Pago de la Cuota" VIEW-AS TEXT
+          SIZE 25 BY .62 AT ROW 5.08 COL 3
+          FGCOLOR 7 
+     " Periodo de Pago de la Cuota" VIEW-AS TEXT
+          SIZE 27 BY .81 AT ROW 3 COL 3
+          FGCOLOR 7 
+     RECT-280 AT ROW 5.46 COL 2
+     RECT-283 AT ROW 3.27 COL 2
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 2 ROW 11.92
+         SIZE 51 BY 11.23
+         BGCOLOR 17 FONT 5
+         TITLE "Ahorros a la Vista y Aportes".
+
+DEFINE FRAME F_Atermino
+     AT_Monto AT ROW 1.15 COL 11.86 COLON-ALIGNED
+     AT_Puntos AT ROW 1.27 COL 41 COLON-ALIGNED
+     F-FecVenc AT ROW 2.08 COL 12 COLON-ALIGNED WIDGET-ID 2
+     AT_Plazo AT ROW 3.15 COL 12 COLON-ALIGNED
+     AT_VerTasa AT ROW 4.23 COL 5 COLON-ALIGNED NO-LABEL
+     AT_Destino_Intereses AT ROW 5.77 COL 4 NO-LABEL
+     BT_DesAT AT ROW 6.65 COL 4
+     AT_AgenciaDestino AT ROW 7.77 COL 15 COLON-ALIGNED
+     AT_ProductoDestino AT ROW 8.62 COL 15 COLON-ALIGNED
+     AT_CuentaDestino AT ROW 9.46 COL 15 COLON-ALIGNED
+     AT_NombreDestino AT ROW 10.31 COL 15 COLON-ALIGNED
+     " Destino de los Intereses" VIEW-AS TEXT
+          SIZE 22 BY .81 AT ROW 5.04 COL 5
+          FGCOLOR 7 
+     RECT-277 AT ROW 5.46 COL 2
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 2 ROW 11.92
+         SIZE 51 BY 11.23
+         BGCOLOR 17 FONT 5
+         TITLE "A Termino".
 
 
 /* *********************** Procedure Settings ************************ */
@@ -4327,11 +4327,11 @@ DO:
         APPLY "CHOOSE" TO Btn_Cancelar.
         RETURN NO-APPLY.
      END.
-     RUN validarUsuarioSarlaft.R (INPUT Clientes.Nit, OUTPUT W_Sarlaft) NO-ERROR.
+     /*RUN validarUsuarioSarlaft.R (INPUT Clientes.Nit, OUTPUT W_Sarlaft) NO-ERROR.
      IF W_Sarlaft THEN DO:
          APPLY "CHOOSE" TO Btn_Cancelar.
          RETURN NO-APPLY.
-     END.
+     END.*/
    /*  IF Clientes.Tipo_Vinculo GT 2 THEN DO:
         MESSAGE W_NomTitular " No es un cliente de la Cooperativa" SKIP
                 "La persona o empresa debe estar matriculado como" SKIP

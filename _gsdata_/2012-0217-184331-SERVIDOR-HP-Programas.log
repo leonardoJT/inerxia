@@ -1,0 +1,29 @@
+----- 17/02/2012 06:43:31 p.m.: Tarea 'Programas': ANÁLISIS comenzado por Periodic Timer en ordenador 'SERVIDOR-HP' (GoodSync v 9.0.3.7 on Server 2008) -----
+Programas: D:\SPS\soportes\fodun\Prog <-> =My Book:\Backup\Programas (F:\Backup\Programas), CleanupOldGens=12m, TmpDest, EstReq, CopyLocked, DetectMovesAndRenames, DetectFolderMoves, FileLinksDrill, CaseSens, Reconnect=3, ChangeLimit=10
+Excluir Ocultos, Excluir Sistema, Excluir licens*.rfo|cache.rfo|mru.rfo|mpp*.rfo|RoboForm Online Account.rfp|name *._gstmp|/System Volume Information|Thumbs.db|.DS_Store 
+izquierda: Leer archivo de estado D:\SPS\soportes\fodun\Prog\_gsdata_\_file_state._gs
+Locking folder D:\SPS\soportes\fodun\Prog for write
+izquierda: Archivos: 3,270 (excluidos 8). Carpetas: 39 (excluidas 1). D: NTFS, Libre: 246 GB, Total: 365 GB
+derecha: Leer archivo de estado F:\Backup\Programas\_gsdata_\_file_state._gs
+Locking folder F:\Backup\Programas for write
+derecha: Archivos: 3,273 (excluidos 0). Carpetas: 39 (excluidas 1). F: FAT32, Libre: 633 GB, Total: 931 GB
+Cambios: 7, Conflictos: 0, TiempoCopia: 0, EstadoCopia: 0, Errores: 0
+Left to Right: Copy File: 3 Delete File: 4 
+----- 17/02/2012 06:43:33 p.m.: Análisis Completado. Tiempo 00:00:02, Velocidad: 1,661 archivo/s -----
+===== 17/02/2012 06:43:33 p.m.: Tarea 'Programas': SINC comenzada por Periodic Timer en ordenador 'SERVIDOR-HP' =====
+Programas: D:\SPS\soportes\fodun\Prog <-> =My Book:\Backup\Programas (F:\Backup\Programas), CleanupOldGens=12m, TmpDest, EstReq, CopyLocked, DetectMovesAndRenames, DetectFolderMoves, FileLinksDrill, CaseSens, Reconnect=3, ChangeLimit=10
+Fraction of files changed is low enough to perform Auto Sync: 0% (7 / 3322) < 10%
+Borrar Archivo 'F:\Backup\Programas\DBIa03384'
+Borrar Archivo 'F:\Backup\Programas\lbia03384'
+Borrar Archivo 'F:\Backup\Programas\rcda03384'
+Borrar Archivo 'F:\Backup\Programas\srta03384'
+Copiar Nueva 'D:\SPS\soportes\fodun\Prog\scripts\AhorrosVsContabilidad.p' -> 'F:\Backup\Programas\scripts\AhorrosVsContabilidad.p'
+Copiar Sobre 'D:\SPS\soportes\fodun\Prog\scripts\DevolverDocumentoContable.p' -> 'F:\Backup\Programas\scripts\DevolverDocumentoContable.p'
+Copiar Sobre 'D:\SPS\soportes\fodun\Prog\scripts\ImportaMovContableDePlano.p' -> 'F:\Backup\Programas\scripts\ImportaMovContableDePlano.p'
+Guardar archivo de estado D:\SPS\soportes\fodun\Prog\_gsdata_\_file_state._gs
+Guardar archivo de estado F:\Backup\Programas\_gsdata_\_file_state._gs
+Delete lock file D:\SPS\soportes\fodun\Prog\_gsdata_\lock.gsl
+Delete lock file F:\Backup\Programas\_gsdata_\lock.gsl
+Elementos Sincronizados OK: 7, Errores: 0
+===== 17/02/2012 06:43:34 p.m.: Sinc. Completa. Tiempo: 00:00:01, Velocidad:  =====
+

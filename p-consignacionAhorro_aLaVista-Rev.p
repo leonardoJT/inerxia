@@ -71,7 +71,7 @@ IF AVAILABLE ahorros THEN DO:
     Mov_Ahorros.Val_Efectivo = pValEfectivo.
 
     IF pValCheque > 0 THEN DO:
-        mov_ahorros.cod_operacion = 010101002.
+        mov_ahorros.cod_operacion = 010102002.
         
         FIND FIRST che_transito WHERE Che_Transito.Agencia = ahorros.agencia
                                   AND Che_Transito.Cheque = pNroCheque

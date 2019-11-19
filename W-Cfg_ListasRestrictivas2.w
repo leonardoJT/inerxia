@@ -243,17 +243,17 @@ THEN C-Win:HIDDEN = no.
      _TblList          = "bdcentral.cfg_listasSarlaft"
      _Options          = "SHARE-LOCK INDEXED-REPOSITION"
      _FldNameList[1]   > bdcentral.cfg_listasSarlaft.Lista
-"Lista" ? ? "character" ? ? ? ? ? ? no ? no no "34.43" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+"cfg_listasSarlaft.Lista" ? ? "character" ? ? ? ? ? ? no ? no no "34.43" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[2]   > bdcentral.cfg_listasSarlaft.Tipo
-"Tipo" ? ? "character" ? ? ? ? ? ? no ? no no "7.86" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+"cfg_listasSarlaft.Tipo" ? ? "character" ? ? ? ? ? ? no ? no no "7.86" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[3]   > "_<CALC>"
 "IF (cfg_listasSarlaft.Estado = 1) THEN (""Activa"") ELSE (""Inactiva"")" "Estado" ? ? ? ? ? ? ? ? no ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[4]   > bdcentral.cfg_listasSarlaft.created_at
-"created_at" "Fecha creación" "99/99/9999 HH:MM:SS" "datetime" ? ? ? ? ? ? no ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+"cfg_listasSarlaft.created_at" "Fecha creación" "99/99/9999 HH:MM:SS" "datetime" ? ? ? ? ? ? no ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[5]   > bdcentral.cfg_listasSarlaft.updated_at
-"updated_at" "Fecha modificación" "99/99/9999 HH:MM:SS" "datetime" ? ? ? ? ? ? no ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+"cfg_listasSarlaft.updated_at" "Fecha modificación" "99/99/9999 HH:MM:SS" "datetime" ? ? ? ? ? ? no ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[6]   > bdcentral.cfg_listasSarlaft.Usuario
-"Usuario" ? ? "character" ? ? ? ? ? ? no ? no no "33.43" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+"cfg_listasSarlaft.Usuario" ? ? "character" ? ? ? ? ? ? no ? no no "33.43" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
      _Query            is OPENED
 */  /* BROWSE brwListas */
 &ANALYZE-RESUME
@@ -301,6 +301,26 @@ DO:
         estado:SCREEN-VALUE = estado:ENTRY(cfg_listasSarlaft.estado).
         btnEditar:SENSITIVE = TRUE.
     END.
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL brwListas C-Win
+ON MOUSE-SELECT-DBLCLICK OF brwListas IN FRAME F-MAIN
+DO:
+    ASSIGN WWin:SENSITIVE = NO.
+    WWin:MOVE-TO-BOTTOM().
+
+    RUN W-Hist_Creditos.r (INPUT Buscar:SCREEN-VALUE IN FRAME F_Consulta,999999).
+
+    ASSIGN WWin:SENSITIVE               = YES
+           Id_HistCreditos              = FALSE
+           Id_HistCreditos:SCREEN-VALUE = "No".
+    WWin:MOVE-TO-TOP().
+
+  
 END.
 
 /* _UIB-CODE-BLOCK-END */

@@ -9,7 +9,6 @@ DEFINE INPUT PARAMETER pUsuario AS CHARACTER.
 DEFINE VAR pCuota AS DECIMAL.
 DEFINE VAR valDebitar AS DECIMAL.
 DEFINE VAR valAbono AS DECIMAL.
-DEFINE VAR pCuenta AS CHARACTER.
 DEFINE VAR pOperacion AS INTEGER INITIAL 010102001.
 DEFINE VAR pSecuencia AS INTEGER.
 DEFINE VAR pComprobante AS INTEGER.
@@ -30,12 +29,11 @@ DEFINE VAR flagContabiliza AS LOGICAL.
 
 DEFINE TEMP-TABLE TempCtas
     FIELD agencia AS INTEGER
+    FIELD cod_ahorro AS INTEGER
+    FIELD cuenta AS CHARACTER
 
     /* oakley */
 
-    FIELD TipP AS CHAR FORM "X(1)"
-    FIELD Pto LIKE Ahorros.Cod_Ahorro
-    FIELD CtaPro LIKE Cuentas.Cuenta
     FIELD CtaIng LIKE Cuentas.Cuenta
     FIELD CtaLiq LIKE Cuentas.Cuenta
     FIELD IntAnt LIKE Cuentas.Cuenta
@@ -108,8 +106,7 @@ IF AVAILABLE creditos THEN DO:
             END.
 
             FIND FIRST TempCtas WHERE TempCtas.Agencia EQ Ahorros.Agencia
-                                  AND TempCtas.TipP EQ "A"
-                                  AND TempCtas.Pto EQ Ahorros.Cod_Ahorro NO-LOCK NO-ERROR.
+                                  AND TempCtas.cod_ahorro EQ Ahorros.Cod_Ahorro NO-LOCK NO-ERROR.
             IF NOT AVAIL(TempCtas) THEN DO:
                 MESSAGE "Falta configuración con Producto_Ahorro:" Ahorros.Cod_Ahorro SKIP
                         "para la agencia:" Ahorros.Agencia
@@ -124,8 +121,7 @@ IF AVAILABLE creditos THEN DO:
                        Ahorros.Num_RetMes = Ahorros.Num_RetMes + 1
                        Ahorros.Num_RetDia = Ahorros.Num_RetDia + 1
                        Ahorros.Val_RetDia = Ahorros.Val_RetDia + valDebitar
-                       Ahorros.Val_RetMes = Ahorros.Val_RetMes + valDebitar
-                       pCuenta = TempCtas.CtaPro.
+                       Ahorros.Val_RetMes = Ahorros.Val_RetMes + valDebitar.
 
                 IF flagContabiliza = FALSE THEN
                     flagContabiliza = TRUE.
@@ -160,8 +156,7 @@ IF AVAILABLE creditos THEN DO:
             END.
 
             FIND FIRST TempCtas WHERE TempCtas.Agencia EQ Ahorros.Agencia
-                                  AND TempCtas.TipP EQ "A"
-                                  AND TempCtas.Pto EQ Ahorros.Cod_Ahorro NO-LOCK NO-ERROR.
+                                  AND TempCtas.cod_ahorro EQ Ahorros.Cod_Ahorro NO-LOCK NO-ERROR.
             IF NOT AVAIL(TempCtas) THEN DO:
                 MESSAGE "Falta configuración con Producto_Ahorro:" Ahorros.Cod_Ahorro SKIP
                         "para la agencia:" Ahorros.Agencia
@@ -176,8 +171,7 @@ IF AVAILABLE creditos THEN DO:
                        Ahorros.Num_RetMes = Ahorros.Num_RetMes + 1
                        Ahorros.Num_RetDia = Ahorros.Num_RetDia + 1
                        Ahorros.Val_RetDia = Ahorros.Val_RetDia + valDebitar
-                       Ahorros.Val_RetMes = Ahorros.Val_RetMes + valDebitar
-                       pCuenta = TempCtas.CtaPro.
+                       Ahorros.Val_RetMes = Ahorros.Val_RetMes + valDebitar.
 
                 IF flagContabiliza = FALSE THEN
                     flagContabiliza = TRUE.
@@ -222,17 +216,6 @@ IF AVAILABLE creditos THEN DO:
                     "o retornó ERROR..." SKIP
                     "para el Nit:" Creditos.Nit ", Cod_producto:" Creditos.Cod_Credito ", Nro-Crédito:" Creditos.Num_Credito SKIP
                     "Revise por favor... Distribución cancelada."
-                VIEW-AS ALERT-BOX ERROR.
-
-            RETURN ERROR.
-        END.
-
-        FIND FIRST TempCtas WHERE TempCtas.Agencia EQ Creditos.Agencia
-                              AND TempCtas.TipP EQ "C"
-                              AND TempCtas.Pto EQ Creditos.Cod_Credito NO-LOCK NO-ERROR.
-        IF NOT AVAIL(TempCtas) THEN DO:
-            MESSAGE "Falta Configuración con Producto_Credito:" Creditos.Cod_Credito SKIP
-                    "Para la agencia:" Creditos.Agencia
                 VIEW-AS ALERT-BOX ERROR.
 
             RETURN ERROR.
@@ -309,9 +292,8 @@ PROCEDURE CargarCuentas:
 
                 CREATE TempCtas.
                 ASSIGN TempCtas.Agencia = CortoLargo.Agencia
-                       TempCtas.TipP = "A"
-                       TempCtas.Pto = CortoLargo.Cod_Producto
-                       TempCtas.CtaPro = CortoLargo.Cta_AsoAd
+                       TempCtas.cod_ahorro = CortoLargo.Cod_Producto
+                       TempCtas.cuenta = CortoLargo.Cta_AsoAd
                        TempCtas.CtaSyA = CortoLargo.Cta_SyA.
 
                 FIND FIRST Liqui_Int WHERE Liqui_Int.Clase_Producto EQ 1
@@ -372,9 +354,8 @@ PROCEDURE CargarCuentas:
 
                 CREATE TempCtas.
                 ASSIGN TempCtas.Agencia = CortoLargo.Agencia
-                       TempCtas.TipP = "C"
-                       TempCtas.Pto = CortoLargo.Cod_Producto
-                       TempCtas.CtaPro = CortoLargo.Cta_AsoAd
+                       TempCtas.cod_ahorro = CortoLargo.Cod_Producto
+                       TempCtas.cuenta = CortoLargo.Cta_AsoAd
                        TempCtas.CtaSyA = CortoLargo.Cta_SyA
                        TempCtas.CtaHon = CortoLargo.Cta_HonorariosDB
                        TempCtas.CtaPol = CortoLargo.Cta_PolizasDB
@@ -443,7 +424,7 @@ END PROCEDURE.
 PROCEDURE Movimientos:
     CREATE Mov_Contable.
     ASSIGN Mov_Contable.Agencia = Ahorros.Agencia
-           Mov_Contable.Cuenta = pCuenta
+           Mov_Contable.Cuenta = TempCtas.cuenta
            Mov_Contable.Nit = Ahorros.Nit
            Mov_Contable.Fec_Contable = pFechaProceso
            Mov_Contable.Comentario = "Débito Automático"

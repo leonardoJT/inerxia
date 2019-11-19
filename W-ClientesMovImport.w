@@ -307,18 +307,18 @@ DEFINE FRAME DEFAULT-FRAME
      " Registros Leídos:" VIEW-AS TEXT
           SIZE 13 BY .81 AT ROW 3.19 COL 10.86 WIDGET-ID 8
           FGCOLOR 12 
-     "IMPORTAR OPERACIONES TARJETAS" VIEW-AS TEXT
-          SIZE 35 BY .5 AT ROW 1.54 COL 5.72 WIDGET-ID 26
-          BGCOLOR 8 FONT 1
-     "Valor Comisiones:" VIEW-AS TEXT
-          SIZE 11.86 BY .81 AT ROW 5 COL 11.29 WIDGET-ID 174
-          FGCOLOR 12 
-     "Valor Transacciones:" VIEW-AS TEXT
-          SIZE 15 BY .81 AT ROW 4.12 COL 9 WIDGET-ID 172
-          FGCOLOR 12 
      " Resumen" VIEW-AS TEXT
           SIZE 8.14 BY .81 AT ROW 2.46 COL 4.86 WIDGET-ID 4
           FGCOLOR 0 
+     "Valor Transacciones:" VIEW-AS TEXT
+          SIZE 15 BY .81 AT ROW 4.12 COL 9 WIDGET-ID 172
+          FGCOLOR 12 
+     "Valor Comisiones:" VIEW-AS TEXT
+          SIZE 11.86 BY .81 AT ROW 5 COL 11.29 WIDGET-ID 174
+          FGCOLOR 12 
+     "IMPORTAR OPERACIONES TARJETAS" VIEW-AS TEXT
+          SIZE 35 BY .5 AT ROW 1.54 COL 5.72 WIDGET-ID 26
+          BGCOLOR 8 FONT 1
      RECT-346 AT ROW 1 COL 1 WIDGET-ID 186
      RECT-345 AT ROW 2.96 COL 4 WIDGET-ID 2
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
@@ -1526,16 +1526,23 @@ IF AVAILABLE(ahorros) THEN DO:
     Mov_Contable.Comentario = ecg.terminalUbicacion.
     Mov_Contable.Usuario = w_usuario.
     Mov_Contable.Estacion = "005".
-    Mov_Contable.Agencia = ahorros.agencia.
-    Mov_Contable.Destino = ahorros.agencia.
+    mov_contable.destino = ahorros.agencia.
     Mov_contable.db = vcr.
     mov_contable.cr = vdb.
 
-    IF vTransaccion = "CE" OR vTransaccion = "CC" THEN
+    IF vTransaccion = "CE" OR vTransaccion = "CC" THEN DO:
         Mov_Contable.Cuenta = "16603550".
+
+        FIND FIRST usuarios WHERE usuarios.usuario = ecg.usuarioAutorizador NO-LOCK NO-ERROR.
+        IF AVAILABLE usuarios THEN
+            mov_contable.agencia = usuarios.agencia.
+        ELSE
+            mov_contable.agencia = w_agencia.
+    END.
     ELSE DO:
         Mov_Contable.Cuenta = "24459550".
         Mov_Contable.Nit = nitCompensacion.
+        mov_contable.agencia = 1.
     END.
 
     /* oakley */

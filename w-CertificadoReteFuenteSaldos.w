@@ -1556,71 +1556,15 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE Servicios wWin 
 PROCEDURE Servicios :
-DEFINE VAR cont AS INTEGER.
+CREATE TCer.
+TCer.Nit = clientes.nit.
+TCer.CBa = "SERVICIOS".
 
-EMPTY TEMP-TABLE docs.
-EMPTY TEMP-TABLE ttmov.
-
-FOR EACH anexos WHERE anexos.nit = clientes.nit
-                  AND (SUBSTRING(anexos.cuenta,1,6) = "511028" OR
-                       SUBSTRING(anexos.cuenta,1,10) = "6140101154" OR
-                       SUBSTRING(anexos.cuenta,1,10) = "6140101155")
-                  AND anexos.ano = wAno NO-LOCK BREAK BY anexos.nit
-                                                      BY anexos.cuenta:
-    FIND FIRST cuentas WHERE cuentas.cuenta = anexos.cuenta NO-LOCK NO-ERROR.
-    
-    FIND FIRST TCer WHERE TCer.nit = clientes.nit
-                      AND TCer.CBa = "SERVICIOS" NO-ERROR.
-    IF NOT AVAILABLE TCer THEN DO:
-        CREATE TCer.
-        ASSIGN TCer.Nit = clientes.nit
-               TCer.CBa = "SERVICIOS".
-    END.
-
-    TCer.Bas = TCer.Bas + anexos.sdo_inicial.
-
-    DO cont = 1 TO 12:
-        TCer.Bas = TCer.Bas + anexos.db[cont] - anexos.cr[cont].
-    END.
-        
-    IF LAST-OF(anexos.cuenta) THEN DO:
-        FOR EACH mov_contable WHERE mov_contable.cuenta = anexos.cuenta
-                                AND mov_contable.nit = anexos.nit
-                                AND YEAR(mov_contable.fec_contable) = wAno NO-LOCK BREAK:
-            FIND FIRST docs WHERE docs.nit = mov_contable.nit
-                              AND docs.agencia = mov_contable.agencia
-                              AND docs.comprobante = mov_contable.comprobante
-                              AND docs.num_documento = mov_contable.num_documento
-                              AND docs.fec_contable = mov_contable.fec_contable NO-LOCK NO-ERROR.
-            IF NOT AVAILABLE docs THEN DO:
-                CREATE docs.
-                docs.nit = mov_contable.nit.
-                docs.agencia = mov_contable.agencia.
-                docs.comprobante = mov_contable.comprobante.
-                docs.num_documento = mov_contable.num_documento.
-                docs.fec_contable = mov_contable.fec_contable.
-            END.
-        END.
-
-        FOR EACH docs NO-LOCK:
-            FOR EACH mov_contable WHERE mov_contable.agencia = docs.agencia
-                                    AND mov_contable.comprobante = docs.comprobante
-                                    AND mov_contable.num_documento = docs.num_documento
-                                    AND mov_contable.nit = docs.nit
-                                    AND YEAR(mov_contable.fec_contable) = wAno
-                                    AND (SUBSTRING(mov_contable.cuenta,1,6) = "243515" OR
-                                         SUBSTRING(mov_contable.cuenta,1,6) = "243525") NO-LOCK:
-                FIND FIRST ttmov WHERE ttmov.Id = ROWID(mov_contable) NO-LOCK NO-ERROR.
-                IF NOT AVAILABLE ttmov THEN DO:
-                    TCer.Ret = TCer.Ret + mov_contable.cr - mov_contable.db.
-
-                    CREATE ttmov.
-                    ttmov.id = ROWID(mov_contable).
-                END.
-            END.
-        END.
-    END.
-END.
+RUN VALUE("p-1001_5004_Servicios_" + STRING(wAno) + ".r") (INPUT 'C',
+                                                           INPUT clientes.nit,
+                                                           INPUT 0,
+                                                           OUTPUT TCer.Bas,
+                                                           OUTPUT TCer.Ret).
 
 END PROCEDURE.
 
