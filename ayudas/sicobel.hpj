@@ -1,0 +1,12 @@
+[OPTIONS]
+COMPRESS=HIGH
+TITLE=Title of this help project
+COPYRIGHT=© 2004 ... Your company
+BMROOT=.
+[FILES]
+sicobel.rt~
+[WINDOWS]
+Main="Main Window Title",(0,0,0,0),0,(255,255,255),(192,192,192),1
+[MAP]
+[CONFIG]
+BrowseButtons()

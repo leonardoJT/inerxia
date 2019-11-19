@@ -1,0 +1,15 @@
+        1   TRIGGER PROCEDURE FOR WRITE OF Mov_Ahorros
+        2   /*
+        3   NEW inserted OLD deleted.
+        4       FIND FIRST Operacion WHERE (
+        5        
+        6           inserted.Cod_Operacion = Operacion.Cod_Operacion) NO-LOCK NO-ERROR.
+        7       IF NOT AVAILABLE Operacion THEN DO:
+        8         MESSAGE "No puede Actualizar 'Mov_Ahorros' Porque 'Operacion' NO EXISTE".
+        9         RETURN ERROR.
+       10       END.
+       11   
+       12   
+       13   
+       14   {valida/W_Mov_Ahorros.v}
+       15     */

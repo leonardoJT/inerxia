@@ -1,0 +1,3 @@
+FOR EACH mov_contable WHERE nit = "PAL9990700112" NO-LOCK:
+    DISPLAY mov_contable WITH WIDTH 300 1 COL.
+END.

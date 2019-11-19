@@ -1,0 +1,3 @@
+FOR EACH activosFijos WHERE Id = "MED0220800041":
+    UPDATE activosFijos WITH WIDTH 300 1 COL.
+END.

@@ -1,0 +1,13 @@
+DEFINE VAR vFechaIni AS DATE INITIAL 01/01/2016.
+DEFINE VAR vFechaFin AS DATE INITIAL 01/31/2016.
+DEFINE VAR vFecha AS DATE.
+    
+DO vFecha = vfechaIni TO vFechaFin:
+    FIND FIRST mov_contable WHERE fec_contable = vFecha NO-LOCK NO-ERROR.
+    IF NOT AVAILABLE mov_contable THEN
+        MESSAGE vFecha
+            VIEW-AS ALERT-BOX INFO BUTTONS OK.
+END.
+
+MESSAGE "Fin" MONTH(vFecha - 1)
+    VIEW-AS ALERT-BOX INFO BUTTONS OK.

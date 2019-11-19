@@ -1,0 +1,4 @@
+FOR EACH CONTROL_pagos WHERE nit = "19122982" BY nro_cuota:
+    DISPLAY CONTROL_pagos WITH 1 COL.
+END.
+
