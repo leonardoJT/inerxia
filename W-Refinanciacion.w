@@ -521,7 +521,7 @@ DO:
                 btnFecPago:SENSITIVE = TRUE.
                 btnfecPrimerPago:SENSITIVE = FALSE.
                 btnPeriodicidadDePago:SENSITIVE = FALSE.
-                btnFormaDePago:SENSITIVE = FALSE.
+                btnFormaDePago:SENSITIVE = TRUE.
             END.
         END.
 

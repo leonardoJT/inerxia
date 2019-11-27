@@ -2300,7 +2300,7 @@ DEFI VAR Arch AS CHAR FORM "X(35)".
 
 EMPTY TEMP-TABLE TOf.
 
-Arch = "C:\Info_Fodun\FondoLiquidez" + STRING(W_FecCorte,"99999999") + "_" + W_Usuario.
+Arch = W_PathSpl + "FondoLiquidez" + STRING(W_FecCorte,"99999999") + "_" + W_Usuario.
 
 FOR EACH Agencias WHERE Agencias.Estado NE 3 NO-LOCK BY Agencias.Agencia:
     CREATE Tof.
@@ -5113,14 +5113,14 @@ PROCEDURE Inf_Proveed :
 
   FOR EACH TProvee: DELETE TProvee. END.
 
-  FOR EACH Mov_Contab WHERE Mov_Contab.Cuenta EQ "243505" NO-LOCK
-                      BREAK BY Mov_Contab.Nit BY Mov_Contab.Fec_contab DESCEND:
-      IF FIRST-OF(Mov_Contab.Nit) THEN DO:
-         IF TODAY - 1080 LE Mov_Contab.Fec_contab THEN DO:
+  FOR EACH Mov_Contable WHERE Mov_Contable.Cuenta EQ "243505" NO-LOCK
+                      BREAK BY Mov_Contable.Nit BY Mov_Contable.Fec_contab DESCEND:
+      IF FIRST-OF(Mov_Contable.Nit) THEN DO:
+         IF TODAY - 1080 LE Mov_Contable.Fec_contab THEN DO:
             CREATE TProvee.
-            ASSIGN TProvee.CedNit = Mov_Contab.Nit
-                   TProvee.Suc    = Mov_Contab.Agencia
-                   TProvee.Fec    = Mov_Contab.Fec_contab.
+            ASSIGN TProvee.CedNit = Mov_Contable.Nit
+                   TProvee.Suc    = Mov_Contable.Agencia
+                   TProvee.Fec    = Mov_Contable.Fec_contab.
          END.
       END.
   END.

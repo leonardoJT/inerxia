@@ -73,10 +73,10 @@ DEFINE VAR W_ForPag AS CHARACTER FORMAT "X(10)".
 
     DEFINE VARIABLE W_Val          AS LOGICAL.
     DEFINE VARIABLE W_Codbase      AS CHARACTER FORMAT "X(4)".
-    DEFINE VARIABLE W_Pcuenta    LIKE Cuenta.Cuenta.
-    DEFINE VARIABLE W_Pnombre    LIKE Cuenta.Nombre.
-    DEFINE VARIABLE W_Naturaleza LIKE Cuenta.Naturaleza.
-    DEFINE VARIABLE W_CtrNat     LIKE Cuenta.Ctr_Naturaleza.
+    DEFINE VARIABLE W_Pcuenta    LIKE Cuentas.Cuenta.
+    DEFINE VARIABLE W_Pnombre    LIKE Cuentas.Nombre.
+    DEFINE VARIABLE W_Naturaleza LIKE Cuentas.Naturaleza.
+    DEFINE VARIABLE W_CtrNat     LIKE Cuentas.Ctr_Naturaleza.
     DEFINE VARIABLE W_Consulta     AS LOGICAL INITIAL FALSE.
     DEFINE VARIABLE W_ConsCta    LIKE Cuentas.Cuenta.
     DEFINE VARIABLE W_DispCta    LIKE Cuentas.Cuenta.
@@ -1083,7 +1083,7 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE Informes_Retencion wWin 
 PROCEDURE Informes_Retencion :
-Listado = /*W_PathSpl +*/ "c:\info_Fodun\Info_Pagos.LST".  
+Listado = W_PathSpl + "Info_Pagos.LST".  
 OS-DELETE VALUE(Listado).
 DEFINE VAR WEnc1 AS CHARACTER FORMAT "X(75)".
 DEFINE VAR WEnc2 AS CHARACTER FORMAT "X(2)".

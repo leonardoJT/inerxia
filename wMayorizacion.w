@@ -36,7 +36,7 @@ CREATE WIDGET-POOL.
 /* Local Variable Definitions ---                                       */
 
 {src/adm2/widgetprto.i}
-/*{incluido\VARIABLE.i "SHARED"}*/
+{incluido\VARIABLE.i "SHARED"}
 
 DEFINE VAR Hora1 AS INTEGER.
 DEFINE VAR Hora2 AS INTEGER.
@@ -461,8 +461,8 @@ DO:
 /*********************************************************************************************/
 /**                    Generacion Archivo plano de Inconsistencias                          **/
 /*********************************************************************************************/
-    F-Estado:SCREEN-VALUE = "Generando inconsistencias en C:\info_fodun\IncMayorizacion.csv".
-    OUTPUT TO C:\info_fodun\IncMayorizacion.csv.
+    F-Estado:SCREEN-VALUE = "Generando inconsistencias en " + /*W_PathSpl +*/ "IncMayorizacion.csv".
+    OUTPUT TO VALUE (W_PathSpl + "IncMayorizacion.csv").
     PUT "Agencia;Nit;Cuenta;Fecha;Documento;DB;CR;Usuario;Estado" SKIP.
     FOR EACH TTCtasInc NO-LOCK:
         EXPORT DELIMITER ";" TTCtasInc.

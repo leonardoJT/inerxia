@@ -480,7 +480,7 @@ DO:
      RUN SdosXCta.  /*Halla todos los Sdos-Contables*/
 
      RUN Procesar.  /*Halla los Sdos de pdctos*/
-     Listado = "C:\info_fodun\INTEG_" + SUBSTRING(W_CmbOfi:SCREEN-VALUE IN FRAME F_Integ,1,3)
+     Listado = W_PathSpl + "INTEG_" + SUBSTRING(W_CmbOfi:SCREEN-VALUE IN FRAME F_Integ,1,3)
                          + STRING(W_Fecha,"999999") + ".Txt".
 
      {Incluido\ImpArch.I "listado"}

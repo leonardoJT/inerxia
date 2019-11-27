@@ -310,17 +310,13 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL brwListas C-Win
 ON MOUSE-SELECT-DBLCLICK OF brwListas IN FRAME F-MAIN
 DO:
-    ASSIGN WWin:SENSITIVE = NO.
-    WWin:MOVE-TO-BOTTOM().
+    C-Win:SENSITIVE = NO.
+    C-Win:MOVE-TO-BOTTOM().
 
-    RUN W-Hist_Creditos.r (INPUT Buscar:SCREEN-VALUE IN FRAME F_Consulta,999999).
+    RUN W-DetalleListaRestrictiva.r (INPUT ROWID(cfg_listasSarlaft)) NO-ERROR.
 
-    ASSIGN WWin:SENSITIVE               = YES
-           Id_HistCreditos              = FALSE
-           Id_HistCreditos:SCREEN-VALUE = "No".
-    WWin:MOVE-TO-TOP().
-
-  
+    C-Win:SENSITIVE = YES.
+    C-Win:MOVE-TO-TOP().
 END.
 
 /* _UIB-CODE-BLOCK-END */

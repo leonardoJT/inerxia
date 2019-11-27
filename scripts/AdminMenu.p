@@ -1,4 +1,4 @@
-FOR EACH programas WHERE ejecutable = "w-rp_movimientoContable.r" NO-LOCK:
+FOR EACH programas WHERE ejecutable = "W-RP_MvtoContablehria.r" NO-LOCK:
     DISPLAY programas WITH 1 COL.
 END.
 

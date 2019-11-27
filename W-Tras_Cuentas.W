@@ -2447,7 +2447,7 @@ ON LEAVE OF W_NitCte IN FRAME F_Proc /* Ced/Nit */
 DO:
     ASSIGN W_NitCte.
 
-    IF W_NitCte = "10249571" THEN DO:
+    /*IF W_NitCte = "10249571" THEN DO:
         MESSAGE "Para este número de identificación no se permite" SKIP
                 "ningún tipo de operación. Por favor, consulte con" SKIP
                 "el Administrador del Sistema."
@@ -2458,7 +2458,7 @@ DO:
         W_NomCte:SCREEN-VALUE = ''.
 
         LEAVE.
-    END.
+    END.*/
 
     W_NomCte:SCREEN-VALUE = "".
 

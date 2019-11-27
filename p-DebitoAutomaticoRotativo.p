@@ -30,23 +30,7 @@ DEFINE VAR flagContabiliza AS LOGICAL.
 DEFINE TEMP-TABLE TempCtas
     FIELD agencia AS INTEGER
     FIELD cod_ahorro AS INTEGER
-    FIELD cuenta AS CHARACTER
-
-    /* oakley */
-
-    FIELD CtaIng LIKE Cuentas.Cuenta
-    FIELD CtaLiq LIKE Cuentas.Cuenta
-    FIELD IntAnt LIKE Cuentas.Cuenta
-    FIELD IntMor LIKE Cuentas.Cuenta
-    FIELD DifCoD LIKE Cuentas.Cuenta
-    FIELD DifCoH LIKE Cuentas.Cuenta
-    FIELD CtaPol LIKE Cuentas.Cuenta
-    FIELD CtaHon LIKE Cuentas.Cuenta
-    FIELD CtaCos LIKE Cuentas.Cuenta
-    FIELD CtaGar LIKE CortoLargo.Cta_VigGarAd
-    FIELD CtaCGa LIKE CortoLargo.Cta_ContrapartidaGar
-    FIELD Oper LIKE Liqui_Int.Cod_Operacion
-    FIELD CtaSyA LIKE Cuentas.Cuenta.
+    FIELD cuenta AS CHARACTER.
 
 DEFINE VAR saldoMinimo AS DECIMAL.
 
@@ -56,9 +40,9 @@ FIND FIRST creditos WHERE creditos.nit = pNit
                       AND creditos.cod_credito = pCodCredito
                       AND creditos.num_credito = pNumCredito NO-ERROR.
 IF AVAILABLE creditos THEN DO:
-    FIND FIRST Comprobantes WHERE Comprobantes.Agencia EQ creditos.agencia
-                              AND Comprobantes.Comprobante EQ 21
-                              AND Comprobantes.Estado EQ 1 NO-ERROR.
+    FIND FIRST Comprobantes WHERE Comprobantes.Agencia = creditos.agencia
+                              AND Comprobantes.Comprobante = 21
+                              AND Comprobantes.Estado = 1 NO-ERROR.
     IF AVAILABLE comprobantes THEN DO:
         pComprobante = comprobantes.comprobante.
         pSecuencia = comprobantes.secuencia + 1.
@@ -72,20 +56,14 @@ IF AVAILABLE creditos THEN DO:
         pCuota = pcuota + (facturacion.cuota - facturacion.pago_mora - facturacion.pago_intCorriente - facturacion.pago_capital).
     END.
 
-    IF pCuota > creditos.sdo_capital + creditos.INT_corriente + creditos.INT_morCobrar + creditos.INT_difCobro + creditos.INT_moraDifCob + creditos.costas + creditos.polizas + creditos.honorarios -
-                creditos.INT_anticipado THEN
-
-        pCuota = creditos.sdo_capital + creditos.INT_corriente + creditos.INT_morCobrar + creditos.INT_difCobro + creditos.INT_moraDifCob + creditos.costas + creditos.polizas + creditos.honorarios -
-                 creditos.INT_anticipado.
+    IF pCuota > creditos.sdo_capital + creditos.INT_corriente + creditos.INT_morCobrar + creditos.INT_difCobro + creditos.INT_moraDifCob + creditos.costas + creditos.polizas + creditos.honorarios - creditos.INT_anticipado THEN
+        pCuota = creditos.sdo_capital + creditos.INT_corriente + creditos.INT_morCobrar + creditos.INT_difCobro + creditos.INT_moraDifCob + creditos.costas + creditos.polizas + creditos.honorarios - creditos.INT_anticipado.
 
     IF pCuota < 0 THEN
         pCuota = 0.
 
     /* 2. Debitamos las cuentas de ahorro */
     IF pCuota > 0 THEN DO:
-
-        /* oakley */
-
         valDebitar = pCuota.
 
         FIND FIRST ahorros WHERE ahorros.agencia = creditos.agencia
@@ -104,6 +82,8 @@ IF AVAILABLE creditos THEN DO:
                 IF ahorros.sdo_disponible - saldoMinimo < valDebitar * 1.004 THEN
                     valDebitar = TRUNCATE(((ahorros.sdo_disponible - saldoMinimo) * 100) / 100.4,0).
             END.
+
+            /* oakley */
 
             FIND FIRST TempCtas WHERE TempCtas.Agencia EQ Ahorros.Agencia
                                   AND TempCtas.cod_ahorro EQ Ahorros.Cod_Ahorro NO-LOCK NO-ERROR.
@@ -277,11 +257,11 @@ PROCEDURE CargarCuentas:
                 FIND FIRST Cuentas WHERE Cuentas.Cuenta = CortoLargo.Cta_AsoAd
                                      AND Cuentas.Tipo = 2
                                      AND Cuentas.Estado = 1 NO-LOCK NO-ERROR.
-                IF AVAIL(Cuentas) THEN
-                    FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ CortoLargo.Cta_SyA
-                                         AND Cuentas.Tipo EQ 2
-                                         AND Cuentas.Estado EQ 1 NO-LOCK NO-ERROR.
-                IF NOT AVAIL(Cuentas) THEN DO:
+                IF AVAILABLE(Cuentas) THEN
+                    FIND FIRST Cuentas WHERE Cuentas.Cuenta = CortoLargo.Cta_SyA
+                                         AND Cuentas.Tipo = 2
+                                         AND Cuentas.Estado = 1 NO-LOCK NO-ERROR.
+                IF NOT AVAILABLE(Cuentas) THEN DO:
                     MESSAGE "En CortoLargo.Cta_AsoAd y CortoLargo.Cta_SyA deben existir activas en Cuentas..." SKIP
                             "para el Pro_Ahorros.Cod_Ahorro:" Pro_Ahorros.Cod_Ahorro SKIP
                             "de la Agencia:" CortoLargo.Agencia
@@ -291,133 +271,22 @@ PROCEDURE CargarCuentas:
                 END.
 
                 CREATE TempCtas.
-                ASSIGN TempCtas.Agencia = CortoLargo.Agencia
-                       TempCtas.cod_ahorro = CortoLargo.Cod_Producto
-                       TempCtas.cuenta = CortoLargo.Cta_AsoAd
-                       TempCtas.CtaSyA = CortoLargo.Cta_SyA.
+                TempCtas.Agencia = CortoLargo.Agencia.
+                TempCtas.cod_ahorro = CortoLargo.Cod_Producto.
+                TempCtas.cuenta = CortoLargo.Cta_AsoAd.
 
-                FIND FIRST Liqui_Int WHERE Liqui_Int.Clase_Producto EQ 1
-                                       AND Liqui_Int.Cod_Producto EQ CortoLargo.Cod_Producto NO-LOCK NO-ERROR.
-                IF NOT AVAIL(Liqui_Int) THEN DO:
+                FIND FIRST Liqui_Int WHERE Liqui_Int.Clase_Producto = 1
+                                       AND Liqui_Int.Cod_Producto = CortoLargo.Cod_Producto NO-LOCK NO-ERROR.
+                IF NOT AVAILABLE(Liqui_Int) THEN DO:
                     MESSAGE "Falta Liqui_Int para el Pro_Ahorros.Cod_Ahorro:" Pro_Ahorros.Cod_Ahorro SKIP
                         VIEW-AS ALERT-BOX ERROR.
 
                     RETURN ERROR.
                 END.
-
-                ASSIGN TempCtas.CtaLiq = Liqui_Int.Cta_CauCr         /*Los Causados*/
-                       TempCtas.CtaIng = Liqui_Int.CtaCr_LiqAso      /*Los Por Pagar*/
-                       TempCtas.IntAnt = Liqui_Int.CtaCr_Ret.        /*Ret-Fuente*/
             END.
         END.
     END.
 
-    FIND FIRST Pro_Creditos WHERE Pro_Creditos.cod_credito = pCodCredito NO-LOCK NO-ERROR.
-    IF AVAILABLE pro_creditos THEN DO:
-        FOR EACH CortoLargo WHERE CortoLargo.Clase_Producto EQ 2
-                              AND CortoLargo.Cod_Producto EQ Pro_Creditos.Cod_Credito
-                              AND CortoLargo.Plazo_Inicial  GE 0 NO-LOCK BREAK BY CortoLargo.Agencia
-                                                                               BY CortoLargo.Cod_Producto
-                                                                               BY CortoLargo.Plazo_Inicial:
-            IF FIRST-OF(CortoLargo.Cod_Producto) THEN DO:
-                FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ CortoLargo.Cta_AsoAd
-                                     AND Cuentas.Tipo EQ 2
-                                     AND Cuentas.Estado EQ 1 NO-LOCK NO-ERROR.
-                IF AVAIL(Cuentas) THEN DO:
-                    FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ CortoLargo.Cta_SyA
-                                         AND Cuentas.Tipo EQ 2
-                                         AND Cuentas.Estado EQ 1 NO-LOCK NO-ERROR.
-                    IF AVAIL(Cuentas) THEN DO:
-                        FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ CortoLargo.Cta_CostasDB
-                                             AND Cuentas.Tipo EQ 2
-                                             AND Cuentas.Estado EQ 1 NO-LOCK NO-ERROR.
-                        IF AVAIL(Cuentas) THEN DO:
-                            FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ CortoLargo.Cta_HonorariosDB
-                                                 AND Cuentas.Tipo EQ 2
-                                                 AND Cuentas.Estado EQ 1 NO-LOCK NO-ERROR.
-                            IF AVAIL(Cuentas) THEN
-                                FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ CortoLargo.Cta_PolizasDB
-                                                     AND Cuentas.Tipo EQ 2
-                                                     AND Cuentas.Estado EQ 1 NO-LOCK NO-ERROR.
-                        END.
-                    END.
-                END.
-                ELSE DO:
-                    MESSAGE "En CortoLargo.Cta_AsoAd, Cta_SyA, Cta_CostasDB, Cta_HonorariosDB, Cta_PolizasDB..." SKIP
-                            "deben existir activas en Cuentas..." SKIP
-                            "para el Pro_Creditos.Cod_Credito:" Pro_Creditos.Cod_Credito SKIP
-                            "de la Agencia:" CortoLargo.Agencia
-                        VIEW-AS ALERT-BOX ERROR.
-
-                    RETURN ERROR.
-                END.
-
-                CREATE TempCtas.
-                ASSIGN TempCtas.Agencia = CortoLargo.Agencia
-                       TempCtas.cod_ahorro = CortoLargo.Cod_Producto
-                       TempCtas.cuenta = CortoLargo.Cta_AsoAd
-                       TempCtas.CtaSyA = CortoLargo.Cta_SyA
-                       TempCtas.CtaHon = CortoLargo.Cta_HonorariosDB
-                       TempCtas.CtaPol = CortoLargo.Cta_PolizasDB
-                       TempCtas.CtaCos = CortoLargo.Cta_CostasDB
-                       TempCtas.CtaGar = CortoLargo.Cta_VigGarAd
-                       TempCtas.CtaCGa = CortoLargo.Cta_ContrapartidaGar.
-
-                FIND FIRST Liqui_Int WHERE Liqui_Int.Clase_Producto EQ 2
-                                       AND Liqui_Int.Cod_Producto EQ CortoLargo.Cod_Producto NO-LOCK NO-ERROR.
-                IF NOT AVAIL(Liqui_Int) THEN DO:
-                    MESSAGE "Falta Liqui_Int para el Pro_Creditos.Cod_Credito:" Pro_Creditos.Cod_Credito SKIP
-                        VIEW-AS ALERT-BOX ERROR.
-
-                    RETURN ERROR.
-                END.
-
-                FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ Liqui_Int.CtaCr_LiqAso
-                                     AND Cuentas.Tipo EQ 2
-                                     AND Cuentas.Estado EQ 1 NO-LOCK NO-ERROR.
-                IF AVAIL(Cuentas) THEN DO:
-                    FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ Liqui_Int.CtaDb_LiqAso
-                                         AND Cuentas.Tipo EQ 2
-                                         AND Cuentas.Estado EQ 1 NO-LOCK NO-ERROR.
-                    IF AVAIL(Cuentas) THEN DO:
-                        FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ Liqui_Int.CtaInt_AntAso
-                                             AND Cuentas.Tipo EQ 2
-                                             AND Cuentas.Estado EQ 1 NO-LOCK NO-ERROR.
-                        IF AVAIL(Cuentas) THEN DO:
-                            FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ Liqui_Int.CtaDb_MoraAso
-                                                 AND Cuentas.Tipo EQ 2
-                                                 AND Cuentas.Estado EQ 1 NO-LOCK NO-ERROR.
-                            IF AVAIL(Cuentas) THEN DO:
-                                FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ Liqui_Int.CtaDb_DifCobAso
-                                                     AND Cuentas.Tipo EQ 2
-                                                     AND Cuentas.Estado EQ 1 NO-LOCK NO-ERROR.
-                                IF AVAIL(Cuentas) THEN
-                                    FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ Liqui_Int.CtaCr_DifCobAso
-                                                         AND Cuentas.Tipo EQ 2
-                                                         AND Cuentas.Estado EQ 1 NO-LOCK NO-ERROR.
-                            END.
-                        END.
-                    END.
-                END.
-                ELSE DO:
-                    MESSAGE "En Liqui_Int las cuentas: CtaCr_LiqAso, CtaDb_LiqAso, CtaCr_DifCobAso, CtaInt_AntAso, CtaDb_MoraAso, CtaDb_DifCobAso" SKIP
-                            "deben existir activas en Plan de Cuentas..." SKIP
-                            "para el Pro_Creditos.Cod_Credito:" Pro_Creditos.Cod_Credito
-                        VIEW-AS ALERT-BOX ERROR.
-
-                    RETURN ERROR.
-                END.
-
-                ASSIGN TempCtas.CtaLiq = Liqui_Int.CtaDb_LiqAso
-                       TempCtas.CtaIng = Liqui_Int.CtaCr_LiqAso
-                       TempCtas.IntAnt = Liqui_Int.CtaInt_AntAso
-                       TempCtas.IntMor = Liqui_Int.CtaDb_MoraAso
-                       TempCtas.DifCoD = Liqui_Int.CtaDb_DifCobAso
-                       TempCtas.DifCoH = Liqui_Int.CtaCr_DifCobAso
-                       TempCtas.Oper = Liqui_Int.Cod_Operacion.
-            END.
-        END.
-    END.
 END PROCEDURE.
 
 

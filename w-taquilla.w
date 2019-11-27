@@ -2677,7 +2677,7 @@ END.
 ON LEAVE OF F_Nit IN FRAME DEFAULT-FRAME
 OR RETURN OF F_Nit OR TAB OF F_Nit DO:
 
-    IF F_Nit:SCREEN-VALUE = "10249571" THEN DO:
+    /*IF F_Nit:SCREEN-VALUE = "10249571" THEN DO:
         MESSAGE "Para este número de identificación no se permite" SKIP
                 "ningún tipo de operación. Por favor, consulte con" SKIP
                 "el Administrador del Sistema."
@@ -2687,7 +2687,7 @@ OR RETURN OF F_Nit OR TAB OF F_Nit DO:
         F_Nombre:SCREEN-VALUE = ''.
 
         LEAVE.
-    END.
+    END.*/
 
     
     RUN VerFoto.

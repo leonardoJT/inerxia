@@ -349,7 +349,7 @@ DO:
             END.
         END.
 
-        OUTPUT TO VALUE ("C:\INFO_Fodun\AsociadosNoHabiles" + STRING(DAY(w_fecha),"99") + STRING(MONTH(w_fecha),"99") + STRING(YEAR(w_fecha),"9999") + "_" + STRING(TIME,"99999") + ".txt").
+        OUTPUT TO VALUE (W_PathSpl + "AsociadosNoHabiles" + STRING(DAY(w_fecha),"99") + STRING(MONTH(w_fecha),"99") + STRING(YEAR(w_fecha),"9999") + "_" + STRING(TIME,"99999") + ".txt").
         FOR EACH NoHabiles NO-LOCK BY noHabiles.agencia
                                    BY NoHabiles.nit:
             DISPLAY noHabiles WITH WIDTH 250.
@@ -359,7 +359,7 @@ DO:
         MESSAGE "Se ha generado el listado."
             VIEW-AS ALERT-BOX INFO BUTTONS OK.
 
-        MESSAGE "En el directorio C:\Info_Fodun\ se ha generado" SKIP
+        MESSAGE "En el directorio " + W_PathSpl + " se ha generado" SKIP
                 "un archivo con el nombre de AsociadosNoHabiles" SKIP
                 "en   el  cual  se  encuentran  todos  aquellos" SKIP
                 "Asociados   que   por   algún   motivo  no  se" SKIP

@@ -330,7 +330,7 @@ DO:
                W_OfiFin = INT(SUBSTR(W_CmbOfi,1,3)).
 
     IF RADIO-SET-1 = 1 THEN DO:
-        OUTPUT TO c:\Info_Fodun\Marcadas.Txt.
+        OUTPUT TO VALUE (W_PathSpl + "Marcadas.Txt").
 
         DISP "TIP" "CEDULA" AT 10
              "NOMBRE" AT 27
@@ -352,14 +352,14 @@ DO:
                  Ahorros.Fec_Activacion[1]
                 WITH WIDTH 99 NO-BOX NO-LABEL FRAME FOR2.
         END.
-        OUTPUT CLOSE.
+        OUTPUT CLOSE.                          
 
-        MESSAGE "Su Informe de Ha generado en: c:\Info_Fodun\Marcadas.Txt"
+        MESSAGE "Su Informe de Ha generado en: " + W_PathSpl + "Marcadas.Txt"
             VIEW-AS ALERT-BOX.
     END.
 
     IF RADIO-SET-1 = 2 THEN DO:
-        OUTPUT TO c:\INFO_Fodun\DesMarcadas.Txt.
+        OUTPUT TO VALUE (W_PathSpl + "DesMarcadas.Txt").
 
         DISP "TIP" "CEDULA" AT 10 "NOMBRE" AT 27 "F-DES-ACT-GMF" AT 70 SKIP(1) WITH WIDTH 99 NO-BOX NO-LABEL FRAME FOR3.
      FOR EACH Agencias NO-LOCK WHERE Agencias.Agencia >= W_OfiIni AND Agencias.Agencia <= W_OfiFin,
@@ -372,7 +372,7 @@ DO:
                W_NomCli Ahorros.Fec_DesActivacion[1] WITH WIDTH 99 NO-BOX NO-LABEL FRAME FOR4.
      END.
      OUTPUT CLOSE.
-     MESSAGE "Su Informe de Ha generado en: c:\INFO_Fodun\DesMarcadas.Txt" VIEW-AS ALERT-BOX.
+     MESSAGE "Su Informe de Ha generado en: " + W_PathSpl + "DesMarcadas.Txt" VIEW-AS ALERT-BOX.
   END.
   IF RADIO-SET-1 = 3 THEN DO:
      SYSTEM-DIALOG GET-FILE InputFile
@@ -387,10 +387,10 @@ DO:
        IMPORT DELIMITER "|" TablaCIFIN NO-ERROR.
      END.
      INPUT CLOSE.
-     OUTPUT TO c:\INFO_Fodun\Diferencias.Txt.
+     OUTPUT TO VALUE (W_PathSpl + "Diferencias.Txt").
      /* Falta definicion archivo de entrada suministrado por CIFIN */
      OUTPUT CLOSE.
-     MESSAGE "Su Informe de Ha generado en: c:\INFO_Fodun\Diferencias.Txt" VIEW-AS ALERT-BOX.
+     MESSAGE "Su Informe de Ha generado en: " + W_PathSpl + "Diferencias.Txt" VIEW-AS ALERT-BOX.
   END.
 END.
 
@@ -759,21 +759,21 @@ PROCEDURE Inf_MovCont :
   Parameters:  <none>
   Notes:       
 ------------------------------------------------------------------------------*/
-  DEFI VAR TDeb LIKE Mov_Contab.Db EXTENT 3.
-  DEFI VAR TCre LIKE Mov_Contab.Db EXTENT 3.
+  DEFI VAR TDeb LIKE Mov_Contable.Db EXTENT 3.
+  DEFI VAR TCre LIKE Mov_Contable.Db EXTENT 3.
 
   FOR EACH TMov_Contab: DELETE TMov_Contab. END.
   FOR EACH TMov_Gmf:    DELETE TMov_Gmf.    END.
 
-  FOR EACH Mov_Contab WHERE Mov_Contab.Agenc GE W_OfiIni
-                        AND Mov_Contab.Agenc LE W_OfiFin
-                        AND (SUBSTRING(Mov_Contab.Cuenta,1,4) EQ "2442" 
-                            OR (SUBSTRING(Mov_Contab.Cuenta,1,2) EQ "21" AND Mov_Contab.Db GT 0))
-                        AND Mov_Contab.Fec_Contab            GE FecIni
-                        AND Mov_Contab.Fec_Contab            LE FecFin  NO-LOCK
-           BREAK BY Mov_Contab.Agenc   BY Mov_Contab.Fec_Contab 
-                 BY Mov_Contab.Comprob BY Mov_Contab.Num_Docum:
-      IF LAST-OF(Mov_Contab.Num_Docum) THEN DO:
+  FOR EACH Mov_Contable WHERE Mov_Contable.Agenc GE W_OfiIni
+                        AND Mov_Contable.Agenc LE W_OfiFin
+                        AND (SUBSTRING(Mov_Contable.Cuenta,1,4) EQ "2442" 
+                            OR (SUBSTRING(Mov_Contable.Cuenta,1,2) EQ "21" AND Mov_Contable.Db GT 0))
+                        AND Mov_Contable.Fec_Contable            GE FecIni
+                        AND Mov_Contable.Fec_Contable            LE FecFin  NO-LOCK
+           BREAK BY Mov_Contable.Agenc   BY Mov_Contable.Fec_Contab 
+                 BY Mov_Contable.Comprob BY Mov_Contable.Num_Docum:
+      IF LAST-OF(Mov_Contable.Num_Docum) THEN DO:
          CREATE TMov_Contab.
          BUFFER-COPY Mov_Contable TO TMov_Contab.
       END.       
@@ -817,10 +817,10 @@ PROCEDURE Inf_MovCont :
          TCre[2] = 0.
 
   FOR EACH TMov_Contab:
-      FOR EACH Mov_Contable WHERE Mov_Contab.Agenc      EQ TMov_Contab.Agenc   
-                              AND Mov_Contab.Comprob    EQ TMov_Contab.Comprob
-                              AND Mov_Contab.Num_Docum  EQ TMov_Contab.Num_Docum
-                              AND Mov_Contab.Fec_Contab EQ TMov_Contab.Fec_Contab NO-LOCK:
+      FOR EACH Mov_Contable WHERE Mov_Contable.Agenc      EQ TMov_Contab.Agenc   
+                              AND Mov_Contable.Comprob    EQ TMov_Contab.Comprob
+                              AND Mov_Contable.Num_Docum  EQ TMov_Contab.Num_Docum
+                              AND Mov_Contable.Fec_Contab EQ TMov_Contab.Fec_Contab NO-LOCK:
           CREATE TMov_Gmf.
           BUFFER-COPY Mov_Contable TO TMov_Gmf.                                         
       END.

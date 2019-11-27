@@ -2,7 +2,7 @@ DISABLE TRIGGERS FOR LOAD OF mov_contable.
 DISABLE TRIGGERS FOR LOAD OF mov_contable2.
 
 DEFINE VAR cont AS INTEGER.
-DEFINE VAR vFecha AS DATE FORMAT "99/99/9999" INITIAL 04/27/2011.
+DEFINE VAR vFecha AS DATE FORMAT "99/99/9999" INITIAL 04/29/2011.
 
 FOR EACH mov_contable WHERE mov_contable.agencia >= 0
                         AND mov_contable.cuenta <> ""

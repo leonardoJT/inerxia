@@ -307,18 +307,18 @@ DEFINE FRAME DEFAULT-FRAME
      " Registros Leídos:" VIEW-AS TEXT
           SIZE 13 BY .81 AT ROW 3.19 COL 10.86 WIDGET-ID 8
           FGCOLOR 12 
-     " Resumen" VIEW-AS TEXT
-          SIZE 8.14 BY .81 AT ROW 2.46 COL 4.86 WIDGET-ID 4
-          FGCOLOR 0 
-     "Valor Transacciones:" VIEW-AS TEXT
-          SIZE 15 BY .81 AT ROW 4.12 COL 9 WIDGET-ID 172
-          FGCOLOR 12 
-     "Valor Comisiones:" VIEW-AS TEXT
-          SIZE 11.86 BY .81 AT ROW 5 COL 11.29 WIDGET-ID 174
-          FGCOLOR 12 
      "IMPORTAR OPERACIONES TARJETAS" VIEW-AS TEXT
           SIZE 35 BY .5 AT ROW 1.54 COL 5.72 WIDGET-ID 26
           BGCOLOR 8 FONT 1
+     "Valor Comisiones:" VIEW-AS TEXT
+          SIZE 11.86 BY .81 AT ROW 5 COL 11.29 WIDGET-ID 174
+          FGCOLOR 12 
+     "Valor Transacciones:" VIEW-AS TEXT
+          SIZE 15 BY .81 AT ROW 4.12 COL 9 WIDGET-ID 172
+          FGCOLOR 12 
+     " Resumen" VIEW-AS TEXT
+          SIZE 8.14 BY .81 AT ROW 2.46 COL 4.86 WIDGET-ID 4
+          FGCOLOR 0 
      RECT-346 AT ROW 1 COL 1 WIDGET-ID 186
      RECT-345 AT ROW 2.96 COL 4 WIDGET-ID 2
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
@@ -1445,6 +1445,9 @@ DEFINE VAR vcr AS DECIMAL.
 DEFINE VAR valEfectivo AS DECIMAL.
 DEFINE VAR valCheque AS DECIMAL.
 DEFINE VAR pResult AS LOGICAL.
+DEFINE VAR vAgenciaDestino AS INTEGER.
+DEFINE VAR vCuentaDestino AS CHARACTER.
+DEFINE VAR vNitDestino AS CHARACTER.
 
 FIND FIRST ahorros WHERE ahorros.nit = documento_cliente
                      AND INTEGER(ahorros.cue_ahorros) = INTEGER(vCuenta1_origen) NO-LOCK NO-ERROR.
@@ -1531,6 +1534,7 @@ IF AVAILABLE(ahorros) THEN DO:
     mov_contable.cr = vdb.
 
     IF vTransaccion = "CE" OR vTransaccion = "CC" THEN DO:
+        mov_contable.nit = ahorros.nit.
         Mov_Contable.Cuenta = "16603550".
 
         FIND FIRST usuarios WHERE usuarios.usuario = ecg.usuarioAutorizador NO-LOCK NO-ERROR.
@@ -1545,17 +1549,19 @@ IF AVAILABLE(ahorros) THEN DO:
         mov_contable.agencia = 1.
     END.
 
-    /* oakley */
-
     /* Para Sucursales y Agencias */
-    IF ahorros.agencia <> 1 THEN DO:
+    IF mov_contable.agencia <> ahorros.agencia THEN DO:
         RUN cuentaSucursales&agencias.
 
+        vAgenciaDestino = mov_contable.agencia.
+        mov_contable.agencia = ahorros.agencia.
+        vCuentaDestino = mov_contable.cuenta.
         mov_contable.cuenta = cuentaSyA.
-        mov_contable.nit = "001".
+        vNitDestino = mov_contable.nit.
+        mov_contable.nit = STRING(vAgenciaDestino,"999").
 
         FIND FIRST comprobante WHERE comprobante.comprobante = 22
-                                 AND comprobantes.agencia = 1 NO-ERROR.
+                                 AND comprobantes.agencia = vAgenciaDestino NO-ERROR.
         IF AVAILABLE(comprobante) THEN
             ASSIGN wDoc = comprobante.secuencia + 1
                    comprobantes.secuencia = comprobante.secuencia + 1.
@@ -1570,8 +1576,8 @@ IF AVAILABLE(ahorros) THEN DO:
                Mov_Contable.Comentario = ecg.terminalUbicacion
                Mov_Contable.Usuario = w_usuario
                Mov_Contable.Estacion = "005"
-               Mov_Contable.Agencia = 1
-               Mov_Contable.Destino = 1
+               Mov_Contable.Agencia = vAgenciaDestino
+               Mov_Contable.Destino = ahorros.agencia
                Mov_Contable.Cuenta = cuentaSyA
                Mov_Contable.Nit = STRING(ahorros.agencia,"999")
                Mov_contable.db = vdb
@@ -1587,9 +1593,9 @@ IF AVAILABLE(ahorros) THEN DO:
                Mov_Contable.Comentario = ecg.terminalUbicacion
                Mov_Contable.Usuario = w_usuario
                Mov_Contable.Estacion = "005"
-               Mov_Contable.Agencia = 1
-               Mov_Contable.Destino = 1
-               Mov_Contable.Cuenta = "24459550"
+               Mov_Contable.Agencia = vAgenciaDestino
+               Mov_Contable.Destino = ahorros.agencia
+               Mov_Contable.Cuenta = vCuentaDestino
                Mov_Contable.Nit = nitCompensacion
                Mov_contable.db = vcr
                mov_contable.cr = vdb.

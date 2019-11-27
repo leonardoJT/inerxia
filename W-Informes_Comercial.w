@@ -1757,7 +1757,7 @@ IF vcDBName EQ "BDCENTRAL" THEN
 ELSE IF vcDBName = "BDCENTRAL1" THEN
          ASSIGN vcDBName = "pruebas".
 
-ASSIGN vcFile = "C:\info_fodun\" + W_Usuario + "_InformeComercial" +
+ASSIGN vcFile = W_PathSpl + W_Usuario + "_InformeComercial" +
                 vcDBname + "_" + STRING(W_Fecha,"99999999") + "_" +
                 SUBSTRING(STRING(TIME,"HH:MM:SS"),1,2) + "-" + 
                 SUBSTRING(STRING(TIME,"HH:MM:SS"),4,2) + "-" +

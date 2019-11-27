@@ -276,12 +276,11 @@ DO:
                                     END.
                                 END.
                             END.
-
-                            /* Ahorro Permanente */
-                            IF ttRecibir.tipo_ah = 'AP' THEN DO:
-
+                        END.
+                        ELSE DO:
+                            IF ttRecibir.tipo = "CR" THEN DO:
+                                /* Avance cupo rotativo */
                             END.
-
                         END.
                     END.
                     
