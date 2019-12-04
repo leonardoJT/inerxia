@@ -310,13 +310,15 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL brwListas C-Win
 ON MOUSE-SELECT-DBLCLICK OF brwListas IN FRAME F-MAIN
 DO:
-    C-Win:SENSITIVE = NO.
-    C-Win:MOVE-TO-BOTTOM().
+    IF AVAILABLE cfg_listasSarlaft THEN DO:
+        C-Win:SENSITIVE = NO.
+        C-Win:MOVE-TO-BOTTOM().
 
-    RUN W-DetalleListaRestrictiva.r (INPUT ROWID(cfg_listasSarlaft)) NO-ERROR.
+        RUN W-DetalleListaRestrictiva.r (INPUT ROWID(cfg_listasSarlaft)).
 
-    C-Win:SENSITIVE = YES.
-    C-Win:MOVE-TO-TOP().
+        C-Win:SENSITIVE = YES.
+        C-Win:MOVE-TO-TOP().
+    END.
 END.
 
 /* _UIB-CODE-BLOCK-END */

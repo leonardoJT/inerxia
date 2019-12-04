@@ -1436,72 +1436,16 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE RendimientosFinancieros wWin 
 PROCEDURE RendimientosFinancieros :
-DEFINE BUFFER bfrMovContable FOR mov_contable.
-DEFINE VAR cont AS INTEGER.
-DEFIN VAR ctaRete AS CHARACTER.
-    
-EMPTY TEMP-TABLE docs.
-EMPTY TEMP-TABLE ttmov.
-    
-FOR EACH anexos WHERE anexos.nit = clientes.nit
-                  AND (SUBSTRING(anexos.cuenta,1,8) = "52100505" OR
-                       SUBSTRING(anexos.cuenta,1,6) = "615005" OR
-                       SUBSTRING(anexos.cuenta,1,6) = "615010" OR
-                       SUBSTRING(anexos.cuenta,1,6) = "615020" OR
-                       SUBSTRING(anexos.cuenta,1,6) = "615035")
-                  AND anexos.ano = wAno NO-LOCK BREAK BY anexos.nit
-                                                      BY anexos.cuenta:
-    FIND FIRST cuentas WHERE cuentas.cuenta = anexos.cuenta NO-LOCK NO-ERROR.
-    
-    FIND FIRST TCer WHERE TCer.nit = clientes.nit
-                      AND TCer.CBa = "RENDIMIENTOS FINANCIEROS" NO-ERROR.
-    IF NOT AVAILABLE TCer THEN DO:
-        CREATE TCer.
-        ASSIGN TCer.Nit = clientes.nit
-               TCer.CBa = "RENDIMIENTOS FINANCIEROS".
-    END.
+CREATE TCer.
+TCer.Nit = clientes.nit.
+TCer.CBa = "RENDIMIENTOS FINANCIEROS".
 
-    TCer.Bas = TCer.Bas + anexos.sdo_inicial.
-
-    DO cont = 1 TO 12:
-        TCer.Bas = TCer.Bas + anexos.db[cont] - anexos.cr[cont].
-    END.
-
-    IF LAST-OF(anexos.cuenta) THEN DO:
-        IF SUBSTRING(anexos.cuenta,1,8) = "52100505" THEN
-            ctaRete = "243535".
-        ELSE
-            ctaRete = "243525".
-
-        FOR EACH mov_contable WHERE mov_contable.cuenta = anexos.cuenta
-                                AND mov_contable.nit = anexos.nit
-                                AND YEAR(mov_contable.fec_contable) = wAno NO-LOCK BREAK:
-            FIND FIRST docs WHERE docs.nit = mov_contable.nit
-                              AND docs.agencia = mov_contable.agencia
-                              AND docs.comprobante = mov_contable.comprobante
-                              AND docs.num_documento = mov_contable.num_documento
-                              AND docs.fec_contable = mov_contable.fec_contable NO-LOCK NO-ERROR.
-            IF NOT AVAILABLE docs THEN DO:
-                CREATE docs.
-                docs.nit = mov_contable.nit.
-                docs.agencia = mov_contable.agencia.
-                docs.comprobante = mov_contable.comprobante.
-                docs.num_documento = mov_contable.num_documento.
-                docs.fec_contable = mov_contable.fec_contable.
-
-                FOR EACH bfrMovContable WHERE bfrMovContable.agencia = docs.agencia
-                                          AND bfrMovContable.comprobante = docs.comprobante
-                                          AND bfrMovContable.num_documento = docs.num_documento
-                                          AND bfrMovContable.nit = docs.nit
-                                          AND bfrMovContable.fec_contable = docs.fec_contable
-                                          AND SUBSTRING(bfrMovContable.cuenta,1,6) = ctaRete NO-LOCK:
-                    TCer.Ret = TCer.Ret + bfrMovContable.cr - bfrMovContable.db.
-                END.
-            END.
-        END.
-    END.
-END.
-
+RUN VALUE("p-1001_5006_RendimientosFinancieros_" + STRING(wAno) + ".r") (INPUT 'C',
+                                                                         INPUT clientes.nit,
+                                                                         INPUT 0,
+                                                                         OUTPUT TCer.Bas,
+                                                                         
+                                                                         OUTPUT TCer.Ret).
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */

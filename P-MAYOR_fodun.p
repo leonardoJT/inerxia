@@ -8,8 +8,8 @@ DEFINE VARIABLE i AS INTEGER.
 DEFINE VAR vAgencia AS INTEGER.
 
 vAgencia = 4.
-fecIni = 10/01/2019.
-fecFin = 10/31/2019.
+fecIni = 12/01/2019.
+fecFin = 12/31/2019.
 vYear = YEAR(fecIni).
 vMes = MONTH(fecIni).
 dia1 = DAY(fecIni).

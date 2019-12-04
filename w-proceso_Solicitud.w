@@ -1957,224 +1957,108 @@ DEFINE FRAME F_Solicitud
          FONT 5
          TITLE "Radicación de Solicitudes".
 
-DEFINE FRAME F_Instancias
-     BUTTON-142 AT ROW 1.27 COL 3
-     Mov_Instancias.Fec_Ingreso AT ROW 1.27 COL 73 COLON-ALIGNED
+DEFINE FRAME F_HojaVida
+     Hoja_Vida.Fec_Grabacion AT ROW 1.27 COL 70 COLON-ALIGNED
+          LABEL "Fecha Grabación"
           VIEW-AS FILL-IN 
           SIZE 11.43 BY .81
           BGCOLOR 18 FGCOLOR 15 
-     WHora_Ingreso AT ROW 1.27 COL 85 COLON-ALIGNED NO-LABEL
-     W_Instancia AT ROW 1.42 COL 12 COLON-ALIGNED NO-LABEL
-     W_UsuarioInstancia AT ROW 2.35 COL 12 COLON-ALIGNED NO-LABEL
-     Mov_Instancias.Fec_Retiro AT ROW 2.35 COL 73 COLON-ALIGNED
-          VIEW-AS FILL-IN 
-          SIZE 11.43 BY .81
-          BGCOLOR 18 FGCOLOR 15 
-     Whora_Retiro AT ROW 2.35 COL 85 COLON-ALIGNED NO-LABEL
-     Vigencia AT ROW 3.42 COL 48 COLON-ALIGNED
-     Mov_Instancias.Estado AT ROW 3.54 COL 3
-          LABEL "Cerrar Instancia"
+     BUTTON-150 AT ROW 1.27 COL 86
+     Hoja_Vida.Asunto_Cumplido AT ROW 1.54 COL 4
+          LABEL "Asunto Cumplido"
           VIEW-AS TOGGLE-BOX
-          SIZE 17 BY .77
-     Mov_Instancias.Descripcion AT ROW 4.5 COL 3 NO-LABEL
-          VIEW-AS EDITOR MAX-CHARS 1200 SCROLLBAR-VERTICAL LARGE
-          SIZE 77 BY 9.69
+          SIZE 18 BY .81
+     Hoja_Vida.Observacion AT ROW 2.62 COL 4 NO-LABEL
+          VIEW-AS EDITOR LARGE
+          SIZE 80 BY 7.08
           BGCOLOR 15 
-     Btn_GraInstancia AT ROW 4.5 COL 82
-     Btn_AgregarTxt AT ROW 6.38 COL 82
-     Btn_Imp AT ROW 9.69 COL 82
-     Btn_insVolver AT ROW 12.58 COL 82
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 3 ROW 7.46
-         SIZE 98 BY 14.54
-         FONT 5
-         TITLE "Procesar Instancias".
-
-DEFINE FRAME F_Agregar
-     E_Agregar AT ROW 1.27 COL 2 NO-LABEL
-     BUTTON-153 AT ROW 6.92 COL 48
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 19 ROW 11.5
-         SIZE 57 BY 8.88
-         TITLE "Texto a ser Agregado".
-
-DEFINE FRAME F_Cerradas
-     Br_Cerradas AT ROW 1.27 COL 3
-     Btn_OutCerradas AT ROW 7.73 COL 89
-     BUTTON-154 AT ROW 8 COL 62
-     "La instancia activa se encuentra en letra color rojo" VIEW-AS TEXT
-          SIZE 43 BY .81 AT ROW 7.19 COL 3
-          FGCOLOR 7 FONT 5
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 3 ROW 3.69
-         SIZE 98 BY 9.42
-         FGCOLOR 0 FONT 4
-         TITLE "Consulta de Instancias Procesadas y Actuales".
-
-DEFINE FRAME F_Ultima
-     Btn_SalvaUltima AT ROW 1.27 COL 85
-     Btn_OutUltima AT ROW 2.62 COL 85
-     Solicitud.Estado AT ROW 3.27 COL 21 NO-LABEL
-          VIEW-AS RADIO-SET HORIZONTAL
-          RADIO-BUTTONS 
-                    "En estudio", 1,
-"Aprobada", 2,
-"Negada", 3,
-"Condicionada", 4
-          SIZE 56 BY .69
-     Cmb_Negadas AT ROW 4.08 COL 53 COLON-ALIGNED
-     W_CptoScoring AT ROW 4.23 COL 16 COLON-ALIGNED NO-LABEL
-     W_MenDes AT ROW 5.31 COL 4 COLON-ALIGNED NO-LABEL
-     "Se ha llegado a la última instancia en el proceso de solicitud," VIEW-AS TEXT
-          SIZE 53 BY .81 AT ROW 1.54 COL 22
-          BGCOLOR 0 FGCOLOR 15 
-     "Cambie el estado de la Solicitud según el estudio realizado" VIEW-AS TEXT
-          SIZE 53 BY .62 AT ROW 2.35 COL 22
-          BGCOLOR 0 FGCOLOR 15 
-     "Concepto Scoring :" VIEW-AS TEXT
-          SIZE 16.72 BY .62 AT ROW 4.23 COL 1
-     RECT-224 AT ROW 1.27 COL 21
-     RECT-225 AT ROW 5.15 COL 5
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         PAGE-TOP SIDE-LABELS TOP-ONLY NO-UNDERLINE THREE-D 
-         AT COL 3 ROW 3.69
-         SIZE 98 BY 18.31
-         FGCOLOR 15 FONT 5
-         TITLE "Estado de la Solicitud".
-
-DEFINE FRAME F_Condicionada
-     Cmb_InsCon AT ROW 1.27 COL 8.43 COLON-ALIGNED
-     Br_Usuarios AT ROW 2.08 COL 51
-     E_Condicion AT ROW 3.15 COL 3 NO-LABEL
-     BUTTON-162 AT ROW 9.88 COL 82
-     "Condición" VIEW-AS TEXT
-          SIZE 10 BY .62 AT ROW 2.35 COL 3
-     "  Usuarios Disponibles para recibir la Solicitud" VIEW-AS TEXT
-          SIZE 40.29 BY .81 AT ROW 1.27 COL 52
-          BGCOLOR 18 FGCOLOR 15 
-     "Los Usuarios en Rojo han tenido la Solicitud asignada" VIEW-AS TEXT
-          SIZE 42 BY .62 AT ROW 8.81 COL 52
-          FGCOLOR 15 FONT 4
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 2 ROW 6.12
-         SIZE 95 BY 12.38
-         FGCOLOR 15 FONT 5
-         TITLE "Instancia a la cual se devuelve la Solicitud Condicionada".
-
-DEFINE FRAME F_ConHV
-     Br_ConHV AT ROW 1.27 COL 3
-     Btn_OutConHV AT ROW 8.27 COL 89
-     "   Los Mensajes en Rojo estan pendientes por cumplirse" VIEW-AS TEXT
-          SIZE 85 BY 1.08 AT ROW 8.54 COL 3
-          BGCOLOR 0 FGCOLOR 15 FONT 5
+     Btn_SalvaHV AT ROW 3.15 COL 86
+     Btn_NvoHv AT ROW 4.5 COL 86
+     BUTTON-152 AT ROW 5.85 COL 86
+     BUTTON-149 AT ROW 8 COL 86
     WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 3 ROW 12.04
          SIZE 98 BY 9.96
-         FONT 4
-         TITLE "Asuntos Pendientes".
-
-DEFINE FRAME F_Deducibles
-     Br_Deducibles AT ROW 1.27 COL 2
-     BUTTON-101 AT ROW 9.35 COL 45
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 3 ROW 10.69
-         SIZE 55 BY 11.31
-         TITLE "Deducibles del Producto".
-
-DEFINE FRAME F_Desembolso
-     Solicitud.Desembolso AT ROW 1.27 COL 3 NO-LABEL
-          VIEW-AS RADIO-SET HORIZONTAL
-          RADIO-BUTTONS 
-                    "Efectivo", 1,
-"Cheque", 2,
-"Cta Ahorros", 3,
-"Orden a 3os", 4
-          SIZE 52 BY .81
-     Solicitud.Age_Desembolso AT ROW 2.35 COL 10 COLON-ALIGNED
-          LABEL "Agencia"
-          VIEW-AS FILL-IN 
-          SIZE 10 BY .81
-          BGCOLOR 18 FGCOLOR 15 FONT 4
-     W_NomAgeDesembolso AT ROW 2.35 COL 20 COLON-ALIGNED NO-LABEL
-     Solicitud.Cod_Desembolso AT ROW 3.42 COL 10 COLON-ALIGNED
-          LABEL "Producto"
-          VIEW-AS FILL-IN 
-          SIZE 10 BY .81
-          BGCOLOR 18 FGCOLOR 15 FONT 5
-     W_NomProDesembolso AT ROW 3.42 COL 20 COLON-ALIGNED NO-LABEL
-     Solicitud.Cue_Desembolso AT ROW 4.5 COL 10 COLON-ALIGNED
-          LABEL "Cuenta"
-          VIEW-AS FILL-IN 
-          SIZE 41 BY .81
-          BGCOLOR 18 FGCOLOR 15 
-     BUTTON-104 AT ROW 5.58 COL 46
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 32 ROW 6.92
-         SIZE 55 BY 7.27
          FONT 5
-         TITLE "Destino del Desembolso".
+         TITLE "Hoja de Vida".
 
-DEFINE FRAME F_ForPago
-     Solicitud.For_Pago AT ROW 1.27 COL 1 NO-LABEL
-          VIEW-AS RADIO-SET HORIZONTAL
-          RADIO-BUTTONS 
-                    "Caja", 1,
-"Nómina", 2,
-"Déb Aut", 3,
-"Nóm Crec", 4,
-"Prima", 5
-          SIZE 45 BY .81
-     Anexos_Clientes.Cam_Cat1 AT ROW 2.35 COL 15 COLON-ALIGNED HELP
-          "" WIDGET-ID 4
-          LABEL "Capacidad Pago" FORMAT "x(15)"
-          VIEW-AS COMBO-BOX SORT INNER-LINES 4
-          LIST-ITEM-PAIRS ""," ",
-                     "50%","f50%",
-                     "SMMLV","fsmmlv",
-                     "CAJA","fcapagocaja"
-          DROP-DOWN-LIST
-          SIZE 16 BY 1 TOOLTIP "Función Para Calcular La Capacidad De Pago"
-     Solicitud.Age_DebAutomatico AT ROW 3.42 COL 15 COLON-ALIGNED
-          LABEL "Agencia"
-          VIEW-AS FILL-IN 
-          SIZE 4 BY .81
-          BGCOLOR 18 FGCOLOR 15 
-     W_NomAgeDebAutomatico AT ROW 3.42 COL 19 COLON-ALIGNED NO-LABEL
-     Solicitud.Cod_DebAutomatico AT ROW 4.5 COL 15 COLON-ALIGNED
-          LABEL "Producto"
-          VIEW-AS FILL-IN 
-          SIZE 4 BY .81
-          BGCOLOR 18 FGCOLOR 15 
-     W_NomCodDebAutomatico AT ROW 4.5 COL 19 COLON-ALIGNED NO-LABEL
-     Solicitud.Cue_DebAutomatico AT ROW 5.58 COL 15 COLON-ALIGNED
-          LABEL "Cuenta"
-          VIEW-AS FILL-IN 
-          SIZE 29 BY .81
-          BGCOLOR 18 FGCOLOR 15 
-     BUTTON-106 AT ROW 6.65 COL 38
+DEFINE FRAME VisorSolicitud
+     BUTTON-233 AT ROW 18.27 COL 100 WIDGET-ID 10
+     Btn_IrProcesarInst AT ROW 18.31 COL 76.86 WIDGET-ID 14
+     "Si es necesario, puede actualizar los datos del sistema y volver a generar PDF." VIEW-AS TEXT
+          SIZE 74.86 BY .62 AT ROW 18.77 COL 2.14 WIDGET-ID 12
     WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 18 ROW 10.42
-         SIZE 46 BY 8.35
+         AT COL 2 ROW 3.42
+         SIZE 107 BY 19.92
+         TITLE "Visor de solicitud" WIDGET-ID 200.
+
+DEFINE FRAME F_Consulta
+     Br_Consulta AT ROW 2.08 COL 4
+     R_Organizar AT ROW 15.54 COL 25 NO-LABEL
+     Btn_OutConsulta AT ROW 16.73 COL 88
+     Buscar AT ROW 17.15 COL 19 COLON-ALIGNED
+     VG_Normal AT ROW 1.23 COL 3 COLON-ALIGNED NO-LABEL
+     VG_Media AT ROW 1.27 COL 33.72 COLON-ALIGNED NO-LABEL
+     VG_Alta AT ROW 1.27 COL 64 COLON-ALIGNED NO-LABEL
+     "Organizada por..." VIEW-AS TEXT
+          SIZE 16 BY .81 AT ROW 15.54 COL 7
+          FGCOLOR 7 
+     "" VIEW-AS TEXT
+          SIZE 45 BY .81 AT ROW 17.15 COL 42
+          FGCOLOR 7 
+     RECT-223 AT ROW 15.27 COL 4
+     RECT-287 AT ROW 1 COL 35
+     RECT-288 AT ROW 1 COL 4
+     RECT-289 AT ROW 1 COL 65
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 2 ROW 3.69
+         SIZE 98 BY 18.31
          FONT 5
-         TITLE BGCOLOR 16 "Forma de Pago de la Cuota".
+         TITLE "Solicitudes Disponibles".
 
-DEFINE FRAME F_Foto
-     BUTTON-230 AT ROW 6.12 COL 5 WIDGET-ID 4
-     P_Foto AT ROW 1 COL 1.43 WIDGET-ID 2
+DEFINE FRAME F_Scoring
+     BR_Scoring AT ROW 1.04 COL 1
+     M_Cliente AT ROW 11.81 COL 54.72
+     Nom_CteCod AT ROW 12.46 COL 27.14 COLON-ALIGNED NO-LABEL
+     BUTTON-166 AT ROW 12.5 COL 26
+     W_Concepto AT ROW 13.46 COL 36.57 COLON-ALIGNED
+     Total_Puntaje AT ROW 14.5 COL 36.57 COLON-ALIGNED
+     BUT-IMP-Scoring AT ROW 15.54 COL 25.86 WIDGET-ID 2
+     Btn_Ejecutar AT ROW 15.54 COL 43 WIDGET-ID 36
+     BUTTON-99 AT ROW 15.54 COL 60.14
+     "Cada Codeudor" VIEW-AS TEXT
+          SIZE 14.57 BY .62 AT ROW 11.77 COL 26.29
+          BGCOLOR 18 FGCOLOR 15 
     WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 70 ROW 1
-         SIZE 19 BY 6.73
-         TITLE "Foto del Asociado"
-         CANCEL-BUTTON BUTTON-230 WIDGET-ID 100.
+         AT COL 3 ROW 4.23
+         SIZE 98 BY 17.23
+         FONT 5
+         TITLE "Datos del Scoring de Créditos".
+
+DEFINE FRAME F_InfoProducto
+     S_InfoProducto AT ROW 1.27 COL 1.72 NO-LABEL
+     Btn_OutScoring AT ROW 9.15 COL 43.72
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 44.43 ROW 7.73
+         SIZE 53.57 BY 10.77
+         FGCOLOR 0 FONT 5
+         TITLE "Información del Producto".
+
+DEFINE FRAME F_InfoCliente
+     S_InfoCliente AT ROW 1.27 COL 2 NO-LABEL WIDGET-ID 2
+     BUTTON-156 AT ROW 13.65 COL 2
+     BUTTON-108 AT ROW 13.65 COL 42
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 3 ROW 6.65
+         SIZE 51 BY 15.35
+         FONT 5
+         TITLE "Información Financiera del Cliente".
 
 DEFINE FRAME F_Garantias
      R_TipoGarantia AT ROW 1.27 COL 17.43 NO-LABEL
@@ -2186,6 +2070,43 @@ DEFINE FRAME F_Garantias
          SIZE 98 BY 15.35
          FONT 5
          TITLE "Garantías".
+
+DEFINE FRAME F_ConAdmisible
+     BR_Admisible AT ROW 1.27 COL 2
+     Btn_OutConAdm AT ROW 8.27 COL 85
+     R_ConAdm AT ROW 8.54 COL 2.57 NO-LABEL
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 2 ROW 2.08
+         SIZE 95 BY 9.96
+         FONT 5
+         TITLE BGCOLOR 3 "Consulta de Garantías Admisibles y No-Admisibles".
+
+DEFINE FRAME F_Codeudores
+     Relaciones.Aprobada AT ROW 1.27 COL 78.72 HELP
+          "Aprobada/Negada" NO-LABEL
+          VIEW-AS RADIO-SET VERTICAL
+          RADIO-BUTTONS 
+                    "Aceptado", yes,
+"Rechazado", no
+          SIZE 14.14 BY 1.35 TOOLTIP "Marque si el Codeudor es Aceptado Ò No."
+     W_NitCodeudor AT ROW 1.54 COL 14 COLON-ALIGNED
+     W_NomCodeudor AT ROW 1.54 COL 27 COLON-ALIGNED NO-LABEL
+     BUTTON-155 AT ROW 1.58 COL 72.14
+     Btn_CreCod AT ROW 2.62 COL 3
+     Btn_CanCod AT ROW 2.62 COL 13.86
+     Btn_Activas AT ROW 2.62 COL 25.43
+     Btn_SalCod AT ROW 2.62 COL 36.29
+     BUTTON-165 AT ROW 2.69 COL 50.86
+     RActivas AT ROW 2.88 COL 73 NO-LABEL
+     Br_Codeudores AT ROW 3.96 COL 3
+     RECT-297 AT ROW 1 COL 77
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 2 ROW 2.08
+         SIZE 95 BY 9.69
+         FONT 5
+         TITLE "Personal".
 
 DEFINE FRAME F_Admisible
      Garantias.Descripcion_Bien2 AT ROW 4.46 COL 3 NO-LABEL
@@ -2353,145 +2274,224 @@ DEFINE FRAME F_Admisible
          FONT 4
          TITLE "Garantías Admisibles".
 
-DEFINE FRAME F_Codeudores
-     Relaciones.Aprobada AT ROW 1.27 COL 78.72 HELP
-          "Aprobada/Negada" NO-LABEL
-          VIEW-AS RADIO-SET VERTICAL
+DEFINE FRAME F_Foto
+     BUTTON-230 AT ROW 6.12 COL 5 WIDGET-ID 4
+     P_Foto AT ROW 1 COL 1.43 WIDGET-ID 2
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 70 ROW 1
+         SIZE 19 BY 6.73
+         TITLE "Foto del Asociado"
+         CANCEL-BUTTON BUTTON-230 WIDGET-ID 100.
+
+DEFINE FRAME F_ForPago
+     Solicitud.For_Pago AT ROW 1.27 COL 1 NO-LABEL
+          VIEW-AS RADIO-SET HORIZONTAL
           RADIO-BUTTONS 
-                    "Aceptado", yes,
-"Rechazado", no
-          SIZE 14.14 BY 1.35 TOOLTIP "Marque si el Codeudor es Aceptado Ò No."
-     W_NitCodeudor AT ROW 1.54 COL 14 COLON-ALIGNED
-     W_NomCodeudor AT ROW 1.54 COL 27 COLON-ALIGNED NO-LABEL
-     BUTTON-155 AT ROW 1.58 COL 72.14
-     Btn_CreCod AT ROW 2.62 COL 3
-     Btn_CanCod AT ROW 2.62 COL 13.86
-     Btn_Activas AT ROW 2.62 COL 25.43
-     Btn_SalCod AT ROW 2.62 COL 36.29
-     BUTTON-165 AT ROW 2.69 COL 50.86
-     RActivas AT ROW 2.88 COL 73 NO-LABEL
-     Br_Codeudores AT ROW 3.96 COL 3
-     RECT-297 AT ROW 1 COL 77
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 2 ROW 2.08
-         SIZE 95 BY 9.69
-         FONT 5
-         TITLE "Personal".
-
-DEFINE FRAME F_ConAdmisible
-     BR_Admisible AT ROW 1.27 COL 2
-     Btn_OutConAdm AT ROW 8.27 COL 85
-     R_ConAdm AT ROW 8.54 COL 2.57 NO-LABEL
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 2 ROW 2.08
-         SIZE 95 BY 9.96
-         FONT 5
-         TITLE BGCOLOR 3 "Consulta de Garantías Admisibles y No-Admisibles".
-
-DEFINE FRAME F_InfoCliente
-     S_InfoCliente AT ROW 1.27 COL 2 NO-LABEL WIDGET-ID 2
-     BUTTON-156 AT ROW 13.65 COL 2
-     BUTTON-108 AT ROW 13.65 COL 42
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 3 ROW 6.65
-         SIZE 51 BY 15.35
-         FONT 5
-         TITLE "Información Financiera del Cliente".
-
-DEFINE FRAME F_InfoProducto
-     S_InfoProducto AT ROW 1.27 COL 1.72 NO-LABEL
-     Btn_OutScoring AT ROW 9.15 COL 43.72
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 44.43 ROW 7.73
-         SIZE 53.57 BY 10.77
-         FGCOLOR 0 FONT 5
-         TITLE "Información del Producto".
-
-DEFINE FRAME F_Scoring
-     BR_Scoring AT ROW 1.04 COL 1
-     M_Cliente AT ROW 11.81 COL 54.72
-     Nom_CteCod AT ROW 12.46 COL 27.14 COLON-ALIGNED NO-LABEL
-     BUTTON-166 AT ROW 12.5 COL 26
-     W_Concepto AT ROW 13.46 COL 36.57 COLON-ALIGNED
-     Total_Puntaje AT ROW 14.5 COL 36.57 COLON-ALIGNED
-     BUT-IMP-Scoring AT ROW 15.54 COL 25.86 WIDGET-ID 2
-     Btn_Ejecutar AT ROW 15.54 COL 43 WIDGET-ID 36
-     BUTTON-99 AT ROW 15.54 COL 60.14
-     "Cada Codeudor" VIEW-AS TEXT
-          SIZE 14.57 BY .62 AT ROW 11.77 COL 26.29
-          BGCOLOR 18 FGCOLOR 15 
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 3 ROW 4.23
-         SIZE 98 BY 17.23
-         FONT 5
-         TITLE "Datos del Scoring de Créditos".
-
-DEFINE FRAME F_Consulta
-     Br_Consulta AT ROW 2.08 COL 4
-     R_Organizar AT ROW 15.54 COL 25 NO-LABEL
-     Btn_OutConsulta AT ROW 16.73 COL 88
-     Buscar AT ROW 17.15 COL 19 COLON-ALIGNED
-     VG_Normal AT ROW 1.23 COL 3 COLON-ALIGNED NO-LABEL
-     VG_Media AT ROW 1.27 COL 33.72 COLON-ALIGNED NO-LABEL
-     VG_Alta AT ROW 1.27 COL 64 COLON-ALIGNED NO-LABEL
-     "Organizada por..." VIEW-AS TEXT
-          SIZE 16 BY .81 AT ROW 15.54 COL 7
-          FGCOLOR 7 
-     "" VIEW-AS TEXT
-          SIZE 45 BY .81 AT ROW 17.15 COL 42
-          FGCOLOR 7 
-     RECT-223 AT ROW 15.27 COL 4
-     RECT-287 AT ROW 1 COL 35
-     RECT-288 AT ROW 1 COL 4
-     RECT-289 AT ROW 1 COL 65
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 2 ROW 3.69
-         SIZE 98 BY 18.31
-         FONT 5
-         TITLE "Solicitudes Disponibles".
-
-DEFINE FRAME VisorSolicitud
-     BUTTON-233 AT ROW 18.27 COL 100 WIDGET-ID 10
-     Btn_IrProcesarInst AT ROW 18.31 COL 76.86 WIDGET-ID 14
-     "Si es necesario, puede actualizar los datos del sistema y volver a generar PDF." VIEW-AS TEXT
-          SIZE 74.86 BY .62 AT ROW 18.77 COL 2.14 WIDGET-ID 12
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 2 ROW 3.42
-         SIZE 107 BY 19.92
-         TITLE "Visor de solicitud" WIDGET-ID 200.
-
-DEFINE FRAME F_HojaVida
-     Hoja_Vida.Fec_Grabacion AT ROW 1.27 COL 70 COLON-ALIGNED
-          LABEL "Fecha Grabación"
+                    "Caja", 1,
+"Nómina", 2,
+"Déb Aut", 3,
+"Nóm Crec", 4,
+"Prima", 5
+          SIZE 45 BY .81
+     Anexos_Clientes.Cam_Cat1 AT ROW 2.35 COL 15 COLON-ALIGNED HELP
+          "" WIDGET-ID 4
+          LABEL "Capacidad Pago" FORMAT "x(15)"
+          VIEW-AS COMBO-BOX SORT INNER-LINES 4
+          LIST-ITEM-PAIRS ""," ",
+                     "50%","f50%",
+                     "SMMLV","fsmmlv",
+                     "CAJA","fcapagocaja"
+          DROP-DOWN-LIST
+          SIZE 16 BY 1 TOOLTIP "Función Para Calcular La Capacidad De Pago"
+     Solicitud.Age_DebAutomatico AT ROW 3.42 COL 15 COLON-ALIGNED
+          LABEL "Agencia"
           VIEW-AS FILL-IN 
-          SIZE 11.43 BY .81
+          SIZE 4 BY .81
           BGCOLOR 18 FGCOLOR 15 
-     BUTTON-150 AT ROW 1.27 COL 86
-     Hoja_Vida.Asunto_Cumplido AT ROW 1.54 COL 4
-          LABEL "Asunto Cumplido"
-          VIEW-AS TOGGLE-BOX
-          SIZE 18 BY .81
-     Hoja_Vida.Observacion AT ROW 2.62 COL 4 NO-LABEL
-          VIEW-AS EDITOR LARGE
-          SIZE 80 BY 7.08
-          BGCOLOR 15 
-     Btn_SalvaHV AT ROW 3.15 COL 86
-     Btn_NvoHv AT ROW 4.5 COL 86
-     BUTTON-152 AT ROW 5.85 COL 86
-     BUTTON-149 AT ROW 8 COL 86
+     W_NomAgeDebAutomatico AT ROW 3.42 COL 19 COLON-ALIGNED NO-LABEL
+     Solicitud.Cod_DebAutomatico AT ROW 4.5 COL 15 COLON-ALIGNED
+          LABEL "Producto"
+          VIEW-AS FILL-IN 
+          SIZE 4 BY .81
+          BGCOLOR 18 FGCOLOR 15 
+     W_NomCodDebAutomatico AT ROW 4.5 COL 19 COLON-ALIGNED NO-LABEL
+     Solicitud.Cue_DebAutomatico AT ROW 5.58 COL 15 COLON-ALIGNED
+          LABEL "Cuenta"
+          VIEW-AS FILL-IN 
+          SIZE 29 BY .81
+          BGCOLOR 18 FGCOLOR 15 
+     BUTTON-106 AT ROW 6.65 COL 38
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 18 ROW 10.42
+         SIZE 46 BY 8.35
+         FONT 5
+         TITLE BGCOLOR 16 "Forma de Pago de la Cuota".
+
+DEFINE FRAME F_Desembolso
+     Solicitud.Desembolso AT ROW 1.27 COL 3 NO-LABEL
+          VIEW-AS RADIO-SET HORIZONTAL
+          RADIO-BUTTONS 
+                    "Efectivo", 1,
+"Cheque", 2,
+"Cta Ahorros", 3,
+"Orden a 3os", 4
+          SIZE 52 BY .81
+     Solicitud.Age_Desembolso AT ROW 2.35 COL 10 COLON-ALIGNED
+          LABEL "Agencia"
+          VIEW-AS FILL-IN 
+          SIZE 10 BY .81
+          BGCOLOR 18 FGCOLOR 15 FONT 4
+     W_NomAgeDesembolso AT ROW 2.35 COL 20 COLON-ALIGNED NO-LABEL
+     Solicitud.Cod_Desembolso AT ROW 3.42 COL 10 COLON-ALIGNED
+          LABEL "Producto"
+          VIEW-AS FILL-IN 
+          SIZE 10 BY .81
+          BGCOLOR 18 FGCOLOR 15 FONT 5
+     W_NomProDesembolso AT ROW 3.42 COL 20 COLON-ALIGNED NO-LABEL
+     Solicitud.Cue_Desembolso AT ROW 4.5 COL 10 COLON-ALIGNED
+          LABEL "Cuenta"
+          VIEW-AS FILL-IN 
+          SIZE 41 BY .81
+          BGCOLOR 18 FGCOLOR 15 
+     BUTTON-104 AT ROW 5.58 COL 46
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 32 ROW 6.92
+         SIZE 55 BY 7.27
+         FONT 5
+         TITLE "Destino del Desembolso".
+
+DEFINE FRAME F_Deducibles
+     Br_Deducibles AT ROW 1.27 COL 2
+     BUTTON-101 AT ROW 9.35 COL 45
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 3 ROW 10.69
+         SIZE 55 BY 11.31
+         TITLE "Deducibles del Producto".
+
+DEFINE FRAME F_ConHV
+     Br_ConHV AT ROW 1.27 COL 3
+     Btn_OutConHV AT ROW 8.27 COL 89
+     "   Los Mensajes en Rojo estan pendientes por cumplirse" VIEW-AS TEXT
+          SIZE 85 BY 1.08 AT ROW 8.54 COL 3
+          BGCOLOR 0 FGCOLOR 15 FONT 5
     WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 3 ROW 12.04
          SIZE 98 BY 9.96
+         FONT 4
+         TITLE "Asuntos Pendientes".
+
+DEFINE FRAME F_Ultima
+     Btn_SalvaUltima AT ROW 1.27 COL 85
+     Btn_OutUltima AT ROW 2.62 COL 85
+     Solicitud.Estado AT ROW 3.27 COL 21 NO-LABEL
+          VIEW-AS RADIO-SET HORIZONTAL
+          RADIO-BUTTONS 
+                    "En estudio", 1,
+"Aprobada", 2,
+"Negada", 3,
+"Condicionada", 4
+          SIZE 56 BY .69
+     Cmb_Negadas AT ROW 4.08 COL 53 COLON-ALIGNED
+     W_CptoScoring AT ROW 4.23 COL 16 COLON-ALIGNED NO-LABEL
+     W_MenDes AT ROW 5.31 COL 4 COLON-ALIGNED NO-LABEL
+     "Se ha llegado a la última instancia en el proceso de solicitud," VIEW-AS TEXT
+          SIZE 53 BY .81 AT ROW 1.54 COL 22
+          BGCOLOR 0 FGCOLOR 15 
+     "Concepto Scoring :" VIEW-AS TEXT
+          SIZE 16.72 BY .62 AT ROW 4.23 COL 1
+     "Cambie el estado de la Solicitud según el estudio realizado" VIEW-AS TEXT
+          SIZE 53 BY .62 AT ROW 2.35 COL 22
+          BGCOLOR 0 FGCOLOR 15 
+     RECT-224 AT ROW 1.27 COL 21
+     RECT-225 AT ROW 5.15 COL 5
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         PAGE-TOP SIDE-LABELS TOP-ONLY NO-UNDERLINE THREE-D 
+         AT COL 3 ROW 3.69
+         SIZE 98 BY 18.31
+         FGCOLOR 15 FONT 5
+         TITLE "Estado de la Solicitud".
+
+DEFINE FRAME F_Condicionada
+     Cmb_InsCon AT ROW 1.27 COL 8.43 COLON-ALIGNED
+     Br_Usuarios AT ROW 2.08 COL 51
+     E_Condicion AT ROW 3.15 COL 3 NO-LABEL
+     BUTTON-162 AT ROW 9.88 COL 82
+     "Condición" VIEW-AS TEXT
+          SIZE 10 BY .62 AT ROW 2.35 COL 3
+     "  Usuarios Disponibles para recibir la Solicitud" VIEW-AS TEXT
+          SIZE 40.29 BY .81 AT ROW 1.27 COL 52
+          BGCOLOR 18 FGCOLOR 15 
+     "Los Usuarios en Rojo han tenido la Solicitud asignada" VIEW-AS TEXT
+          SIZE 42 BY .62 AT ROW 8.81 COL 52
+          FGCOLOR 15 FONT 4
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 2 ROW 6.12
+         SIZE 95 BY 12.38
+         FGCOLOR 15 FONT 5
+         TITLE "Instancia a la cual se devuelve la Solicitud Condicionada".
+
+DEFINE FRAME F_Cerradas
+     Br_Cerradas AT ROW 1.27 COL 3
+     Btn_OutCerradas AT ROW 7.73 COL 89
+     BUTTON-154 AT ROW 8 COL 62
+     "La instancia activa se encuentra en letra color rojo" VIEW-AS TEXT
+          SIZE 43 BY .81 AT ROW 7.19 COL 3
+          FGCOLOR 7 FONT 5
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 3 ROW 3.69
+         SIZE 98 BY 9.42
+         FGCOLOR 0 FONT 4
+         TITLE "Consulta de Instancias Procesadas y Actuales".
+
+DEFINE FRAME F_Agregar
+     E_Agregar AT ROW 1.27 COL 2 NO-LABEL
+     BUTTON-153 AT ROW 6.92 COL 48
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 19 ROW 11.5
+         SIZE 57 BY 8.88
+         TITLE "Texto a ser Agregado".
+
+DEFINE FRAME F_Instancias
+     BUTTON-142 AT ROW 1.27 COL 3
+     Mov_Instancias.Fec_Ingreso AT ROW 1.27 COL 73 COLON-ALIGNED
+          VIEW-AS FILL-IN 
+          SIZE 11.43 BY .81
+          BGCOLOR 18 FGCOLOR 15 
+     WHora_Ingreso AT ROW 1.27 COL 85 COLON-ALIGNED NO-LABEL
+     W_Instancia AT ROW 1.42 COL 12 COLON-ALIGNED NO-LABEL
+     W_UsuarioInstancia AT ROW 2.35 COL 12 COLON-ALIGNED NO-LABEL
+     Mov_Instancias.Fec_Retiro AT ROW 2.35 COL 73 COLON-ALIGNED
+          VIEW-AS FILL-IN 
+          SIZE 11.43 BY .81
+          BGCOLOR 18 FGCOLOR 15 
+     Whora_Retiro AT ROW 2.35 COL 85 COLON-ALIGNED NO-LABEL
+     Vigencia AT ROW 3.42 COL 48 COLON-ALIGNED
+     Mov_Instancias.Estado AT ROW 3.54 COL 3
+          LABEL "Cerrar Instancia"
+          VIEW-AS TOGGLE-BOX
+          SIZE 17 BY .77
+     Mov_Instancias.Descripcion AT ROW 4.5 COL 3 NO-LABEL
+          VIEW-AS EDITOR MAX-CHARS 1200 SCROLLBAR-VERTICAL LARGE
+          SIZE 77 BY 9.69
+          BGCOLOR 15 
+     Btn_GraInstancia AT ROW 4.5 COL 82
+     Btn_AgregarTxt AT ROW 6.38 COL 82
+     Btn_Imp AT ROW 9.69 COL 82
+     Btn_insVolver AT ROW 12.58 COL 82
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 3 ROW 7.46
+         SIZE 98 BY 14.54
          FONT 5
-         TITLE "Hoja de Vida".
+         TITLE "Procesar Instancias".
 
 
 /* *********************** Procedure Settings ************************ */
@@ -2620,7 +2620,7 @@ ASSIGN
 
 /* SETTINGS FOR FRAME F_Cerradas
    NOT-VISIBLE                                                          */
-/* BROWSE-TAB Br_Cerradas TEXT-27 F_Cerradas */
+/* BROWSE-TAB Br_Cerradas TEXT-7 F_Cerradas */
 ASSIGN 
        FRAME F_Cerradas:HIDDEN           = TRUE.
 
@@ -2654,7 +2654,7 @@ ASSIGN
 
 /* SETTINGS FOR FRAME F_ConHV
    NOT-VISIBLE                                                          */
-/* BROWSE-TAB Br_ConHV TEXT-20 F_ConHV */
+/* BROWSE-TAB Br_ConHV TEXT-14 F_ConHV */
 ASSIGN 
        FRAME F_ConHV:HIDDEN           = TRUE.
 
@@ -2812,7 +2812,7 @@ ASSIGN
 
 /* SETTINGS FOR FRAME F_Scoring
    NOT-VISIBLE                                                          */
-/* BROWSE-TAB BR_Scoring TEXT-10 F_Scoring */
+/* BROWSE-TAB BR_Scoring TEXT-24 F_Scoring */
 ASSIGN 
        FRAME F_Scoring:HIDDEN           = TRUE.
 
@@ -5154,6 +5154,8 @@ DO:
                pro_creditos.cod_credito = 114 THEN DO:
                 cmb_sistemas:SCREEN-VALUE IN FRAME F_Solicitud = "00002 - Cuota única".
                 cmb_sistemas:SENSITIVE = FALSE.
+
+                IF pro_credito THEN
             END.
 
         END.

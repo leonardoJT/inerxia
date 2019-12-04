@@ -196,20 +196,27 @@ DO:
                             NEXT.
                         END.
                     END.
+                    /* ----------------------- */
+
+                    /* Conversiones */
+                    IF ttRecibir.cheque_codigo = '' THEN DO:
+                        vValEfectivo = ttRecibir.valor / 100.
+                        vValCheque = 0.
+                    END.
+                    ELSE DO:
+                        vValEfectivo = 0.
+                        vValCheque = ttRecibir.valor / 100.
+                    END.
+                    /* ----------------------- */
+
+                    /* Parámetros y configuraciones */
+                    FIND FIRST comprobantes WHERE comprobantes.comprobante = vComprobante NO-ERROR.
+                    /* ----------------------- */
 
                     
                     /* Se aplica la lògica para determinar qué clase de Tx es, y hacer el llamado a la rutina que corresponda */
                     IF ttRecibir.operacion = 'DEBITO' THEN DO: /* Retiros */
                         IF ttRecibir.tipo = 'AH' THEN DO:
-                            IF ttRecibir.cheque_codigo = '' THEN DO:
-                                vValEfectivo = ttRecibir.valor / 100.
-                                vValCheque = 0.
-                            END.
-                            ELSE DO:
-                                vValEfectivo = 0.
-                                vValCheque = ttRecibir.valor / 100.
-                            END.
-
                             /* Ahorro a la Vista */
                             IF ttRecibir.tipo_ah = 'AV' THEN DO:
                                 FIND FIRST ahorros WHERE ahorros.nit = ttRecibir.documento
@@ -217,12 +224,9 @@ DO:
                                                      AND ahorros.cue_ahorros = ttRecibir.cuenta
                                                      AND ahorros.estado = 1 NO-LOCK NO-ERROR.
                                 IF AVAILABLE ahorros THEN DO:
-                                    FIND FIRST comprobantes WHERE comprobantes.comprobante = vComprobante NO-ERROR.
-                                    IF AVAILABLE(comprobantes) THEN DO:
-                                        comprobantes.secuencia = comprobantes.secuencia + 1.
-                                        vNumDocumento = comprobantes.secuencia.
-                                    END.
-
+                                    comprobantes.secuencia = comprobantes.secuencia + 1.
+                                    vNumDocumento = comprobantes.secuencia.
+                                    
                                     RUN p-retiroAhorro_aLaVista.r (INPUT ahorros.agencia,
                                                                    INPUT ahorros.nit,
                                                                    INPUT ahorros.cod_ahorro,
@@ -280,6 +284,70 @@ DO:
                         ELSE DO:
                             IF ttRecibir.tipo = "CR" THEN DO:
                                 /* Avance cupo rotativo */
+                                
+                                FIND FIRST creditos WHERE creditos.nit = ttRecibir.documento
+                                                      AND creditos.num_credito = INTEGER(ttRecibir.cuenta)
+                                                      AND credito.estado = 2 NO-LOCK NO-ERROR.
+                                IF AVAILABLE creditos THEN DO:
+                                    comprobantes.secuencia = comprobantes.secuencia + 1.
+                                    vNumDocumento = comprobantes.secuencia.
+
+                                    /* oakley */
+
+                                    RUN p-AvanceCupoRotativo.r (INPUT ahorros.agencia,
+                                                                INPUT ahorros.nit,
+                                                                INPUT ahorros.cod_ahorro,
+                                                                INPUT ahorros.cue_ahorros,
+                                                                INPUT ahorros.nit,
+                                                                INPUT vValEfectivo,
+                                                                INPUT vValCheque,
+                                                                INPUT vComprobante,
+                                                                INPUT vNumDocumento,
+                                                                INPUT ttRecibir.descripcion + " - " + ttRecibir.cTerminal,
+                                                                INPUT ahorros.nit,
+                                                                INPUT ttRecibir.usuario,
+                                                                OUTPUT pError) NO-ERROR.
+
+                                    IF pError = FALSE THEN DO:
+                                        CREATE mov_contable.
+
+                                        RUN movContable.
+
+                                        /* Transacción en oficina propia */
+                                        IF ttRecibir.canal = "OFI" AND ttRecibir.dispositivo = "PROPIO" THEN DO:
+                                            Mov_Contable.Agencia = usuarios.agencia.
+                                            Mov_Contable.Destino = usuarios.agencia.
+                                            mov_contable.cuenta = vCuentaCaja. /* O cheque */
+
+                                            vAgenciaDestino = usuarios.agencia.
+                                        END.
+                                        /* Transacción externa */
+                                        ELSE DO:
+                                            mov_contable.agencia = 1.
+                                            mov_contable.destino = 1.
+                                            Mov_Contable.Cuenta = vCuentaCompensacion.
+                                            Mov_Contable.Nit = nitCompensacion.
+
+                                            vAgenciaDestino = 1.
+                                        END.
+
+                                        mov_contable.cr = vValEfectivo + vValCheque.
+                                        mov_contable.usuario = ttRecibir.usuario.
+
+                                        /* Sucursales y Agencias */
+                                        IF vAgenciaDestino <> ahorros.agencia THEN DO:
+                                            RUN cuentaSucursales&Agencias.
+
+                                            RUN movContable.
+                                            mov_contable.agencia = ahorros.agencia.
+                                            mov_contable.destino = usuarios.agencia.
+                                            mov_contable.cuenta = cuentaSyA.
+                                            mov_contable.nit = STRING().
+                                        END.
+                                    END.
+                                END.
+                            END.
+
                             END.
                         END.
                     END.
@@ -1313,115 +1381,6 @@ PROCEDURE retiroAvance:
             ASSIGN vdb = vMonto + vComision
                    vcr = 0.
 
-            creditos.Sdo_capital = Creditos.Sdo_capital + vdb.
-            aplicarVisionamos.estado = 2.
-
-            IF vMonto > 0 THEN DO:
-                CREATE Mov_Creditos.
-                RUN movCreditos.
-
-                ASSIGN Mov_Creditos.Cod_Operacion = 020102001
-                       Mov_Creditos.Num_Documento = STRING(pNumDocumento)
-                       Mov_Creditos.Val_Efectivo = vMonto
-                       Mov_Creditos.Descrip = vRev + aplicarVisionamos.TERMINAL_ubicacion.
-            END.
-
-            IF vComision > 0 THEN DO:
-                CREATE Mov_Creditos.
-                RUN movCreditos.
-
-                ASSIGN Mov_Creditos.Cod_Operacion = 020102001
-                       Mov_Creditos.Num_Documento = STRING(pNumDocumento)
-                       Mov_Creditos.Val_Efectivo = vComision
-                       Mov_Creditos.Descrip = vRev + aplicarVisionamos.TERMINAL_ubicacion.
-            END.
-
-
-            FIND FIRST pro_creditos WHERE pro_credito.cod_credito = creditos.cod_credito NO-LOCK NO-ERROR.
-            IF AVAILABLE(pro_creditos) THEN
-                FIND FIRST indicadores WHERE Indicadores.indicador = pro_creditos.cod_tasa  NO-LOCK NO-ERROR.
-
-            IF AVAILABLE(indicadores) THEN DO:
-                tasaCredito = (((EXP((indicadores.tasa / 100) + 1,1 / 12)) - 1) * 100) * 12.
-
-                IF STRING(tasaCredito,">>9.99") <> STRING(creditos.tasa,">>9.99") THEN DO:
-                    CREATE Mov_Creditos.
-                    RUN movCreditos.
-
-                    ASSIGN Mov_Creditos.Cod_Operacion = 999999999
-                           Mov_Creditos.Descrip = "Cambio de Tasa " + STRING(creditos.tasa,">>9.99") + "-->" + STRING(tasaCredito,">>9.99").
-
-                    creditos.tasa = tasaCredito.
-                END.
-            END.
-
-            CREATE mov_contable.
-            RUN movContable.
-
-            Mov_Contable.Agencia = Creditos.agencia.
-            Mov_Contable.Destino = Creditos.agencia.
-            Mov_Contable.Cuenta = "14420505".
-            Mov_Contable.Nit = creditos.nit.
-            Mov_contable.db = vdb.
-            mov_contable.cr = vcr.
-
-            CREATE mov_contable.
-            RUN movContable.
-
-            Mov_Contable.Agencia = Creditos.agencia.
-            Mov_Contable.Destino = Creditos.agencia.
-            Mov_Contable.Cuenta = "24459550".
-            Mov_Contable.Nit = nitCompensacion.
-            Mov_contable.db = vcr.
-            mov_contable.cr = vdb.
-
-            IF aplicarVisionamos.entidadDuenaTerminal = "00000018" AND aplicarVisionamos.entidadDuenaCuentaOrigen = "00000018" THEN DO:
-                ASSIGN mov_contable.cuenta = "11050501"
-                       mov_contable.nit = creditos.nit.
-
-                FIND FIRST usuarios WHERE usuarios.usuario = aplicarVisionamos.usuario NO-LOCK NO-ERROR.
-                IF AVAILABLE usuarios THEN
-                    mov_contable.agencia = usuarios.agencia.
-            END.
-
-
-            /* Para Sucursales y Agencias */
-            IF creditos.agencia <> 1 AND mov_contable.cuenta <> "11050501" THEN DO:
-                RUN cuentaSucursales&agencias.
-
-                mov_contable.cuenta = cuentaSyA.
-                mov_contable.nit = "001".
-
-                FIND FIRST comprobantes WHERE comprobantes.comprobante = 22
-                                          AND comprobantes.agencia = 1 NO-ERROR.
-                IF AVAILABLE(comprobantes) THEN
-                    ASSIGN pNumDocumento = comprobantes.secuencia + 1
-                           comprobantes.secuencia = comprobantes.secuencia + 1.
-
-                RELEASE comprobantes.
-
-                CREATE mov_contable.
-                RUN movContable.
-
-                ASSIGN Mov_Contable.Agencia = 1
-                       Mov_Contable.Destino = 1
-                       Mov_Contable.Cuenta = cuentaSyA
-                       Mov_Contable.Nit = STRING(creditos.agencia,"999")
-                       Mov_contable.db = vdb
-                       mov_contable.cr = vcr.
-
-                CREATE mov_contable.
-                RUN movContable.
-
-                ASSIGN Mov_Contable.Agencia = 1
-                       Mov_Contable.Destino = 1
-                       Mov_Contable.Cuenta = "24459550"
-                       Mov_Contable.Nit = nitCompensacion
-                       Mov_contable.db = vcr
-                       mov_contable.cr = vdb.
-            END.
-
-            RELEASE creditos.
         END.
     END.
 END PROCEDURE.

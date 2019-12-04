@@ -51,27 +51,22 @@ DEFINE VARIABLE P_AgeCli AS INTEGER.
 /* Need to scope the external tables to this procedure                  */
 DEFINE QUERY external_tables FOR Usuarios.
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-FIELDS Usuarios.Estado Usuarios.Nit ~
-Usuarios.Id_Bloqueo Usuarios.Nombre Usuarios.email Usuarios.Pedir_Clave ~
-Usuarios.Prioridad Usuarios.Id_OpeOfi Usuarios.Id_AccSimultaneo ~
+&Scoped-Define ENABLED-FIELDS Usuarios.Estado Usuarios.Id_Bloqueo ~
+Usuarios.Pedir_Clave Usuarios.Id_OpeOfi Usuarios.Id_AccSimultaneo ~
 Usuarios.permiteCambiarFecha 
 &Scoped-define ENABLED-TABLES Usuarios
 &Scoped-define FIRST-ENABLED-TABLE Usuarios
-&Scoped-Define ENABLED-OBJECTS RECT-326 W_Cgrupo tgGestionCobranza ~
-BUTTON-61 
-&Scoped-Define DISPLAYED-FIELDS Usuarios.Estado Usuarios.Nit ~
-Usuarios.Id_Bloqueo Usuarios.Nombre Usuarios.Usuario Usuarios.email ~
-Usuarios.Pedir_Clave Usuarios.Prioridad Usuarios.Id_OpeOfi ~
-Usuarios.Id_AccSimultaneo Usuarios.permiteCambiarFecha ~
-Usuarios.Fec_Creacion Usuarios.Fec_Retiro Usuarios.Fec_UltCam 
+&Scoped-Define ENABLED-OBJECTS RECT-326 tgGestionCobranza 
+&Scoped-Define DISPLAYED-FIELDS Usuarios.Estado Usuarios.Id_Bloqueo ~
+Usuarios.Pedir_Clave Usuarios.Id_OpeOfi Usuarios.Id_AccSimultaneo ~
+Usuarios.permiteCambiarFecha Usuarios.Fec_Creacion Usuarios.Fec_Retiro ~
+Usuarios.Fec_UltCam 
 &Scoped-define DISPLAYED-TABLES Usuarios
 &Scoped-define FIRST-DISPLAYED-TABLE Usuarios
-&Scoped-Define DISPLAYED-OBJECTS W_CAgencia W_Cgrupo tgGestionCobranza ~
-W_ClaTmp2 
+&Scoped-Define DISPLAYED-OBJECTS tgGestionCobranza 
 
 /* Custom List Definitions                                              */
 /* ADM-CREATE-FIELDS,ADM-ASSIGN-FIELDS,List-3,List-4,List-5,List-6      */
-&Scoped-define ADM-ASSIGN-FIELDS Usuarios.Grupo Usuarios.Agencia 
 
 /* _UIB-PREPROCESSOR-BLOCK-END */
 &ANALYZE-RESUME
@@ -82,29 +77,6 @@ W_ClaTmp2
 
 
 /* Definitions of the field level widgets                               */
-DEFINE BUTTON BUTTON-61 
-     LABEL "Grabar Base" 
-     SIZE 10 BY 1.12.
-
-DEFINE VARIABLE W_CAgencia AS CHARACTER FORMAT "X(40)":U 
-     LABEL "Agencia" 
-     VIEW-AS COMBO-BOX INNER-LINES 5
-     DROP-DOWN-LIST
-     SIZE 25 BY 1
-     BGCOLOR 15 FONT 5 NO-UNDO.
-
-DEFINE VARIABLE W_Cgrupo AS CHARACTER FORMAT "X(40)":U 
-     LABEL "Perfil" 
-     VIEW-AS COMBO-BOX INNER-LINES 5
-     DROP-DOWN-LIST
-     SIZE 37 BY 1
-     BGCOLOR 15  NO-UNDO.
-
-DEFINE VARIABLE W_ClaTmp2 AS CHARACTER FORMAT "X(16)":U 
-     VIEW-AS FILL-IN 
-     SIZE 8 BY .81
-     BGCOLOR 17 FGCOLOR 17  NO-UNDO.
-
 DEFINE RECTANGLE RECT-326
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 70 BY 10.77.
@@ -125,44 +97,14 @@ DEFINE FRAME F-Grupo
 "Retirado", 2
           SIZE 11.72 BY 1
           FONT 5
-     W_CAgencia AT ROW 1.85 COL 26 COLON-ALIGNED HELP
-          "Seleccione la Agencia del usuario"
-     Usuarios.Nit AT ROW 2.85 COL 26 COLON-ALIGNED
-          LABEL "Cédula / Documento de identidad"
-          VIEW-AS FILL-IN 
-          SIZE 25 BY .81
-          BGCOLOR 15 
      Usuarios.Id_Bloqueo AT ROW 2.88 COL 60
           LABEL "Bloqueado"
           VIEW-AS TOGGLE-BOX
           SIZE 11.72 BY .77
-     Usuarios.Nombre AT ROW 3.69 COL 26 COLON-ALIGNED
-          LABEL "Nombre completo"
-          VIEW-AS FILL-IN 
-          SIZE 43.29 BY .81
-          BGCOLOR 15 
-     Usuarios.Usuario AT ROW 4.54 COL 26 COLON-ALIGNED
-          LABEL "Nombre de Usuario / login" FORMAT "X(25)"
-          VIEW-AS FILL-IN 
-          SIZE 25 BY .81
-          BGCOLOR 15 
-     Usuarios.email AT ROW 5.38 COL 26 COLON-ALIGNED WIDGET-ID 10
-          VIEW-AS FILL-IN 
-          SIZE 25 BY .81
-          BGCOLOR 15 
      Usuarios.Pedir_Clave AT ROW 6.27 COL 27.86
           LABEL "Pedir Clave la Proxima entrada al Sistema?"
           VIEW-AS TOGGLE-BOX
           SIZE 33 BY .77
-     W_Cgrupo AT ROW 7.31 COL 25.86 COLON-ALIGNED HELP
-          "Seleccione el Grupo al que pertene el usuario"
-     Usuarios.Prioridad AT ROW 8.23 COL 57.86 COLON-ALIGNED
-          LABEL "Nivel de Privilegios"
-          VIEW-AS COMBO-BOX 
-          LIST-ITEMS "1","2","3","4","5","6" 
-          DROP-DOWN-LIST
-          SIZE 5 BY 1
-          BGCOLOR 15 
      Usuarios.Id_OpeOfi AT ROW 9.08 COL 62.86
           LABEL ""
           VIEW-AS TOGGLE-BOX
@@ -180,42 +122,27 @@ DEFINE FRAME F-Grupo
           VIEW-AS FILL-IN 
           SIZE 13.29 BY .81
           BGCOLOR 18 FGCOLOR 15 
-     Usuarios.Grupo AT ROW 12.73 COL 7 COLON-ALIGNED
-          VIEW-AS FILL-IN 
-          SIZE 2.86 BY .81
-     Usuarios.Agencia AT ROW 12.73 COL 23 COLON-ALIGNED
-          VIEW-AS FILL-IN 
-          SIZE 3.57 BY .81
      Usuarios.Fec_Retiro AT ROW 13.38 COL 57.86 COLON-ALIGNED
           VIEW-AS FILL-IN 
           SIZE 13.29 BY .81
           BGCOLOR 18 FGCOLOR 15 
-     BUTTON-61 AT ROW 13.62 COL 18.72
-     W_ClaTmp2 AT ROW 13.65 COL 2 COLON-ALIGNED NO-LABEL
      Usuarios.Fec_UltCam AT ROW 14.23 COL 57.86 COLON-ALIGNED
           VIEW-AS FILL-IN 
           SIZE 13.29 BY .81
           BGCOLOR 18 FGCOLOR 15 
      "Permite gestión de cobranza:" VIEW-AS TEXT
           SIZE 20 BY .5 AT ROW 11.35 COL 43 WIDGET-ID 28
-     "Permite cambiar fecha:" VIEW-AS TEXT
-          SIZE 15.86 BY .5 AT ROW 10.69 COL 47.14 WIDGET-ID 24
-     "Permitir varias sesiones simultáneas del programa:" VIEW-AS TEXT
-          SIZE 33.86 BY .5 AT ROW 9.96 COL 29.14 WIDGET-ID 20
-     "Permite transacciones con Sucursales y Agencias:" VIEW-AS TEXT
-          SIZE 33.86 BY .5 AT ROW 9.23 COL 28.57 WIDGET-ID 18
-    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 1 ROW 1 SCROLLABLE 
-         BGCOLOR 17 FONT 4.
-
-/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
-DEFINE FRAME F-Grupo
-     "Fecha de ingreso:" VIEW-AS TEXT
-          SIZE 12.14 BY .5 AT ROW 12.69 COL 47.43 WIDGET-ID 16
      " Información General" VIEW-AS TEXT
           SIZE 18 BY .5 AT ROW 1.27 COL 4
           FGCOLOR 7 FONT 5
+     "Fecha de ingreso:" VIEW-AS TEXT
+          SIZE 12.14 BY .5 AT ROW 12.69 COL 47.43 WIDGET-ID 16
+     "Permite transacciones con Sucursales y Agencias:" VIEW-AS TEXT
+          SIZE 33.86 BY .5 AT ROW 9.23 COL 28.57 WIDGET-ID 18
+     "Permitir varias sesiones simultáneas del programa:" VIEW-AS TEXT
+          SIZE 33.86 BY .5 AT ROW 9.96 COL 29.14 WIDGET-ID 20
+     "Permite cambiar fecha:" VIEW-AS TEXT
+          SIZE 15.86 BY .5 AT ROW 10.69 COL 47.14 WIDGET-ID 24
      RECT-326 AT ROW 1.54 COL 3 WIDGET-ID 4
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
@@ -278,47 +205,22 @@ ASSIGN
        FRAME F-Grupo:SCROLLABLE       = FALSE
        FRAME F-Grupo:HIDDEN           = TRUE.
 
-/* SETTINGS FOR FILL-IN Usuarios.Agencia IN FRAME F-Grupo
-   NO-DISPLAY NO-ENABLE 2                                               */
-ASSIGN 
-       Usuarios.Agencia:HIDDEN IN FRAME F-Grupo           = TRUE.
-
-ASSIGN 
-       BUTTON-61:HIDDEN IN FRAME F-Grupo           = TRUE.
-
 /* SETTINGS FOR FILL-IN Usuarios.Fec_Creacion IN FRAME F-Grupo
    NO-ENABLE                                                            */
 /* SETTINGS FOR FILL-IN Usuarios.Fec_Retiro IN FRAME F-Grupo
    NO-ENABLE                                                            */
 /* SETTINGS FOR FILL-IN Usuarios.Fec_UltCam IN FRAME F-Grupo
    NO-ENABLE                                                            */
-/* SETTINGS FOR FILL-IN Usuarios.Grupo IN FRAME F-Grupo
-   NO-DISPLAY NO-ENABLE 2                                               */
-ASSIGN 
-       Usuarios.Grupo:HIDDEN IN FRAME F-Grupo           = TRUE.
-
 /* SETTINGS FOR TOGGLE-BOX Usuarios.Id_AccSimultaneo IN FRAME F-Grupo
    EXP-LABEL                                                            */
 /* SETTINGS FOR TOGGLE-BOX Usuarios.Id_Bloqueo IN FRAME F-Grupo
    EXP-LABEL                                                            */
 /* SETTINGS FOR TOGGLE-BOX Usuarios.Id_OpeOfi IN FRAME F-Grupo
    EXP-LABEL                                                            */
-/* SETTINGS FOR FILL-IN Usuarios.Nit IN FRAME F-Grupo
-   EXP-LABEL                                                            */
-/* SETTINGS FOR FILL-IN Usuarios.Nombre IN FRAME F-Grupo
-   EXP-LABEL                                                            */
 /* SETTINGS FOR TOGGLE-BOX Usuarios.Pedir_Clave IN FRAME F-Grupo
    EXP-LABEL                                                            */
 /* SETTINGS FOR TOGGLE-BOX Usuarios.permiteCambiarFecha IN FRAME F-Grupo
    EXP-LABEL                                                            */
-/* SETTINGS FOR COMBO-BOX Usuarios.Prioridad IN FRAME F-Grupo
-   EXP-LABEL                                                            */
-/* SETTINGS FOR FILL-IN Usuarios.Usuario IN FRAME F-Grupo
-   NO-ENABLE EXP-LABEL EXP-FORMAT                                       */
-/* SETTINGS FOR COMBO-BOX W_CAgencia IN FRAME F-Grupo
-   NO-ENABLE                                                            */
-/* SETTINGS FOR FILL-IN W_ClaTmp2 IN FRAME F-Grupo
-   NO-ENABLE                                                            */
 /* _RUN-TIME-ATTRIBUTES-END */
 &ANALYZE-RESUME
 
@@ -334,183 +236,6 @@ ASSIGN
 
  
 
-
-
-/* ************************  Control Triggers  ************************ */
-
-&Scoped-define SELF-NAME BUTTON-61
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BUTTON-61 V-table-Win
-ON CHOOSE OF BUTTON-61 IN FRAME F-Grupo /* Grabar Base */
-DO:
-  RUN C-GrabaBase.r (INPUT Usuarios.Usuario, INPUT usuarios.nombre:SCREEN-VALUE).
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&Scoped-define SELF-NAME Usuarios.Nit
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL Usuarios.Nit V-table-Win
-ON LEAVE OF Usuarios.Nit IN FRAME F-Grupo /* Cédula / Documento de identidad */
-DO:
-    DO WITH FRAME {&FRAME-NAME}:
-        FIND FIRST Clientes WHERE Clientes.Nit EQ Usuarios.Nit:SCREEN-VALUE NO-LOCK NO-ERROR.
-        IF AVAILABLE(Clientes) THEN
-            usuarios.nombre:SCREEN-VALUE = TRIM(Clientes.Nombre) + " " + Clientes.Apellido1 + " " + Clientes.Apellido2.
-        ELSE DO:
-            RUN C-Clientes.R(INPUT 1,
-                            INPUT W_Agencia,
-                            OUTPUT P_Nit,
-                            OUTPUT P_Nombre,
-                            OUTPUT P_Apellido,
-                            OUTPUT P_AgeCli).
-            
-            ASSIGN usuarios.nombre:SCREEN-VALUE = TRIM(P_Nombre) + " " + P_Apellido
-                   Usuarios.Nit:SCREEN-VALUE = P_Nit.
-            
-            FIND FIRST Clientes WHERE Clientes.Agencia EQ P_AgeCli AND Clientes.Nit EQ P_Nit NO-LOCK NO-ERROR.
-        END.
-        
-        IF AVAILABLE(Clientes) THEN DO:
-            IF Clientes.Tipo_Identificacion EQ "NIT" THEN DO:
-                MESSAGE "Los Usuarios no pueden ser personas jurídicas"
-                    VIEW-AS ALERT-BOX.
-                
-                RETURN NO-APPLY.
-            END.
-        END.
-    END.
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&Scoped-define SELF-NAME W_CAgencia
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL W_CAgencia V-table-Win
-ON VALUE-CHANGED OF W_CAgencia IN FRAME F-Grupo /* Agencia */
-DO:
-  ASSIGN W_OfiUsu = INTEGER(ENTRY(1,SELF:SCREEN-VALUE, "-"))
-         Usuarios.Agencia:SCREEN-VALUE = STRING(W_OfiUsu).
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&Scoped-define SELF-NAME W_Cgrupo
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL W_Cgrupo V-table-Win
-ON VALUE-CHANGED OF W_Cgrupo IN FRAME F-Grupo /* Perfil */
-DO:
-  ASSIGN W_GruUsu = INTEGER(ENTRY(1,SELF:SCREEN-VALUE, "-"))
-         Usuarios.Grupo:SCREEN-VALUE = STRING(W_GruUsu).
-  FIND Grupos WHERE Grupos.Grupo EQ W_GruUsu NO-LOCK NO-ERROR.
-  IF AVAILABLE Grupos THEN
-     Usuarios.Prioridad:SCREEN-VALUE = STRING(Grupos.Prioridad).
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&Scoped-define SELF-NAME W_ClaTmp2
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL W_ClaTmp2 V-table-Win
-ON ANY-PRINTABLE OF W_ClaTmp2 IN FRAME F-Grupo
-/*OR ANY-KEY OF W_ClaTmp DO:
-  DO WITH FRAME {&FRAME-NAME}:
-     ASSIGN W_ChgKey = TRUE.
-     CASE KEYFUNCTION(LASTKEY):
-       WHEN "DELETE-CHARACTER" THEN DO:
-         IF LENGTH(W_ClaUsu) GT 0 THEN DO:
-            W_ClaUsu = SUBSTRING(W_ClaUsu,1,(LENGTH(W_ClaUsu) - 1)).
-            W_ClaTmp:SCREEN-VALUE = SUBSTRING(W_ClaTmp:SCREEN-VALUE,1,LENGTH(W_ClaTmp:SCREEN-VALUE) - 1).
-            W_ClaTmp:CURSOR-OFFSET = LENGTH(W_ClaTmp:SCREEN-VALUE) + 1.
-            RETURN NO-APPLY.
-         END.
-       END.
-       WHEN "BACKSPACE" THEN DO:
-         IF LENGTH(W_ClaUsu) GT 0 THEN DO:
-            W_ClaUsu = SUBSTRING(W_ClaUsu,1,(LENGTH(W_ClaUsu) - 1)).
-            W_ClaTmp:SCREEN-VALUE = SUBSTRING(W_ClaTmp:SCREEN-VALUE,1,LENGTH(W_ClaTmp:SCREEN-VALUE) - 1).
-            W_ClaTmp:CURSOR-OFFSET = LENGTH(W_ClaTmp:SCREEN-VALUE) + 1.
-            RETURN NO-APPLY.
-         END.
-       END.
-       WHEN "RETURN" THEN DO:
-         RETURN.
-       END.
-       WHEN "TAB" THEN DO:
-         RETURN.
-       END.
-       WHEN "END-ERROR" THEN DO:
-         RETURN NO-APPLY.
-       END.
-       OTHERWISE DO:
-         IF KEYCODE(KEYFUNCTION(LASTKEY)) GT 0   AND
-            KEYCODE(KEYFUNCTION(LASTKEY)) LT 200 THEN DO:
-             W_ClaUsu = W_ClaUsu + KEYFUNCTION(LASTKEY).
-             W_ClaTmp:SCREEN-VALUE = W_ClaTmp:SCREEN-VALUE + "*".
-             W_ClaTmp:CURSOR-OFFSET = W_ClaTmp:CURSOR-OFFSET + 1.
-             RETURN NO-APPLY.
-         END.
-         ELSE RETURN NO-APPLY.
-       END.
-     END CASE.
-  END.*/
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL W_ClaTmp2 V-table-Win
-ON ENTRY OF W_ClaTmp2 IN FRAME F-Grupo
-DO:
-  /*ASSIGN W_ChgKey = FALSE.*/
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL W_ClaTmp2 V-table-Win
-ON LEAVE OF W_ClaTmp2 IN FRAME F-Grupo
-DO:
-  /*IF LENGTH(W_ClaUsu) GT 0 AND LENGTH(W_ClaUsu) LT 6 OR LENGTH(W_ClaUsu) GT 10 THEN
-   DO:
-     MESSAGE "La clave debe tener una longitud" skip
-             "entre 6 y 10 caracteres. Reconfirme!!!" VIEW-AS ALERT-BOX WARNING
-             TITLE "Inconsistencia".
-     APPLY "ENTRY" TO W_ClaTmp.
-     RETURN NO-APPLY.
-   END.
-   RUN Verificar_Caracteres&Numeros(OUTPUT X_Ok).
-   RUN Verificar_Repeticion_Digitos(OUTPUT W_Ok). 
-      IF NOT W_Ok AND LENGTH(W_ClaUsu) GT 0 THEN
-       DO:
-         MESSAGE "La CLAVE DIGITADA tiene algún caracter REPETIDO en más de TRES OCACIONES." skip(2)
-                 "     ( POR SEGURIDAD, EL SISTEMA NO PERMITE ESTE TIPO DE CLAVES )" 
-                 VIEW-AS ALERT-BOX ERROR TITLE "Digito Repetido".
-         ASSIGN W_ClaTmp:SCREEN-VALUE IN FRAME {&FRAME-NAME} = "".     
-         APPLY "ENTRY" TO W_ClaTmp.
-         RETURN NO-APPLY.
-       END.
-      IF NOT X_Ok AND LENGTH(W_ClaUsu) GT 0 THEN
-       DO:
-         MESSAGE "La clave no puede esta compuesta solo de numeros o solo de digitos alfanumericos" skip(2)
-                 "       ( POR SEGURIDAD, EL SISTEMA NO PERMITE ESTE TIPO DE CLAVES )" 
-                 VIEW-AS ALERT-BOX ERROR TITLE "Digito Repetido".
-         ASSIGN w_ClaTmp:SCREEN-VALUE IN FRAME {&FRAME-NAME} = "".     
-         APPLY "ENTRY" TO W_ClaTmp.
-         RETURN NO-APPLY.
-       END.*/
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&UNDEFINE SELF-NAME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _MAIN-BLOCK V-table-Win 
 
@@ -678,7 +403,7 @@ IF Usuarios.Estado EQ 1 THEN
 ELSE
     IF Usuarios.Fec_Retiro = ? THEN
         Usuarios.Fec_Retiro = W_Fecha.
-
+        
 /*RUN Local-Row-Available.*/
   
 END PROCEDURE.

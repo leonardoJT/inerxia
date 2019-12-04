@@ -124,7 +124,7 @@ DEFINE RECTANGLE RECT-302
 
 DEFINE RECTANGLE RECT-303
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 18.57 BY 3.95.
+     SIZE 18.57 BY 3.96.
 
 DEFINE RECTANGLE RECT-304
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
@@ -197,7 +197,7 @@ DEFINE FRAME F_Nuevos
           BGCOLOR 15 
      Clientes.Dir_comercial AT ROW 9.04 COL 18.43 COLON-ALIGNED HELP
           "Dirección comercial donde labora el cliente"
-          LABEL "Dirección Comercial" FORMAT "X(40)"
+          LABEL "Dirección Comercial" FORMAT "X(50)"
           VIEW-AS FILL-IN 
           SIZE 32.86 BY .81
           BGCOLOR 15 

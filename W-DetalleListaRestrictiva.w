@@ -33,6 +33,7 @@ CREATE WIDGET-POOL.
 /* ***************************  Definitions  ************************** */
 
 /* Parameters Definitions ---                                           */
+DEFINE INPUT PARAMETER pRowIdLista AS ROWID.
 
 /* Local Variable Definitions ---                                       */
 
@@ -51,7 +52,7 @@ CREATE WIDGET-POOL.
 &Scoped-define FRAME-NAME DEFAULT-FRAME
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS EDITOR-1 
+&Scoped-Define ENABLED-OBJECTS EDITOR-1 btnImportar 
 &Scoped-Define DISPLAYED-OBJECTS EDITOR-1 
 
 /* Custom List Definitions                                              */
@@ -68,6 +69,10 @@ CREATE WIDGET-POOL.
 DEFINE VAR C-Win AS WIDGET-HANDLE NO-UNDO.
 
 /* Definitions of the field level widgets                               */
+DEFINE BUTTON btnImportar 
+     LABEL "Importar" 
+     SIZE 15 BY 1.12.
+
 DEFINE VARIABLE EDITOR-1 AS CHARACTER 
      VIEW-AS EDITOR NO-WORD-WRAP SCROLLBAR-HORIZONTAL SCROLLBAR-VERTICAL
      SIZE 129 BY 25.58 NO-UNDO.
@@ -77,10 +82,11 @@ DEFINE VARIABLE EDITOR-1 AS CHARACTER
 
 DEFINE FRAME DEFAULT-FRAME
      EDITOR-1 AT ROW 1.27 COL 2 NO-LABEL WIDGET-ID 2
+     btnImportar AT ROW 2.23 COL 132 WIDGET-ID 4
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1 ROW 1
-         SIZE 165.72 BY 26.15 WIDGET-ID 100.
+         SIZE 147.29 BY 26.15 WIDGET-ID 100.
 
 
 /* *********************** Procedure Settings ************************ */
@@ -233,7 +239,7 @@ PROCEDURE enable_UI :
 ------------------------------------------------------------------------------*/
   DISPLAY EDITOR-1 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
-  ENABLE EDITOR-1 
+  ENABLE EDITOR-1 btnImportar 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
   {&OPEN-BROWSERS-IN-QUERY-DEFAULT-FRAME}
   VIEW C-Win.

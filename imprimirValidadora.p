@@ -105,7 +105,7 @@ PROCEDURE ImpFto:
     IF NOT W_SiNos THEN P_SAct = 0.    */
             
             xx = TRIM(STRING(INT(w_usuario))) + "_" + STRING(TIME).
-         salida = "c:\info_fodun\tq" + xx + ".txt".
+         salida = W_PathSpl + "tq" + xx + ".txt".
           /* MESSAGE  salida VIEW-AS ALERT-BOX INFO BUTTON OK. */
        OUTPUT TO  value(salida).
  

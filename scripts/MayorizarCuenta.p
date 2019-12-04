@@ -7,14 +7,14 @@ DEFINE VARIABLE w_FEC2 AS DATE.
 DEFINE VARIABLE i AS INTEGER.
 DEFINE VAR vCuenta AS CHARACTER.
 
-w_FEC1 = 10/01/2019.
-w_FEC2 = 10/31/2019.
+w_FEC1 = 12/01/2019.
+w_FEC2 = 12/31/2019.
 w_ano = YEAR(w_fec1).
 w_mes = MONTH(W_Fec1).
 dia1 = DAY(w_Fec1).
 dia2 = DAY(w_fec2).
 
-vCuenta = "1705952001".
+vCuenta = "51103001".
 
 MESSAGE "Inicia Mayorización"
     VIEW-AS ALERT-BOX INFO BUTTONS OK.

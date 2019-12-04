@@ -72,28 +72,26 @@ IF AVAILABLE creditos THEN DO:
                              AND ahorros.cod_ahorro = 9
                              AND ahorros.sdo_disponible > 0 NO-ERROR.
         IF AVAILABLE ahorros THEN DO:
+            /* Valido la parametrización contable */
+            FIND FIRST TempCtas WHERE TempCtas.Agencia = Ahorros.Agencia
+                                  AND TempCtas.cod_ahorro = Ahorros.Cod_Ahorro NO-LOCK NO-ERROR.
+            IF NOT AVAILABLE(TempCtas) THEN DO:
+                RUN escribirLog (INPUT "Débito automático Rotativos: Aborta proceso por no encontrar la configuración contable para la línea de ahoros ahorros.cod_ahorro") NO-ERROR.
+
+                RETURN ERROR.
+            END.
+            /* ----------------------- */
+
             FIND FIRST pro_ahorros WHERE pro_ahorros.cod_ahorro = ahorros.cod_ahorro NO-LOCK NO-ERROR.
             IF AVAILABLE pro_ahorros THEN DO:
                 IF pro_ahorros.id_salMinimo = YES THEN
                     saldoMinimo = pro_ahorros.val_sdoMinimo.
                 ELSE
                     saldoMinimo = 0.
-
-                IF ahorros.sdo_disponible - saldoMinimo < valDebitar * 1.004 THEN
-                    valDebitar = TRUNCATE(((ahorros.sdo_disponible - saldoMinimo) * 100) / 100.4,0).
             END.
 
-            /* oakley */
-
-            FIND FIRST TempCtas WHERE TempCtas.Agencia EQ Ahorros.Agencia
-                                  AND TempCtas.cod_ahorro EQ Ahorros.Cod_Ahorro NO-LOCK NO-ERROR.
-            IF NOT AVAIL(TempCtas) THEN DO:
-                MESSAGE "Falta configuración con Producto_Ahorro:" Ahorros.Cod_Ahorro SKIP
-                        "para la agencia:" Ahorros.Agencia
-                    VIEW-AS ALERT-BOX ERROR.
-
-                RETURN ERROR.
-            END.
+            IF ahorros.sdo_disponible - saldoMinimo < valDebitar * 1.004 THEN
+                valDebitar = TRUNCATE(((ahorros.sdo_disponible - saldoMinimo) * 100) / 100.4,0).
 
             IF valDebitar > 0 THEN DO:
                 ASSIGN Ahorros.Sdo_Disponible = Ahorros.Sdo_Disponible - valDebitar
@@ -124,26 +122,28 @@ IF AVAILABLE creditos THEN DO:
                              AND ahorros.cod_ahorro = 4
                              AND ahorros.sdo_disponible > 0 NO-ERROR.
         IF AVAILABLE ahorros THEN DO:
+            /* Valido la parametrización contable */
+            FIND FIRST TempCtas WHERE TempCtas.Agencia = Ahorros.Agencia
+                                  AND TempCtas.cod_ahorro = Ahorros.Cod_Ahorro NO-LOCK NO-ERROR.
+            IF NOT AVAILABLE(TempCtas) THEN DO:
+                RUN escribirLog (INPUT "Débito automático Rotativos: cliente_id: " + creditos.nit + " num_credito: " + STRING(creditos.num_credito) + " - Aborta proceso por no encontrar la configuración contable para la línea de ahoros ahorros.cod_ahorro") NO-ERROR.
+
+                RETURN ERROR.
+            END.
+            /* ----------------------- */
+
             FIND FIRST pro_ahorros WHERE pro_ahorros.cod_ahorro = ahorros.cod_ahorro NO-LOCK NO-ERROR.
             IF AVAILABLE pro_ahorros THEN DO:
                 IF pro_ahorros.id_salMinimo = YES THEN
                     saldoMinimo = pro_ahorros.val_sdoMinimo.
                 ELSE
                     saldoMinimo = 0.
-
-                IF ahorros.sdo_disponible - saldoMinimo < valDebitar * 1.004 THEN
-                    valDebitar = TRUNCATE(((ahorros.sdo_disponible - saldoMinimo) * 100) / 100.4,0).
             END.
 
-            FIND FIRST TempCtas WHERE TempCtas.Agencia EQ Ahorros.Agencia
-                                  AND TempCtas.cod_ahorro EQ Ahorros.Cod_Ahorro NO-LOCK NO-ERROR.
-            IF NOT AVAIL(TempCtas) THEN DO:
-                MESSAGE "Falta configuración con Producto_Ahorro:" Ahorros.Cod_Ahorro SKIP
-                        "para la agencia:" Ahorros.Agencia
-                    VIEW-AS ALERT-BOX ERROR.
+            IF ahorros.sdo_disponible - saldoMinimo < valDebitar * 1.004 THEN
+                valDebitar = TRUNCATE(((ahorros.sdo_disponible - saldoMinimo) * 100) / 100.4,0).
 
-                RETURN ERROR.
-            END.
+            /* oakley */
 
             IF valDebitar > 0 THEN DO:
                 ASSIGN Ahorros.Sdo_Disponible = Ahorros.Sdo_Disponible - valDebitar
@@ -296,7 +296,7 @@ PROCEDURE Movimientos:
            Mov_Contable.Cuenta = TempCtas.cuenta
            Mov_Contable.Nit = Ahorros.Nit
            Mov_Contable.Fec_Contable = pFechaProceso
-           Mov_Contable.Comentario = "Débito Automático"
+           Mov_Contable.Comentario = "Débito Automático Rotativos"
            Mov_Contable.Usuario = pUsuario
            Mov_Contable.Cen_Costos = 999
            Mov_Contable.Destino = creditos.agencia
