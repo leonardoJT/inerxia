@@ -294,18 +294,15 @@ DO:
 
                                     /* oakley */
 
-                                    RUN p-AvanceCupoRotativo.r (INPUT ahorros.agencia,
-                                                                INPUT ahorros.nit,
-                                                                INPUT ahorros.cod_ahorro,
-                                                                INPUT ahorros.cue_ahorros,
-                                                                INPUT ahorros.nit,
-                                                                INPUT vValEfectivo,
-                                                                INPUT vValCheque,
+                                    RUN p-AvanceCupoRotativo.r (INPUT ROWID(creditos),
+                                                                INPUT vValEfectivo + vValCheque,
                                                                 INPUT vComprobante,
-                                                                INPUT vNumDocumento,
                                                                 INPUT ttRecibir.descripcion + " - " + ttRecibir.cTerminal,
-                                                                INPUT ahorros.nit,
+                                                                INPUT vNumDocumento,
+                                                                INPUT usuarios.agencia,
                                                                 INPUT ttRecibir.usuario,
+
+                                                                INPUT ahorros.nit,
                                                                 OUTPUT pError) NO-ERROR.
 
                                     IF pError = FALSE THEN DO:

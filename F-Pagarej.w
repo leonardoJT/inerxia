@@ -1,11 +1,10 @@
-/*--------------------------------------------------------------------------
- Formatos globales:
- 1.CDAT    2.NOTAMULTIPLE  3.TAC  4.LIBRANZA  5.PAGARE
----------------------------------------------------------------------------*/                  
+DEFINE INPUT PARAMETER P_Formato AS CHARACTER.
+DEFINE INPUT PARAMETER WNit AS CHARACTER.
+DEFINE INPUT PARAMETER WNumpag AS INTEGER.
+
+/* oakley */
+
 {INCLUIDO\VARIABLE.I " shared"}
-DEFINE INPUT  PARAMETER P_Formato  AS CHARACTER FORMAT "X(10)".
-DEFINE INPUT  PARAMETER WNit      LIKE Clientes.Nit.
-DEFINE INPUT  PARAMETER WNumpag   LIKE Creditos.num_credito.
 
 DEFINE VAR W_ArcSalida AS CHARACTER FORMAT "X(80)" INITIAL "".
 

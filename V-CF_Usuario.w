@@ -51,14 +51,12 @@ DEFINE VARIABLE P_AgeCli AS INTEGER.
 /* Need to scope the external tables to this procedure                  */
 DEFINE QUERY external_tables FOR Usuarios.
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-FIELDS Usuarios.Estado Usuarios.Id_Bloqueo ~
-Usuarios.Pedir_Clave Usuarios.Id_OpeOfi Usuarios.Id_AccSimultaneo ~
+&Scoped-Define ENABLED-FIELDS Usuarios.Id_AccSimultaneo ~
 Usuarios.permiteCambiarFecha 
 &Scoped-define ENABLED-TABLES Usuarios
 &Scoped-define FIRST-ENABLED-TABLE Usuarios
 &Scoped-Define ENABLED-OBJECTS RECT-326 tgGestionCobranza 
-&Scoped-Define DISPLAYED-FIELDS Usuarios.Estado Usuarios.Id_Bloqueo ~
-Usuarios.Pedir_Clave Usuarios.Id_OpeOfi Usuarios.Id_AccSimultaneo ~
+&Scoped-Define DISPLAYED-FIELDS Usuarios.Id_AccSimultaneo ~
 Usuarios.permiteCambiarFecha Usuarios.Fec_Creacion Usuarios.Fec_Retiro ~
 Usuarios.Fec_UltCam 
 &Scoped-define DISPLAYED-TABLES Usuarios
@@ -90,25 +88,6 @@ DEFINE VARIABLE tgGestionCobranza AS LOGICAL INITIAL no
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME F-Grupo
-     Usuarios.Estado AT ROW 1.81 COL 60 NO-LABEL
-          VIEW-AS RADIO-SET VERTICAL
-          RADIO-BUTTONS 
-                    "Activo", 1,
-"Retirado", 2
-          SIZE 11.72 BY 1
-          FONT 5
-     Usuarios.Id_Bloqueo AT ROW 2.88 COL 60
-          LABEL "Bloqueado"
-          VIEW-AS TOGGLE-BOX
-          SIZE 11.72 BY .77
-     Usuarios.Pedir_Clave AT ROW 6.27 COL 27.86
-          LABEL "Pedir Clave la Proxima entrada al Sistema?"
-          VIEW-AS TOGGLE-BOX
-          SIZE 33 BY .77
-     Usuarios.Id_OpeOfi AT ROW 9.08 COL 62.86
-          LABEL ""
-          VIEW-AS TOGGLE-BOX
-          SIZE 3 BY .81
      Usuarios.Id_AccSimultaneo AT ROW 9.85 COL 62.86
           LABEL ""
           VIEW-AS TOGGLE-BOX
@@ -137,8 +116,6 @@ DEFINE FRAME F-Grupo
           FGCOLOR 7 FONT 5
      "Fecha de ingreso:" VIEW-AS TEXT
           SIZE 12.14 BY .5 AT ROW 12.69 COL 47.43 WIDGET-ID 16
-     "Permite transacciones con Sucursales y Agencias:" VIEW-AS TEXT
-          SIZE 33.86 BY .5 AT ROW 9.23 COL 28.57 WIDGET-ID 18
      "Permitir varias sesiones simultáneas del programa:" VIEW-AS TEXT
           SIZE 33.86 BY .5 AT ROW 9.96 COL 29.14 WIDGET-ID 20
      "Permite cambiar fecha:" VIEW-AS TEXT
@@ -212,12 +189,6 @@ ASSIGN
 /* SETTINGS FOR FILL-IN Usuarios.Fec_UltCam IN FRAME F-Grupo
    NO-ENABLE                                                            */
 /* SETTINGS FOR TOGGLE-BOX Usuarios.Id_AccSimultaneo IN FRAME F-Grupo
-   EXP-LABEL                                                            */
-/* SETTINGS FOR TOGGLE-BOX Usuarios.Id_Bloqueo IN FRAME F-Grupo
-   EXP-LABEL                                                            */
-/* SETTINGS FOR TOGGLE-BOX Usuarios.Id_OpeOfi IN FRAME F-Grupo
-   EXP-LABEL                                                            */
-/* SETTINGS FOR TOGGLE-BOX Usuarios.Pedir_Clave IN FRAME F-Grupo
    EXP-LABEL                                                            */
 /* SETTINGS FOR TOGGLE-BOX Usuarios.permiteCambiarFecha IN FRAME F-Grupo
    EXP-LABEL                                                            */

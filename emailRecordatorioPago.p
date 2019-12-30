@@ -152,9 +152,12 @@ piedecorreo = "<p>Recuerde que puede acercarse a nuestras oficinas para cancelar
             IF pDiasGeneraCarta < 1 THEN
                     mensaje = "<p>Nos permitimos recordarle que el <strong>" + string(vencimiento,"99/99/9999") + "</strong>, vencer&aacute; la cuota correspondiente a su " + linea + " Nro.:" + string(credito) + ", por un monto de " + string(cuota,"$>>>,>>>,>>9") + ".</p>".
             ELSE DO:
-                IF pDiasGeneraCarta > 0 AND pDiasGeneraCarta <= 30 THEN
+                IF pDiasGeneraCarta > 0 AND pDiasGeneraCarta <= 30 THEN DO:
                     mensaje = "<p>Al d&iacute;a de hoy " + STRING(TODAY,"99/99/9999") + ", usted presenta valores pendientes en el pago de sus obligaciones con Fodun.</p>" + tablaCred + "<p>Le sugerimos cancelar los valores que se encuentran pendientes de
                     pago antes de cumplir 30 d&iacute;as de mora y as&iacute; evitar la suspensi&oacute;n de los servicios de Fodun.</p><p>&nbsp;</p>" + art60.
+                    IF pDiasGeneraCarta < 8 THEN
+                        mensaje = mensaje + "<p><strong>De acuerdo con la Ley estatutaria 1266 del 31 de diciembre de 2008, nos permitimos informar que si transcurridos veinte (20) d&iacute;as calendario a la fecha de este correo no cancela sus obligaciones con FODUN, ser&aacute; reportado en centrales de riesgo.</strong><p>".
+                END.
                 ELSE DO:
                     IF pDiasGeneraCarta > 30 AND pDiasGeneraCarta < 85 THEN
                         mensaje = "<p>Por tener una mora en el pago de sus obligaciones superior a 30 d&iacute;as, usted se encuentra con una suspensi&oacute;n de los servicios de Fodun. Le sugerimos cancelar a la mayor brevedad los valores que se encuentran

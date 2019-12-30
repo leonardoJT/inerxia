@@ -14,7 +14,7 @@ w_mes = MONTH(W_Fec1).
 dia1 = DAY(w_Fec1).
 dia2 = DAY(w_fec2).
 
-vCuenta = "51103001".
+vCuenta = "16500501".
 
 MESSAGE "Inicia Mayorización"
     VIEW-AS ALERT-BOX INFO BUTTONS OK.

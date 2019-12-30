@@ -245,7 +245,7 @@ DEFINE TEMP-TABLE brecha
 &Scoped-define PROCEDURE-TYPE Window
 &Scoped-define DB-AWARE no
 
-/* Name of first Frame and/or Browse and/or first Query                 */
+/* Name of designated FRAME-NAME and/or first browse and/or first query */
 &Scoped-define FRAME-NAME FrM
 
 /* Standard List Definitions                                            */
@@ -326,19 +326,19 @@ DEFINE VARIABLE Prc AS DECIMAL FORMAT "999999":U INITIAL 0
      BGCOLOR 18 FGCOLOR 15  NO-UNDO.
 
 DEFINE RECTANGLE RECT-25
-     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL 
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 38 BY 1.62.
 
 DEFINE RECTANGLE RECT-26
-     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL 
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 38 BY 5.38.
 
 DEFINE RECTANGLE RECT-27
-     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL 
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 38 BY 1.62.
 
 DEFINE RECTANGLE RECT-28
-     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL 
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 38 BY 5.38.
 
 DEFINE VARIABLE t-2 AS LOGICAL INITIAL no 
@@ -450,22 +450,22 @@ DEFINE FRAME frm0
      CED AT ROW 18.23 COL 27 COLON-ALIGNED
      BUTTON-5 AT ROW 19.31 COL 103
      Prc AT ROW 19.58 COL 27 COLON-ALIGNED
-     RECT-25 AT ROW 8.27 COL 7
-     RECT-26 AT ROW 10.69 COL 7
-     RECT-27 AT ROW 8.27 COL 51
-     RECT-28 AT ROW 10.69 COL 51
-     "  FOGACOOP" VIEW-AS TEXT
-          SIZE 13 BY 1.08 AT ROW 7.73 COL 9
-          FGCOLOR 7 
-     "  SUPERSOLIDARIA" VIEW-AS TEXT
-          SIZE 18 BY .81 AT ROW 10.42 COL 9
+     "  SUPERBANCARIA" VIEW-AS TEXT
+          SIZE 20 BY 1.08 AT ROW 10.15 COL 54
           FGCOLOR 7 
      "  REVISORIA FISCAL" VIEW-AS TEXT
           SIZE 20 BY .81 AT ROW 7.88 COL 54
           FGCOLOR 7 
-     "  SUPERBANCARIA" VIEW-AS TEXT
-          SIZE 20 BY 1.08 AT ROW 10.15 COL 54
+     "  SUPERSOLIDARIA" VIEW-AS TEXT
+          SIZE 18 BY .81 AT ROW 10.42 COL 9
           FGCOLOR 7 
+     "  FOGACOOP" VIEW-AS TEXT
+          SIZE 13 BY 1.08 AT ROW 7.73 COL 9
+          FGCOLOR 7 
+     RECT-25 AT ROW 8.27 COL 7
+     RECT-26 AT ROW 10.69 COL 7
+     RECT-27 AT ROW 8.27 COL 51
+     RECT-28 AT ROW 10.69 COL 51
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1 ROW 1
@@ -531,7 +531,7 @@ ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 ASSIGN FRAME FrM:FRAME = FRAME frm0:HANDLE.
 
 /* SETTINGS FOR FRAME FrM
-                                                                        */
+   FRAME-NAME                                                           */
 /* SETTINGS FOR FILL-IN FecCorte IN FRAME FrM
    ALIGN-L                                                              */
 /* SETTINGS FOR FRAME frm0
@@ -1340,8 +1340,8 @@ PROCEDURE enable_UI :
 ------------------------------------------------------------------------------*/
   DISPLAY m1 m2 t1 t-2 t2 t3 t8 t-3 t-4 t-9 t4 t-5 T5 T-6 T6 T-7 t7 t-8 CED Prc 
       WITH FRAME frm0 IN WINDOW w-arcext.
-  ENABLE BUTTON-3 BUTTON-2 t1 t-2 t2 t3 t8 t-3 t-4 t-9 t4 t-5 T5 T-6 T6 T-7 t7 
-         t-8 BUTTON-4 BUTTON-5 RECT-25 RECT-26 RECT-27 RECT-28 
+  ENABLE RECT-25 RECT-26 RECT-27 RECT-28 BUTTON-3 BUTTON-2 t1 t-2 t2 t3 t8 t-3 
+         t-4 t-9 t4 t-5 T5 T-6 T6 T-7 t7 t-8 BUTTON-4 BUTTON-5 
       WITH FRAME frm0 IN WINDOW w-arcext.
   {&OPEN-BROWSERS-IN-QUERY-frm0}
   DISPLAY FecCorte 

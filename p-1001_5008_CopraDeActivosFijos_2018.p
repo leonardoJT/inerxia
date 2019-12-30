@@ -6,7 +6,6 @@ DEFINE OUTPUT PARAMETER pRetencion AS DECIMAL.
 
 DEFINE VAR vNumId_ini AS CHARACTER.
 DEFINE VAR vNumId_fin AS CHARACTER.
-DEFINE VAR ctaRete AS CHARACTER.
 
 IF pOrigen = 'C' THEN DO:
     vNumId_ini = pNumId.
@@ -58,17 +57,16 @@ DEFINE VAR totalReporte AS DECIMAL.
 DEFINE BUFFER bfrMovContable FOR mov_contable.
 DEFINE VAR vYear AS INTEGER INITIAL 2018.
 
+FOR EACH activosFijos WHERE YEAR(activosFijos.fechaCompra) = vYear
+                        AND activosFijos.nitProveedor <> ""
+                        AND activosFijos.contabilizado = YES NO-LOCK BREAK BY activosFijos.nitProveedor:
+    IF FIRST-OF(activosFijos.nitProveedor) THEN DO:
 
-FOR EACH anexos WHERE (SUBSTRING(anexos.cuenta,1,8) = "52100505" OR
-                       SUBSTRING(anexos.cuenta,1,6) = "615005" OR
-                       SUBSTRING(anexos.cuenta,1,6) = "615010" OR
-                       SUBSTRING(anexos.cuenta,1,6) = "615020" OR
-                       SUBSTRING(anexos.cuenta,1,6) = "615035")
-                  AND anexos.nit >= vNumId_ini
-                  AND anexos.nit <= vNumId_fin
-                  AND anexos.ano = vYear NO-LOCK BREAK BY anexos.nit
-                                                       BY anexos.cuenta:
-    IF FIRST-OF(anexos.nit) THEN DO:
+    END.
+END.
+
+
+
         FIND FIRST F1001 WHERE F1001.nit = anexos.nit
                            AND F1001.concepto = "5006" NO-ERROR.
         IF NOT AVAILABLE F1001 THEN DO:

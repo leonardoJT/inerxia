@@ -276,93 +276,53 @@ PROCEDURE ProcesoImprimir:
         usuario_ini = w_usuario1.
     END.
 
-    FOR EACH mov_contable WHERE mov_contable.cuenta >= w_cuenta1
-                            AND mov_contable.cuenta <= w_cuenta2
-                            AND mov_contable.comprobante >= w_cb1
-                            AND mov_contable.comprobante <= w_cb2
-                            AND mov_contable.agencia >= w_ag1
-                            AND mov_contable.agencia <= w_ag2
-                            AND mov_contable.fec_contable >= w_fec1
-                            AND mov_contable.fec_contable <= w_fec2
-                            AND mov_contable.cen_costos >= w_cc1
-                            AND mov_contable.cen_costos <= w_cc2
-                            AND mov_contable.usuario >= usuario_ini
-                            AND mov_contable.usuario <= usuario_fin NO-LOCK:
-        CREATE tmp_mvto.
-        BUFFER-COPY mov_contable TO tmp_mvto.
-    END.
-
-    FOR EACH mov_contable WHERE mov_contable.agencia >= w_ag1       AND mov_contable.agencia <= w_ag2
-                            AND mov_contable.cuenta >= w_cuenta1    AND mov_contable.cuenta <= w_cuenta2
-                            AND mov_contable.fec_contable >= w_fec1 AND mov_contable.fec_contable <= w_fec2 NO-LOCK:
-
-        IF mov_contable.cen_costo < w_cc1 OR mov_contable.cen_costo > w_cc2 OR
-           mov_contable.comprobante < w_cb1 OR mov_contable.comprobante > w_cb2 THEN
-            NEXT.
-                            
-        IF mov_contable.nit < w_nit1 OR mov_contable.nit > w_nit2 THEN
-            NEXT.
-
-        IF w_usuario1 <> '' AND mov_contable.usuario <> w_usuario1 THEN
-            NEXT.
-
-        CREATE tmp_mvto.
-        BUFFER-COPY mov_contable TO tmp_mvto.
-    END.
-
-
-    /*FOR EACH agencias WHERE agencias.agencia >= W_Ag1
+    FOR EACH agencias WHERE agencias.agencia >= W_Ag1
                         AND agencias.agencia <= W_Ag2 NO-LOCK:
-        FOR EACH comprobantes WHERE comprobantes.agencia = agencias.agencia
-                                AND comprobantes.comprobante >= W_CB1
-                                AND comprobantes.comprobante <= W_CB2 NO-LOCK:
-            FOR EACH cen_costos WHERE cen_costos.agencia = agencias.agencia
-                                  AND cen_costos.cen_costo >= W_CC1
-                                  AND cen_costos.cen_costo <= W_CC2 NO-LOCK:
-                FOR EACH cuentas WHERE cuentas.cuenta >= W_Cuenta1
-                                   AND cuentas.cuenta <= W_Cuenta2 NO-LOCK:
-                    DO fecCont = W_Fec1 TO W_Fec2:
-                        IF w_usuario1 = "" THEN DO:
-                            FOR EACH mov_contable WHERE mov_contable.cuenta = cuentas.cuenta
-                                                    AND mov_contable.comprobante = comprobantes.comprobante
-                                                    AND mov_contable.agencia = agencias.agencia
-                                                    AND mov_contable.fec_contable = fecCont
-                                                    AND mov_contable.cen_costos = cen_costos.cen_costo NO-LOCK:
-                                IF w_usuario1 <> "" THEN DO:
-                                    IF mov_contable.usuario <> w_usuario1 THEN
-                                        NEXT.
-                                END.
+        FOR EACH mov_contable WHERE mov_contable.agencia = agencias.agencia
+                                AND mov_contable.fec_contable >= w_fec1
+                                AND mov_contable.fec_contable <= w_fec2
+                                AND mov_contable.cuenta >= w_cuenta1
+                                AND mov_contable.cuenta <= w_cuenta2 NO-LOCK:
+            IF mov_contable.comprobante < w_cb1 OR mov_contable.comprobante > w_cb2 THEN
+                NEXT.
 
-                                IF w_nit1 <> "" THEN DO:
-                                    IF mov_contable.nit <> w_nit1 THEN
-                                        NEXT.
-                                END.
+            IF mov_contable.cen_costos < w_cc1 OR mov_contable.cen_costos > w_cc2 THEN
+                NEXT.
 
-                                CREATE tmp_mvto.
-                                BUFFER-COPY mov_contable TO tmp_mvto.
-                            END.
-                        END.
-                        ELSE DO:
-                            FOR EACH mov_contable WHERE mov_contable.cuenta = cuentas.cuenta
-                                                    AND mov_contable.comprobante = comprobantes.comprobante
-                                                    AND mov_contable.agencia = agencias.agencia
-                                                    AND mov_contable.fec_contable = fecCont
-                                                    AND mov_contable.cen_costos = cen_costos.cen_costo
-                                                    AND mov_contable.usuario = W_Usuario1 NO-LOCK:
-                                IF w_nit1 <> "" THEN DO:
-                                    IF mov_contable.nit <> w_nit1 THEN
-                                        NEXT.
-                                END.
+            IF w_usuario1 <> "" AND mov_contable.usuario <> w_usuario1 THEN
+                NEXT.
 
-                                CREATE tmp_mvto.
-                                BUFFER-COPY mov_contable TO tmp_mvto.
-                            END.
-                        END.
-                    END.
-                END.
-            END.
+            IF w_nit1 <> "" AND mov_contable.nit <> w_nit1 THEN
+                NEXT.
+
+            CREATE tmp_mvto.
+            BUFFER-COPY mov_contable TO tmp_mvto.
         END.
-    END.*/
+
+        FOR EACH mov_contable2 WHERE mov_contable2.agencia = agencias.agencia
+                                 AND mov_contable2.comprobante >= w_cb1
+                                 AND mov_contable2.comprobante <= w_cb2
+                                 AND mov_contable2.cen_costos >= w_cc1
+                                 AND mov_contable2.cen_costos <= w_cc2
+                                 AND mov_contable2.fec_contable >= w_fec1
+                                 AND mov_contable2.fec_contable <= w_fec2
+                                 AND mov_contable2.cuenta >= w_cuenta1
+                                 AND mov_contable2.cuenta <= w_cuenta2 NO-LOCK:
+            IF w_usuario1 <> "" AND mov_contable2.usuario <> w_usuario1 THEN
+                NEXT.
+
+            IF w_nit1 <> "" AND mov_contable2.cliente_id <> w_nit1 THEN
+                NEXT.
+
+            CREATE tmp_mvto.
+            BUFFER-COPY mov_contable2 TO tmp_mvto.
+            tmp_mvto.nit = mov_contable2.cliente_id.
+        END.
+    END.
+
+
+
+    
 
     IF W_TotCta THEN DO:
         IF W_Usuario1 <> "" THEN

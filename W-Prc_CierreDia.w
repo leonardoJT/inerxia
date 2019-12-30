@@ -2,36 +2,59 @@
 &ANALYZE-RESUME
 &Scoped-define WINDOW-NAME W-Prc_CierreDia
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _DEFINITIONS W-Prc_CierreDia 
-/*------------------------------------------------------------------------
-  File:        W-Prc_CierreDia.W 
-  Description: Proceso de Cierre diario
-  Author:      GAER
-  Created:     Feb.11/2004
-------------------------------------------------------------------------*/
-/*          This .W file was created with the Progress AppBuilder.      */
-/*----------------------------------------------------------------------*/
-
 CREATE WIDGET-POOL.
 
-/* ***************************  Definitions  ************************** */
+ON RETURN TAB.
 
-/* Parameters Definitions ---                                           */
+{Incluido/Variable.I "SHARED"}
+{Incluido/VARCON.I   "SHARED"}
 
-/* Local Variable Definitions ---                                       */
+DEFINE TEMP-TABLE Total_Dia LIKE Total_Agencia
+    FIELD TasaXSdo AS DECIMAL
+    FIELD TTasa AS DECIMAL.
 
-   ON RETURN TAB.
+DEFINE TEMP-TABLE TOTAL_Empresa
+    FIELD Cod_empresa AS INTEGER
+    FIELD Valor AS DECIMAL FORMAT ">>>,>>>,>>>,>>9".
 
-   {Incluido/Variable.I "SHARED"}
+/* Cuentas para cierre de impuestos mensual */
+DEFINE TEMP-TABLE cierreCuentas
+    FIELD cuenta AS CHARACTER.
 
-   {Incluido/VARCON.I   "SHARED"}
-        
-   DEFI TEMP-TABLE Total_Dia LIKE Total_Agencia
-        FIELD TasaXSdo       LIKE Total_Dia.Sdo_Dia
-        FIELD TTasa          LIKE Ahorros.Tasa.
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24300501".
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24301001".
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24301002".
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24302001".
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24309501".
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24350501".
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24351501".
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24351502".
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24351503".
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24351504".
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24352501".
+/* ----------------------- */
 
-   DEFI TEMP-TABLE TOTAL_Empresa
-       FIELD Cod_empresa LIKE Empresa.Cod_Empresa
-       FIELD Valor       AS DECIMAL FORMAT ">>>,>>>,>>>,>>9".
+24352502
+24352503
+24352504
+24352505
+24352506
+24352507
+24352508
+24353001
+24353002
+24353501
+24353502
+24353503
+24353504
+24353507
+24353508
+24353509
+24353510
+24354001
+24354002
+24358501
+24358502
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -522,14 +545,14 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE Proceso W-Prc_CierreDia 
 PROCEDURE Proceso :
-DEFI VAR W_FecCorte LIKE W_Fecha.
-DEFI VAR K AS INTEG FORM "9".
-DEFI VAR id AS LOGICAL INITIAL NO.
+DEFINE VAR W_FecCorte AS DATE.
+DEFINE VAR K AS INTEGER.
+DEFINE VAR id AS LOGICAL.
 
 /*Validaciones*/
-FIND FIRST Agencias WHERE Agencias.Agencia GE W_OfiIni
-                      AND Agencias.Agencia LE W_OfiFin
-                      AND Agencias.Estado EQ 2 NO-LOCK NO-ERROR.
+FIND FIRST Agencias WHERE Agencias.Agencia >= W_OfiIni
+                      AND Agencias.Agencia <= W_OfiFin
+                      AND Agencias.Estado = 2 NO-LOCK NO-ERROR.
 IF NOT AVAILABLE(Agencias) THEN DO:
     MESSAGE "No existe Agencia en estado de Cierre...?" SKIP
             "                     Revise por favor. No se permite la operación."
@@ -538,9 +561,9 @@ IF NOT AVAILABLE(Agencias) THEN DO:
     RETURN ERROR.
 END.
 
-FOR EACH Agencias WHERE Agencias.Agencia GE W_OfiIni
-                    AND Agencias.Agencia LE W_OfiFin
-                    AND Agencias.Estado EQ 2 NO-LOCK:   /*Solo Agencias con estado Cerradas*/
+FOR EACH Agencias WHERE Agencias.Agencia >= W_OfiIni
+                    AND Agencias.Agencia <= W_OfiFin
+                    AND Agencias.Estado = 2 NO-LOCK:   /*Solo Agencias con estado Cerradas*/
     FIND FIRST Usuarios WHERE Usuarios.Agencia EQ Agencias.Agencia
                           AND Usuarios.Usuario NE W_Usuario
                           AND Usuarios.Estado EQ 1
@@ -573,10 +596,10 @@ FOR EACH Agencias WHERE Agencias.Agencia GE W_OfiIni
         END.
     END.
 
-    FIND FIRST ProcDia WHERE ProcDia.Agencia EQ Agencias.Agencia
-                         AND ProcDia.Fecha_Proc EQ W_Fecha
-                         AND ProcDia.Cod_Proceso EQ 6
-                         AND ProcDia.Estado EQ 1 NO-LOCK NO-ERROR.
+    FIND FIRST ProcDia WHERE ProcDia.Agencia = Agencias.Agencia
+                         AND ProcDia.Fecha_Proc = W_Fecha
+                         AND ProcDia.Cod_Proceso = 6
+                         AND ProcDia.Estado = 1 NO-LOCK NO-ERROR.
     IF NOT AVAILABLE(ProcDia) THEN DO:
         MESSAGE "Este proceso ya fue ejecutado para este día en la Agencia:" Agencias.Agencia SKIP
                 "o no está matriculado... Revise por favor. No se permite la operación." SKIP
@@ -585,10 +608,10 @@ FOR EACH Agencias WHERE Agencias.Agencia GE W_OfiIni
         RETURN ERROR.
     END.
 
-    FIND FIRST ProcDia WHERE ProcDia.Agencia EQ Agencias.Agencia
-                         AND ProcDia.Fecha_Proc EQ W_Fecha
-                         AND ProcDia.Cod_Proceso NE 6
-                         AND ProcDia.Estado EQ 1 NO-LOCK NO-ERROR.
+    FIND FIRST ProcDia WHERE ProcDia.Agencia = Agencias.Agencia
+                         AND ProcDia.Fecha_Proc = W_Fecha
+                         AND ProcDia.Cod_Proceso <> 6
+                         AND ProcDia.Estado = 1 NO-LOCK NO-ERROR.
     IF AVAIL(ProcDia) THEN DO:
         MESSAGE "El Proceso:" ProcDia.Cod_Proceso "no se ejecutó para este día en la Agencia:" Agencias.Agencia SKIP
                 "Revise por favor... No se permite la operación." SKIP
@@ -596,8 +619,6 @@ FOR EACH Agencias WHERE Agencias.Agencia GE W_OfiIni
 
         RETURN ERROR.
     END.
-
-    /* oakley */
 END.
 
 DO TRANSACTION ON ERROR UNDO:
@@ -612,19 +633,19 @@ DO TRANSACTION ON ERROR UNDO:
         listaNegra.estado = 1.
     END.
 
-    FOR EACH Agencias WHERE Agencias.Agencia GE W_OfiIni
-                        AND Agencias.Agencia LE W_OfiFin
-                        AND Agencias.Estado EQ 2:
-        FIND FIRST Calendario WHERE Calendario.Agencia EQ Agencias.Agencia
-                                AND Calendario.Ano EQ YEAR(W_Fecha)
-                                AND Calendario.Mes EQ MONTH(W_Fecha)
-                                AND Calendario.Dia EQ DAY(W_Fecha) NO-ERROR.
+    FOR EACH Agencias WHERE Agencias.Agencia >= W_OfiIni
+                        AND Agencias.Agencia <= W_OfiFin
+                        AND Agencias.Estado = 2:
+        FIND FIRST Calendario WHERE Calendario.Agencia = Agencias.Agencia
+                                AND Calendario.Ano = YEAR(W_Fecha)
+                                AND Calendario.Mes = MONTH(W_Fecha)
+                                AND Calendario.Dia = DAY(W_Fecha) NO-ERROR.
         EMPTY TEMP-TABLE TOTAL_Dia.
         
-        ASSIGN Calendario.Estado = 2                /*Cierra el dia de Proceso en calendario*/
-               W_FecCorte = W_Fecha.
+        Calendario.Estado = 2.
+        W_FecCorte = W_Fecha.
 
-        /* Se revisa y es cierre de mes para reiniciar los comprobantes que asi se encuentren configurados */
+        /* Se revisa si es cierre de mes para reiniciar los comprobantes que asi se encuentren configurados */
         IF calendario.Cierre = TRUE THEN DO:
             FOR EACH comprobantes WHERE comprobantes.agencia = agencias.agencia
                                     AND comprobantes.ReiniciaCierre = TRUE:
@@ -646,38 +667,28 @@ DO TRANSACTION ON ERROR UNDO:
         DO K = 1 TO 7:    /*Halla en los Pròximos 7 dìas el primero hàbil*/
             W_FecCorte = W_FecCorte + 1.
 
-            FIND FIRST Calendario WHERE Calendario.Agencia EQ Agencias.Agencia
-                                    AND Calendario.Ano EQ YEAR(W_FecCorte)
-                                    AND Calendario.Mes EQ MONTH(W_FecCorte)
-                                    AND Calendario.Dia EQ DAY(W_FecCorte)
-                                    AND Calendario.Habil EQ TRUE NO-ERROR.
-            IF AVAIL(Calendario) THEN DO:
-                ASSIGN Calendario.Estado = 1.        /*Abre el pròximo dìa hàbil en calendario*/
+            FIND FIRST Calendario WHERE Calendario.Agencia = Agencias.Agencia
+                                    AND Calendario.Ano = YEAR(W_FecCorte)
+                                    AND Calendario.Mes = MONTH(W_FecCorte)
+                                    AND Calendario.Dia = DAY(W_FecCorte)
+                                    AND Calendario.Habil = TRUE NO-ERROR.
+            IF AVAILABLE(Calendario) THEN DO:
+                Calendario.Estado = 1.
                 LEAVE.
             END.
         END.
 
-        FIND FIRST ProcDia WHERE ProcDia.Agencia EQ Agencias.Agencia
-                             AND ProcDia.Fecha_Proc EQ W_Fecha
-                             AND ProcDia.Cod_Proceso EQ 6
-                             AND ProcDia.Estado EQ 1  NO-ERROR.
+        FIND FIRST ProcDia WHERE ProcDia.Agencia = Agencias.Agencia
+                             AND ProcDia.Fecha_Proc = W_Fecha
+                             AND ProcDia.Cod_Proceso = 6
+                             AND ProcDia.Estado = 1 NO-ERROR.
 
-        ASSIGN ProcDia.Estado = 2               /*Proceso de Cierre Ejecutado*/
-               Agencias.Estado = 1.              /*Agencia abierta*/
+        ProcDia.Estado = 2.
+        Agencias.Estado = 1.
     END.
 
     /* Llenado del repositorio */
     IF DAY(w_fecha + 1) = 1 THEN DO:
-        /*FOR EACH rep_ahorros WHERE MONTH(rep_ahorros.fecCorte) = MONTH(w_fecha)
-                               AND YEAR(rep_ahorros.fecCorte) = YEAR(w_fecha) - 1:
-            DELETE rep_ahorros.
-        END.
-
-        FOR EACH rep_creditos WHERE MONTH(rep_creditos.fecCorte) = MONTH(w_fecha)
-                                AND YEAR(rep_creditos.fecCorte) = YEAR(w_fecha) - 1:
-            DELETE rep_creditos.
-        END.*/
-
         FOR EACH ahorros WHERE ahorros.estado = 1 NO-LOCK:
             CREATE rep_ahorros.
             rep_ahorros.fecCorte = w_fecha.
@@ -704,16 +715,16 @@ DO TRANSACTION ON ERROR UNDO:
             /* -------------------------------- */
         END.
 
-        /*FOR EACH rep_activosFijos WHERE MONTH(rep_activosFijos.fecCorte) = MONTH(w_fecha)
-                                    AND YEAR(rep_activosFijos.fecCorte) = YEAR(w_fecha) - 1:
-            DELETE rep_activosFijos.
-        END.*/
-        
         FOR EACH activosFijos NO-LOCK:
             CREATE rep_activosFijos.
             rep_activosFijos.fecCorte = w_fecha.
             BUFFER-COPY activosFijos TO rep_activosFijos.
         END.
+    END.
+
+    /* Se cierran las cuentas de impuestos */
+    IF DAY(w_fecha + 1) = 1 THEN DO:
+
     END.
     
     /* Se llenan los Hábiles para tema Alojamientos desde la página web */

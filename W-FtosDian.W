@@ -594,7 +594,13 @@ DO:
                                                                                           OUTPUT pOut_1,
                                                                                           OUTPUT pOut_2).
 
-        WHEN "Formato_1001_5008" THEN RUN 1001_5008.
+        WHEN "1001_5008" THEN
+            RUN VALUE("p-1001_5008_ _" + STRING(ano_corte) + ".r") (INPUT 'E',
+                                                                                          INPUT '',
+                                                                                          INPUT DECIMAL(tope:SCREEN-VALUE),
+                                                                                          OUTPUT pOut_1,
+                                                                                          OUTPUT pOut_2).
+
         WHEN "Formato_1001_5010" THEN RUN 1001_5010.
         WHEN "Formato_1001_5011" THEN RUN 1001_5011.
         WHEN "Formato_1001_5012" THEN RUN 1001_5012.
@@ -5872,7 +5878,7 @@ DO WITH FRAME F_Ftos:
     Cmb_Ftos:ADD-LAST("1001_5004").
     Cmb_Ftos:ADD-LAST("1001_5005").
     Cmb_Ftos:ADD-LAST("1001_5006").
-    Cmb_Ftos:ADD-LAST("Formato_1001_5008").
+    Cmb_Ftos:ADD-LAST("1001_5008").
     Cmb_Ftos:ADD-LAST("Formato_1001_5010").
     Cmb_Ftos:ADD-LAST("Formato_1001_5011").
     Cmb_Ftos:ADD-LAST("Formato_1001_5012").

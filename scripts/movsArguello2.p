@@ -1,4 +1,4 @@
-DEFINE TEMP-TABLE tt
+yDEFINE TEMP-TABLE tt
     FIELD agencia AS INTEGER
     FIELD cen_costo AS INTEGER
     FIELD nombreCenCosto AS CHARACTER

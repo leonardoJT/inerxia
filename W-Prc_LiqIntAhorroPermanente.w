@@ -1037,7 +1037,12 @@ DEFI VAR W_PdoAno AS INTEG FORM "9" INIT 0.
 
 W_VrReTfte = 0.
 
-BaseLiq = ahorros.sdo_anuales[mesSaldo].
+FIND FIRST rep_ahorros WHERE rep_ahorros.fecCorte = DATE(mesSaldo + 1,1,YEAR(w_fecha)) - 1
+                         AND rep_ahorros.nit = ahorros.nit
+                         AND rep_ahorros.cue_ahorros = ahorros.cue_ahorros NO-LOCK NO-ERROR.
+IF AVAILABLE rep_ahorros THEN
+    /*BaseLiq = ahorros.sdo_anuales[mesSaldo].*/
+    baseLiq = rep_ahorros.sdo_disponible.
 
 IF BaseLiq GT 0 AND Ahorros.Tasa GT 0 THEN DO:
     ASSIGN W_TasaD = Ahorros.Tasa / 360

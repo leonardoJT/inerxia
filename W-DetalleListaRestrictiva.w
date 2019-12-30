@@ -33,9 +33,11 @@ CREATE WIDGET-POOL.
 /* ***************************  Definitions  ************************** */
 
 /* Parameters Definitions ---                                           */
+
 DEFINE INPUT PARAMETER pRowIdLista AS ROWID.
 
 /* Local Variable Definitions ---                                       */
+{Incluido/Variable.I "SHARED"}
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -75,18 +77,18 @@ DEFINE BUTTON btnImportar
 
 DEFINE VARIABLE EDITOR-1 AS CHARACTER 
      VIEW-AS EDITOR NO-WORD-WRAP SCROLLBAR-HORIZONTAL SCROLLBAR-VERTICAL
-     SIZE 129 BY 25.58 NO-UNDO.
+     SIZE 148 BY 25.58 NO-UNDO.
 
 
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME DEFAULT-FRAME
      EDITOR-1 AT ROW 1.27 COL 2 NO-LABEL WIDGET-ID 2
-     btnImportar AT ROW 2.23 COL 132 WIDGET-ID 4
+     btnImportar AT ROW 1.27 COL 151 WIDGET-ID 4
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1 ROW 1
-         SIZE 147.29 BY 26.15 WIDGET-ID 100.
+         SIZE 165.72 BY 26.15 WIDGET-ID 100.
 
 
 /* *********************** Procedure Settings ************************ */
@@ -172,6 +174,62 @@ END.
 &ANALYZE-RESUME
 
 
+&Scoped-define SELF-NAME btnImportar
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnImportar C-Win
+ON CHOOSE OF btnImportar IN FRAME DEFAULT-FRAME /* Importar */
+DO:
+    DEFINE VAR nombreArchivo AS CHARACTER.
+    
+    SYSTEM-DIALOG GET-FILE nombreArchivo
+        TITLE "Archivo a importar..."
+        MUST-EXIST
+        USE-FILENAME.
+
+    IF nombreArchivo = "" THEN
+        RETURN NO-APPLY.
+
+    /* oakley - Ubicar si existe contenido y en caso que si preguntar si se quiere reemplazar... */
+     
+    MESSAGE "El contenido de la lista restrictiva será reemplzado." SKIP
+            "No será posible deshacer esta operación... Está seguro" SKIP
+            "que desea continuar?"
+        VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO TITLE "Reemplazar lista"
+
+    FIND FIRST cfg_contenidoListas where cfg_contenidoListas.IDLista = STRING(ROWID(cfg_listasSarlaft)) NO-LOCK NO-ERROR.
+    IF AVAILABLE cfg_contenidoListas THEN DO:
+        MESSAGE "¿Desea reemplazar el contenido de la lista con los datos del archivo elegido?" SKIP
+            VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO TITLE "Confirmar carga" UPDATE W_RptaRet AS LOGICAL.
+
+        IF NOT W_RptaRet THEN
+            RETURN.
+        ELSE DO:
+            FOR EACH cfg_contenidoListas where cfg_contenidoListas.IDLista = STRING(ROWID(cfg_listasSarlaft)):
+                DELETE cfg_contenidoListas.
+            END.
+        END.
+    END.
+
+    INPUT FROM VALUE(Archivo_nombre).
+    REPEAT:
+        IMPORT UNFORMAT cLine.
+        CREATE cfg_contenidolistas.
+        cfg_contenidolistas.IDLista = string(rowId(cfg_listasSarlaft)).
+        cfg_contenidolistas.linea = cLine.
+        ContadorRegistros:SCREEN-VALUE = STRING(INTEGER(ContadorRegistros:SCREEN-VALUE) + 1).
+    END.
+
+    MESSAGE "La Lista Restrictiva fue cargada exitosamente!"
+        VIEW-AS ALERT-BOX INFO BUTTONS OK.
+
+    hQuery = QUERY brw_lineas:HANDLE.
+    hQuery:QUERY-PREPARE("FOR EACH cfg_contenidoListas SHARE-LOCK WHERE cfg_contenidoListas.IDLista = " + quoter(STRING(ROWID(cfg_listasSarlaft)))).
+    hQuery:QUERY-OPEN().
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
 &UNDEFINE SELF-NAME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _MAIN-BLOCK C-Win 
@@ -197,6 +255,13 @@ MAIN-BLOCK:
 DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
    ON END-KEY UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK:
   RUN enable_UI.
+
+  FIND FIRST cfg_sarlaft NO-LOCK NO-ERROR.
+  IF AVAILABLE cfg_sarlaft THEN DO:
+      IF cfg_sarlaft.usuarioOficialDeCumplimiento = w_usuario THEN
+          btnImportar:SENSITIVE = TRUE.
+  END.
+
   IF NOT THIS-PROCEDURE:PERSISTENT THEN
     WAIT-FOR CLOSE OF THIS-PROCEDURE.
 END.

@@ -1,4 +1,4 @@
-&ANALYZE-SUSPEND _VERSION-NUMBER AB_v9r12 GUI ADM2
+&ANALYZE-SUSPEND _VERSION-NUMBER AB_v10r12 GUI ADM2
 &ANALYZE-RESUME
 /* Connected Databases 
           bdcentral        PROGRESS
@@ -59,7 +59,7 @@ DEFINE VAR P_VrCapital LIKE Creditos.Sdo_Capital.
 
 &Scoped-define ADM-SUPPORTED-LINKS Data-Target,Data-Source,Page-Target,Update-Source,Update-Target,Filter-target,Filter-Source
 
-/* Name of first Frame and/or Browse and/or first Query                 */
+/* Name of designated FRAME-NAME and/or first browse and/or first query */
 &Scoped-define FRAME-NAME F_Cre
 
 /* Internal Tables (found by Frame, Query & Browse Queries)             */
@@ -80,7 +80,7 @@ Creditos.Fec_Reestructurado
 
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS W_FecAce Btn_Grabar Btn_Salir RECT-296 
+&Scoped-Define ENABLED-OBJECTS RECT-296 W_FecAce Btn_Grabar Btn_Salir 
 &Scoped-Define DISPLAYED-FIELDS Creditos.Fec_Desembolso Creditos.Fec_Pago ~
 Creditos.Fec_ProxLiquidacion Creditos.Fec_UltPago Creditos.Sdo_Capital ~
 Creditos.Fec_UltLiquidacion Creditos.Tasa Creditos.Int_DifCobro ~
@@ -122,7 +122,7 @@ DEFINE VARIABLE W_FecAce AS DATE FORMAT "99/99/9999":U
      BGCOLOR 15 FGCOLOR 0 FONT 0 NO-UNDO.
 
 DEFINE RECTANGLE RECT-296
-     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL 
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 26 BY 11.31.
 
 /* Query definitions                                                    */
@@ -223,7 +223,9 @@ DEFINE FRAME F_Cre
           VIEW-AS FILL-IN 
           SIZE 11 BY .81
           BGCOLOR 18 FGCOLOR 15 
-     RECT-296 AT ROW 1.54 COL 2
+     "Información del Crédito" VIEW-AS TEXT
+          SIZE 20 BY .81 AT ROW 1.15 COL 3
+          FGCOLOR 7 FONT 5
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1 ROW 1
@@ -232,9 +234,7 @@ DEFINE FRAME F_Cre
 
 /* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
 DEFINE FRAME F_Cre
-     "Información del Crédito" VIEW-AS TEXT
-          SIZE 20 BY .81 AT ROW 1.15 COL 3
-          FGCOLOR 7 FONT 5
+     RECT-296 AT ROW 1.54 COL 2
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1 ROW 1
@@ -299,7 +299,7 @@ ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 /* SETTINGS FOR WINDOW Wwin
   VISIBLE,,RUN-PERSISTENT                                               */
 /* SETTINGS FOR FRAME F_Cre
-                                                                        */
+   FRAME-NAME                                                           */
 /* SETTINGS FOR FILL-IN Creditos.Cuota IN FRAME F_Cre
    NO-ENABLE EXP-LABEL                                                  */
 /* SETTINGS FOR FILL-IN Creditos.Cuo_Atraso IN FRAME F_Cre
@@ -517,7 +517,7 @@ PROCEDURE enable_UI :
           Creditos.Val_Atraso Creditos.Cuota Creditos.Dias_Atraso 
           Creditos.Cuo_Atraso Creditos.Provision Creditos.Fec_Reestructurado 
       WITH FRAME F_Cre IN WINDOW Wwin.
-  ENABLE W_FecAce Btn_Grabar Btn_Salir RECT-296 
+  ENABLE RECT-296 W_FecAce Btn_Grabar Btn_Salir 
       WITH FRAME F_Cre IN WINDOW Wwin.
   {&OPEN-BROWSERS-IN-QUERY-F_Cre}
   VIEW Wwin.

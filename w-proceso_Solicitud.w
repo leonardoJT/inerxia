@@ -1157,8 +1157,8 @@ DEFINE VARIABLE Cmb_Agencias AS CHARACTER FORMAT "X(256)":U
 
 DEFINE VARIABLE Cmb_PerPago AS CHARACTER FORMAT "X(25)":U INITIAL "4 - Mensual" 
      LABEL "Período" 
-     VIEW-AS COMBO-BOX INNER-LINES 6
-     LIST-ITEMS "0 - Diario","1 - Semanal","2 - Decadal","3 - Quincenal","4 - Mensual","5 - Bimestral","6 - Trimestral","7 - Cuatrimestral","8 - Semestral","9 - Anual" 
+     VIEW-AS COMBO-BOX INNER-LINES 11
+     LIST-ITEMS "0 - Diario","1 - Semanal","2 - Decadal","3 - Quincenal","4 - Mensual","5 - Bimestral","6 - Trimestral","7 - Cuatrimestral","8 - Semestral","9 - Anual","10 - Al Vencimiento" 
      DROP-DOWN-LIST
      SIZE 18.86 BY 1
      BGCOLOR 15  NO-UNDO.
@@ -1311,10 +1311,6 @@ DEFINE RECTANGLE RECT-327
 DEFINE RECTANGLE RECT-330
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 70 BY 2.23.
-
-DEFINE RECTANGLE RECT-331
-     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 32.57 BY 4.88.
 
 DEFINE RECTANGLE RECT-333
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
@@ -1782,67 +1778,48 @@ DEFINE FRAME F_CredACanc
 DEFINE FRAME F_Creditos
      Cmb_Instancias AT ROW 1.27 COL 10 COLON-ALIGNED
      BUTTON-169 AT ROW 1.27 COL 82
-     Btn_Imprimir AT ROW 1.54 COL 109.72
+     Btn_Imprimir AT ROW 1.54 COL 135
      PDF AT ROW 1.81 COL 102 WIDGET-ID 6
      Btn_ProcesarInstancia AT ROW 2.35 COL 12
      T_Refresh AT ROW 2.35 COL 48
      Btn_ImpCA AT ROW 2.5 COL 82
-     Btn_Consulta AT ROW 3.42 COL 109.72
-     BUTTON-164 AT ROW 5.31 COL 109.72
-     Btn_Anexos AT ROW 7.46 COL 109.72 WIDGET-ID 2
-     Btn_Salvar AT ROW 9.62 COL 109.72
-     Btn_Deshacer AT ROW 11.42 COL 109.72
-     Btn_Ingresar AT ROW 13.23 COL 109.72
-     Btn_Cancelar AT ROW 15.04 COL 109.72
-     BUTTON-9 AT ROW 16.85 COL 109.72
-     BUTTON-2 AT ROW 18.65 COL 109.72
+     Btn_Consulta AT ROW 3.42 COL 135
+     BUTTON-164 AT ROW 5.31 COL 135
+     Btn_Anexos AT ROW 7.46 COL 135 WIDGET-ID 2
+     Btn_Salvar AT ROW 9.62 COL 135
+     Btn_Deshacer AT ROW 11.42 COL 135
+     Btn_Ingresar AT ROW 13.23 COL 135
+     Btn_Cancelar AT ROW 15.04 COL 135
+     BUTTON-9 AT ROW 16.85 COL 135
+     BUTTON-2 AT ROW 18.65 COL 135
      NomUsuario AT ROW 1.27 COL 45 COLON-ALIGNED NO-LABEL
-     RECT-3 AT ROW 1.27 COL 108.72
+     RECT-3 AT ROW 1.27 COL 134
      RECT-347 AT ROW 9.35 COL 109.14 WIDGET-ID 4
-     SPACE(0.00) SKIP(14.15)
+     SPACE(12.86) SKIP(14.15)
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1 ROW 1 SCROLLABLE 
          FONT 5.
 
-DEFINE FRAME F_Producto
-     Solicitud.Tip_Credito AT ROW 1 COL 3 NO-LABEL
-          VIEW-AS RADIO-SET HORIZONTAL
-          RADIO-BUTTONS 
-                    "Consumo", 1,
-"Comercial", 2,
-"Hipotecario", 3,
-"Microcrédito", 4
-          SIZE 52 BY 1.08
-     Cmb_Productos AT ROW 2.65 COL 10.29 COLON-ALIGNED
-     Btn_OutProductos AT ROW 3.92 COL 43.86
-     BUTTON-131 AT ROW 4.19 COL 11.86
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 13 ROW 5.04
-         SIZE 57 BY 5.65
-         FONT 5
-         TITLE BGCOLOR 11 "Producto de la Solicitud".
-
 DEFINE FRAME F_Solicitud
      Cmb_Agencias AT ROW 1.04 COL 10 COLON-ALIGNED
-     Solicitud.Num_Solicitud AT ROW 1.08 COL 74.57 COLON-ALIGNED
+     Solicitud.Num_Solicitud AT ROW 1.08 COL 99.57 COLON-ALIGNED
           LABEL "Solicitud"
           VIEW-AS FILL-IN 
           SIZE 11 BY .81
           BGCOLOR 3 FGCOLOR 15 
-     Solicitud.Fec_Solicitud AT ROW 1.08 COL 93.86 COLON-ALIGNED
+     Solicitud.Fec_Solicitud AT ROW 1.08 COL 118.86 COLON-ALIGNED
           LABEL "Fecha"
           VIEW-AS FILL-IN 
           SIZE 10 BY .81
           BGCOLOR 3 FGCOLOR 15 
-     NomNit AT ROW 2.19 COL 33 COLON-ALIGNED NO-LABEL
-     BUTTON-19 AT ROW 2.19 COL 102.72
      Solicitud.Nit AT ROW 2.35 COL 14.43 COLON-ALIGNED
           LABEL "Cédula/Nit"
           VIEW-AS FILL-IN 
           SIZE 16.57 BY .81
           BGCOLOR 15 FGCOLOR 0 
+     BUTTON-19 AT ROW 2.35 COL 100.72
+     NomNit AT ROW 2.38 COL 31.43 COLON-ALIGNED NO-LABEL
      Fec_Asociado AT ROW 3.19 COL 14.57 COLON-ALIGNED HELP
           "Fecha en que ingresa como asociado a la Organización" WIDGET-ID 354
      BUTTON-103 AT ROW 3.69 COL 101.43
@@ -1886,7 +1863,7 @@ DEFINE FRAME F_Solicitud
           BGCOLOR 15 FONT 5
      W_TasaNominal AT ROW 9.12 COL 71 COLON-ALIGNED
      btnFrmlrioAfliacion AT ROW 9.62 COL 85.43 WIDGET-ID 4 NO-TAB-STOP 
-     Solicitud.fec_desembolso AT ROW 10 COL 19 COLON-ALIGNED WIDGET-ID 390
+     Solicitud.fec_desembolso AT ROW 10.04 COL 19 COLON-ALIGNED WIDGET-ID 390
           LABEL "Fecha Desembolso"
           VIEW-AS FILL-IN 
           SIZE 12.86 BY .85
@@ -1904,7 +1881,7 @@ DEFINE FRAME F_Solicitud
     WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 2 ROW 3.62
-         SIZE 106 BY 20
+         SIZE 131 BY 20
          FONT 5.
 
 /* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
@@ -1947,13 +1924,12 @@ DEFINE FRAME F_Solicitud
      RECT-325 AT ROW 7.92 COL 36.57 WIDGET-ID 352
      RECT-327 AT ROW 14.81 COL 1.43 WIDGET-ID 368
      RECT-330 AT ROW 3.42 COL 35.57 WIDGET-ID 374
-     RECT-331 AT ROW 2.04 COL 1.43 WIDGET-ID 376
      RECT-333 AT ROW 12.85 COL 36 WIDGET-ID 380
      RECT-334 AT ROW 7.19 COL 1.43 WIDGET-ID 388
     WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 2 ROW 3.62
-         SIZE 106 BY 20
+         SIZE 131 BY 20
          FONT 5
          TITLE "Radicación de Solicitudes".
 
@@ -2284,51 +2260,6 @@ DEFINE FRAME F_Foto
          TITLE "Foto del Asociado"
          CANCEL-BUTTON BUTTON-230 WIDGET-ID 100.
 
-DEFINE FRAME F_ForPago
-     Solicitud.For_Pago AT ROW 1.27 COL 1 NO-LABEL
-          VIEW-AS RADIO-SET HORIZONTAL
-          RADIO-BUTTONS 
-                    "Caja", 1,
-"Nómina", 2,
-"Déb Aut", 3,
-"Nóm Crec", 4,
-"Prima", 5
-          SIZE 45 BY .81
-     Anexos_Clientes.Cam_Cat1 AT ROW 2.35 COL 15 COLON-ALIGNED HELP
-          "" WIDGET-ID 4
-          LABEL "Capacidad Pago" FORMAT "x(15)"
-          VIEW-AS COMBO-BOX SORT INNER-LINES 4
-          LIST-ITEM-PAIRS ""," ",
-                     "50%","f50%",
-                     "SMMLV","fsmmlv",
-                     "CAJA","fcapagocaja"
-          DROP-DOWN-LIST
-          SIZE 16 BY 1 TOOLTIP "Función Para Calcular La Capacidad De Pago"
-     Solicitud.Age_DebAutomatico AT ROW 3.42 COL 15 COLON-ALIGNED
-          LABEL "Agencia"
-          VIEW-AS FILL-IN 
-          SIZE 4 BY .81
-          BGCOLOR 18 FGCOLOR 15 
-     W_NomAgeDebAutomatico AT ROW 3.42 COL 19 COLON-ALIGNED NO-LABEL
-     Solicitud.Cod_DebAutomatico AT ROW 4.5 COL 15 COLON-ALIGNED
-          LABEL "Producto"
-          VIEW-AS FILL-IN 
-          SIZE 4 BY .81
-          BGCOLOR 18 FGCOLOR 15 
-     W_NomCodDebAutomatico AT ROW 4.5 COL 19 COLON-ALIGNED NO-LABEL
-     Solicitud.Cue_DebAutomatico AT ROW 5.58 COL 15 COLON-ALIGNED
-          LABEL "Cuenta"
-          VIEW-AS FILL-IN 
-          SIZE 29 BY .81
-          BGCOLOR 18 FGCOLOR 15 
-     BUTTON-106 AT ROW 6.65 COL 38
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 18 ROW 10.42
-         SIZE 46 BY 8.35
-         FONT 5
-         TITLE BGCOLOR 16 "Forma de Pago de la Cuota".
-
 DEFINE FRAME F_Desembolso
      Solicitud.Desembolso AT ROW 1.27 COL 3 NO-LABEL
           VIEW-AS RADIO-SET HORIZONTAL
@@ -2493,6 +2424,70 @@ DEFINE FRAME F_Instancias
          FONT 5
          TITLE "Procesar Instancias".
 
+DEFINE FRAME F_Producto
+     Solicitud.Tip_Credito AT ROW 1 COL 3 NO-LABEL
+          VIEW-AS RADIO-SET HORIZONTAL
+          RADIO-BUTTONS 
+                    "Consumo", 1,
+"Comercial", 2,
+"Hipotecario", 3,
+"Microcrédito", 4
+          SIZE 52 BY 1.08
+     Cmb_Productos AT ROW 2.65 COL 10.29 COLON-ALIGNED
+     Btn_OutProductos AT ROW 3.92 COL 43.86
+     BUTTON-131 AT ROW 4.19 COL 11.86
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 13 ROW 5.04
+         SIZE 57 BY 5.65
+         FONT 5
+         TITLE BGCOLOR 11 "Producto de la Solicitud".
+
+DEFINE FRAME F_ForPago
+     Solicitud.For_Pago AT ROW 1.27 COL 1 NO-LABEL
+          VIEW-AS RADIO-SET HORIZONTAL
+          RADIO-BUTTONS 
+                    "Caja", 1,
+"Nómina", 2,
+"Déb Aut", 3,
+"Nóm Crec", 4,
+"Prima", 5
+          SIZE 45 BY .81
+     Anexos_Clientes.Cam_Cat1 AT ROW 2.35 COL 15 COLON-ALIGNED HELP
+          "" WIDGET-ID 4
+          LABEL "Capacidad Pago" FORMAT "x(15)"
+          VIEW-AS COMBO-BOX SORT INNER-LINES 4
+          LIST-ITEM-PAIRS ""," ",
+                     "50%","f50%",
+                     "SMMLV","fsmmlv",
+                     "CAJA","fcapagocaja"
+          DROP-DOWN-LIST
+          SIZE 16 BY 1 TOOLTIP "Función Para Calcular La Capacidad De Pago"
+     Solicitud.Age_DebAutomatico AT ROW 3.42 COL 15 COLON-ALIGNED
+          LABEL "Agencia"
+          VIEW-AS FILL-IN 
+          SIZE 4 BY .81
+          BGCOLOR 18 FGCOLOR 15 
+     W_NomAgeDebAutomatico AT ROW 3.42 COL 19 COLON-ALIGNED NO-LABEL
+     Solicitud.Cod_DebAutomatico AT ROW 4.5 COL 15 COLON-ALIGNED
+          LABEL "Producto"
+          VIEW-AS FILL-IN 
+          SIZE 4 BY .81
+          BGCOLOR 18 FGCOLOR 15 
+     W_NomCodDebAutomatico AT ROW 4.5 COL 19 COLON-ALIGNED NO-LABEL
+     Solicitud.Cue_DebAutomatico AT ROW 5.58 COL 15 COLON-ALIGNED
+          LABEL "Cuenta"
+          VIEW-AS FILL-IN 
+          SIZE 29 BY .81
+          BGCOLOR 18 FGCOLOR 15 
+     BUTTON-106 AT ROW 6.65 COL 38
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 26 ROW 10.15
+         SIZE 46 BY 8.35
+         FONT 5
+         TITLE BGCOLOR 16 "Forma de Pago de la Cuota".
+
 
 /* *********************** Procedure Settings ************************ */
 
@@ -2512,7 +2507,7 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
          HIDDEN             = YES
          TITLE              = "Proceso de Solicitudes"
          HEIGHT             = 22.69
-         WIDTH              = 127.29
+         WIDTH              = 145.72
          MAX-HEIGHT         = 36.54
          MAX-WIDTH          = 182.86
          VIRTUAL-HEIGHT     = 36.54
@@ -2843,6 +2838,9 @@ ASSIGN
    NO-ENABLE                                                            */
 /* SETTINGS FOR FILL-IN Fec_Asociado IN FRAME F_Solicitud
    NO-ENABLE                                                            */
+ASSIGN 
+       Fec_Asociado:READ-ONLY IN FRAME F_Solicitud        = TRUE.
+
 /* SETTINGS FOR FILL-IN Solicitud.fec_desembolso IN FRAME F_Solicitud
    EXP-LABEL                                                            */
 /* SETTINGS FOR FILL-IN Solicitud.fec_primerPago IN FRAME F_Solicitud
@@ -2877,6 +2875,9 @@ ASSIGN
    NO-ENABLE EXP-LABEL                                                  */
 /* SETTINGS FOR FILL-IN WAntiguedad IN FRAME F_Solicitud
    NO-ENABLE                                                            */
+ASSIGN 
+       WAntiguedad:READ-ONLY IN FRAME F_Solicitud        = TRUE.
+
 /* SETTINGS FOR FILL-IN WMonto IN FRAME F_Solicitud
    NO-ENABLE                                                            */
 /* SETTINGS FOR FILL-IN WTasa IN FRAME F_Solicitud
@@ -2886,8 +2887,14 @@ ASSIGN
 
 /* SETTINGS FOR FILL-IN WVeces IN FRAME F_Solicitud
    NO-ENABLE                                                            */
+ASSIGN 
+       WVeces:READ-ONLY IN FRAME F_Solicitud        = TRUE.
+
 /* SETTINGS FOR FILL-IN WX_Edad IN FRAME F_Solicitud
    NO-ENABLE                                                            */
+ASSIGN 
+       WX_Edad:READ-ONLY IN FRAME F_Solicitud        = TRUE.
+
 /* SETTINGS FOR FILL-IN W_Desembolso IN FRAME F_Solicitud
    NO-ENABLE                                                            */
 /* SETTINGS FOR FILL-IN W_ForPago IN FRAME F_Solicitud
@@ -5154,10 +5161,26 @@ DO:
                pro_creditos.cod_credito = 114 THEN DO:
                 cmb_sistemas:SCREEN-VALUE IN FRAME F_Solicitud = "00002 - Cuota única".
                 cmb_sistemas:SENSITIVE = FALSE.
+                cmb_perPago:SCREEN-VALUE = "8 - Semestral".
+                cmb_perPago:SENSITIVE = FALSE.
+                solicitud.plazo:SCREEN-VALUE = "1".
+                solicitud.plazo:SENSITIVE = FALSE.
+                solicitud.FOR_pago:SCREEN-VALUE IN FRAME F_ForPago = "1".
+                solicitud.FOR_pago:SENSITIVE = FALSE.
+                W_ForPago:SCREEN-VALUE = "Caja".
+                button-107:SENSITIVE = FALSE.
 
-                IF pro_credito THEN
+                APPLY 'leave' TO solicitud.plazo.
             END.
-
+            ELSE DO:
+                cmb_sistemas:SCREEN-VALUE IN FRAME F_Solicitud = "00001 - Cuota fija".
+                cmb_sistemas:SENSITIVE = FALSE.
+                cmb_perPago:SCREEN-VALUE = "4 - Mensual".
+                cmb_perPago:SENSITIVE = FALSE.
+                solicitud.plazo:SCREEN-VALUE = "".
+                solicitud.plazo:SENSITIVE = TRUE.
+                button-107:SENSITIVE = TRUE.
+            END.
         END.
     END.
 
@@ -7974,6 +7997,8 @@ DO:
             END.
         END.
     END.
+
+    RUN liquidar.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -8531,7 +8556,7 @@ DO:
             ASSIGN solicitud.fec_primerPago:SCREEN-VALUE = STRING(fechaTemp,"99/99/9999").
         END.
         ELSE
-            ASSIGN solicitud.fec_primerPago:SCREEN-VALUE = STRING(ADD-INTERVAL(DATE(solicitud.fec_solicitud:SCREEN-VALUE),INTEGER(solicitud.plazo:SCREEN-VALUE),"months"),"99/99/9999").
+            ASSIGN solicitud.fec_primerPago:SCREEN-VALUE = STRING(ADD-INTERVAL(DATE(solicitud.fec_solicitud:SCREEN-VALUE),/*INTEGER(solicitud.plazo:SCREEN-VALUE)*/ 6,"months"),"99/99/9999").
     END.
     /* ------------------------------------------------------------------------- */
     
@@ -8546,8 +8571,8 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL Solicitud.Plazo wWin
 ON VALUE-CHANGED OF Solicitud.Plazo IN FRAME F_Solicitud /* Plazo */
 DO:
-  Solicitud.Cuota:SCREEN-VALUE = "0".
-  ENABLE Btn_Liquidar WITH FRAME F_Solicitud.
+    /*Solicitud.Cuota:SCREEN-VALUE = "0".
+    ENABLE Btn_Liquidar WITH FRAME F_Solicitud.*/
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -10672,8 +10697,8 @@ PROCEDURE enable_UI :
           Solicitud.fec_primerPago Solicitud.Cuota Solicitud.Deducible 
           Solicitud.Total_Prestamo 
       WITH FRAME F_Solicitud IN WINDOW wWin.
-  ENABLE RECT-322 RECT-323 RECT-325 RECT-327 RECT-330 RECT-331 RECT-333 
-         RECT-334 BUTTON-19 BUTTON-103 Btn_Destino btnGrntias Btn_Gar 
+  ENABLE RECT-322 RECT-323 RECT-325 RECT-327 RECT-330 RECT-333 RECT-334 
+         BUTTON-19 BUTTON-103 Btn_Destino btnGrntias Btn_Gar 
          btnFrmlrioAfliacion Solicitud.fec_desembolso Cmb_PerPago Btn_Proyectar 
          Solicitud.fec_primerPago BUTTON-120 BUTTON-107 BUTTON-105 Btn_HojaVida 
          Btn_Extras BUTTON-102 Btn_CancCred Btn_Liquidar 
@@ -12582,16 +12607,14 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE initializeObject wWin 
 PROCEDURE initializeObject :
-MESSAGE "Inicia proceso"
-        VIEW-AS ALERT-BOX INFO BUTTONS OK.
-
-    /* oakley */
-
 FOR EACH pro_scoring WHERE pro_scoring.observacion = "ESCENARIO ECONOMICO" NO-LOCK:
     CREATE tEscnrioEcnmco.
     ASSIGN tEscnrioEcnmco.clfccion = pro_scoring.titulo
            tEscnrioEcnmco.ps = fchar2decimal(pro_scoring.Rango_final).
 END.
+
+MESSAGE "Inicia proceso"
+        VIEW-AS ALERT-BOX INFO BUTTONS OK.
 
 FOR EACH Varios WHERE Varios.Tipo = 26 NO-LOCK:
     W_Ok = Cmb_Negadas:ADD-LAST(STRING(Varios.Codigo,"99999") + " - " + Varios.Descripcion) IN FRAME F_Ultima.
@@ -14262,7 +14285,7 @@ IF AVAILABLE pro_creditos THEN DO:
                     "No se reciben más solicitudes para este concepto..."
                 VIEW-AS ALERT-BOX INFO BUTTONS OK.
 
-            RETURN ERROR.
+            /*RETURN ERROR.*/
         END.
     END.
 
