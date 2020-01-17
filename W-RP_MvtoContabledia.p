@@ -280,9 +280,10 @@ PROCEDURE ProcesoImprimir:
                         AND agencias.agencia <= W_Ag2 NO-LOCK:
         FOR EACH mov_contable WHERE mov_contable.agencia = agencias.agencia
                                 AND mov_contable.fec_contable >= w_fec1
-                                AND mov_contable.fec_contable <= w_fec2
-                                AND mov_contable.cuenta >= w_cuenta1
-                                AND mov_contable.cuenta <= w_cuenta2 NO-LOCK:
+                                AND mov_contable.fec_contable <= w_fec2 NO-LOCK:
+            IF mov_contable.cuenta < w_cuenta1 OR mov_contable.cuenta > w_cuenta2 THEN
+                NEXT.
+
             IF mov_contable.comprobante < w_cb1 OR mov_contable.comprobante > w_cb2 THEN
                 NEXT.
 
@@ -298,6 +299,9 @@ PROCEDURE ProcesoImprimir:
             CREATE tmp_mvto.
             BUFFER-COPY mov_contable TO tmp_mvto.
         END.
+
+        /*MESSAGE "Termina mov_contable"
+            VIEW-AS ALERT-BOX INFO BUTTONS OK.*/
 
         FOR EACH mov_contable2 WHERE mov_contable2.agencia = agencias.agencia
                                  AND mov_contable2.comprobante >= w_cb1
@@ -318,11 +322,10 @@ PROCEDURE ProcesoImprimir:
             BUFFER-COPY mov_contable2 TO tmp_mvto.
             tmp_mvto.nit = mov_contable2.cliente_id.
         END.
+
+        /*MESSAGE "Termina mov_contable2"
+            VIEW-AS ALERT-BOX INFO BUTTONS OK.*/
     END.
-
-
-
-    
 
     IF W_TotCta THEN DO:
         IF W_Usuario1 <> "" THEN

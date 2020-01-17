@@ -314,7 +314,7 @@ DEFINE FRAME F_Lq
      BUTTON-166 AT ROW 4.77 COL 55
      Btn_Ejecutar AT ROW 6.15 COL 55
      BtnDone AT ROW 8.81 COL 55
-     "Revisión 04/04/2013" VIEW-AS TEXT
+     "Revisión 02/01/2020" VIEW-AS TEXT
           SIZE 19 BY .81 AT ROW 3.15 COL 50.29 WIDGET-ID 2
           FONT 3
      RECT-290 AT ROW 4.23 COL 54
@@ -655,25 +655,23 @@ END PROCEDURE.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE initializeObject wWin 
 PROCEDURE initializeObject :
 DEFINE VAR i AS INTEGER INITIAL 1.
+
 RUN SUPER.
 
-IF W_OfiIni = 0 THEN
-    W_Ok = Cmb_Agencias:ADD-LAST("000 - Todas las Agencias") IN FRAME F_Lq.
+W_Ok = Cmb_Agencias:ADD-LAST("000 - Todas las Agencias") IN FRAME F_Lq.
 
 FOR EACH Agencias WHERE Agencias.Estado <> 3
-                        AND Agencias.Agencia GE W_OfiIni
-                        AND Agencias.Agencia LE W_OfiFin NO-LOCK:
+                    AND Agencias.Agencia >= W_OfiIni
+                    AND Agencias.Agencia <= W_OfiFin NO-LOCK:
     W_Ok = Cmb_Agencias:ADD-LAST(STRING(Agencias.Agencia,"999") + " - " + Agencias.Nombre).
     cmb_agencias:SCREEN-VALUE = STRING(Agencias.Agencia,"999") + " - " + Agencias.Nombre.
 END.
 
-IF W_OfiIni = 0 THEN
-    Cmb_Agencias:SCREEN-VALUE = "000 - Todas las Agencias".
+Cmb_Agencias:SCREEN-VALUE = "000 - Todas las Agencias".
 
-
-ASSIGN WDia:SCREEN-VALUE = STRING(DAY(w_fecha))
-       WMes:SCREEN-VALUE = STRING(MONTH(w_fecha))
-       WAno:SCREEN-VALUE = STRING(YEAR(w_fecha)).
+WDia:SCREEN-VALUE = STRING(DAY(w_fecha)).
+WMes:SCREEN-VALUE = STRING(MONTH(w_fecha)).
+WAno:SCREEN-VALUE = STRING(YEAR(w_fecha)).
 
 END PROCEDURE.
 
@@ -692,8 +690,6 @@ DEFINE VAR vPath AS CHARACTER.
 
 Liquidando:
 DO TRANSACTION ON ERROR UNDO Liquidando:
-    MESSAGE W_OfiIni W_OfiFin
-        VIEW-AS ALERT-BOX INFO BUTTONS OK.
     FOR EACH Agencias WHERE Agencias.Agencia >= W_OfiIni
                         AND Agencias.Agencia <= W_OfiFin NO-LOCK:
         /* 2. Hacemos el débito automático para los Créditos Rotativos con mora menor a 85 días */

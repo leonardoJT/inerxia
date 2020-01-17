@@ -14,14 +14,18 @@ w_mes = MONTH(W_Fec1).
 dia1 = DAY(w_Fec1).
 dia2 = DAY(w_fec2).
 
-vCuenta = "16500501".
+/*vCuenta = "14680501".*/
+/*vCuenta = "14680502".*/
+/*vCuenta = "14681001".*/
+/*vCuenta = "51152901".*/
+vCuenta = "51152902".
 
 MESSAGE "Inicia Mayorización"
     VIEW-AS ALERT-BOX INFO BUTTONS OK.
 
 FIND FIRST cuentas WHERE cuentas.cuenta = vCuenta NO-LOCK NO-ERROR.
 
-FOR EACH agencias WHERE agencias.agencia = 1 NO-LOCK:
+FOR EACH agencias WHERE agencias.agencia > 0 NO-LOCK:
     FOR EACH sal_cuenta WHERE sal_cuenta.agencia = agencias.agencia
                           AND sal_cuenta.cuenta = vCuenta
                           AND SAL_CUENTA.ano EQ w_ano:

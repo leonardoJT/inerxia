@@ -39,18 +39,36 @@ END PROCEDURE.
 
 /* Encuentra el saldo de una cuenta */
 PROCEDURE HallarSaldoCuenta:
-    DEFINE INPUT PARAMETER agenciaIni AS INTEGER.
-    DEFINE INPUT PARAMETER agenciaFin AS INTEGER.
-    DEFINE INPUT PARAMETER cenCostosIni AS INTEGER.
-    DEFINE INPUT PARAMETER cenCostosFin AS INTEGER.
+    DEFINE INPUT PARAMETER pAgencia AS INTEGER.
+    DEFINE INPUT PARAMETER pCenCostos AS INTEGER.
     DEFINE INPUT PARAMETER pCuenta AS CHARACTER.
     DEFINE INPUT PARAMETER pYear AS INTEGER.
-    DEFINE INPUT PARAMETER pMes AS INTEGER FORMAT "99".
-    DEFINE OUTPUT PARAMETER pDB AS DECIMAL INITIAL 0.
-    DEFINE OUTPUT PARAMETER pCR AS DECIMAL INITIAL 0.
-    DEFINE OUTPUT PARAMETER saldoFinal AS DECIMAL INITIAL 0.
+    DEFINE INPUT PARAMETER pMes AS INTEGER.
+    DEFINE OUTPUT PARAMETER pSaldoFinal AS DECIMAL.
 
+    DEFINE VAR agenciaIni AS INTEGER.
+    DEFINE VAR agenciaFin AS INTEGER.
+    DEFINE VAR cenCostosIni AS INTEGER.
+    DEFINE VAR cenCostosFin AS INTEGER.
     DEFINE VAR cont AS INTEGER.
+
+    IF pAgencia = 0 THEN DO:
+        agenciaIni = 0.
+        agenciaFin = 999.
+    END.
+    ELSE DO:
+        agenciaIni = pAgencia.
+        agenciaFin = pAgencia.
+    END.
+
+    IF pcenCostos = 0 THEN DO:
+        cenCostosIni = 0.
+        cenCostosFin = 999.
+    END.
+    ELSE DO:
+        cenCostosIni = pcenCostos.
+        cenCostosFin = pcenCostos.
+    END.
 
     FIND FIRST cuentas WHERE cuentas.cuenta = pCuenta NO-LOCK NO-ERROR.
     IF AVAILABLE cuentas THEN DO:
@@ -60,13 +78,13 @@ PROCEDURE HallarSaldoCuenta:
                               AND sal_cuenta.cen_costo <= cenCostosFin
                               AND sal_cuenta.cuenta = pCuenta
                               AND sal_cuenta.ano = pYear NO-LOCK:
-            saldoFinal = sal_cuenta.sal_inicial.
+            pSaldoFinal = sal_cuenta.sal_inicial.
 
             DO cont = 1 TO pMes:
                 IF cuentas.naturaleza = "DB" THEN
-                    saldoFinal = saldoFinal + sal_cuenta.db[cont] - sal_cuenta.cr[cont].
+                    pSaldoFinal = pSaldoFinal + sal_cuenta.db[cont] - sal_cuenta.cr[cont].
                 ELSE
-                    saldoFinal = saldoFinal - sal_cuenta.db[cont] + sal_cuenta.cr[cont].
+                    pSaldoFinal = pSaldoFinal - sal_cuenta.db[cont] + sal_cuenta.cr[cont].
             END.
         END.
     END.

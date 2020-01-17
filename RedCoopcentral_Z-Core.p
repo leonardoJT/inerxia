@@ -16,6 +16,7 @@ DEFINE VAR ODBC-CURSOR AS INTEGER NO-UNDO.
 DEFINE VAR vNumDocumento AS INTEGER.
 DEFINE VAR vValEfectivo AS DECIMAL.
 DEFINE VAR vValCheque AS DECIMAL.
+DEFINE VAR vValComision AS DECIMAL.
 DEFINE VAR pError AS LOGICAL.
 DEFINE VAR vComprobante AS INTEGER INITIAL 22.
 DEFINE VAR vCuentaCompensacion AS CHARACTER INITIAL "24459550".
@@ -202,6 +203,7 @@ DO:
                     IF ttRecibir.cheque_codigo = '' THEN DO:
                         vValEfectivo = ttRecibir.valor / 100.
                         vValCheque = 0.
+                        vValComision = ttRecibir.valor_comision / 100.
                     END.
                     ELSE DO:
                         vValEfectivo = 0.
@@ -213,6 +215,9 @@ DO:
                     FIND FIRST comprobantes WHERE comprobantes.comprobante = vComprobante NO-ERROR.
                     /* ----------------------- */
 
+                    IF vValEfectivo <> 0 OR vValCheque <> 0 OR vValComision <> 0 THEN DO:
+                        /* oakley */
+                    END.
                     
                     /* Se aplica la lògica para determinar qué clase de Tx es, y hacer el llamado a la rutina que corresponda */
                     IF ttRecibir.operacion = 'DEBITO' THEN DO: /* Retiros */

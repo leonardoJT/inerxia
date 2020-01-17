@@ -45,9 +45,8 @@ DEFINE VAR pCuentaSyA AS CHARACTER INITIAL "19040501".
 
 /* Definitions for FRAME DEFAULT-FRAME                                  */
 &Scoped-define FIELDS-IN-QUERY-DEFAULT-FRAME Usuarios.Pedir_Clave ~
-Usuarios.Id_OpeOfi Usuarios.Estado 
-&Scoped-define ENABLED-FIELDS-IN-QUERY-DEFAULT-FRAME Usuarios.Id_OpeOfi ~
-Usuarios.Estado 
+Usuarios.Estado Usuarios.Id_OpeOfi 
+&Scoped-define ENABLED-FIELDS-IN-QUERY-DEFAULT-FRAME Usuarios.Estado 
 &Scoped-define ENABLED-TABLES-IN-QUERY-DEFAULT-FRAME Usuarios
 &Scoped-define FIRST-ENABLED-TABLE-IN-QUERY-DEFAULT-FRAME Usuarios
 &Scoped-define QUERY-STRING-DEFAULT-FRAME FOR EACH Usuarios SHARE-LOCK
@@ -57,19 +56,20 @@ Usuarios.Estado
 
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-FIELDS Usuarios.Id_OpeOfi Usuarios.Estado 
+&Scoped-Define ENABLED-FIELDS Usuarios.Estado 
 &Scoped-define ENABLED-TABLES Usuarios
 &Scoped-define FIRST-ENABLED-TABLE Usuarios
 &Scoped-Define ENABLED-OBJECTS RECT-1 RECT-2 RECT-3 RECT-4 RECT-6 RECT-9 ~
-RECT-348 cNombre txtAnotaciones btnBuscar btnAgregar btnSalir 
-&Scoped-Define DISPLAYED-FIELDS Usuarios.Pedir_Clave Usuarios.Id_OpeOfi ~
-Usuarios.Estado 
+cNombre txtAnotaciones btnBuscar btnAgregar btnSalir 
+&Scoped-Define DISPLAYED-FIELDS Usuarios.Pedir_Clave Usuarios.Estado ~
+Usuarios.Id_OpeOfi 
 &Scoped-define DISPLAYED-TABLES Usuarios
 &Scoped-define FIRST-DISPLAYED-TABLE Usuarios
-&Scoped-Define DISPLAYED-OBJECTS tgDepreciable txtMesesA_Depreciar cId ~
-txtValorDepreciado cNombre txtFecUltDep cEmail cUsuario cmbPerfiles ~
-txtMarca cmbAgencia txtSerial rsEstado cmbPrivilegios txtUbicacion avaluo ~
-fechaAvaluo txtAnotaciones txtNumFactura txtNitProveedor txtValorCompra 
+&Scoped-Define DISPLAYED-OBJECTS txtMesesA_Depreciar cId txtValorDepreciado ~
+cNombre txtFecUltDep cEmail cUsuario cmbPerfiles txtMarca cmbAgencia ~
+txtSerial rsEstado cmbPrivilegios txtUbicacion tgPermiteCambioDeFecha ~
+avaluo tgPermiteGestionDeCobranza fechaAvaluo txtAnotaciones ~
+txtNitProveedor txtValorCompra 
 
 /* Custom List Definitions                                              */
 /* List-1,List-2,List-3,List-4,List-5,List-6                            */
@@ -191,11 +191,6 @@ DEFINE VARIABLE txtNitProveedor AS CHARACTER FORMAT "X(256)":U
      VIEW-AS FILL-IN 
      SIZE 22.57 BY .92 NO-UNDO.
 
-DEFINE VARIABLE txtNumFactura AS CHARACTER FORMAT "X(256)":U 
-     LABEL "Factura #" 
-     VIEW-AS FILL-IN 
-     SIZE 22.57 BY .92 NO-UNDO.
-
 DEFINE VARIABLE txtSerial AS CHARACTER FORMAT "X(256)":U 
      LABEL "Serial #" 
      VIEW-AS FILL-IN 
@@ -240,13 +235,9 @@ DEFINE RECTANGLE RECT-3
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 59 BY 8.08.
 
-DEFINE RECTANGLE RECT-348
-     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 18 BY 3.23.
-
 DEFINE RECTANGLE RECT-4
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 29 BY 4.04.
+     SIZE 29 BY 4.85.
 
 DEFINE RECTANGLE RECT-6
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
@@ -256,10 +247,15 @@ DEFINE RECTANGLE RECT-9
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 22.43 BY 1.35.
 
-DEFINE VARIABLE tgDepreciable AS LOGICAL INITIAL no 
-     LABEL "Depreciable" 
+DEFINE VARIABLE tgPermiteCambioDeFecha AS LOGICAL INITIAL no 
+     LABEL "Permite cambiar fecha de trabajo" 
      VIEW-AS TOGGLE-BOX
-     SIZE 15 BY .77 NO-UNDO.
+     SIZE 36 BY .77 NO-UNDO.
+
+DEFINE VARIABLE tgPermiteGestionDeCobranza AS LOGICAL INITIAL no 
+     LABEL "Permite gestión de cobranza" 
+     VIEW-AS TOGGLE-BOX
+     SIZE 36 BY .77 NO-UNDO.
 
 /* Query definitions                                                    */
 &ANALYZE-SUSPEND
@@ -270,7 +266,6 @@ DEFINE QUERY DEFAULT-FRAME FOR
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME DEFAULT-FRAME
-     tgDepreciable AT ROW 2.35 COL 148 WIDGET-ID 72
      txtMesesA_Depreciar AT ROW 3.27 COL 152.57 COLON-ALIGNED WIDGET-ID 74
      Usuarios.Pedir_Clave AT ROW 3.42 COL 77.86 HELP
           "" WIDGET-ID 118
@@ -280,6 +275,13 @@ DEFINE FRAME DEFAULT-FRAME
      cId AT ROW 3.65 COL 4.57 WIDGET-ID 124
      txtValorDepreciado AT ROW 4.31 COL 138 COLON-ALIGNED WIDGET-ID 76
      cNombre AT ROW 4.65 COL 9.57 WIDGET-ID 84
+     Usuarios.Estado AT ROW 5.04 COL 78 NO-LABEL WIDGET-ID 128
+          VIEW-AS RADIO-SET VERTICAL
+          RADIO-BUTTONS 
+                    "Activo", 1,
+"Bloqueado", 2,
+"Retirado", 3
+          SIZE 14 BY 2.15
      txtFecUltDep AT ROW 5.38 COL 122.57 WIDGET-ID 96
      cEmail AT ROW 5.62 COL 57 RIGHT-ALIGNED WIDGET-ID 86
      cUsuario AT ROW 6.62 COL 9.57 WIDGET-ID 30
@@ -294,17 +296,11 @@ DEFINE FRAME DEFAULT-FRAME
           VIEW-AS TOGGLE-BOX
           SIZE 32 BY .77
      txtUbicacion AT ROW 10.69 COL 114.71 WIDGET-ID 122
-     Usuarios.Estado AT ROW 11.54 COL 53.14 NO-LABEL WIDGET-ID 128
-          VIEW-AS RADIO-SET VERTICAL
-          RADIO-BUTTONS 
-                    "Activo", 1,
-"Bloqueado", 2,
-"Retirado", 3
-          SIZE 14 BY 2.15
+     tgPermiteCambioDeFecha AT ROW 11.58 COL 18 WIDGET-ID 72
      avaluo AT ROW 11.77 COL 79 COLON-ALIGNED WIDGET-ID 104
+     tgPermiteGestionDeCobranza AT ROW 12.46 COL 18 WIDGET-ID 138
      fechaAvaluo AT ROW 12.77 COL 72.14 WIDGET-ID 106
      txtAnotaciones AT ROW 16.23 COL 63 NO-LABEL WIDGET-ID 80
-     txtNumFactura AT ROW 16.77 COL 27.42 WIDGET-ID 46
      txtNitProveedor AT ROW 17.73 COL 23.28 WIDGET-ID 48
      txtValorCompra AT ROW 20.08 COL 35.14 COLON-ALIGNED WIDGET-ID 50
      btnBuscar AT ROW 21.92 COL 62.57 WIDGET-ID 12
@@ -313,17 +309,15 @@ DEFINE FRAME DEFAULT-FRAME
      btnEditar AT ROW 21.92 COL 83 WIDGET-ID 16
      btnGuardar AT ROW 21.92 COL 89.86 WIDGET-ID 18
      btnSalir AT ROW 21.92 COL 96.72 WIDGET-ID 20
-     "Estado" VIEW-AS TEXT
-          SIZE 7 BY .62 AT ROW 10.46 COL 52.72 WIDGET-ID 134
-     "Estado" VIEW-AS TEXT
-          SIZE 7.14 BY .62 AT ROW 2.62 COL 76.57 WIDGET-ID 70
+     " Estado y contraseña" VIEW-AS TEXT
+          SIZE 20.43 BY .62 AT ROW 2.62 COL 76.57 WIDGET-ID 70
+     "Anotaciones:" VIEW-AS TEXT
+          SIZE 14 BY .62 AT ROW 15.54 COL 76.43 RIGHT-ALIGNED WIDGET-ID 82
+     "Datos Básicos" VIEW-AS TEXT
+          SIZE 15 BY .62 AT ROW 2.62 COL 3 WIDGET-ID 40
      "              ADMINISTRACIÓN DE USUARIOS" VIEW-AS TEXT
           SIZE 102.29 BY 1.08 AT ROW 1.27 COL 1.72 WIDGET-ID 8
           BGCOLOR 3 
-     "Datos Básicos" VIEW-AS TEXT
-          SIZE 15 BY .62 AT ROW 2.62 COL 3 WIDGET-ID 40
-     "Anotaciones:" VIEW-AS TEXT
-          SIZE 14 BY .62 AT ROW 15.54 COL 76.43 RIGHT-ALIGNED WIDGET-ID 82
      RECT-1 AT ROW 21.73 COL 61.57 WIDGET-ID 26
      RECT-2 AT ROW 2.88 COL 2 WIDGET-ID 38
      RECT-3 AT ROW 15.27 COL 2 WIDGET-ID 42
@@ -331,7 +325,6 @@ DEFINE FRAME DEFAULT-FRAME
      RECT-6 AT ROW 9.08 COL 81 WIDGET-ID 102
      RECT-9 AT ROW 21.62 COL 37 WIDGET-ID 112
      IMAGE-1 AT ROW 3.35 COL 43.72 WIDGET-ID 126
-     RECT-348 AT ROW 10.73 COL 51.72 WIDGET-ID 132
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1 ROW 1
@@ -414,14 +407,16 @@ ASSIGN
 /* SETTINGS FOR FILL-IN fechaAvaluo IN FRAME DEFAULT-FRAME
    NO-ENABLE ALIGN-L                                                    */
 /* SETTINGS FOR TOGGLE-BOX Usuarios.Id_OpeOfi IN FRAME DEFAULT-FRAME
-   EXP-LABEL                                                            */
+   NO-ENABLE EXP-LABEL                                                  */
 /* SETTINGS FOR IMAGE IMAGE-1 IN FRAME DEFAULT-FRAME
    NO-ENABLE                                                            */
 /* SETTINGS FOR TOGGLE-BOX Usuarios.Pedir_Clave IN FRAME DEFAULT-FRAME
    NO-ENABLE EXP-LABEL EXP-HELP                                         */
 /* SETTINGS FOR RADIO-SET rsEstado IN FRAME DEFAULT-FRAME
    NO-ENABLE                                                            */
-/* SETTINGS FOR TOGGLE-BOX tgDepreciable IN FRAME DEFAULT-FRAME
+/* SETTINGS FOR TOGGLE-BOX tgPermiteCambioDeFecha IN FRAME DEFAULT-FRAME
+   NO-ENABLE                                                            */
+/* SETTINGS FOR TOGGLE-BOX tgPermiteGestionDeCobranza IN FRAME DEFAULT-FRAME
    NO-ENABLE                                                            */
 ASSIGN 
        txtAnotaciones:READ-ONLY IN FRAME DEFAULT-FRAME        = TRUE.
@@ -436,8 +431,6 @@ ASSIGN
 /* SETTINGS FOR FILL-IN txtMesesA_Depreciar IN FRAME DEFAULT-FRAME
    NO-ENABLE                                                            */
 /* SETTINGS FOR FILL-IN txtNitProveedor IN FRAME DEFAULT-FRAME
-   NO-ENABLE ALIGN-L                                                    */
-/* SETTINGS FOR FILL-IN txtNumFactura IN FRAME DEFAULT-FRAME
    NO-ENABLE ALIGN-L                                                    */
 /* SETTINGS FOR FILL-IN txtSerial IN FRAME DEFAULT-FRAME
    NO-ENABLE ALIGN-L                                                    */
@@ -536,8 +529,6 @@ DO:
     txtUbicacion:SCREEN-VALUE = "".
     cId:SENSITIVE = TRUE.
     cId:SCREEN-VALUE = "".
-    txtNumFactura:SENSITIVE = TRUE.
-    txtNumFactura:SCREEN-VALUE = "".
     txtNitProveedor:SENSITIVE = TRUE.
     txtNitProveedor:SCREEN-VALUE = "".
     cEmail:SCREEN-VALUE = "".
@@ -548,8 +539,10 @@ DO:
     fechaAvaluo:SENSITIVE = FALSE.
     fechaAvaluo:SCREEN-VALUE = "".
     cmbPerfiles:SENSITIVE = TRUE.
-    tgDepreciable:SENSITIVE = TRUE.
-    tgDepreciable:SCREEN-VALUE = "yes".
+    tgPermiteCambioDeFecha:SENSITIVE = TRUE.
+    tgPermiteCambioDeFecha:SCREEN-VALUE = "no".
+    tgPermiteGestionDeCobranza:SENSITIVE = TRUE.
+    tgPermiteGestionDeCobranza:SCREEN-VALUE = "no".
     usuarios.pedir_clave:SCREEN-VALUE = "no".
     usuarios.id_opeOfi:SCREEN-VALUE = "no".
     txtMesesA_Depreciar:SENSITIVE = TRUE.
@@ -600,8 +593,6 @@ DO:
         txtUbicacion:SENSITIVE = FALSE.
         cId:SCREEN-VALUE = activosFijos.responsable.
         cId:SENSITIVE = FALSE.
-        txtNumFactura:SCREEN-VALUE = activosFijos.numFactura.
-        txtNumFactura:SENSITIVE = FALSE.
         txtNitProveedor:SCREEN-VALUE = activosFijos.nitProveedor.
         txtNitProveedor:SENSITIVE = FALSE.
         txtfecUltDep:SCREEN-VALUE = STRING(activosFijos.fecUltDepreciacion).
@@ -617,8 +608,10 @@ DO:
         txtValorCompra:SCREEN-VALUE = STRING(activosFijos.valorCompra,">>>,>>>,>>>,>>9.99").
         txtValorCompra:SENSITIVE = FALSE.
         rsEstado:SCREEN-VALUE = STRING(activos.estado).
-        tgDepreciable:SCREEN-VALUE = STRING(activosFijos.depreciable).
-        tgDepreciable:SENSITIVE = FALSE.
+        tgPermiteCambioDeFecha:SCREEN-VALUE = STRING(usuarios.permiteCambiarFecha).
+        tgPermiteCambioDeFecha:SENSITIVE = FALSE.
+        tgPermiteGestionDeCobranza:SCREEN-VALUE = STRING(usuarios.permiteGestionDeCobranza).
+        tgPermiteGestionDeCobranza:SENSITIVE = FALSE.
         usuarios.pedir_clave:SCREEN-VALUE = STRING(usuarios.pedir_clave).
         usuarios.id_opeOfi:SCREEN-VALUE = STRING(usuarios.id_opeOfi).
         txtMesesA_Depreciar:SCREEN-VALUE = STRING(activosFijos.mesesDepreciar,">>>9").
@@ -664,8 +657,6 @@ DO:
         txtUbicacion:SCREEN-VALUE = "".
         cId:SENSITIVE = FALSE.
         cId:SCREEN-VALUE = "".
-        txtNumFactura:SENSITIVE = FALSE.
-        txtNumFactura:SCREEN-VALUE = "".
         txtNitProveedor:SENSITIVE = FALSE.
         txtNitProveedor:SCREEN-VALUE = "".
         cEmail:SCREEN-VALUE = "".
@@ -673,8 +664,10 @@ DO:
         txtValorCompra:SCREEN-VALUE = "0.00".
         cmbPerfiles:SENSITIVE = FALSE.
         cmbPerfiles:SCREEN-VALUE = "".
-        tgDepreciable:SENSITIVE = FALSE.
-        tgDepreciable:SCREEN-VALUE = "yes".
+        tgPermiteCambioDeFecha:SENSITIVE = FALSE.
+        tgPermiteCambioDeFecha:SCREEN-VALUE = "no".
+        tgPermiteGestionDeCobranza:SENSITIVE = FALSE.
+        tgPermiteGestionDeCobranza:SCREEN-VALUE = "no".
         usuarios.pedir_clave:SCREEN-VALUE = "no".
         usuarios.id_OpeOfi:SCREEN-VALUE = "no".
         txtMesesA_Depreciar:SENSITIVE = FALSE.
@@ -711,14 +704,11 @@ DO:
     cNombre:SENSITIVE = TRUE.
     txtUbicacion:SENSITIVE = TRUE.
     cId:SENSITIVE = TRUE.
-    txtNumFactura:SENSITIVE = TRUE.
     txtNitProveedor:SENSITIVE = TRUE.
     txtValorCompra:SENSITIVE = FALSE.
     cmbPerfiles:SENSITIVE = TRUE.
-    
-    IF ActivosFijos.depreciable = NO THEN
-        tgDepreciable:SENSITIVE = TRUE.
-    
+    tgPermiteCambioDeFecha:SENSITIVE = TRUE.
+    tgPermiteGestionDeCobranza:SENSITIVE = TRUE.
     txtMesesA_Depreciar:SENSITIVE = TRUE.
     txtValorDepreciado:SENSITIVE = FALSE.
     avaluo:SENSITIVE = FALSE.
@@ -768,16 +758,16 @@ DO:
         txtUbicacion:SCREEN-VALUE = "".
         cId:SENSITIVE = FALSE.
         cId:SCREEN-VALUE = "".
-        txtNumFactura:SENSITIVE = FALSE.
-        txtNumFactura:SCREEN-VALUE = "".
         txtNitProveedor:SENSITIVE = FALSE.
         txtNitProveedor:SCREEN-VALUE = "".
         cEmail:SCREEN-VALUE = "".
         txtValorCompra:SENSITIVE = FALSE.
         txtValorCompra:SCREEN-VALUE = "0.00".
         cmbPerfiles:SENSITIVE = FALSE.
-        tgDepreciable:SENSITIVE = FALSE.
-        tgDepreciable:SCREEN-VALUE = "yes".
+        tgPermiteCambioDeFecha:SENSITIVE = FALSE.
+        tgPermiteCambioDeFecha:SCREEN-VALUE = "no".
+        tgPermiteGestionDeCobranza:SENSITIVE = FALSE.
+        tgPermiteGestionDeCobranza:SCREEN-VALUE = "no".
         usuarios.pedir_clave:SCREEN-VALUE = "no".
         usuarios.id_OpeOfi:SCREEN-VALUE = "no".
         txtMesesA_Depreciar:SENSITIVE = FALSE.
@@ -819,8 +809,7 @@ DO:
             INTEGER(SUBSTRING(cmbPrivilegios:SCREEN-VALUE IN FRAME default-frame,1,2)) <> 3 AND
             INTEGER(SUBSTRING(cmbPrivilegios:SCREEN-VALUE IN FRAME default-frame,1,2)) <> 4) AND
            (txtMarca:SCREEN-VALUE = ""      OR txtMarca:SCREEN-VALUE = ?   OR
-            txtSerial:SCREEN-VALUE = ""     OR txtSerial:SCREEN-VALUE = ?  OR
-            txtNumFactura:SCREEN-VALUE = "" OR txtNumFactura:SCREEN-VALUE = ?) THEN DO:
+            txtSerial:SCREEN-VALUE = ""     OR txtSerial:SCREEN-VALUE = ?) THEN DO:
             MESSAGE "Todos los campos deben estar diligenciados." SKIP
                     "Revise la información y vuelva a intentar."
                 VIEW-AS ALERT-BOX INFO BUTTONS OK.
@@ -828,13 +817,8 @@ DO:
             RETURN NO-APPLY.
         END.
 
-        IF tgDepreciable:SCREEN-VALUE = "yes" THEN DO:
-            IF txtMesesA_Depreciar:SCREEN-VALUE <> "" THEN
-                RUN GrabarActivoFijo.
-        END.
-        ELSE
-            RUN GrabarActivoFijo.
-
+        RUN GrabarActivoFijo.
+        
         cmbAgencia:SENSITIVE = FALSE.
         cmbPrivilegios:SENSITIVE = FALSE.
         cUsuario:SENSITIVE = FALSE.
@@ -844,11 +828,11 @@ DO:
         txtUbicacion:SENSITIVE = FALSE.
         cId:SENSITIVE = FALSE.
         cId:SENSITIVE = FALSE.
-        txtNumFactura:SENSITIVE = FALSE.
         txtNitProveedor:SENSITIVE = FALSE.
         txtValorCompra:SENSITIVE = FALSE.
         cmbPerfiles:SENSITIVE = FALSE.
-        tgDepreciable:SENSITIVE = FALSE.
+        tgPermiteCambioDeFecha:SENSITIVE = FALSE.
+        tgPermiteGestionDeCobranza:SENSITIVE = FALSE.
         txtMesesA_Depreciar:SENSITIVE = FALSE.
         txtValorDepreciado:SENSITIVE = FALSE.
         avaluo:SENSITIVE = FALSE.
@@ -923,21 +907,6 @@ DO:
     cNombre:SCREEN-VALUE = pNombre + " " + pApellido.
 
     FIND FIRST Clientes WHERE clientes.nit = pId NO-LOCK NO-ERROR.
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&Scoped-define SELF-NAME tgDepreciable
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL tgDepreciable C-Win
-ON VALUE-CHANGED OF tgDepreciable IN FRAME DEFAULT-FRAME /* Depreciable */
-DO:
-    IF tgDepreciable:SCREEN-VALUE = "yes" THEN DO:
-        txtMesesA_Depreciar:SENSITIVE = TRUE.
-    END.
-    ELSE
-        txtMesesA_Depreciar:SENSITIVE = FALSE.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -1066,17 +1035,17 @@ PROCEDURE enable_UI :
 
   {&OPEN-QUERY-DEFAULT-FRAME}
   GET FIRST DEFAULT-FRAME.
-  DISPLAY tgDepreciable txtMesesA_Depreciar cId txtValorDepreciado cNombre 
-          txtFecUltDep cEmail cUsuario cmbPerfiles txtMarca cmbAgencia txtSerial 
-          rsEstado cmbPrivilegios txtUbicacion avaluo fechaAvaluo txtAnotaciones 
-          txtNumFactura txtNitProveedor txtValorCompra 
+  DISPLAY txtMesesA_Depreciar cId txtValorDepreciado cNombre txtFecUltDep cEmail 
+          cUsuario cmbPerfiles txtMarca cmbAgencia txtSerial rsEstado 
+          cmbPrivilegios txtUbicacion tgPermiteCambioDeFecha avaluo 
+          tgPermiteGestionDeCobranza fechaAvaluo txtAnotaciones txtNitProveedor 
+          txtValorCompra 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
   IF AVAILABLE Usuarios THEN 
-    DISPLAY Usuarios.Pedir_Clave Usuarios.Id_OpeOfi Usuarios.Estado 
+    DISPLAY Usuarios.Pedir_Clave Usuarios.Estado Usuarios.Id_OpeOfi 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
-  ENABLE RECT-1 RECT-2 RECT-3 RECT-4 RECT-6 RECT-9 RECT-348 cNombre 
-         Usuarios.Id_OpeOfi Usuarios.Estado txtAnotaciones btnBuscar btnAgregar 
-         btnSalir 
+  ENABLE RECT-1 RECT-2 RECT-3 RECT-4 RECT-6 RECT-9 cNombre Usuarios.Estado 
+         txtAnotaciones btnBuscar btnAgregar btnSalir 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
   {&OPEN-BROWSERS-IN-QUERY-DEFAULT-FRAME}
   VIEW C-Win.
@@ -1136,16 +1105,20 @@ usuario.usuario = cUsuario:SCREEN-VALUE.
 activosFijos.marca = txtMarca:SCREEN-VALUE.
 usuarios.grupo = INTEGER(SUBSTRING(cmbPerfiles:SCREEN-VALUE,1,2)).
 
-IF tgDepreciable:SCREEN-VALUE = "yes" THEN
-    activosFijos.depreciable = TRUE.
+IF tgPermiteCambioDeFecha:SCREEN-VALUE = "yes" THEN
+    usuarios.permiteCambiarFecha = TRUE.
 ELSE
-    activosFijos.depreciable = FALSE.
+    usuarios.permiteCambiarFecha = FALSE.
+
+IF tgPermiteGestionDeCobranza:SCREEN-VALUE = "yes" THEN
+    usuarios.permiteGestionDeCobranza = TRUE.
+ELSE
+    usuarios.permiteGestionDeCobranza = FALSE.
 
 activosFijos.estado = 1.
 activosFijos.mesesDepreciar = INTEGER(txtMesesA_Depreciar:SCREEN-VALUE).
 activosFijos.nitProveedor = txtNitProveedor:SCREEN-VALUE.
 usuarios.usuario = cUsuario:SCREEN-VALUE.
-activosFijos.numFactura = txtNumFactura:SCREEN-VALUE.
 activosFijos.serial = txtSerial:SCREEN-VALUE.
 activosFijos.ubicacion = txtUbicacion:SCREEN-VALUE.
 usuarios.nit = cId:SCREEN-VALUE.

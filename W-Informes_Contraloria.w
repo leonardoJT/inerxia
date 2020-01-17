@@ -134,7 +134,7 @@ DECLARE InfCDAt CURSOR FOR
 &Scoped-define PROCEDURE-TYPE Window
 &Scoped-define DB-AWARE no
 
-/* Name of first Frame and/or Browse and/or first Query                 */
+/* Name of designated FRAME-NAME and/or first browse and/or first query */
 &Scoped-define FRAME-NAME FrmGerencia
 
 /* Standard List Definitions                                            */
@@ -235,19 +235,19 @@ DEFINE VARIABLE R_InfGral AS INTEGER
      SIZE 49 BY 6.46 TOOLTIP "Informe Consolidados" NO-UNDO.
 
 DEFINE RECTANGLE RECT-282
-     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL 
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 22 BY 1.88.
 
 DEFINE RECTANGLE RECT-283
-     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL 
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 23 BY 1.88.
 
 DEFINE RECTANGLE RECT-291
-     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL 
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 15 BY 7.
 
 DEFINE RECTANGLE RECT-292
-     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL 
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 51 BY 7.04.
 
 
@@ -268,11 +268,11 @@ DEFINE FRAME FrmGerencia
      BtnDone AT ROW 8.62 COL 62.57
      "Agencias:" VIEW-AS TEXT
           SIZE 18 BY .81 AT ROW 1.27 COL 3
-     "Fecha de Corte" VIEW-AS TEXT
-          SIZE 15 BY .62 AT ROW 1.42 COL 54.72
-          BGCOLOR 17 FGCOLOR 7 
      "Fecha Inicial" VIEW-AS TEXT
           SIZE 14.72 BY .69 AT ROW 1.38 COL 32
+          BGCOLOR 17 FGCOLOR 7 
+     "Fecha de Corte" VIEW-AS TEXT
+          SIZE 15 BY .62 AT ROW 1.42 COL 54.72
           BGCOLOR 17 FGCOLOR 7 
      Img_MesF AT ROW 2.19 COL 58.29
      Img_MesI AT ROW 2.19 COL 35.72
@@ -334,7 +334,7 @@ ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 /* SETTINGS FOR WINDOW Wwin
   VISIBLE,,RUN-PERSISTENT                                               */
 /* SETTINGS FOR FRAME FrmGerencia
-                                                                        */
+   FRAME-NAME                                                           */
 /* SETTINGS FOR FILL-IN AnoFin IN FRAME FrmGerencia
    NO-ENABLE                                                            */
 /* SETTINGS FOR FILL-IN AnoIni IN FRAME FrmGerencia
@@ -762,39 +762,49 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE InfAsociados_Ingresos Wwin 
 PROCEDURE InfAsociados_Ingresos :
-/*------------------------------------------------------------------------------   
-   PROPOSITO  : Reporte de ingreso de asociados apoyado en el manejo de los aportes
-   AUTOR      :  JOHN  MONCADA PUERTA
-   ACTAULIZADO: 9 septiembre de 2005      
-------------------------------------------------------------------------------*/ 
- RUN _SetCurs.r ("WAIT").
- Listado = W_PathSpl + "InfAhoApeCanc-" + W_Usuario + ".Lst".
- OS-DELETE VALUE(Listado).
- OUTPUT TO value(Listado) NO-ECHO PAGED PAGE-SIZE 65.
- {Incluido\RepEncabezado.i}
- W_Reporte    = "REPORTE   : Ingreso de Asociados -  Agencia: " + TRIM(SUBSTRING(Cmb_Agencias,6,15)) + " Del " + STRING(FecIni,"99/99/9999") + " Al " + STRING(FecFin,"99/99/9999").
- W_EncColumna = "#Asoc. Nro.Identif  Nombres Completos                          Apertura     Aportes".
- VIEW FRAME F-Encabezado.
-    
- DEFINE VAR wconteo AS INTEGER INITIAL 0.
- DEFINE VAR wsaldo  AS DECIMAL INITIAL 0.
- DEFINE VAR wTsaldo AS DECIMAL INITIAL 0.
- FOR EACH ahorros WHERE Ahorros.Tip_Ahorro       EQ 4 AND 
-                        ahorros.estado           EQ 1       AND
-                        ahorros.fec_cancelacion  EQ ? AND
-                        ahorros.fec_apertura     GE fecini AND ahorros.fec_apertura LE fecfin AND
-                        ahorros.agencia          GE ageini AND ahorros.agencia      LE agefin AND
-                        (ahorros.sdo_disponible + ahorros.sdo_canje) GT 0 NO-LOCK BREAK BY ahorros.agencia BY ahorros.fec_apertura:
+RUN _SetCurs.r ("WAIT").
+
+Listado = W_PathSpl + "InfAhoApeCanc-" + W_Usuario + ".Lst".
+
+OS-DELETE VALUE(Listado).
+
+OUTPUT TO value(Listado) NO-ECHO PAGED PAGE-SIZE 66.
+
+{Incluido\RepEncabezado.i}
+
+W_Reporte = "REPORTE   : Ingreso de Asociados -  Agencia: " + TRIM(SUBSTRING(Cmb_Agencias,6,15)) + " Del " + STRING(FecIni,"99/99/9999") + " Al " + STRING(FecFin,"99/99/9999").
+W_EncColumna = "#Asoc. Nro.Identif  Nombres Completos                          Apertura     Aportes".
+
+VIEW FRAME F-Encabezado.
+
+DEFINE VAR wconteo AS INTEGER.
+DEFINE VAR wsaldo AS DECIMAL.
+DEFINE VAR wTsaldo AS DECIMAL.
+
+FOR EACH ahorros WHERE Ahorros.Tip_Ahorro = 4
+                   AND ahorros.estado = 1
+                   AND ahorros.fec_cancelacion = ?
+                   AND ahorros.fec_apertura >= fecini
+                   AND ahorros.fec_apertura <= fecfin
+                   AND ahorros.agencia >= ageini
+                   AND ahorros.agencia <= agefin
+                   AND (ahorros.sdo_disponible + ahorros.sdo_canje) > 0 NO-LOCK BREAK BY ahorros.agencia
+                                                                                      BY ahorros.fec_apertura:
     IF FIRST-OF(Ahorros.agencia) THEN DO:
-       FIND agencias WHERE agencias.agencia = ahorros.agencia NO-LOCK NO-ERROR.
-       PUT " Agencia: " CAPS(TRIM(agencias.nombre)) FORMAT "X(15)" SKIP(1).
-       ASSIGN wsaldo = 0 wconteo = 0.
+        FIND FIRST agencias WHERE agencias.agencia = ahorros.agencia NO-LOCK NO-ERROR.
+
+        PUT " Agencia: " CAPS(TRIM(agencias.nombre)) FORMAT "X(15)" SKIP(1).
+
+        wsaldo = 0.
+        wconteo = 0.
     END.
 
     wconteo = wconteo + 1.
     wsaldo  = wsaldo + (sdo_disponible + sdo_canje).
     wtsaldo = wtsaldo + (sdo_disponible + sdo_canje).
-    FIND clientes WHERE clientes.nit     = ahorros.nit      NO-LOCK NO-ERROR.
+
+    FIND FIRST clientes WHERE clientes.nit = ahorros.nit NO-LOCK NO-ERROR.
+
     PUT    wconteo           FORMAT "zzz,zz9" " "
            ahorros.nit FORMAT "X(12)" " "
            trim(clientes.apellido1) + " " + trim(clientes.apellido2) + " " + trim(clientes.nombre) FORMAT "X(40)" " "

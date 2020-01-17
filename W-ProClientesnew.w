@@ -1340,1089 +1340,6 @@ DEFINE FRAME F_Clientes
          BGCOLOR 17 FONT 4
          DEFAULT-BUTTON Btn_Salvar.
 
-DEFINE FRAME F_Ubicacion
-     Clientes.departamento AT ROW 4.81 COL 70.57 COLON-ALIGNED NO-LABEL WIDGET-ID 326
-          VIEW-AS FILL-IN 
-          SIZE 2 BY .5
-          BGCOLOR 14 FGCOLOR 14 
-     Clientes.facultad AT ROW 4.81 COL 72.86 COLON-ALIGNED NO-LABEL WIDGET-ID 324
-          VIEW-AS FILL-IN 
-          SIZE 2 BY .5
-          BGCOLOR 14 FGCOLOR 14 
-     Anexos_Clientes.Cam_int1 AT ROW 14.69 COL 56 COLON-ALIGNED HELP
-          "Indicativo del telefono del cliente" NO-LABEL WIDGET-ID 298 FORMAT "99"
-          VIEW-AS COMBO-BOX INNER-LINES 13
-          LIST-ITEMS "0","1","2","3","4","5","6","7","8","9","10","11","12" 
-          DROP-DOWN-LIST
-          SIZE 7 BY 1 TOOLTIP "Meses Actividad"
-     Anexos_Clientes.Tel_Fax_Comercial AT ROW 11.96 COL 62.86 COLON-ALIGNED WIDGET-ID 292
-          LABEL "Fax"
-          VIEW-AS FILL-IN 
-          SIZE 19 BY .81
-          BGCOLOR 18 
-     Anexos_Clientes.Exento_retencion AT ROW 1.15 COL 13
-          LABEL "Retencion Fuente"
-          VIEW-AS TOGGLE-BOX
-          SIZE 20 BY .81 TOOLTIP "Exento Retencion fuente"
-          FONT 5
-     Anexos_Clientes.Exento_GMF AT ROW 1.15 COL 36.14
-          LABEL "GMF"
-          VIEW-AS TOGGLE-BOX
-          SIZE 8 BY .81 TOOLTIP "Exento GMF"
-     Anexos_Clientes.Declara_Renta AT ROW 1.15 COL 60.86
-          LABEL ""
-          VIEW-AS TOGGLE-BOX
-          SIZE 3 BY .77 TOOLTIP "Declara Renta"
-     Anexos_Clientes.Adm_Recursos_Publ AT ROW 1.15 COL 95.14 WIDGET-ID 8
-          LABEL ""
-          VIEW-AS TOGGLE-BOX
-          SIZE 3 BY .77 TOOLTIP "Administra Recursos Publicos"
-     Cmb_TipAct AT ROW 2 COL 3
-     Anexos_Clientes.Especifique_Ocupacion AT ROW 2 COL 65 COLON-ALIGNED WIDGET-ID 252
-          LABEL "Especifique" FORMAT "X(70)"
-          VIEW-AS FILL-IN 
-          SIZE 33.29 BY .81
-          BGCOLOR 18 
-     W_NomEmpresa AT ROW 5.73 COL 18 COLON-ALIGNED
-     Btn_Empresa AT ROW 5.85 COL 94 WIDGET-ID 260
-     Clientes.Cod_Empresa AT ROW 4.77 COL 82.72 COLON-ALIGNED NO-LABEL WIDGET-ID 264
-          VIEW-AS FILL-IN 
-          SIZE 2 BY .5
-          BGCOLOR 17 FGCOLOR 17 
-     Anexos_Clientes.Acti_Economica_emp AT ROW 4.81 COL 75 COLON-ALIGNED NO-LABEL WIDGET-ID 272 FORMAT "X(90)"
-          VIEW-AS FILL-IN 
-          SIZE 2 BY .5
-          BGCOLOR 17 FGCOLOR 17 
-     Clientes.Dir_comercial AT ROW 7.35 COL 18 COLON-ALIGNED
-          LABEL "Dirección" FORMAT "X(90)"
-          VIEW-AS FILL-IN 
-          SIZE 74 BY .81
-          BGCOLOR 18 
-     W_UbicacionComercial AT ROW 8.19 COL 18 COLON-ALIGNED
-     Btn_Lugar_Comercial AT ROW 8.31 COL 94
-     Clientes.Lugar_comercial AT ROW 4.81 COL 80.14 COLON-ALIGNED NO-LABEL
-          VIEW-AS FILL-IN 
-          SIZE 2 BY .5
-          BGCOLOR 17 FGCOLOR 17 
-     Clientes.Tel_comercial AT ROW 9.04 COL 23.43 COLON-ALIGNED NO-LABEL FORMAT "X(8)"
-          VIEW-AS FILL-IN 
-          SIZE 19.57 BY .81
-          BGCOLOR 18 
-     Anexos_Clientes.Extencion_Comercial AT ROW 9.08 COL 48 COLON-ALIGNED WIDGET-ID 280
-          LABEL "Ext" FORMAT ">>>>9"
-          VIEW-AS FILL-IN 
-          SIZE 9 BY .81
-          BGCOLOR 18 
-     W_NomCargo AT ROW 9.08 COL 65 COLON-ALIGNED WIDGET-ID 44
-     Btn_Cargo AT ROW 9.15 COL 94 WIDGET-ID 38
-     Clientes.Cod_Cargo AT ROW 4.81 COL 87.86 COLON-ALIGNED NO-LABEL WIDGET-ID 62
-          VIEW-AS FILL-IN 
-          SIZE 2 BY .5
-          BGCOLOR 17 FGCOLOR 17 
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 1.43 ROW 8.27
-         SIZE 115.57 BY 16.96
-         BGCOLOR 17 FONT 5.
-
-/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
-DEFINE FRAME F_Ubicacion
-     Clientes.Fec_IngEmpresa AT ROW 10.88 COL 23.86 COLON-ALIGNED WIDGET-ID 266
-          VIEW-AS FILL-IN 
-          SIZE 11 BY .81
-          BGCOLOR 18 FGCOLOR 0 
-     Clientes.Carnet AT ROW 11.04 COL 56 COLON-ALIGNED WIDGET-ID 42
-          LABEL "Carnet"
-          VIEW-AS FILL-IN 
-          SIZE 26 BY .81
-          BGCOLOR 18 
-     Cmb_Est_Cargo AT ROW 11.85 COL 15 COLON-ALIGNED
-     Clientes.Tip_Contrato AT ROW 12.88 COL 17.29 NO-LABEL
-          VIEW-AS RADIO-SET HORIZONTAL
-          RADIO-BUTTONS 
-                    "Término Indefinido", 1,
-"Término Fijo", 2
-          SIZE 66.72 BY .81
-          BGCOLOR 18 FONT 5
-     Anexos_Clientes.Nit_Independiente AT ROW 14.73 COL 6.29 COLON-ALIGNED
-          LABEL "Nit" FORMAT "9(5)x(7)"
-          VIEW-AS FILL-IN 
-          SIZE 28.43 BY .81
-          BGCOLOR 18 
-     Anexos_Clientes.Tiempo_Actividad AT ROW 14.77 COL 51.57 COLON-ALIGNED
-          LABEL "Tiempo Actividad"
-          VIEW-AS FILL-IN 
-          SIZE 3.43 BY .81
-          BGCOLOR 18 
-     W_NomCiiu AT ROW 15.77 COL 7 COLON-ALIGNED WIDGET-ID 30
-     Btn_Ciiu AT ROW 15.85 COL 48 WIDGET-ID 20
-     Clientes.Codigo_CIIU AT ROW 4.81 COL 92.14 NO-LABEL WIDGET-ID 268
-          VIEW-AS FILL-IN 
-          SIZE 2 BY .5
-          BGCOLOR 17 FGCOLOR 17 
-     Clientes.Grupo AT ROW 4.81 COL 92.57 COLON-ALIGNED NO-LABEL WIDGET-ID 14
-          VIEW-AS FILL-IN 
-          SIZE 2 BY .5
-          BGCOLOR 17 FGCOLOR 17 
-     Clientes.Subgrupo AT ROW 4.81 COL 95 COLON-ALIGNED NO-LABEL WIDGET-ID 16
-          VIEW-AS FILL-IN 
-          SIZE 2 BY .5
-          BGCOLOR 17 FGCOLOR 17 
-     Anexos_Clientes.Fec_Pensionado AT ROW 14.96 COL 83 COLON-ALIGNED WIDGET-ID 278
-          LABEL "Pensionado Desde"
-          VIEW-AS FILL-IN 
-          SIZE 10.57 BY .81
-          BGCOLOR 18 
-     Btn_DireccionComercial AT ROW 7.42 COL 94 WIDGET-ID 290
-     Anexos_Clientes.Ind_Comercial AT ROW 9.04 COL 18 COLON-ALIGNED WIDGET-ID 294
-          LABEL "Teléfono"
-          VIEW-AS FILL-IN 
-          SIZE 5.43 BY .81
-          BGCOLOR 18 
-     Btn_Ciiu-2 AT ROW 4.77 COL 48 WIDGET-ID 300
-     W_NomCiiu-2 AT ROW 4.62 COL 19 COLON-ALIGNED WIDGET-ID 302
-     W_NomCiiu-3 AT ROW 3.77 COL 19 COLON-ALIGNED WIDGET-ID 304
-     Btn_Ciiu-3 AT ROW 3.92 COL 48 WIDGET-ID 306
-     Clientes.cod_actividad AT ROW 4.81 COL 77.57 COLON-ALIGNED NO-LABEL WIDGET-ID 308
-          VIEW-AS FILL-IN 
-          SIZE 2 BY .5
-          BGCOLOR 17 FGCOLOR 17 
-     Clientes.Id_Micro AT ROW 2.92 COL 19 COLON-ALIGNED WIDGET-ID 310
-          VIEW-AS FILL-IN 
-          SIZE 3.43 BY .81
-          BGCOLOR 15 
-     Cmb_Situacion_Actual AT ROW 2.85 COL 65 COLON-ALIGNED WIDGET-ID 312
-     Clientes.Fuerza_Mayor AT ROW 3.77 COL 65 COLON-ALIGNED WIDGET-ID 314
-          VIEW-AS FILL-IN 
-          SIZE 3 BY .81
-          BGCOLOR 15 
-     Clientes.Situacion_Actual AT ROW 4.81 COL 85.29 COLON-ALIGNED NO-LABEL WIDGET-ID 316
-          VIEW-AS FILL-IN 
-          SIZE 2 BY .5
-          BGCOLOR 17 FGCOLOR 17 
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 1.43 ROW 8.27
-         SIZE 115.57 BY 16.96
-         BGCOLOR 17 FONT 5.
-
-/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
-DEFINE FRAME F_Ubicacion
-     FacultadDepartamento AT ROW 6.54 COL 18 COLON-ALIGNED WIDGET-ID 320
-     btnFacultadDpto AT ROW 6.62 COL 94 WIDGET-ID 322
-     " Exento" VIEW-AS TEXT
-          SIZE 8 BY .81 AT ROW 1.15 COL 4
-          FGCOLOR 7 FONT 5
-     "Pensionado" VIEW-AS TEXT
-          SIZE 10.57 BY .81 AT ROW 14 COL 68.43 WIDGET-ID 276
-          FGCOLOR 7 FONT 5
-     "Contrato:" VIEW-AS TEXT
-          SIZE 8.57 BY .81 AT ROW 12.85 COL 8.72 WIDGET-ID 60
-          FGCOLOR 7 FONT 5
-     "Empleado" VIEW-AS TEXT
-          SIZE 10.14 BY .69 AT ROW 10.38 COL 4.72
-          FGCOLOR 7 FONT 5
-     " Administra Recursos Públicos" VIEW-AS TEXT
-          SIZE 27 BY .81 AT ROW 1.19 COL 68 WIDGET-ID 4
-          FGCOLOR 7 FONT 5
-     "Declara Renta" VIEW-AS TEXT
-          SIZE 12.72 BY .81 TOOLTIP "Declara Renta" AT ROW 1.15 COL 47.29 WIDGET-ID 6
-          FGCOLOR 7 FONT 5
-     "Independiente o Empleado Socio" VIEW-AS TEXT
-          SIZE 29 BY .69 AT ROW 14.04 COL 5.29 WIDGET-ID 270
-          FGCOLOR 7 FONT 5
-     RECT-235 AT ROW 10.65 COL 3 WIDGET-ID 258
-     RECT-217 AT ROW 14.42 COL 3 WIDGET-ID 50
-     RECT-236 AT ROW 14.54 COL 67 WIDGET-ID 274
-     RECT-319 AT ROW 5.58 COL 3 WIDGET-ID 318
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 1.43 ROW 8.27
-         SIZE 115.57 BY 16.96
-         BGCOLOR 17 FONT 5
-         TITLE "3. INFORMACION ACTIVIDAD ECONÓMICA".
-
-DEFINE FRAME F_Autorizaciones
-     Anexos_Clientes.Represetacion AT ROW 2.04 COL 19.57 COLON-ALIGNED
-          LABEL "Representacion de" FORMAT "X(100)"
-          VIEW-AS FILL-IN 
-          SIZE 91 BY .81
-          BGCOLOR 15 
-     Anexos_Clientes.Proviene AT ROW 2.88 COL 19.57 COLON-ALIGNED
-          LABEL "Proviene de" FORMAT "X(100)"
-          VIEW-AS FILL-IN 
-          SIZE 91 BY .81
-          BGCOLOR 15 
-     Anexos_Clientes.Declaracion_Conocimiento AT ROW 4.04 COL 5.43
-          LABEL "Declaracion de Conocimiento de Origen de Fondos"
-          VIEW-AS TOGGLE-BOX
-          SIZE 49.57 BY .77
-     Anexos_Clientes.Autorizaciones[1] AT ROW 6.15 COL 5 WIDGET-ID 180
-          LABEL "1. Consulta y Reporte a Centros de Riesgos"
-          VIEW-AS TOGGLE-BOX
-          SIZE 49.57 BY .77
-     Anexos_Clientes.Declaracion_aceptacion AT ROW 6.69 COL 111 WIDGET-ID 194
-          LABEL ""
-          VIEW-AS TOGGLE-BOX
-          SIZE 3 BY .77 TOOLTIP "Declaracion Aceptacion"
-          BGCOLOR 17 
-     Anexos_Clientes.Autorizaciones[2] AT ROW 6.88 COL 5 WIDGET-ID 182
-          LABEL "2. Actualiza y Verifica la información"
-          VIEW-AS TOGGLE-BOX
-          SIZE 49.57 BY .77
-     Anexos_Clientes.Autorizaciones[3] AT ROW 7.62 COL 5
-          LABEL "3. Suministro de Informacion"
-          VIEW-AS TOGGLE-BOX
-          SIZE 49.57 BY .77
-     Anexos_Clientes.Autorizaciones[4] AT ROW 8.35 COL 5 WIDGET-ID 184
-          LABEL "4. Cláusula de Aceptación de Reglamentos"
-          VIEW-AS TOGGLE-BOX
-          SIZE 49.57 BY .77
-     Anexos_Clientes.Autorizaciones[5] AT ROW 9.08 COL 5
-          LABEL "5. Destrucción de Documentos"
-          VIEW-AS TOGGLE-BOX
-          SIZE 49.57 BY .77
-     Anexos_Clientes.Fec_Diligenciamiento AT ROW 9.77 COL 80.14 COLON-ALIGNED WIDGET-ID 210
-          LABEL "DD/MM/AAAA"
-          VIEW-AS FILL-IN 
-          SIZE 15 BY .81
-          BGCOLOR 15 
-     Anexos_Clientes.Autorizaciones[6] AT ROW 9.81 COL 5 WIDGET-ID 188
-          LABEL "6. Cláusula de Aceptación de Términos"
-          VIEW-AS TOGGLE-BOX
-          SIZE 49.57 BY .77
-     Anexos_Clientes.Autorizaciones[7] AT ROW 10.54 COL 5 WIDGET-ID 186
-          LABEL "7. Cobro de Centrales de Riesgo"
-          VIEW-AS TOGGLE-BOX
-          SIZE 49.57 BY .77
-     Anexos_Clientes.Autorizaciones[8] AT ROW 11.27 COL 5 WIDGET-ID 190
-          LABEL "8. Compromiso de Cumplimiento de actualizacion de Información"
-          VIEW-AS TOGGLE-BOX
-          SIZE 58 BY .77
-     Anexos_Clientes.Autorizaciones[9] AT ROW 12 COL 5.14 WIDGET-ID 208
-          LABEL "9. Requisitos de Asegurabilidad"
-          VIEW-AS TOGGLE-BOX
-          SIZE 56.86 BY .77 TOOLTIP "Autorizacion 9"
-     Anexos_Clientes.Autorizaciones[10] AT ROW 12.73 COL 5 WIDGET-ID 216
-          LABEL "10. Desembolso"
-          VIEW-AS TOGGLE-BOX
-          SIZE 33 BY .77
-     Anexos_Clientes.Autorizaciones[11] AT ROW 13.46 COL 5 WIDGET-ID 218
-          LABEL "11. Débito Automàtico"
-          VIEW-AS TOGGLE-BOX
-          SIZE 43 BY .77
-     Anexos_Clientes.Cam_log1 AT ROW 13.96 COL 65.14 COLON-ALIGNED NO-LABEL WIDGET-ID 224
-          VIEW-AS COMBO-BOX INNER-LINES 1
-          LIST-ITEM-PAIRS "FIRMA SOLICITANTE Y HUELLA INDICE DERECHO","FIRMA SOLICITANTE Y HUELLA INDICE DERECHO"
-          DROP-DOWN-LIST
-          SIZE 46.86 BY 1
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 1.43 ROW 8.23
-         SIZE 115.57 BY 17
-         BGCOLOR 17 FONT 5.
-
-/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
-DEFINE FRAME F_Autorizaciones
-     Anexos_Clientes.Autorizaciones[12] AT ROW 14.19 COL 5 WIDGET-ID 220
-          LABEL "12. Prioridad de Descuento"
-          VIEW-AS TOGGLE-BOX
-          SIZE 34 BY .77
-     "Fecha de Diligenciamiento" VIEW-AS TEXT
-          SIZE 30 BY .65 AT ROW 8.85 COL 68 WIDGET-ID 212
-          FGCOLOR 7 FONT 7
-     "Declaro conocer y aceptar los términos de los" VIEW-AS TEXT
-          SIZE 43.14 BY 1.35 AT ROW 5.73 COL 65.86 WIDGET-ID 200
-          FONT 7
-     "AUTORIZACIONES" VIEW-AS TEXT
-          SIZE 18 BY .77 AT ROW 5.35 COL 23.14 WIDGET-ID 178
-          FGCOLOR 7 FONT 7
-     "contratos y reglamentos vigentes en FODUN" VIEW-AS TEXT
-          SIZE 43 BY 1.35 AT ROW 6.62 COL 66 WIDGET-ID 202
-          FONT 7
-     "DECLARACION VOLUNTARIA DE ORIGEN DE FONDOS" VIEW-AS TEXT
-          SIZE 50 BY .77 AT ROW 1.12 COL 25.72 WIDGET-ID 172
-          FGCOLOR 7 FONT 7
-     RECT-304 AT ROW 1.42 COL 3 WIDGET-ID 4
-     RECT-305 AT ROW 5.62 COL 3 WIDGET-ID 176
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 1.43 ROW 8.23
-         SIZE 115.57 BY 17
-         BGCOLOR 17 FONT 5
-         TITLE "DECLARACION DE CONOCIMIENTO  Y AUTORIZACIONES".
-
-DEFINE FRAME F_Conyuge
-     CnygeExtncion AT ROW 12.38 COL 103 COLON-ALIGNED HELP
-          "Extencion del Teléfono Comercial" NO-LABEL WIDGET-ID 286
-     R_Tipo_Identificacion AT ROW 1.42 COL 5.72 COLON-ALIGNED WIDGET-ID 2
-     R_Tercero AT ROW 1.42 COL 31.14 COLON-ALIGNED HELP
-          "Número documento de identificación" WIDGET-ID 110
-     R_Sexo AT ROW 1.46 COL 61.86 NO-LABEL WIDGET-ID 114
-     R_Apellido1 AT ROW 3.46 COL 1 COLON-ALIGNED HELP
-          "Primer apellido del cliente" NO-LABEL WIDGET-ID 22 FORMAT "X(30)"
-          VIEW-AS FILL-IN 
-          SIZE 25 BY .81
-          BGCOLOR 15 
-     R_Apellido2 AT ROW 3.46 COL 26.86 COLON-ALIGNED HELP
-          "Segundo apellido del cliente" NO-LABEL WIDGET-ID 24 FORMAT "X(30)"
-          VIEW-AS FILL-IN 
-          SIZE 25 BY .81
-          BGCOLOR 15 
-     R_Nombre AT ROW 3.42 COL 53 COLON-ALIGNED HELP
-          "Nombre del cliente" NO-LABEL WIDGET-ID 26 FORMAT "X(90)"
-          VIEW-AS FILL-IN 
-          SIZE 59 BY .81
-          BGCOLOR 15 
-     WR_CiuNacimiento AT ROW 5.62 COL 3 NO-LABEL WIDGET-ID 264
-     R_Btn_Nacimiento AT ROW 5.54 COL 67 WIDGET-ID 262
-     R_Lugar_Nacimiento AT ROW 14.19 COL 61 COLON-ALIGNED HELP
-          "Barrio, Ciudad y Departamento donde nació el cliente" NO-LABEL WIDGET-ID 216
-          BGCOLOR 17 FGCOLOR 17 
-     R_Fec_Nacimiento AT ROW 5.62 COL 69 COLON-ALIGNED HELP
-          "Fecha de nacimiento del cliente" NO-LABEL
-          BGCOLOR 15 
-     R_Nacionalidad AT ROW 5.62 COL 112.43 RIGHT-ALIGNED NO-LABEL WIDGET-ID 102
-     R_Niv_Educativo AT ROW 7.85 COL 3 NO-LABEL
-     WR_NomProfesion AT ROW 7.85 COL 26 COLON-ALIGNED NO-LABEL
-     R_Btn_Profesion AT ROW 7.77 COL 57.86 WIDGET-ID 244
-     R_Cod_Profesion AT ROW 14.19 COL 57 COLON-ALIGNED HELP
-          "Código de la profesión del cliente" NO-LABEL WIDGET-ID 242
-          BGCOLOR 17 FGCOLOR 17 
-     R_Ocupacion AT ROW 7.77 COL 62.57 NO-LABEL WIDGET-ID 4
-     R_Especifique AT ROW 7.81 COL 83.43 COLON-ALIGNED NO-LABEL WIDGET-ID 252
-     R_Cargo_Actividad AT ROW 11.12 COL 24 COLON-ALIGNED
-     R_Empresa AT ROW 10.23 COL 24 COLON-ALIGNED WIDGET-ID 254
-     R_Direccion AT ROW 12 COL 26 NO-LABEL FORMAT "X(90)":U
-          VIEW-AS FILL-IN 
-          SIZE 57 BY .81
-          BGCOLOR 15 
-     WR_CiuEmpresa AT ROW 12.92 COL 26 NO-LABEL WIDGET-ID 270
-     R_Btn_Empresa AT ROW 12.88 COL 82.43 WIDGET-ID 266
-     R_Dir_Empresa AT ROW 14.19 COL 55 HELP
-          "Dirección comercial donde labora el cliente" NO-LABEL WIDGET-ID 268
-          BGCOLOR 17 FGCOLOR 17 
-     R_Btn_Direccion AT ROW 11.85 COL 82.43 WIDGET-ID 290
-     R_Tel_Empresa AT ROW 12.38 COL 90.57 COLON-ALIGNED NO-LABEL WIDGET-ID 28
-     R_TIngreso AT ROW 13.92 COL 11.43
-     R_TEgresos AT ROW 14.65 COL 11.57
-     Btn_Grabar_conyuge AT ROW 1.31 COL 84.14 WIDGET-ID 282
-     Btn_Ocultar_conyuge AT ROW 1.27 COL 100 WIDGET-ID 284
-     R_Tel_Empresa-Indctvo AT ROW 12.38 COL 85.86 COLON-ALIGNED NO-LABEL WIDGET-ID 292
-     "Segundo Apellido" VIEW-AS TEXT
-          SIZE 16.86 BY .77 AT ROW 2.69 COL 29.72 WIDGET-ID 106
-          FGCOLOR 7 FONT 5
-     "Primer Apellido" VIEW-AS TEXT
-          SIZE 14 BY .77 AT ROW 2.65 COL 3 WIDGET-ID 104
-          FGCOLOR 7 FONT 5
-     "Ciudad y Departamento" VIEW-AS TEXT
-          SIZE 21 BY .77 AT ROW 12.88 COL 4 WIDGET-ID 276
-          FGCOLOR 7 FONT 5
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 1.43 ROW 8.23
-         SIZE 115.57 BY 17
-         BGCOLOR 17 FONT 5 WIDGET-ID 300.
-
-/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
-DEFINE FRAME F_Conyuge
-     "NACIONALIDAD" VIEW-AS TEXT
-          SIZE 12.14 BY .77 AT ROW 4.85 COL 86 WIDGET-ID 222
-          FGCOLOR 7 FONT 4
-     "Teléfono" VIEW-AS TEXT
-          SIZE 14 BY .77 AT ROW 11.58 COL 88.57 WIDGET-ID 278
-          FGCOLOR 7 FONT 5
-     "Dirección de la Empresa" VIEW-AS TEXT
-          SIZE 22 BY .77 AT ROW 12.04 COL 3.14 WIDGET-ID 274
-          FGCOLOR 7 FONT 5
-     "Ocupación Principal" VIEW-AS TEXT
-          SIZE 18.29 BY .77 AT ROW 7 COL 63.14 WIDGET-ID 250
-          FGCOLOR 7 FONT 5
-     "Nivel Educación" VIEW-AS TEXT
-          SIZE 15 BY .77 AT ROW 7.08 COL 3 WIDGET-ID 280
-          FGCOLOR 7 FONT 5
-     "Ext" VIEW-AS TEXT
-          SIZE 7 BY .77 AT ROW 11.58 COL 105.29 WIDGET-ID 288
-          FGCOLOR 7 FONT 5
-     "Profesión" VIEW-AS TEXT
-          SIZE 9.29 BY .77 AT ROW 7.04 COL 30 WIDGET-ID 166
-          FGCOLOR 7 FONT 5
-     "Datos Financieros" VIEW-AS TEXT
-          SIZE 16.29 BY .77 AT ROW 9.46 COL 3 WIDGET-ID 172
-          FGCOLOR 7 FONT 5
-     "Lugar y Fecha de Nacimiento" VIEW-AS TEXT
-          SIZE 26 BY .77 AT ROW 4.85 COL 3 WIDGET-ID 220
-          FGCOLOR 7 FONT 5
-     "DDMMAAAA" VIEW-AS TEXT
-          SIZE 9.43 BY .77 AT ROW 4.85 COL 71 WIDGET-ID 146
-          FGCOLOR 7 FONT 4
-     "Género" VIEW-AS TEXT
-          SIZE 7.14 BY .54 AT ROW 1.08 COL 60.86 WIDGET-ID 118
-          FGCOLOR 7 FONT 4
-     "Nombre" VIEW-AS TEXT
-          SIZE 9.14 BY .77 AT ROW 2.65 COL 55.72 WIDGET-ID 108
-          FGCOLOR 7 FONT 5
-     RECT-231 AT ROW 4.77 COL 2 WIDGET-ID 68
-     RECT-5 AT ROW 1.31 COL 60.29 WIDGET-ID 112
-     RECT-232 AT ROW 2.62 COL 2 WIDGET-ID 218
-     RECT-233 AT ROW 6.92 COL 2 WIDGET-ID 168
-     RECT-234 AT ROW 9.88 COL 2 WIDGET-ID 272
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 1.43 ROW 8.23
-         SIZE 115.57 BY 17
-         BGCOLOR 17 FONT 5
-         TITLE "Información Cónyuge o Compañero (a) permanente" WIDGET-ID 300.
-
-DEFINE FRAME F_Documentacion
-     Cmb_Linea AT ROW 1.19 COL 32.14 COLON-ALIGNED
-     Cmb_Contrato AT ROW 1.27 COL 74 COLON-ALIGNED
-     Anexos_Clientes.Docum_Requer[1] AT ROW 2.12 COL 5
-          LABEL "   Formato unico de vinculación"
-          VIEW-AS TOGGLE-BOX
-          SIZE 29 BY .77
-     Anexos_Clientes.Docum_Requer[2] AT ROW 2.81 COL 5 WIDGET-ID 182
-          LABEL "   Fotocopia Ampliada del Documento de Identidad"
-          VIEW-AS TOGGLE-BOX
-          SIZE 49.57 BY .77
-     Anexos_Clientes.Docum_Requer[3] AT ROW 3.54 COL 5 WIDGET-ID 192
-          LABEL "   Fotocopia de las dos (2) últimas nóminas o mesada pensional"
-          VIEW-AS TOGGLE-BOX
-          SIZE 59 BY .77
-     Anexos_Clientes.Docum_Requer[4] AT ROW 4.23 COL 5
-          LABEL "   Certificado Laboral Expedicion menor a 30 días"
-          VIEW-AS TOGGLE-BOX
-          SIZE 49.57 BY .77
-     Anexos_Clientes.Docum_Requer[5] AT ROW 4.96 COL 5
-          LABEL "   Fotocopia de Tarjeta de propiedad de (los) vehiculos(s) o moto(s)"
-          VIEW-AS TOGGLE-BOX
-          SIZE 61 BY .77
-     Anexos_Clientes.Docum_Requer[6] AT ROW 5.73 COL 5 WIDGET-ID 188
-          LABEL "   Factura proforma para vehiculo o moto nuevo"
-          VIEW-AS TOGGLE-BOX
-          SIZE 49.57 BY .77
-     Anexos_Clientes.Docum_Requer[7] AT ROW 6.46 COL 5 WIDGET-ID 186
-          LABEL "   Peritaje para vehiculo usado"
-          VIEW-AS TOGGLE-BOX
-          SIZE 49.57 BY .77
-     Anexos_Clientes.Docum_Requer[8] AT ROW 7.19 COL 5 WIDGET-ID 190
-          LABEL "   Certificado original de tradición y libertad del inmuebleno mayor a 30 días"
-          VIEW-AS TOGGLE-BOX
-          SIZE 67 BY .77
-     Anexos_Clientes.Docum_Requer[9] AT ROW 7.92 COL 5
-          LABEL "   Declaración de renta o constancia si no esta obligado (2 últimos años)"
-          VIEW-AS TOGGLE-BOX
-          SIZE 67 BY .77
-     Anexos_Clientes.Docum_Requer[10] AT ROW 8.65 COL 5 WIDGET-ID 194
-          LABEL "   Copia del contrato de promesa de compra venta o la minuta"
-          VIEW-AS TOGGLE-BOX
-          SIZE 67 BY .77
-     Anexos_Clientes.Docum_Requer[11] AT ROW 9.42 COL 5
-          LABEL "   Paz y salvo de impuesto predial"
-          VIEW-AS TOGGLE-BOX
-          SIZE 67 BY .77
-     Anexos_Clientes.Docum_Requer[12] AT ROW 10.15 COL 5
-          LABEL "   Avalúo Comercial y estudio de titulos"
-          VIEW-AS TOGGLE-BOX
-          SIZE 67 BY .77
-     Anexos_Clientes.Docum_Requer[13] AT ROW 10.88 COL 5
-          LABEL "   Factura de compra venta que acrediten las transacciones comerciales"
-          VIEW-AS TOGGLE-BOX
-          SIZE 67 BY .77
-     Anexos_Clientes.Docum_Requer[14] AT ROW 11.62 COL 5
-          LABEL "   Certificado de ingresos, retenciones otros ingresos u honorarios"
-          VIEW-AS TOGGLE-BOX
-          SIZE 67 BY .77
-     Anexos_Clientes.Docum_Requer[15] AT ROW 12.35 COL 5
-          LABEL "   Cert. Cámara de comercio, Licencia de Sanidad o Bomberos."
-          VIEW-AS TOGGLE-BOX
-          SIZE 67 BY .77
-     Anexos_Clientes.Docum_Requer[16] AT ROW 13.08 COL 5
-          LABEL "   Extractos Bancarios de los últimos tres (3) meses"
-          VIEW-AS TOGGLE-BOX
-          SIZE 67 BY .77
-     Anexos_Clientes.Docum_Requer[17] AT ROW 13.81 COL 5
-          LABEL "   Estados Financieros certificados de 2 últimos años y al corte más reciente"
-          VIEW-AS TOGGLE-BOX
-          SIZE 67 BY .77
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 1.43 ROW 8.23
-         SIZE 115.57 BY 17
-         BGCOLOR 17 FONT 5 WIDGET-ID 200.
-
-/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
-DEFINE FRAME F_Documentacion
-     Anexos_Clientes.Docum_Requer[18] AT ROW 14.54 COL 5
-          LABEL "   Prueba de destinación para el crédito educativo"
-          VIEW-AS TOGGLE-BOX
-          SIZE 67 BY .77
-     Anexos_Clientes.Docum_Requer[19] AT ROW 15.23 COL 5 WIDGET-ID 196
-          LABEL "   Flujo de Caja del Proyecto a Financiar"
-          VIEW-AS TOGGLE-BOX
-          SIZE 67 BY .77
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 1.43 ROW 8.23
-         SIZE 115.57 BY 17
-         BGCOLOR 17 FONT 5
-         TITLE "DOCUMENTACION REQUERIDA" WIDGET-ID 200.
-
-DEFINE FRAME F_Economica
-     Anexos_Clientes.Transac_Mod_Ext AT ROW 8.73 COL 96 NO-LABEL WIDGET-ID 18
-          VIEW-AS SELECTION-LIST MULTIPLE SCROLLBAR-VERTICAL 
-          LIST-ITEMS "","Importaciones","Exportaciones","Inversiones","Giros","Préstamos en moneda Extranjera","Ordenes de pago","Remesas","Transferencias","Cambio de Divisas","Otros" 
-          SIZE 17.72 BY 1.96 TOOLTIP "Transacciones Que Normalmente Realiza"
-     Anexos_Clientes.Gto_TargetaCredito AT ROW 5.04 COL 77.86
-          LABEL "Cuota Tarjeta Crédito" FORMAT ">,>>>,>>>,>>9"
-          VIEW-AS FILL-IN 
-          SIZE 14.29 BY .81
-     Clientes.Salario AT ROW 1.77 COL 23 COLON-ALIGNED
-          LABEL "Salario / Pensión" FORMAT ">,>>>,>>>,>>9"
-          VIEW-AS FILL-IN 
-          SIZE 17 BY .81
-          BGCOLOR 15 
-     Clientes.Ing_Honorarios AT ROW 2.65 COL 23 COLON-ALIGNED
-          LABEL "Honorarios" FORMAT ">,>>>,>>>,>>9"
-          VIEW-AS FILL-IN 
-          SIZE 17 BY .81
-          BGCOLOR 15 
-     Clientes.Ing_financieros AT ROW 3.58 COL 23 COLON-ALIGNED
-          LABEL "Comisiones" FORMAT ">,>>>,>>>,>>9"
-          VIEW-AS FILL-IN 
-          SIZE 17 BY .81
-          BGCOLOR 15 
-     Clientes.Ing_arriendos AT ROW 4.46 COL 23 COLON-ALIGNED WIDGET-ID 2
-          LABEL "Arriendos" FORMAT ">,>>>,>>>,>>9"
-          VIEW-AS FILL-IN 
-          SIZE 17 BY .81
-          BGCOLOR 15 
-     Clientes.Ing_Otros AT ROW 5.35 COL 23 COLON-ALIGNED FORMAT ">,>>>,>>>,>>9"
-          VIEW-AS FILL-IN 
-          SIZE 17 BY .81
-          BGCOLOR 15 
-     Anexos_Clientes.Especifique_OtrosIng AT ROW 6.23 COL 11 COLON-ALIGNED
-          LABEL "Especifique" FORMAT "X(70)"
-          VIEW-AS FILL-IN 
-          SIZE 29 BY .81
-          BGCOLOR 19 
-     Tot_Ingresos AT ROW 7.19 COL 23 COLON-ALIGNED
-     Clientes.Gto_obligacion AT ROW 2.54 COL 91 COLON-ALIGNED
-          LABEL "Descuentos Nomina" FORMAT ">,>>>,>>>,>>9"
-          VIEW-AS FILL-IN 
-          SIZE 14.29 BY .81
-          BGCOLOR 15 
-     Clientes.Gto_Arriendo AT ROW 4.23 COL 91 COLON-ALIGNED
-          LABEL "Arriendo / Cuota Hip."
-          VIEW-AS FILL-IN 
-          SIZE 14.29 BY .81 TOOLTIP "Valor Arriendo"
-          BGCOLOR 33 
-     Clientes.Sdo_Obligaciones AT ROW 3.38 COL 91 COLON-ALIGNED
-          LABEL "Cuotas Préstamos" FORMAT ">,>>>,>>>,>>9"
-          VIEW-AS FILL-IN 
-          SIZE 14.29 BY .81
-          BGCOLOR 15 
-     Clientes.Gto_Familiar AT ROW 1.69 COL 90.86 COLON-ALIGNED
-          LABEL "Gastos Familiares" FORMAT ">,>>>,>>>,>>9"
-          VIEW-AS FILL-IN 
-          SIZE 14.29 BY .81
-          BGCOLOR 15 
-     Anexos_Clientes.Gto_Otros AT ROW 5.88 COL 91 COLON-ALIGNED
-          LABEL "Otras Deudas"
-          VIEW-AS FILL-IN 
-          SIZE 14.29 BY .81
-          BGCOLOR 15 
-     Tot_Egresos AT ROW 6.81 COL 91.29 COLON-ALIGNED
-     Btn_Grabar_Act_Pas AT ROW 10.42 COL 34.29 WIDGET-ID 16
-     Clientes.Act_vehiculo AT ROW 10.42 COL 14 COLON-ALIGNED
-          LABEL "Valor Vehículo" FORMAT ">,>>>,>>>,>>9"
-          VIEW-AS FILL-IN 
-          SIZE 17 BY .81
-          BGCOLOR 8 
-     Clientes.Act_casa AT ROW 11.31 COL 14 COLON-ALIGNED FORMAT ">,>>>,>>>,>>9"
-          VIEW-AS FILL-IN 
-          SIZE 17 BY .81
-          BGCOLOR 8 
-     Clientes.Act_inversion AT ROW 12.19 COL 14 COLON-ALIGNED
-          LABEL "Otros Activos" FORMAT ">,>>>,>>>,>>9"
-          VIEW-AS FILL-IN 
-          SIZE 17 BY .81
-          BGCOLOR 8 
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 1.43 ROW 8.23
-         SIZE 115.57 BY 17
-         BGCOLOR 17 FGCOLOR 0 FONT 4.
-
-/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
-DEFINE FRAME F_Economica
-     Tot_Activos AT ROW 13.08 COL 14 COLON-ALIGNED
-     Anexos_Clientes.Val_Pasivos AT ROW 14.27 COL 14 COLON-ALIGNED
-          LABEL "Total Pasivos"
-          VIEW-AS FILL-IN 
-          SIZE 17 BY .81
-          BGCOLOR 18 FGCOLOR 15 
-     Anexos_Clientes.Otra_Transac_extr AT ROW 10.96 COL 90 COLON-ALIGNED
-          LABEL "Otra ¿Cual?" FORMAT "X(70)"
-          VIEW-AS FILL-IN 
-          SIZE 21.86 BY .81
-          BGCOLOR 18 
-     Anexos_Clientes.Maneja_Cta_Extanjera AT ROW 12.15 COL 97.29
-          LABEL ""
-          VIEW-AS TOGGLE-BOX
-          SIZE 4 BY .77 TOOLTIP "Cuenta Moneda Extranjera"
-     Anexos_Clientes.Tipo_Moneda_Divisa AT ROW 13.08 COL 76 COLON-ALIGNED
-          LABEL "Tipo Moneda" FORMAT "X(60)"
-          VIEW-AS FILL-IN 
-          SIZE 11 BY .81
-          BGCOLOR 18 FONT 5
-     Anexos_Clientes.Nom_Banco_extranjero AT ROW 13.08 COL 94.29 COLON-ALIGNED WIDGET-ID 10
-          LABEL "Banco" FORMAT "X(50)"
-          VIEW-AS FILL-IN 
-          SIZE 18 BY .81
-          BGCOLOR 18 FONT 5
-     Anexos_Clientes.Num_cta_extranjera AT ROW 13.92 COL 76 COLON-ALIGNED WIDGET-ID 12
-          LABEL "Numero Cuenta" FORMAT "X(25)"
-          VIEW-AS FILL-IN 
-          SIZE 36 BY .81
-          BGCOLOR 18 FONT 5
-     Anexos_Clientes.Ciudad_Pais_Bco_Extranjero AT ROW 14.77 COL 76 COLON-ALIGNED
-          LABEL "Ciudad y País" FORMAT "X(50)"
-          VIEW-AS FILL-IN 
-          SIZE 36 BY .81
-          BGCOLOR 18 FONT 5
-     Clientes.Id_Mon_Ext AT ROW 9.08 COL 90 COLON-ALIGNED NO-LABEL WIDGET-ID 22
-          VIEW-AS FILL-IN 
-          SIZE 2.86 BY .81
-          BGCOLOR 15 
-     "  Egresos Mensuales" VIEW-AS TEXT
-          SIZE 19 BY .77 AT ROW 1 COL 68.29
-          FGCOLOR 7 FONT 5
-     "  Ingresos Mensuales" VIEW-AS TEXT
-          SIZE 19 BY 1.04 AT ROW 1 COL 6
-          FGCOLOR 7 FONT 5
-     " Activos y Pasivos" VIEW-AS TEXT
-          SIZE 16 BY .81 AT ROW 9.19 COL 7
-          FGCOLOR 7 FONT 5
-     "Transacciones Moneda Extranjera" VIEW-AS TEXT
-          SIZE 31 BY .81 AT ROW 7.92 COL 67.72
-          FGCOLOR 7 FONT 5
-     "Posee cuenta en moneda extranjera" VIEW-AS TEXT
-          SIZE 27.29 BY .81 AT ROW 12.15 COL 68 WIDGET-ID 8
-          FONT 4
-     "Realiza Tx en moneda extranjera?" VIEW-AS TEXT
-          SIZE 24 BY .81 AT ROW 9.12 COL 67 WIDGET-ID 24
-          FONT 4
-     RECT-213 AT ROW 1.27 COL 3
-     RECT-214 AT ROW 1.23 COL 66
-     RECT-219 AT ROW 9.62 COL 3
-     RECT-237 AT ROW 8.27 COL 66 WIDGET-ID 6
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 1.43 ROW 8.23
-         SIZE 115.57 BY 17
-         BGCOLOR 17 FGCOLOR 0 FONT 4
-         TITLE "INFORMACIÓN FINANCIERA".
-
-DEFINE FRAME F_Falta
-     B_Falta AT ROW 2.08 COL 3
-     BUTTON-179 AT ROW 14.19 COL 105
-     "La siguiente información se necesita para salvar el registro" VIEW-AS TEXT
-          SIZE 51 BY .62 AT ROW 1.27 COL 4
-          FGCOLOR 7 FONT 5
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 2 ROW 8.27
-         SIZE 115 BY 16.96
-         BGCOLOR 17 
-         TITLE "Información que falta por llenar".
-
-DEFINE FRAME F_Juridicas
-     Clientes.Celular AT ROW 1.15 COL 22.29 COLON-ALIGNED WIDGET-ID 2
-          LABEL "Camara de Comercio"
-          VIEW-AS FILL-IN 
-          SIZE 21.43 BY .81
-          BGCOLOR 15 
-     Clientes.Fec_expedicion AT ROW 1.12 COL 75 COLON-ALIGNED WIDGET-ID 4
-          LABEL "Fecha de Constitucion"
-          VIEW-AS FILL-IN 
-          SIZE 12.86 BY .81
-          BGCOLOR 15 
-     Btn_DirEmpresa AT ROW 2.04 COL 90 WIDGET-ID 292
-     Clientes.Dir_Residencia AT ROW 2.08 COL 22.14 COLON-ALIGNED WIDGET-ID 6
-          LABEL "Direccion de la Empresa"
-          VIEW-AS FILL-IN 
-          SIZE 66 BY .81
-          BGCOLOR 15 
-     Btn_UbiEmpresa AT ROW 2.96 COL 90 WIDGET-ID 208
-     Clientes.Lugar_Residencia AT ROW 1.54 COL 108.14 COLON-ALIGNED NO-LABEL WIDGET-ID 296
-          VIEW-AS FILL-IN 
-          SIZE 2 BY .5
-          BGCOLOR 17 FGCOLOR 17 
-     W_Ubi_Empresa AT ROW 2.96 COL 22.29 COLON-ALIGNED WIDGET-ID 294
-     Clientes.Tel_Residencia AT ROW 3.81 COL 22.43 COLON-ALIGNED WIDGET-ID 302
-          LABEL "Telefono Fijo"
-          VIEW-AS FILL-IN 
-          SIZE 21.43 BY .81
-          BGCOLOR 15 
-     Clientes.Tel_Arrendatario AT ROW 3.85 COL 51.86 COLON-ALIGNED WIDGET-ID 300
-          LABEL "Fax"
-          VIEW-AS FILL-IN 
-          SIZE 15.43 BY .81
-          BGCOLOR 15 
-     Anexos_Clientes.AA_Cliente AT ROW 3.85 COL 78.57 COLON-ALIGNED WIDGET-ID 304
-          LABEL "AA"
-          VIEW-AS FILL-IN 
-          SIZE 9.43 BY .81
-          BGCOLOR 15 
-     Clientes.Email AT ROW 4.77 COL 22.29 COLON-ALIGNED WIDGET-ID 298
-          LABEL "Pagina Web"
-          VIEW-AS FILL-IN 
-          SIZE 66 BY .81
-          BGCOLOR 15 
-     Clientes.Tipo_Empresa AT ROW 6.04 COL 22.43 COLON-ALIGNED WIDGET-ID 306
-          LABEL "Tipo de Empresa"
-          VIEW-AS COMBO-BOX 
-          LIST-ITEMS "Privada","Publica","Mixta" 
-          DROP-DOWN-LIST
-          SIZE 12.14 BY 1
-          BGCOLOR 15 
-     Btn_Act_Ppal AT ROW 6.96 COL 51.72 WIDGET-ID 310
-     Clientes.cod_actividad AT ROW 2.62 COL 108 COLON-ALIGNED NO-LABEL WIDGET-ID 314
-          VIEW-AS FILL-IN 
-          SIZE 2 BY .5
-          BGCOLOR 17 FGCOLOR 17 
-     W_Nom_Act_Ppal AT ROW 7 COL 22.29 COLON-ALIGNED WIDGET-ID 308
-     Anexos_Clientes.Acti_Economica_emp AT ROW 3.69 COL 108 COLON-ALIGNED NO-LABEL WIDGET-ID 316
-          VIEW-AS FILL-IN 
-          SIZE 2 BY .5
-          BGCOLOR 17 FGCOLOR 17 
-     W_Nom_Ciu_Emp AT ROW 6.92 COL 61.29 COLON-ALIGNED WIDGET-ID 318
-     Clientes.Salario AT ROW 9.19 COL 3 COLON-ALIGNED WIDGET-ID 322
-          LABEL "$"
-          VIEW-AS FILL-IN 
-          SIZE 15 BY .81
-          BGCOLOR 15 
-     Clientes.Ing_Otros AT ROW 9.19 COL 34.29 COLON-ALIGNED WIDGET-ID 320
-          VIEW-AS FILL-IN 
-          SIZE 15.57 BY .81
-          BGCOLOR 15 
-     Anexos_Clientes.Especifique_OtrosIng AT ROW 9.19 COL 62.57 COLON-ALIGNED WIDGET-ID 324
-          LABEL "Especificar"
-          VIEW-AS FILL-IN 
-          SIZE 28 BY .81
-          BGCOLOR 15 
-     Clientes.Sdo_Obligaciones AT ROW 10.65 COL 20.29 COLON-ALIGNED WIDGET-ID 332
-          LABEL "Egresos Mensuales"
-          VIEW-AS FILL-IN 
-          SIZE 14 BY .81
-          BGCOLOR 15 
-     Clientes.Act_vehiculo AT ROW 10.65 COL 48 COLON-ALIGNED WIDGET-ID 330
-          LABEL "Total Activos"
-          VIEW-AS FILL-IN 
-          SIZE 14 BY .81
-          BGCOLOR 15 
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 2 ROW 8.27
-         SIZE 115 BY 16.96
-         BGCOLOR 17 FONT 5 WIDGET-ID 500.
-
-/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
-DEFINE FRAME F_Juridicas
-     Anexos_Clientes.Val_Pasivos AT ROW 10.65 COL 76 COLON-ALIGNED WIDGET-ID 334
-          LABEL "Total Pasivos"
-          VIEW-AS FILL-IN 
-          SIZE 14 BY .81
-          BGCOLOR 15 
-     Clientes.Id_Mon_Ext AT ROW 12.58 COL 1.14 COLON-ALIGNED NO-LABEL WIDGET-ID 336
-          VIEW-AS FILL-IN 
-          SIZE 4 BY .81
-          BGCOLOR 15 
-     Anexos_Clientes.Otra_Transac_extr AT ROW 12.54 COL 13.14 COLON-ALIGNED WIDGET-ID 340
-          LABEL "Cuales"
-          VIEW-AS FILL-IN 
-          SIZE 29 BY .81
-          BGCOLOR 15 
-     Anexos_Clientes.Maneja_Cta_Extanjera AT ROW 12.62 COL 45.86 COLON-ALIGNED NO-LABEL WIDGET-ID 338
-          VIEW-AS FILL-IN 
-          SIZE 4 BY .81
-          BGCOLOR 15 
-     Anexos_Clientes.Tipo_Moneda_Divisa AT ROW 12.54 COL 58.86 COLON-ALIGNED WIDGET-ID 342
-          LABEL "Moneda"
-          VIEW-AS FILL-IN 
-          SIZE 29 BY .81
-          BGCOLOR 15 
-     Anexos_Clientes.Num_cta_extranjera AT ROW 13.85 COL 8.57 COLON-ALIGNED WIDGET-ID 358
-          LABEL "Nro Cta"
-          VIEW-AS FILL-IN 
-          SIZE 25 BY .81
-          BGCOLOR 15 
-     Anexos_Clientes.Nom_Banco_extranjero AT ROW 13.85 COL 52 COLON-ALIGNED WIDGET-ID 356
-          LABEL "Banco"
-          VIEW-AS FILL-IN 
-          SIZE 36.57 BY .81
-          BGCOLOR 15 
-     Anexos_Clientes.Ciudad_Pais_Bco_Extranjero AT ROW 14.85 COL 52.14 COLON-ALIGNED WIDGET-ID 354
-          LABEL "Ciudad y Pais"
-          VIEW-AS FILL-IN 
-          SIZE 36.43 BY .81
-          BGCOLOR 15 
-     "Posee Cuentas en Moneda Extranjera" VIEW-AS TEXT
-          SIZE 33 BY .62 AT ROW 11.77 COL 51.14 WIDGET-ID 348
-          BGCOLOR 18 FGCOLOR 0 
-     "Ingresos Mensuales Derivados de su Actividad Principal" VIEW-AS TEXT
-          SIZE 48.57 BY .62 AT ROW 8.35 COL 3 WIDGET-ID 328
-          BGCOLOR 18 
-     "Realiza Operaciones en Moneda Extranjera" VIEW-AS TEXT
-          SIZE 38 BY .62 AT ROW 11.81 COL 4.72 WIDGET-ID 346
-          BGCOLOR 18 FGCOLOR 0 
-     RECT-327 AT ROW 8.69 COL 2.43 WIDGET-ID 326
-     RECT-328 AT ROW 12.12 COL 2.29 WIDGET-ID 350
-     RECT-329 AT ROW 12.12 COL 47 WIDGET-ID 352
-     RECT-330 AT ROW 5.85 COL 2.57 WIDGET-ID 360
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 2 ROW 8.27
-         SIZE 115 BY 16.96
-         BGCOLOR 17 FONT 5
-         TITLE "INFORMACION GENERAL ASOCIADO - PERSONA JURIDICA" WIDGET-ID 500.
-
-DEFINE FRAME F_Microempresas
-     MicroEmpresas.NOMBRE AT ROW 1.23 COL 10.72 COLON-ALIGNED WIDGET-ID 18
-          VIEW-AS FILL-IN 
-          SIZE 55.29 BY .81
-          BGCOLOR 15 FONT 5
-     MicroEmpresas.DIRECCION AT ROW 2.08 COL 10.72 COLON-ALIGNED WIDGET-ID 6
-          VIEW-AS FILL-IN 
-          SIZE 55.29 BY .81
-          BGCOLOR 15 FONT 5
-     Btn_Direccion-2 AT ROW 2.23 COL 68.29 WIDGET-ID 290
-     Nom_Ubicacion AT ROW 2.92 COL 10.72 COLON-ALIGNED WIDGET-ID 294
-     Btn_Ubi_Micro AT ROW 3.08 COL 68.29 WIDGET-ID 206
-     MicroEmpresas.TELEFONO AT ROW 4.23 COL 10.57 COLON-ALIGNED WIDGET-ID 20
-          VIEW-AS FILL-IN 
-          SIZE 16.43 BY .81
-          BGCOLOR 15 FONT 5
-     Nom_Actividad AT ROW 5.04 COL 10.57 COLON-ALIGNED WIDGET-ID 26
-     Btn_Actividad_Micro AT ROW 5.12 COL 68 WIDGET-ID 306
-     Nom_Ciiu AT ROW 5.85 COL 10.57 COLON-ALIGNED WIDGET-ID 292
-     MicroEmpresas.ESTRATO AT ROW 6.69 COL 10.57 COLON-ALIGNED WIDGET-ID 8
-          VIEW-AS FILL-IN 
-          SIZE 2.57 BY .81
-          BGCOLOR 15 FONT 5
-     MicroEmpresas.cod_actividad AT ROW 6.73 COL 14 COLON-ALIGNED NO-LABEL WIDGET-ID 4
-          VIEW-AS FILL-IN 
-          SIZE 3 BY .81
-          BGCOLOR 17 
-     MicroEmpresas.Codigo_CIIU AT ROW 6.73 COL 17.43 COLON-ALIGNED NO-LABEL WIDGET-ID 2
-          VIEW-AS FILL-IN 
-          SIZE 3 BY .81
-          BGCOLOR 17 FGCOLOR 17 
-     MicroEmpresas.UBICACION AT ROW 6.73 COL 23 NO-LABEL WIDGET-ID 22
-          VIEW-AS FILL-IN 
-          SIZE 3 BY .81
-          BGCOLOR 17 FGCOLOR 17 
-     Grabar_MicroEmpresa AT ROW 8.08 COL 54.86 WIDGET-ID 308
-     MicroEmpresas.HOMBRES AT ROW 8.58 COL 9.86 COLON-ALIGNED WIDGET-ID 10
-          VIEW-AS FILL-IN 
-          SIZE 3.72 BY .81
-          BGCOLOR 15 FONT 5
-     MicroEmpresas.MUJERES AT ROW 9.42 COL 9.86 COLON-ALIGNED WIDGET-ID 14
-          VIEW-AS FILL-IN 
-          SIZE 3.72 BY .81
-          BGCOLOR 15 FONT 5
-     Salir_MicroEmpresa AT ROW 9.81 COL 54.86 WIDGET-ID 310
-     MicroEmpresas.NINOS AT ROW 10.27 COL 9.86 COLON-ALIGNED WIDGET-ID 16
-          VIEW-AS FILL-IN 
-          SIZE 3.72 BY .81
-          BGCOLOR 15 FONT 5
-     "Personas que Favorece" VIEW-AS TEXT
-          SIZE 22 BY .62 AT ROW 7.81 COL 2.86 WIDGET-ID 28
-          BGCOLOR 17 FGCOLOR 18 
-     RECT-311 AT ROW 8.12 COL 2 WIDGET-ID 312
-     RECT-312 AT ROW 4 COL 2 WIDGET-ID 314
-     RECT-313 AT ROW 1 COL 2 WIDGET-ID 316
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 29 ROW 8.31
-         SIZE 71.86 BY 11.31
-         BGCOLOR 17 FONT 5
-         TITLE "Microempresas" WIDGET-ID 400.
-
-DEFINE FRAME F_Otros
-     Clientes.Fec_UltActualiza AT ROW 1.38 COL 82.14 COLON-ALIGNED WIDGET-ID 50
-          LABEL "Ultima Actualización"
-          VIEW-AS FILL-IN 
-          SIZE 10 BY .81
-          BGCOLOR 18 FGCOLOR 15 
-     Clientes.Cod_Retiro AT ROW 1.81 COL 55 COLON-ALIGNED NO-LABEL WIDGET-ID 12
-          VIEW-AS FILL-IN 
-          SIZE 2 BY .5
-          BGCOLOR 17 FGCOLOR 17 
-     Clientes.Reestructurado AT ROW 1.92 COL 4 NO-LABEL
-          VIEW-AS RADIO-SET HORIZONTAL
-          RADIO-BUTTONS 
-                    "No aplica", 0,
-"Reestructurado", 1,
-"No ReEstructurado", 2
-          SIZE 50 BY .69
-     Clientes.Fec_Ingreso AT ROW 2.27 COL 82.29 COLON-ALIGNED WIDGET-ID 44
-          LABEL "Ingreso a la Cooperativa"
-          VIEW-AS FILL-IN 
-          SIZE 10 BY .81
-          BGCOLOR 18 FGCOLOR 15 
-     Clientes.Cod_Ingreso AT ROW 2.35 COL 55 COLON-ALIGNED NO-LABEL WIDGET-ID 8
-          VIEW-AS FILL-IN 
-          SIZE 2 BY .5
-          BGCOLOR 17 FGCOLOR 17 
-     Clientes.Usuario AT ROW 2.88 COL 55 COLON-ALIGNED NO-LABEL WIDGET-ID 18
-          VIEW-AS FILL-IN 
-          SIZE 2 BY .5
-          BGCOLOR 17 FGCOLOR 17 
-     Clientes.Fec_Retiro AT ROW 3.15 COL 82.29 COLON-ALIGNED WIDGET-ID 48
-          VIEW-AS FILL-IN 
-          SIZE 10 BY .81
-          BGCOLOR 18 FGCOLOR 15 
-     Clientes.Dias_Sancion AT ROW 3.23 COL 39 COLON-ALIGNED
-          VIEW-AS FILL-IN 
-          SIZE 5.57 BY .81
-          BGCOLOR 15 
-     Clientes.Sancionado AT ROW 3.31 COL 4
-          VIEW-AS TOGGLE-BOX
-          SIZE 14 BY .77
-     Clientes.Cod_Segmento AT ROW 3.42 COL 55 COLON-ALIGNED NO-LABEL
-          VIEW-AS FILL-IN 
-          SIZE 2 BY .5
-          BGCOLOR 17 FGCOLOR 17 
-     Clientes.Fec_Calificacion AT ROW 4.04 COL 82.29 COLON-ALIGNED WIDGET-ID 40
-          VIEW-AS FILL-IN 
-          SIZE 10 BY .81
-          BGCOLOR 18 FGCOLOR 15 
-     Clientes.Id_PuedeCodeudar AT ROW 4.73 COL 5 HELP
-          "Id_PuedeCodeudar"
-          LABEL "Id_PuedeCodeudar"
-          VIEW-AS TOGGLE-BOX
-          SIZE 18.14 BY .65
-     Clientes.Fec_IniSancion AT ROW 4.92 COL 82.29 COLON-ALIGNED WIDGET-ID 46
-          VIEW-AS FILL-IN 
-          SIZE 10 BY .81
-          BGCOLOR 18 FGCOLOR 15 
-     Clientes.Reportado_Super AT ROW 5.38 COL 5
-          VIEW-AS TOGGLE-BOX
-          SIZE 27 BY .77
-     Clientes.Id_Privilegiado AT ROW 5.5 COL 40.72 HELP
-          "Id_Privilegiado" NO-LABEL
-          VIEW-AS RADIO-SET VERTICAL
-          RADIO-BUTTONS 
-                    "No Privilegiado", 0,
-"Si Privilegiado", 1
-          SIZE 13.43 BY 1.96
-     BUTTON-180 AT ROW 5.77 COL 66 WIDGET-ID 38
-     Clientes.Fec_fallecido AT ROW 5.92 COL 82.29 COLON-ALIGNED NO-LABEL WIDGET-ID 42
-          VIEW-AS FILL-IN 
-          SIZE 10 BY .81
-          BGCOLOR 15 
-     Clientes.Aut_CentralRiesgo AT ROW 6.19 COL 5
-          VIEW-AS TOGGLE-BOX
-          SIZE 22 BY .77
-     Clientes.Id_Preexistentes AT ROW 7 COL 5
-          LABEL "Ha tenido enfermedades preexistentes?"
-          VIEW-AS TOGGLE-BOX
-          SIZE 29 BY .77
-     Clientes.fecPagare AT ROW 7 COL 82.29 COLON-ALIGNED WIDGET-ID 88
-          VIEW-AS FILL-IN 
-          SIZE 9.86 BY .81
-     Clientes.Reportado_fiscalia AT ROW 7.81 COL 5
-          LABEL "Reportado a Fiscalia"
-          VIEW-AS TOGGLE-BOX
-          SIZE 17 BY .77
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 1.57 ROW 8.27
-         SIZE 115.43 BY 16.96
-         BGCOLOR 17 FONT 4.
-
-/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
-DEFINE FRAME F_Otros
-     Clientes.Reportado_Procredito AT ROW 8.62 COL 5
-          LABEL "Reportado Procrédito"
-          VIEW-AS TOGGLE-BOX
-          SIZE 18 BY .77
-     Clientes.id_AsistioAsamblea AT ROW 9.35 COL 5 HELP
-          "" WIDGET-ID 86
-          LABEL "Asisitió a la última Asamblea?"
-          VIEW-AS TOGGLE-BOX
-          SIZE 29 BY .77
-     Clientes.Fec_Ult_Act[1] AT ROW 9.62 COL 85.86 COLON-ALIGNED WIDGET-ID 56
-          LABEL "del Estado Civil"
-          VIEW-AS FILL-IN 
-          SIZE 10 BY .81
-          BGCOLOR 15 
-     Clientes.Fec_Ult_Act[2] AT ROW 10.42 COL 85.86 COLON-ALIGNED WIDGET-ID 58
-          LABEL "del Nivel de Estudios"
-          VIEW-AS FILL-IN 
-          SIZE 10 BY .81
-          BGCOLOR 15 
-     Clientes.Calificacion AT ROW 10.85 COL 21.86 COLON-ALIGNED
-          VIEW-AS FILL-IN 
-          SIZE 6 BY .81
-          BGCOLOR 15 
-     Clientes.Fec_Ult_Act[3] AT ROW 11.23 COL 85.86 COLON-ALIGNED WIDGET-ID 60
-          LABEL "de los Ingresos"
-          VIEW-AS FILL-IN 
-          SIZE 10 BY .81
-          BGCOLOR 15 
-     Clientes.Con_Sospechosas AT ROW 11.81 COL 21.86 COLON-ALIGNED
-          LABEL "Operaciones Sospechosas"
-          VIEW-AS FILL-IN 
-          SIZE 2.86 BY .81
-          BGCOLOR 18 FGCOLOR 15 
-     Clientes.Fec_Ult_Act[4] AT ROW 12.04 COL 85.86 COLON-ALIGNED WIDGET-ID 62
-          LABEL "del Nit del Empleador"
-          VIEW-AS FILL-IN 
-          SIZE 10 BY .81
-          BGCOLOR 15 
-     Clientes.Fec_Ult_Act[5] AT ROW 12.85 COL 85.86 COLON-ALIGNED WIDGET-ID 64
-          LABEL "del Tipo de Contrato Laboral"
-          VIEW-AS FILL-IN 
-          SIZE 10 BY .81
-          BGCOLOR 15 
-     W_NomSegmento AT ROW 13.42 COL 16.14 COLON-ALIGNED
-     Btn_Codseg AT ROW 13.5 COL 57.43
-     Clientes.Fec_Ult_Act[6] AT ROW 13.65 COL 85.86 COLON-ALIGNED WIDGET-ID 66
-          LABEL "de las Operaciones Internacionales"
-          VIEW-AS FILL-IN 
-          SIZE 10 BY .81
-          BGCOLOR 15 
-     W_NomRetiro AT ROW 14.38 COL 16.14 COLON-ALIGNED WIDGET-ID 34
-     Clientes.Fec_Ult_Act[7] AT ROW 14.46 COL 85.86 COLON-ALIGNED WIDGET-ID 68
-          LABEL "de la Fuerza Mayor"
-          VIEW-AS FILL-IN 
-          SIZE 10 BY .81
-          BGCOLOR 15 
-     W_NomUsuario AT ROW 15.31 COL 16.14 COLON-ALIGNED WIDGET-ID 36
-     "  Reestructurado" VIEW-AS TEXT
-          SIZE 16 BY .81 AT ROW 1.19 COL 6
-          FGCOLOR 7 FONT 5
-     " Fecha de la Ultima Actualizacion" VIEW-AS TEXT
-          SIZE 24 BY .81 AT ROW 8.69 COL 70 WIDGET-ID 74
-          BGCOLOR 18 FGCOLOR 0 
-     RECT-221 AT ROW 3.04 COL 3
-     RECT-3 AT ROW 1.54 COL 3
-     RECT-320 AT ROW 1.12 COL 62 WIDGET-ID 54
-     RECT-321 AT ROW 9.08 COL 62.29 WIDGET-ID 76
-     RECT-323 AT ROW 13.15 COL 1.86 WIDGET-ID 78
-     RECT-324 AT ROW 4.5 COL 3.14 WIDGET-ID 80
-     RECT-325 AT ROW 4.96 COL 39.29 WIDGET-ID 82
-     RECT-326 AT ROW 10.73 COL 3.14 WIDGET-ID 84
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 1.57 ROW 8.27
-         SIZE 115.43 BY 16.96
-         BGCOLOR 17 FONT 4
-         TITLE "OTROS".
-
 DEFINE FRAME F_Relaciones
      RActivas AT ROW 1.12 COL 67.57 NO-LABEL
      Cmb_Relaciones AT ROW 1.27 COL 19.57 COLON-ALIGNED
@@ -2724,12 +1641,12 @@ DEFINE FRAME F_Segmentacion
      "Tipo de Vivienda" VIEW-AS TEXT
           SIZE 15 BY .62 AT ROW 7.38 COL 84 WIDGET-ID 142
           BGCOLOR 18 FGCOLOR 7 FONT 5
-     "Tipo de Vínculo" VIEW-AS TEXT
-          SIZE 15 BY .77 AT ROW 1.27 COL 3
-          BGCOLOR 18 FGCOLOR 7 FONT 5
      "Nivel Educación" VIEW-AS TEXT
           SIZE 15 BY .5 AT ROW 7.27 COL 2.43 WIDGET-ID 172
           FGCOLOR 7 FONT 5
+     "Teléfono" VIEW-AS TEXT
+          SIZE 8 BY .5 AT ROW 14.19 COL 65.57
+          FGCOLOR 7 FONT 4
     WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1.43 ROW 8.27
@@ -2738,49 +1655,49 @@ DEFINE FRAME F_Segmentacion
 
 /* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
 DEFINE FRAME F_Segmentacion
-     "Teléfono" VIEW-AS TEXT
-          SIZE 8 BY .5 AT ROW 14.19 COL 65.57
-          FGCOLOR 7 FONT 4
      "Vivienda Actual Menos Dos años" VIEW-AS TEXT
           SIZE 29 BY .69 AT ROW 15.5 COL 3.14 WIDGET-ID 184
           FGCOLOR 7 FONT 5
      "Teléfono" VIEW-AS TEXT
           SIZE 6.29 BY .5 AT ROW 15.69 COL 51.72 WIDGET-ID 246
           FGCOLOR 7 FONT 4
-     "Permanencia" VIEW-AS TEXT
-          SIZE 12.14 BY .81 AT ROW 15.5 COL 63.72 WIDGET-ID 188
-          FGCOLOR 7 FONT 5
-     "Profesion" VIEW-AS TEXT
-          SIZE 8 BY .5 AT ROW 9.69 COL 2.86 WIDGET-ID 356
-     "Permanencia" VIEW-AS TEXT
-          SIZE 12.14 BY .81 AT ROW 14 COL 2.72 WIDGET-ID 180
-          FGCOLOR 7 FONT 5
-     "Fecha Nacimiento (DD/MM/AAAA)" VIEW-AS TEXT
-          SIZE 24.72 BY .69 AT ROW 3.42 COL 21.57 WIDGET-ID 106
-          FONT 4
-     "Colegio:" VIEW-AS TEXT
-          SIZE 7.72 BY .62 AT ROW 8.88 COL 4.14 WIDGET-ID 338
-     "             Número de Hijos por Edades          Personas a cargo" VIEW-AS TEXT
-          SIZE 50.57 BY .62 AT ROW 3.23 COL 64.29 WIDGET-ID 100
-          BGCOLOR 18 FGCOLOR 7 FONT 5
-     "Nro. de Acta" VIEW-AS TEXT
-          SIZE 11 BY .5 AT ROW 8 COL 52 WIDGET-ID 364
-     "Correspondencia" VIEW-AS TEXT
-          SIZE 15.57 BY .69 AT ROW 13.81 COL 84 WIDGET-ID 186
-          FGCOLOR 7 FONT 5
-     "Nivel Cooperativo" VIEW-AS TEXT
-          SIZE 16 BY .5 AT ROW 7.27 COL 27.43 WIDGET-ID 362
-     "Estado Civil" VIEW-AS TEXT
-          SIZE 11 BY .62 AT ROW 1.54 COL 89.29 WIDGET-ID 354
-     "DD/MM/AAAA" VIEW-AS TEXT
-          SIZE 11 BY .69 AT ROW 1.46 COL 49.57 WIDGET-ID 144
+     "Lugar y Fecha Expedición Documento" VIEW-AS TEXT
+          SIZE 27.57 BY .69 AT ROW 1.42 COL 21.43 WIDGET-ID 104
           FONT 4
      "Envío" VIEW-AS TEXT
           SIZE 6.57 BY .77 AT ROW 13.19 COL 84 WIDGET-ID 190
           FGCOLOR 7 FONT 5
-     "Lugar y Fecha Expedición Documento" VIEW-AS TEXT
-          SIZE 27.57 BY .69 AT ROW 1.42 COL 21.43 WIDGET-ID 104
+     "DD/MM/AAAA" VIEW-AS TEXT
+          SIZE 11 BY .69 AT ROW 1.46 COL 49.57 WIDGET-ID 144
           FONT 4
+     "Estado Civil" VIEW-AS TEXT
+          SIZE 11 BY .62 AT ROW 1.54 COL 89.29 WIDGET-ID 354
+     "Nivel Cooperativo" VIEW-AS TEXT
+          SIZE 16 BY .5 AT ROW 7.27 COL 27.43 WIDGET-ID 362
+     "Correspondencia" VIEW-AS TEXT
+          SIZE 15.57 BY .69 AT ROW 13.81 COL 84 WIDGET-ID 186
+          FGCOLOR 7 FONT 5
+     "Nro. de Acta" VIEW-AS TEXT
+          SIZE 11 BY .5 AT ROW 8 COL 52 WIDGET-ID 364
+     "             Número de Hijos por Edades          Personas a cargo" VIEW-AS TEXT
+          SIZE 50.57 BY .62 AT ROW 3.23 COL 64.29 WIDGET-ID 100
+          BGCOLOR 18 FGCOLOR 7 FONT 5
+     "Colegio:" VIEW-AS TEXT
+          SIZE 7.72 BY .62 AT ROW 8.88 COL 4.14 WIDGET-ID 338
+     "Fecha Nacimiento (DD/MM/AAAA)" VIEW-AS TEXT
+          SIZE 24.72 BY .69 AT ROW 3.42 COL 21.57 WIDGET-ID 106
+          FONT 4
+     "Permanencia" VIEW-AS TEXT
+          SIZE 12.14 BY .81 AT ROW 14 COL 2.72 WIDGET-ID 180
+          FGCOLOR 7 FONT 5
+     "Profesion" VIEW-AS TEXT
+          SIZE 8 BY .5 AT ROW 9.69 COL 2.86 WIDGET-ID 356
+     "Permanencia" VIEW-AS TEXT
+          SIZE 12.14 BY .81 AT ROW 15.5 COL 63.72 WIDGET-ID 188
+          FGCOLOR 7 FONT 5
+     "Tipo de Vínculo" VIEW-AS TEXT
+          SIZE 15 BY .77 AT ROW 1.27 COL 3
+          BGCOLOR 18 FGCOLOR 7 FONT 5
      RECT-1 AT ROW 1.15 COL 63.72
      RECT-228 AT ROW 14 COL 82 WIDGET-ID 150
      RECT-306 AT ROW 7.5 COL 83 WIDGET-ID 346
@@ -2792,6 +1709,1089 @@ DEFINE FRAME F_Segmentacion
          SIZE 115.57 BY 16.96
          BGCOLOR 17 FONT 5
          TITLE "2. INFORMACIÓN PERSONAL".
+
+DEFINE FRAME F_Otros
+     Clientes.Fec_UltActualiza AT ROW 1.38 COL 82.14 COLON-ALIGNED WIDGET-ID 50
+          LABEL "Ultima Actualización"
+          VIEW-AS FILL-IN 
+          SIZE 10 BY .81
+          BGCOLOR 18 FGCOLOR 15 
+     Clientes.Cod_Retiro AT ROW 1.81 COL 55 COLON-ALIGNED NO-LABEL WIDGET-ID 12
+          VIEW-AS FILL-IN 
+          SIZE 2 BY .5
+          BGCOLOR 17 FGCOLOR 17 
+     Clientes.Reestructurado AT ROW 1.92 COL 4 NO-LABEL
+          VIEW-AS RADIO-SET HORIZONTAL
+          RADIO-BUTTONS 
+                    "No aplica", 0,
+"Reestructurado", 1,
+"No ReEstructurado", 2
+          SIZE 50 BY .69
+     Clientes.Fec_Ingreso AT ROW 2.27 COL 82.29 COLON-ALIGNED WIDGET-ID 44
+          LABEL "Ingreso a la Cooperativa"
+          VIEW-AS FILL-IN 
+          SIZE 10 BY .81
+          BGCOLOR 18 FGCOLOR 15 
+     Clientes.Cod_Ingreso AT ROW 2.35 COL 55 COLON-ALIGNED NO-LABEL WIDGET-ID 8
+          VIEW-AS FILL-IN 
+          SIZE 2 BY .5
+          BGCOLOR 17 FGCOLOR 17 
+     Clientes.Usuario AT ROW 2.88 COL 55 COLON-ALIGNED NO-LABEL WIDGET-ID 18
+          VIEW-AS FILL-IN 
+          SIZE 2 BY .5
+          BGCOLOR 17 FGCOLOR 17 
+     Clientes.Fec_Retiro AT ROW 3.15 COL 82.29 COLON-ALIGNED WIDGET-ID 48
+          VIEW-AS FILL-IN 
+          SIZE 10 BY .81
+          BGCOLOR 18 FGCOLOR 15 
+     Clientes.Dias_Sancion AT ROW 3.23 COL 39 COLON-ALIGNED
+          VIEW-AS FILL-IN 
+          SIZE 5.57 BY .81
+          BGCOLOR 15 
+     Clientes.Sancionado AT ROW 3.31 COL 4
+          VIEW-AS TOGGLE-BOX
+          SIZE 14 BY .77
+     Clientes.Cod_Segmento AT ROW 3.42 COL 55 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 2 BY .5
+          BGCOLOR 17 FGCOLOR 17 
+     Clientes.Fec_Calificacion AT ROW 4.04 COL 82.29 COLON-ALIGNED WIDGET-ID 40
+          VIEW-AS FILL-IN 
+          SIZE 10 BY .81
+          BGCOLOR 18 FGCOLOR 15 
+     Clientes.Id_PuedeCodeudar AT ROW 4.73 COL 5 HELP
+          "Id_PuedeCodeudar"
+          LABEL "Id_PuedeCodeudar"
+          VIEW-AS TOGGLE-BOX
+          SIZE 18.14 BY .65
+     Clientes.Fec_IniSancion AT ROW 4.92 COL 82.29 COLON-ALIGNED WIDGET-ID 46
+          VIEW-AS FILL-IN 
+          SIZE 10 BY .81
+          BGCOLOR 18 FGCOLOR 15 
+     Clientes.Reportado_Super AT ROW 5.38 COL 5
+          VIEW-AS TOGGLE-BOX
+          SIZE 27 BY .77
+     Clientes.Id_Privilegiado AT ROW 5.5 COL 40.72 HELP
+          "Id_Privilegiado" NO-LABEL
+          VIEW-AS RADIO-SET VERTICAL
+          RADIO-BUTTONS 
+                    "No Privilegiado", 0,
+"Si Privilegiado", 1
+          SIZE 13.43 BY 1.96
+     BUTTON-180 AT ROW 5.77 COL 66 WIDGET-ID 38
+     Clientes.Fec_fallecido AT ROW 5.92 COL 82.29 COLON-ALIGNED NO-LABEL WIDGET-ID 42
+          VIEW-AS FILL-IN 
+          SIZE 10 BY .81
+          BGCOLOR 15 
+     Clientes.Aut_CentralRiesgo AT ROW 6.19 COL 5
+          VIEW-AS TOGGLE-BOX
+          SIZE 22 BY .77
+     Clientes.Id_Preexistentes AT ROW 7 COL 5
+          LABEL "Ha tenido enfermedades preexistentes?"
+          VIEW-AS TOGGLE-BOX
+          SIZE 29 BY .77
+     Clientes.fecPagare AT ROW 7 COL 82.29 COLON-ALIGNED WIDGET-ID 88
+          VIEW-AS FILL-IN 
+          SIZE 9.86 BY .81
+     Clientes.Reportado_fiscalia AT ROW 7.81 COL 5
+          LABEL "Reportado a Fiscalia"
+          VIEW-AS TOGGLE-BOX
+          SIZE 17 BY .77
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 1.57 ROW 8.27
+         SIZE 115.43 BY 16.96
+         BGCOLOR 17 FONT 4.
+
+/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
+DEFINE FRAME F_Otros
+     Clientes.Reportado_Procredito AT ROW 8.62 COL 5
+          LABEL "Reportado Procrédito"
+          VIEW-AS TOGGLE-BOX
+          SIZE 18 BY .77
+     Clientes.id_AsistioAsamblea AT ROW 9.35 COL 5 HELP
+          "" WIDGET-ID 86
+          LABEL "Asisitió a la última Asamblea?"
+          VIEW-AS TOGGLE-BOX
+          SIZE 29 BY .77
+     Clientes.Fec_Ult_Act[1] AT ROW 9.62 COL 85.86 COLON-ALIGNED WIDGET-ID 56
+          LABEL "del Estado Civil"
+          VIEW-AS FILL-IN 
+          SIZE 10 BY .81
+          BGCOLOR 15 
+     Clientes.Fec_Ult_Act[2] AT ROW 10.42 COL 85.86 COLON-ALIGNED WIDGET-ID 58
+          LABEL "del Nivel de Estudios"
+          VIEW-AS FILL-IN 
+          SIZE 10 BY .81
+          BGCOLOR 15 
+     Clientes.Calificacion AT ROW 10.85 COL 21.86 COLON-ALIGNED
+          VIEW-AS FILL-IN 
+          SIZE 6 BY .81
+          BGCOLOR 15 
+     Clientes.Fec_Ult_Act[3] AT ROW 11.23 COL 85.86 COLON-ALIGNED WIDGET-ID 60
+          LABEL "de los Ingresos"
+          VIEW-AS FILL-IN 
+          SIZE 10 BY .81
+          BGCOLOR 15 
+     Clientes.Con_Sospechosas AT ROW 11.81 COL 21.86 COLON-ALIGNED
+          LABEL "Operaciones Sospechosas"
+          VIEW-AS FILL-IN 
+          SIZE 2.86 BY .81
+          BGCOLOR 18 FGCOLOR 15 
+     Clientes.Fec_Ult_Act[4] AT ROW 12.04 COL 85.86 COLON-ALIGNED WIDGET-ID 62
+          LABEL "del Nit del Empleador"
+          VIEW-AS FILL-IN 
+          SIZE 10 BY .81
+          BGCOLOR 15 
+     Clientes.Fec_Ult_Act[5] AT ROW 12.85 COL 85.86 COLON-ALIGNED WIDGET-ID 64
+          LABEL "del Tipo de Contrato Laboral"
+          VIEW-AS FILL-IN 
+          SIZE 10 BY .81
+          BGCOLOR 15 
+     W_NomSegmento AT ROW 13.42 COL 16.14 COLON-ALIGNED
+     Btn_Codseg AT ROW 13.5 COL 57.43
+     Clientes.Fec_Ult_Act[6] AT ROW 13.65 COL 85.86 COLON-ALIGNED WIDGET-ID 66
+          LABEL "de las Operaciones Internacionales"
+          VIEW-AS FILL-IN 
+          SIZE 10 BY .81
+          BGCOLOR 15 
+     W_NomRetiro AT ROW 14.38 COL 16.14 COLON-ALIGNED WIDGET-ID 34
+     Clientes.Fec_Ult_Act[7] AT ROW 14.46 COL 85.86 COLON-ALIGNED WIDGET-ID 68
+          LABEL "de la Fuerza Mayor"
+          VIEW-AS FILL-IN 
+          SIZE 10 BY .81
+          BGCOLOR 15 
+     W_NomUsuario AT ROW 15.31 COL 16.14 COLON-ALIGNED WIDGET-ID 36
+     "  Reestructurado" VIEW-AS TEXT
+          SIZE 16 BY .81 AT ROW 1.19 COL 6
+          FGCOLOR 7 FONT 5
+     " Fecha de la Ultima Actualizacion" VIEW-AS TEXT
+          SIZE 24 BY .81 AT ROW 8.69 COL 70 WIDGET-ID 74
+          BGCOLOR 18 FGCOLOR 0 
+     RECT-221 AT ROW 3.04 COL 3
+     RECT-3 AT ROW 1.54 COL 3
+     RECT-320 AT ROW 1.12 COL 62 WIDGET-ID 54
+     RECT-321 AT ROW 9.08 COL 62.29 WIDGET-ID 76
+     RECT-323 AT ROW 13.15 COL 1.86 WIDGET-ID 78
+     RECT-324 AT ROW 4.5 COL 3.14 WIDGET-ID 80
+     RECT-325 AT ROW 4.96 COL 39.29 WIDGET-ID 82
+     RECT-326 AT ROW 10.73 COL 3.14 WIDGET-ID 84
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 1.57 ROW 8.27
+         SIZE 115.43 BY 16.96
+         BGCOLOR 17 FONT 4
+         TITLE "OTROS".
+
+DEFINE FRAME F_Microempresas
+     MicroEmpresas.NOMBRE AT ROW 1.23 COL 10.72 COLON-ALIGNED WIDGET-ID 18
+          VIEW-AS FILL-IN 
+          SIZE 55.29 BY .81
+          BGCOLOR 15 FONT 5
+     MicroEmpresas.DIRECCION AT ROW 2.08 COL 10.72 COLON-ALIGNED WIDGET-ID 6
+          VIEW-AS FILL-IN 
+          SIZE 55.29 BY .81
+          BGCOLOR 15 FONT 5
+     Btn_Direccion-2 AT ROW 2.23 COL 68.29 WIDGET-ID 290
+     Nom_Ubicacion AT ROW 2.92 COL 10.72 COLON-ALIGNED WIDGET-ID 294
+     Btn_Ubi_Micro AT ROW 3.08 COL 68.29 WIDGET-ID 206
+     MicroEmpresas.TELEFONO AT ROW 4.23 COL 10.57 COLON-ALIGNED WIDGET-ID 20
+          VIEW-AS FILL-IN 
+          SIZE 16.43 BY .81
+          BGCOLOR 15 FONT 5
+     Nom_Actividad AT ROW 5.04 COL 10.57 COLON-ALIGNED WIDGET-ID 26
+     Btn_Actividad_Micro AT ROW 5.12 COL 68 WIDGET-ID 306
+     Nom_Ciiu AT ROW 5.85 COL 10.57 COLON-ALIGNED WIDGET-ID 292
+     MicroEmpresas.ESTRATO AT ROW 6.69 COL 10.57 COLON-ALIGNED WIDGET-ID 8
+          VIEW-AS FILL-IN 
+          SIZE 2.57 BY .81
+          BGCOLOR 15 FONT 5
+     MicroEmpresas.cod_actividad AT ROW 6.73 COL 14 COLON-ALIGNED NO-LABEL WIDGET-ID 4
+          VIEW-AS FILL-IN 
+          SIZE 3 BY .81
+          BGCOLOR 17 
+     MicroEmpresas.Codigo_CIIU AT ROW 6.73 COL 17.43 COLON-ALIGNED NO-LABEL WIDGET-ID 2
+          VIEW-AS FILL-IN 
+          SIZE 3 BY .81
+          BGCOLOR 17 FGCOLOR 17 
+     MicroEmpresas.UBICACION AT ROW 6.73 COL 23 NO-LABEL WIDGET-ID 22
+          VIEW-AS FILL-IN 
+          SIZE 3 BY .81
+          BGCOLOR 17 FGCOLOR 17 
+     Grabar_MicroEmpresa AT ROW 8.08 COL 54.86 WIDGET-ID 308
+     MicroEmpresas.HOMBRES AT ROW 8.58 COL 9.86 COLON-ALIGNED WIDGET-ID 10
+          VIEW-AS FILL-IN 
+          SIZE 3.72 BY .81
+          BGCOLOR 15 FONT 5
+     MicroEmpresas.MUJERES AT ROW 9.42 COL 9.86 COLON-ALIGNED WIDGET-ID 14
+          VIEW-AS FILL-IN 
+          SIZE 3.72 BY .81
+          BGCOLOR 15 FONT 5
+     Salir_MicroEmpresa AT ROW 9.81 COL 54.86 WIDGET-ID 310
+     MicroEmpresas.NINOS AT ROW 10.27 COL 9.86 COLON-ALIGNED WIDGET-ID 16
+          VIEW-AS FILL-IN 
+          SIZE 3.72 BY .81
+          BGCOLOR 15 FONT 5
+     "Personas que Favorece" VIEW-AS TEXT
+          SIZE 22 BY .62 AT ROW 7.81 COL 2.86 WIDGET-ID 28
+          BGCOLOR 17 FGCOLOR 18 
+     RECT-311 AT ROW 8.12 COL 2 WIDGET-ID 312
+     RECT-312 AT ROW 4 COL 2 WIDGET-ID 314
+     RECT-313 AT ROW 1 COL 2 WIDGET-ID 316
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 29 ROW 8.31
+         SIZE 71.86 BY 11.31
+         BGCOLOR 17 FONT 5
+         TITLE "Microempresas" WIDGET-ID 400.
+
+DEFINE FRAME F_Juridicas
+     Clientes.Celular AT ROW 1.15 COL 22.29 COLON-ALIGNED WIDGET-ID 2
+          LABEL "Camara de Comercio"
+          VIEW-AS FILL-IN 
+          SIZE 21.43 BY .81
+          BGCOLOR 15 
+     Clientes.Fec_expedicion AT ROW 1.12 COL 75 COLON-ALIGNED WIDGET-ID 4
+          LABEL "Fecha de Constitucion"
+          VIEW-AS FILL-IN 
+          SIZE 12.86 BY .81
+          BGCOLOR 15 
+     Btn_DirEmpresa AT ROW 2.04 COL 90 WIDGET-ID 292
+     Clientes.Dir_Residencia AT ROW 2.08 COL 22.14 COLON-ALIGNED WIDGET-ID 6
+          LABEL "Direccion de la Empresa"
+          VIEW-AS FILL-IN 
+          SIZE 66 BY .81
+          BGCOLOR 15 
+     Btn_UbiEmpresa AT ROW 2.96 COL 90 WIDGET-ID 208
+     Clientes.Lugar_Residencia AT ROW 1.54 COL 108.14 COLON-ALIGNED NO-LABEL WIDGET-ID 296
+          VIEW-AS FILL-IN 
+          SIZE 2 BY .5
+          BGCOLOR 17 FGCOLOR 17 
+     W_Ubi_Empresa AT ROW 2.96 COL 22.29 COLON-ALIGNED WIDGET-ID 294
+     Clientes.Tel_Residencia AT ROW 3.81 COL 22.43 COLON-ALIGNED WIDGET-ID 302
+          LABEL "Telefono Fijo"
+          VIEW-AS FILL-IN 
+          SIZE 21.43 BY .81
+          BGCOLOR 15 
+     Clientes.Tel_Arrendatario AT ROW 3.85 COL 51.86 COLON-ALIGNED WIDGET-ID 300
+          LABEL "Fax"
+          VIEW-AS FILL-IN 
+          SIZE 15.43 BY .81
+          BGCOLOR 15 
+     Anexos_Clientes.AA_Cliente AT ROW 3.85 COL 78.57 COLON-ALIGNED WIDGET-ID 304
+          LABEL "AA"
+          VIEW-AS FILL-IN 
+          SIZE 9.43 BY .81
+          BGCOLOR 15 
+     Clientes.Email AT ROW 4.77 COL 22.29 COLON-ALIGNED WIDGET-ID 298
+          LABEL "Pagina Web"
+          VIEW-AS FILL-IN 
+          SIZE 66 BY .81
+          BGCOLOR 15 
+     Clientes.Tipo_Empresa AT ROW 6.04 COL 22.43 COLON-ALIGNED WIDGET-ID 306
+          LABEL "Tipo de Empresa"
+          VIEW-AS COMBO-BOX 
+          LIST-ITEMS "Privada","Publica","Mixta" 
+          DROP-DOWN-LIST
+          SIZE 12.14 BY 1
+          BGCOLOR 15 
+     Btn_Act_Ppal AT ROW 6.96 COL 51.72 WIDGET-ID 310
+     Clientes.cod_actividad AT ROW 2.62 COL 108 COLON-ALIGNED NO-LABEL WIDGET-ID 314
+          VIEW-AS FILL-IN 
+          SIZE 2 BY .5
+          BGCOLOR 17 FGCOLOR 17 
+     W_Nom_Act_Ppal AT ROW 7 COL 22.29 COLON-ALIGNED WIDGET-ID 308
+     Anexos_Clientes.Acti_Economica_emp AT ROW 3.69 COL 108 COLON-ALIGNED NO-LABEL WIDGET-ID 316
+          VIEW-AS FILL-IN 
+          SIZE 2 BY .5
+          BGCOLOR 17 FGCOLOR 17 
+     W_Nom_Ciu_Emp AT ROW 6.92 COL 61.29 COLON-ALIGNED WIDGET-ID 318
+     Clientes.Salario AT ROW 9.19 COL 3 COLON-ALIGNED WIDGET-ID 322
+          LABEL "$"
+          VIEW-AS FILL-IN 
+          SIZE 15 BY .81
+          BGCOLOR 15 
+     Clientes.Ing_Otros AT ROW 9.19 COL 34.29 COLON-ALIGNED WIDGET-ID 320
+          VIEW-AS FILL-IN 
+          SIZE 15.57 BY .81
+          BGCOLOR 15 
+     Anexos_Clientes.Especifique_OtrosIng AT ROW 9.19 COL 62.57 COLON-ALIGNED WIDGET-ID 324
+          LABEL "Especificar"
+          VIEW-AS FILL-IN 
+          SIZE 28 BY .81
+          BGCOLOR 15 
+     Clientes.Sdo_Obligaciones AT ROW 10.65 COL 20.29 COLON-ALIGNED WIDGET-ID 332
+          LABEL "Egresos Mensuales"
+          VIEW-AS FILL-IN 
+          SIZE 14 BY .81
+          BGCOLOR 15 
+     Clientes.Act_vehiculo AT ROW 10.65 COL 48 COLON-ALIGNED WIDGET-ID 330
+          LABEL "Total Activos"
+          VIEW-AS FILL-IN 
+          SIZE 14 BY .81
+          BGCOLOR 15 
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 2 ROW 8.27
+         SIZE 115 BY 16.96
+         BGCOLOR 17 FONT 5 WIDGET-ID 500.
+
+/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
+DEFINE FRAME F_Juridicas
+     Anexos_Clientes.Val_Pasivos AT ROW 10.65 COL 76 COLON-ALIGNED WIDGET-ID 334
+          LABEL "Total Pasivos"
+          VIEW-AS FILL-IN 
+          SIZE 14 BY .81
+          BGCOLOR 15 
+     Clientes.Id_Mon_Ext AT ROW 12.58 COL 1.14 COLON-ALIGNED NO-LABEL WIDGET-ID 336
+          VIEW-AS FILL-IN 
+          SIZE 4 BY .81
+          BGCOLOR 15 
+     Anexos_Clientes.Otra_Transac_extr AT ROW 12.54 COL 13.14 COLON-ALIGNED WIDGET-ID 340
+          LABEL "Cuales"
+          VIEW-AS FILL-IN 
+          SIZE 29 BY .81
+          BGCOLOR 15 
+     Anexos_Clientes.Maneja_Cta_Extanjera AT ROW 12.62 COL 45.86 COLON-ALIGNED NO-LABEL WIDGET-ID 338
+          VIEW-AS FILL-IN 
+          SIZE 4 BY .81
+          BGCOLOR 15 
+     Anexos_Clientes.Tipo_Moneda_Divisa AT ROW 12.54 COL 58.86 COLON-ALIGNED WIDGET-ID 342
+          LABEL "Moneda"
+          VIEW-AS FILL-IN 
+          SIZE 29 BY .81
+          BGCOLOR 15 
+     Anexos_Clientes.Num_cta_extranjera AT ROW 13.85 COL 8.57 COLON-ALIGNED WIDGET-ID 358
+          LABEL "Nro Cta"
+          VIEW-AS FILL-IN 
+          SIZE 25 BY .81
+          BGCOLOR 15 
+     Anexos_Clientes.Nom_Banco_extranjero AT ROW 13.85 COL 52 COLON-ALIGNED WIDGET-ID 356
+          LABEL "Banco"
+          VIEW-AS FILL-IN 
+          SIZE 36.57 BY .81
+          BGCOLOR 15 
+     Anexos_Clientes.Ciudad_Pais_Bco_Extranjero AT ROW 14.85 COL 52.14 COLON-ALIGNED WIDGET-ID 354
+          LABEL "Ciudad y Pais"
+          VIEW-AS FILL-IN 
+          SIZE 36.43 BY .81
+          BGCOLOR 15 
+     "Posee Cuentas en Moneda Extranjera" VIEW-AS TEXT
+          SIZE 33 BY .62 AT ROW 11.77 COL 51.14 WIDGET-ID 348
+          BGCOLOR 18 FGCOLOR 0 
+     "Ingresos Mensuales Derivados de su Actividad Principal" VIEW-AS TEXT
+          SIZE 48.57 BY .62 AT ROW 8.35 COL 3 WIDGET-ID 328
+          BGCOLOR 18 
+     "Realiza Operaciones en Moneda Extranjera" VIEW-AS TEXT
+          SIZE 38 BY .62 AT ROW 11.81 COL 4.72 WIDGET-ID 346
+          BGCOLOR 18 FGCOLOR 0 
+     RECT-327 AT ROW 8.69 COL 2.43 WIDGET-ID 326
+     RECT-328 AT ROW 12.12 COL 2.29 WIDGET-ID 350
+     RECT-329 AT ROW 12.12 COL 47 WIDGET-ID 352
+     RECT-330 AT ROW 5.85 COL 2.57 WIDGET-ID 360
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 2 ROW 8.27
+         SIZE 115 BY 16.96
+         BGCOLOR 17 FONT 5
+         TITLE "INFORMACION GENERAL ASOCIADO - PERSONA JURIDICA" WIDGET-ID 500.
+
+DEFINE FRAME F_Falta
+     B_Falta AT ROW 2.08 COL 3
+     BUTTON-179 AT ROW 14.19 COL 105
+     "La siguiente información se necesita para salvar el registro" VIEW-AS TEXT
+          SIZE 51 BY .62 AT ROW 1.27 COL 4
+          FGCOLOR 7 FONT 5
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 2 ROW 8.27
+         SIZE 115 BY 16.96
+         BGCOLOR 17 
+         TITLE "Información que falta por llenar".
+
+DEFINE FRAME F_Economica
+     Anexos_Clientes.Transac_Mod_Ext AT ROW 8.73 COL 96 NO-LABEL WIDGET-ID 18
+          VIEW-AS SELECTION-LIST MULTIPLE SCROLLBAR-VERTICAL 
+          LIST-ITEMS "","Importaciones","Exportaciones","Inversiones","Giros","Préstamos en moneda Extranjera","Ordenes de pago","Remesas","Transferencias","Cambio de Divisas","Otros" 
+          SIZE 17.72 BY 1.96 TOOLTIP "Transacciones Que Normalmente Realiza"
+     Anexos_Clientes.Gto_TargetaCredito AT ROW 5.04 COL 77.86
+          LABEL "Cuota Tarjeta Crédito" FORMAT ">,>>>,>>>,>>9"
+          VIEW-AS FILL-IN 
+          SIZE 14.29 BY .81
+     Clientes.Salario AT ROW 1.77 COL 23 COLON-ALIGNED
+          LABEL "Salario / Pensión" FORMAT ">,>>>,>>>,>>9"
+          VIEW-AS FILL-IN 
+          SIZE 17 BY .81
+          BGCOLOR 15 
+     Clientes.Ing_Honorarios AT ROW 2.65 COL 23 COLON-ALIGNED
+          LABEL "Honorarios" FORMAT ">,>>>,>>>,>>9"
+          VIEW-AS FILL-IN 
+          SIZE 17 BY .81
+          BGCOLOR 15 
+     Clientes.Ing_financieros AT ROW 3.58 COL 23 COLON-ALIGNED
+          LABEL "Comisiones" FORMAT ">,>>>,>>>,>>9"
+          VIEW-AS FILL-IN 
+          SIZE 17 BY .81
+          BGCOLOR 15 
+     Clientes.Ing_arriendos AT ROW 4.46 COL 23 COLON-ALIGNED WIDGET-ID 2
+          LABEL "Arriendos" FORMAT ">,>>>,>>>,>>9"
+          VIEW-AS FILL-IN 
+          SIZE 17 BY .81
+          BGCOLOR 15 
+     Clientes.Ing_Otros AT ROW 5.35 COL 23 COLON-ALIGNED FORMAT ">,>>>,>>>,>>9"
+          VIEW-AS FILL-IN 
+          SIZE 17 BY .81
+          BGCOLOR 15 
+     Anexos_Clientes.Especifique_OtrosIng AT ROW 6.23 COL 11 COLON-ALIGNED
+          LABEL "Especifique" FORMAT "X(70)"
+          VIEW-AS FILL-IN 
+          SIZE 29 BY .81
+          BGCOLOR 19 
+     Tot_Ingresos AT ROW 7.19 COL 23 COLON-ALIGNED
+     Clientes.Gto_obligacion AT ROW 2.54 COL 91 COLON-ALIGNED
+          LABEL "Descuentos Nomina" FORMAT ">,>>>,>>>,>>9"
+          VIEW-AS FILL-IN 
+          SIZE 14.29 BY .81
+          BGCOLOR 15 
+     Clientes.Gto_Arriendo AT ROW 4.23 COL 91 COLON-ALIGNED
+          LABEL "Arriendo / Cuota Hip."
+          VIEW-AS FILL-IN 
+          SIZE 14.29 BY .81 TOOLTIP "Valor Arriendo"
+          BGCOLOR 33 
+     Clientes.Sdo_Obligaciones AT ROW 3.38 COL 91 COLON-ALIGNED
+          LABEL "Cuotas Préstamos" FORMAT ">,>>>,>>>,>>9"
+          VIEW-AS FILL-IN 
+          SIZE 14.29 BY .81
+          BGCOLOR 15 
+     Clientes.Gto_Familiar AT ROW 1.69 COL 90.86 COLON-ALIGNED
+          LABEL "Gastos Familiares" FORMAT ">,>>>,>>>,>>9"
+          VIEW-AS FILL-IN 
+          SIZE 14.29 BY .81
+          BGCOLOR 15 
+     Anexos_Clientes.Gto_Otros AT ROW 5.88 COL 91 COLON-ALIGNED
+          LABEL "Otras Deudas"
+          VIEW-AS FILL-IN 
+          SIZE 14.29 BY .81
+          BGCOLOR 15 
+     Tot_Egresos AT ROW 6.81 COL 91.29 COLON-ALIGNED
+     Btn_Grabar_Act_Pas AT ROW 10.42 COL 34.29 WIDGET-ID 16
+     Clientes.Act_vehiculo AT ROW 10.42 COL 14 COLON-ALIGNED
+          LABEL "Valor Vehículo" FORMAT ">,>>>,>>>,>>9"
+          VIEW-AS FILL-IN 
+          SIZE 17 BY .81
+          BGCOLOR 8 
+     Clientes.Act_casa AT ROW 11.31 COL 14 COLON-ALIGNED FORMAT ">,>>>,>>>,>>9"
+          VIEW-AS FILL-IN 
+          SIZE 17 BY .81
+          BGCOLOR 8 
+     Clientes.Act_inversion AT ROW 12.19 COL 14 COLON-ALIGNED
+          LABEL "Otros Activos" FORMAT ">,>>>,>>>,>>9"
+          VIEW-AS FILL-IN 
+          SIZE 17 BY .81
+          BGCOLOR 8 
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 1.43 ROW 8.23
+         SIZE 115.57 BY 17
+         BGCOLOR 17 FGCOLOR 0 FONT 4.
+
+/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
+DEFINE FRAME F_Economica
+     Tot_Activos AT ROW 13.08 COL 14 COLON-ALIGNED
+     Anexos_Clientes.Val_Pasivos AT ROW 14.27 COL 14 COLON-ALIGNED
+          LABEL "Total Pasivos"
+          VIEW-AS FILL-IN 
+          SIZE 17 BY .81
+          BGCOLOR 18 FGCOLOR 15 
+     Anexos_Clientes.Otra_Transac_extr AT ROW 10.96 COL 90 COLON-ALIGNED
+          LABEL "Otra ¿Cual?" FORMAT "X(70)"
+          VIEW-AS FILL-IN 
+          SIZE 21.86 BY .81
+          BGCOLOR 18 
+     Anexos_Clientes.Maneja_Cta_Extanjera AT ROW 12.15 COL 97.29
+          LABEL ""
+          VIEW-AS TOGGLE-BOX
+          SIZE 4 BY .77 TOOLTIP "Cuenta Moneda Extranjera"
+     Anexos_Clientes.Tipo_Moneda_Divisa AT ROW 13.08 COL 76 COLON-ALIGNED
+          LABEL "Tipo Moneda" FORMAT "X(60)"
+          VIEW-AS FILL-IN 
+          SIZE 11 BY .81
+          BGCOLOR 18 FONT 5
+     Anexos_Clientes.Nom_Banco_extranjero AT ROW 13.08 COL 94.29 COLON-ALIGNED WIDGET-ID 10
+          LABEL "Banco" FORMAT "X(50)"
+          VIEW-AS FILL-IN 
+          SIZE 18 BY .81
+          BGCOLOR 18 FONT 5
+     Anexos_Clientes.Num_cta_extranjera AT ROW 13.92 COL 76 COLON-ALIGNED WIDGET-ID 12
+          LABEL "Numero Cuenta" FORMAT "X(25)"
+          VIEW-AS FILL-IN 
+          SIZE 36 BY .81
+          BGCOLOR 18 FONT 5
+     Anexos_Clientes.Ciudad_Pais_Bco_Extranjero AT ROW 14.77 COL 76 COLON-ALIGNED
+          LABEL "Ciudad y País" FORMAT "X(50)"
+          VIEW-AS FILL-IN 
+          SIZE 36 BY .81
+          BGCOLOR 18 FONT 5
+     Clientes.Id_Mon_Ext AT ROW 9.08 COL 90 COLON-ALIGNED NO-LABEL WIDGET-ID 22
+          VIEW-AS FILL-IN 
+          SIZE 2.86 BY .81
+          BGCOLOR 15 
+     "  Egresos Mensuales" VIEW-AS TEXT
+          SIZE 19 BY .77 AT ROW 1 COL 68.29
+          FGCOLOR 7 FONT 5
+     "  Ingresos Mensuales" VIEW-AS TEXT
+          SIZE 19 BY 1.04 AT ROW 1 COL 6
+          FGCOLOR 7 FONT 5
+     " Activos y Pasivos" VIEW-AS TEXT
+          SIZE 16 BY .81 AT ROW 9.19 COL 7
+          FGCOLOR 7 FONT 5
+     "Transacciones Moneda Extranjera" VIEW-AS TEXT
+          SIZE 31 BY .81 AT ROW 7.92 COL 67.72
+          FGCOLOR 7 FONT 5
+     "Posee cuenta en moneda extranjera" VIEW-AS TEXT
+          SIZE 27.29 BY .81 AT ROW 12.15 COL 68 WIDGET-ID 8
+          FONT 4
+     "Realiza Tx en moneda extranjera?" VIEW-AS TEXT
+          SIZE 24 BY .81 AT ROW 9.12 COL 67 WIDGET-ID 24
+          FONT 4
+     RECT-213 AT ROW 1.27 COL 3
+     RECT-214 AT ROW 1.23 COL 66
+     RECT-219 AT ROW 9.62 COL 3
+     RECT-237 AT ROW 8.27 COL 66 WIDGET-ID 6
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 1.43 ROW 8.23
+         SIZE 115.57 BY 17
+         BGCOLOR 17 FGCOLOR 0 FONT 4
+         TITLE "INFORMACIÓN FINANCIERA".
+
+DEFINE FRAME F_Documentacion
+     Cmb_Linea AT ROW 1.19 COL 32.14 COLON-ALIGNED
+     Cmb_Contrato AT ROW 1.27 COL 74 COLON-ALIGNED
+     Anexos_Clientes.Docum_Requer[1] AT ROW 2.12 COL 5
+          LABEL "   Formato unico de vinculación"
+          VIEW-AS TOGGLE-BOX
+          SIZE 29 BY .77
+     Anexos_Clientes.Docum_Requer[2] AT ROW 2.81 COL 5 WIDGET-ID 182
+          LABEL "   Fotocopia Ampliada del Documento de Identidad"
+          VIEW-AS TOGGLE-BOX
+          SIZE 49.57 BY .77
+     Anexos_Clientes.Docum_Requer[3] AT ROW 3.54 COL 5 WIDGET-ID 192
+          LABEL "   Fotocopia de las dos (2) últimas nóminas o mesada pensional"
+          VIEW-AS TOGGLE-BOX
+          SIZE 59 BY .77
+     Anexos_Clientes.Docum_Requer[4] AT ROW 4.23 COL 5
+          LABEL "   Certificado Laboral Expedicion menor a 30 días"
+          VIEW-AS TOGGLE-BOX
+          SIZE 49.57 BY .77
+     Anexos_Clientes.Docum_Requer[5] AT ROW 4.96 COL 5
+          LABEL "   Fotocopia de Tarjeta de propiedad de (los) vehiculos(s) o moto(s)"
+          VIEW-AS TOGGLE-BOX
+          SIZE 61 BY .77
+     Anexos_Clientes.Docum_Requer[6] AT ROW 5.73 COL 5 WIDGET-ID 188
+          LABEL "   Factura proforma para vehiculo o moto nuevo"
+          VIEW-AS TOGGLE-BOX
+          SIZE 49.57 BY .77
+     Anexos_Clientes.Docum_Requer[7] AT ROW 6.46 COL 5 WIDGET-ID 186
+          LABEL "   Peritaje para vehiculo usado"
+          VIEW-AS TOGGLE-BOX
+          SIZE 49.57 BY .77
+     Anexos_Clientes.Docum_Requer[8] AT ROW 7.19 COL 5 WIDGET-ID 190
+          LABEL "   Certificado original de tradición y libertad del inmuebleno mayor a 30 días"
+          VIEW-AS TOGGLE-BOX
+          SIZE 67 BY .77
+     Anexos_Clientes.Docum_Requer[9] AT ROW 7.92 COL 5
+          LABEL "   Declaración de renta o constancia si no esta obligado (2 últimos años)"
+          VIEW-AS TOGGLE-BOX
+          SIZE 67 BY .77
+     Anexos_Clientes.Docum_Requer[10] AT ROW 8.65 COL 5 WIDGET-ID 194
+          LABEL "   Copia del contrato de promesa de compra venta o la minuta"
+          VIEW-AS TOGGLE-BOX
+          SIZE 67 BY .77
+     Anexos_Clientes.Docum_Requer[11] AT ROW 9.42 COL 5
+          LABEL "   Paz y salvo de impuesto predial"
+          VIEW-AS TOGGLE-BOX
+          SIZE 67 BY .77
+     Anexos_Clientes.Docum_Requer[12] AT ROW 10.15 COL 5
+          LABEL "   Avalúo Comercial y estudio de titulos"
+          VIEW-AS TOGGLE-BOX
+          SIZE 67 BY .77
+     Anexos_Clientes.Docum_Requer[13] AT ROW 10.88 COL 5
+          LABEL "   Factura de compra venta que acrediten las transacciones comerciales"
+          VIEW-AS TOGGLE-BOX
+          SIZE 67 BY .77
+     Anexos_Clientes.Docum_Requer[14] AT ROW 11.62 COL 5
+          LABEL "   Certificado de ingresos, retenciones otros ingresos u honorarios"
+          VIEW-AS TOGGLE-BOX
+          SIZE 67 BY .77
+     Anexos_Clientes.Docum_Requer[15] AT ROW 12.35 COL 5
+          LABEL "   Cert. Cámara de comercio, Licencia de Sanidad o Bomberos."
+          VIEW-AS TOGGLE-BOX
+          SIZE 67 BY .77
+     Anexos_Clientes.Docum_Requer[16] AT ROW 13.08 COL 5
+          LABEL "   Extractos Bancarios de los últimos tres (3) meses"
+          VIEW-AS TOGGLE-BOX
+          SIZE 67 BY .77
+     Anexos_Clientes.Docum_Requer[17] AT ROW 13.81 COL 5
+          LABEL "   Estados Financieros certificados de 2 últimos años y al corte más reciente"
+          VIEW-AS TOGGLE-BOX
+          SIZE 67 BY .77
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 1.43 ROW 8.23
+         SIZE 115.57 BY 17
+         BGCOLOR 17 FONT 5 WIDGET-ID 200.
+
+/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
+DEFINE FRAME F_Documentacion
+     Anexos_Clientes.Docum_Requer[18] AT ROW 14.54 COL 5
+          LABEL "   Prueba de destinación para el crédito educativo"
+          VIEW-AS TOGGLE-BOX
+          SIZE 67 BY .77
+     Anexos_Clientes.Docum_Requer[19] AT ROW 15.23 COL 5 WIDGET-ID 196
+          LABEL "   Flujo de Caja del Proyecto a Financiar"
+          VIEW-AS TOGGLE-BOX
+          SIZE 67 BY .77
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 1.43 ROW 8.23
+         SIZE 115.57 BY 17
+         BGCOLOR 17 FONT 5
+         TITLE "DOCUMENTACION REQUERIDA" WIDGET-ID 200.
+
+DEFINE FRAME F_Conyuge
+     CnygeExtncion AT ROW 12.38 COL 103 COLON-ALIGNED HELP
+          "Extencion del Teléfono Comercial" NO-LABEL WIDGET-ID 286
+     R_Tipo_Identificacion AT ROW 1.42 COL 5.72 COLON-ALIGNED WIDGET-ID 2
+     R_Tercero AT ROW 1.42 COL 31.14 COLON-ALIGNED HELP
+          "Número documento de identificación" WIDGET-ID 110
+     R_Sexo AT ROW 1.46 COL 61.86 NO-LABEL WIDGET-ID 114
+     R_Apellido1 AT ROW 3.46 COL 1 COLON-ALIGNED HELP
+          "Primer apellido del cliente" NO-LABEL WIDGET-ID 22 FORMAT "X(30)"
+          VIEW-AS FILL-IN 
+          SIZE 25 BY .81
+          BGCOLOR 15 
+     R_Apellido2 AT ROW 3.46 COL 26.86 COLON-ALIGNED HELP
+          "Segundo apellido del cliente" NO-LABEL WIDGET-ID 24 FORMAT "X(30)"
+          VIEW-AS FILL-IN 
+          SIZE 25 BY .81
+          BGCOLOR 15 
+     R_Nombre AT ROW 3.42 COL 53 COLON-ALIGNED HELP
+          "Nombre del cliente" NO-LABEL WIDGET-ID 26 FORMAT "X(90)"
+          VIEW-AS FILL-IN 
+          SIZE 59 BY .81
+          BGCOLOR 15 
+     WR_CiuNacimiento AT ROW 5.62 COL 3 NO-LABEL WIDGET-ID 264
+     R_Btn_Nacimiento AT ROW 5.54 COL 67 WIDGET-ID 262
+     R_Lugar_Nacimiento AT ROW 14.19 COL 61 COLON-ALIGNED HELP
+          "Barrio, Ciudad y Departamento donde nació el cliente" NO-LABEL WIDGET-ID 216
+          BGCOLOR 17 FGCOLOR 17 
+     R_Fec_Nacimiento AT ROW 5.62 COL 69 COLON-ALIGNED HELP
+          "Fecha de nacimiento del cliente" NO-LABEL
+          BGCOLOR 15 
+     R_Nacionalidad AT ROW 5.62 COL 112.43 RIGHT-ALIGNED NO-LABEL WIDGET-ID 102
+     R_Niv_Educativo AT ROW 7.85 COL 3 NO-LABEL
+     WR_NomProfesion AT ROW 7.85 COL 26 COLON-ALIGNED NO-LABEL
+     R_Btn_Profesion AT ROW 7.77 COL 57.86 WIDGET-ID 244
+     R_Cod_Profesion AT ROW 14.19 COL 57 COLON-ALIGNED HELP
+          "Código de la profesión del cliente" NO-LABEL WIDGET-ID 242
+          BGCOLOR 17 FGCOLOR 17 
+     R_Ocupacion AT ROW 7.77 COL 62.57 NO-LABEL WIDGET-ID 4
+     R_Especifique AT ROW 7.81 COL 83.43 COLON-ALIGNED NO-LABEL WIDGET-ID 252
+     R_Cargo_Actividad AT ROW 11.12 COL 24 COLON-ALIGNED
+     R_Empresa AT ROW 10.23 COL 24 COLON-ALIGNED WIDGET-ID 254
+     R_Direccion AT ROW 12 COL 26 NO-LABEL FORMAT "X(90)":U
+          VIEW-AS FILL-IN 
+          SIZE 57 BY .81
+          BGCOLOR 15 
+     WR_CiuEmpresa AT ROW 12.92 COL 26 NO-LABEL WIDGET-ID 270
+     R_Btn_Empresa AT ROW 12.88 COL 82.43 WIDGET-ID 266
+     R_Dir_Empresa AT ROW 14.19 COL 55 HELP
+          "Dirección comercial donde labora el cliente" NO-LABEL WIDGET-ID 268
+          BGCOLOR 17 FGCOLOR 17 
+     R_Btn_Direccion AT ROW 11.85 COL 82.43 WIDGET-ID 290
+     R_Tel_Empresa AT ROW 12.38 COL 90.57 COLON-ALIGNED NO-LABEL WIDGET-ID 28
+     R_TIngreso AT ROW 13.92 COL 11.43
+     R_TEgresos AT ROW 14.65 COL 11.57
+     Btn_Grabar_conyuge AT ROW 1.31 COL 84.14 WIDGET-ID 282
+     Btn_Ocultar_conyuge AT ROW 1.27 COL 100 WIDGET-ID 284
+     R_Tel_Empresa-Indctvo AT ROW 12.38 COL 85.86 COLON-ALIGNED NO-LABEL WIDGET-ID 292
+     "Segundo Apellido" VIEW-AS TEXT
+          SIZE 16.86 BY .77 AT ROW 2.69 COL 29.72 WIDGET-ID 106
+          FGCOLOR 7 FONT 5
+     "Primer Apellido" VIEW-AS TEXT
+          SIZE 14 BY .77 AT ROW 2.65 COL 3 WIDGET-ID 104
+          FGCOLOR 7 FONT 5
+     "Ciudad y Departamento" VIEW-AS TEXT
+          SIZE 21 BY .77 AT ROW 12.88 COL 4 WIDGET-ID 276
+          FGCOLOR 7 FONT 5
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 1.43 ROW 8.23
+         SIZE 115.57 BY 17
+         BGCOLOR 17 FONT 5 WIDGET-ID 300.
+
+/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
+DEFINE FRAME F_Conyuge
+     "NACIONALIDAD" VIEW-AS TEXT
+          SIZE 12.14 BY .77 AT ROW 4.85 COL 86 WIDGET-ID 222
+          FGCOLOR 7 FONT 4
+     "Teléfono" VIEW-AS TEXT
+          SIZE 14 BY .77 AT ROW 11.58 COL 88.57 WIDGET-ID 278
+          FGCOLOR 7 FONT 5
+     "Dirección de la Empresa" VIEW-AS TEXT
+          SIZE 22 BY .77 AT ROW 12.04 COL 3.14 WIDGET-ID 274
+          FGCOLOR 7 FONT 5
+     "Ocupación Principal" VIEW-AS TEXT
+          SIZE 18.29 BY .77 AT ROW 7 COL 63.14 WIDGET-ID 250
+          FGCOLOR 7 FONT 5
+     "Nivel Educación" VIEW-AS TEXT
+          SIZE 15 BY .77 AT ROW 7.08 COL 3 WIDGET-ID 280
+          FGCOLOR 7 FONT 5
+     "Ext" VIEW-AS TEXT
+          SIZE 7 BY .77 AT ROW 11.58 COL 105.29 WIDGET-ID 288
+          FGCOLOR 7 FONT 5
+     "Profesión" VIEW-AS TEXT
+          SIZE 9.29 BY .77 AT ROW 7.04 COL 30 WIDGET-ID 166
+          FGCOLOR 7 FONT 5
+     "Datos Financieros" VIEW-AS TEXT
+          SIZE 16.29 BY .77 AT ROW 9.46 COL 3 WIDGET-ID 172
+          FGCOLOR 7 FONT 5
+     "Lugar y Fecha de Nacimiento" VIEW-AS TEXT
+          SIZE 26 BY .77 AT ROW 4.85 COL 3 WIDGET-ID 220
+          FGCOLOR 7 FONT 5
+     "DDMMAAAA" VIEW-AS TEXT
+          SIZE 9.43 BY .77 AT ROW 4.85 COL 71 WIDGET-ID 146
+          FGCOLOR 7 FONT 4
+     "Género" VIEW-AS TEXT
+          SIZE 7.14 BY .54 AT ROW 1.08 COL 60.86 WIDGET-ID 118
+          FGCOLOR 7 FONT 4
+     "Nombre" VIEW-AS TEXT
+          SIZE 9.14 BY .77 AT ROW 2.65 COL 55.72 WIDGET-ID 108
+          FGCOLOR 7 FONT 5
+     RECT-231 AT ROW 4.77 COL 2 WIDGET-ID 68
+     RECT-5 AT ROW 1.31 COL 60.29 WIDGET-ID 112
+     RECT-232 AT ROW 2.62 COL 2 WIDGET-ID 218
+     RECT-233 AT ROW 6.92 COL 2 WIDGET-ID 168
+     RECT-234 AT ROW 9.88 COL 2 WIDGET-ID 272
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 1.43 ROW 8.23
+         SIZE 115.57 BY 17
+         BGCOLOR 17 FONT 5
+         TITLE "Información Cónyuge o Compañero (a) permanente" WIDGET-ID 300.
+
+DEFINE FRAME F_Autorizaciones
+     Anexos_Clientes.Represetacion AT ROW 2.04 COL 19.57 COLON-ALIGNED
+          LABEL "Representacion de" FORMAT "X(100)"
+          VIEW-AS FILL-IN 
+          SIZE 91 BY .81
+          BGCOLOR 15 
+     Anexos_Clientes.Proviene AT ROW 2.88 COL 19.57 COLON-ALIGNED
+          LABEL "Proviene de" FORMAT "X(100)"
+          VIEW-AS FILL-IN 
+          SIZE 91 BY .81
+          BGCOLOR 15 
+     Anexos_Clientes.Declaracion_Conocimiento AT ROW 4.04 COL 5.43
+          LABEL "Declaracion de Conocimiento de Origen de Fondos"
+          VIEW-AS TOGGLE-BOX
+          SIZE 49.57 BY .77
+     Anexos_Clientes.Autorizaciones[1] AT ROW 6.15 COL 5 WIDGET-ID 180
+          LABEL "1. Consulta y Reporte a Centros de Riesgos"
+          VIEW-AS TOGGLE-BOX
+          SIZE 49.57 BY .77
+     Anexos_Clientes.Declaracion_aceptacion AT ROW 6.69 COL 111 WIDGET-ID 194
+          LABEL ""
+          VIEW-AS TOGGLE-BOX
+          SIZE 3 BY .77 TOOLTIP "Declaracion Aceptacion"
+          BGCOLOR 17 
+     Anexos_Clientes.Autorizaciones[2] AT ROW 6.88 COL 5 WIDGET-ID 182
+          LABEL "2. Actualiza y Verifica la información"
+          VIEW-AS TOGGLE-BOX
+          SIZE 49.57 BY .77
+     Anexos_Clientes.Autorizaciones[3] AT ROW 7.62 COL 5
+          LABEL "3. Suministro de Informacion"
+          VIEW-AS TOGGLE-BOX
+          SIZE 49.57 BY .77
+     Anexos_Clientes.Autorizaciones[4] AT ROW 8.35 COL 5 WIDGET-ID 184
+          LABEL "4. Cláusula de Aceptación de Reglamentos"
+          VIEW-AS TOGGLE-BOX
+          SIZE 49.57 BY .77
+     Anexos_Clientes.Autorizaciones[5] AT ROW 9.08 COL 5
+          LABEL "5. Destrucción de Documentos"
+          VIEW-AS TOGGLE-BOX
+          SIZE 49.57 BY .77
+     Anexos_Clientes.Fec_Diligenciamiento AT ROW 9.77 COL 80.14 COLON-ALIGNED WIDGET-ID 210
+          LABEL "DD/MM/AAAA"
+          VIEW-AS FILL-IN 
+          SIZE 15 BY .81
+          BGCOLOR 15 
+     Anexos_Clientes.Autorizaciones[6] AT ROW 9.81 COL 5 WIDGET-ID 188
+          LABEL "6. Cláusula de Aceptación de Términos"
+          VIEW-AS TOGGLE-BOX
+          SIZE 49.57 BY .77
+     Anexos_Clientes.Autorizaciones[7] AT ROW 10.54 COL 5 WIDGET-ID 186
+          LABEL "7. Cobro de Centrales de Riesgo"
+          VIEW-AS TOGGLE-BOX
+          SIZE 49.57 BY .77
+     Anexos_Clientes.Autorizaciones[8] AT ROW 11.27 COL 5 WIDGET-ID 190
+          LABEL "8. Compromiso de Cumplimiento de actualizacion de Información"
+          VIEW-AS TOGGLE-BOX
+          SIZE 58 BY .77
+     Anexos_Clientes.Autorizaciones[9] AT ROW 12 COL 5.14 WIDGET-ID 208
+          LABEL "9. Requisitos de Asegurabilidad"
+          VIEW-AS TOGGLE-BOX
+          SIZE 56.86 BY .77 TOOLTIP "Autorizacion 9"
+     Anexos_Clientes.Autorizaciones[10] AT ROW 12.73 COL 5 WIDGET-ID 216
+          LABEL "10. Desembolso"
+          VIEW-AS TOGGLE-BOX
+          SIZE 33 BY .77
+     Anexos_Clientes.Autorizaciones[11] AT ROW 13.46 COL 5 WIDGET-ID 218
+          LABEL "11. Débito Automàtico"
+          VIEW-AS TOGGLE-BOX
+          SIZE 43 BY .77
+     Anexos_Clientes.Cam_log1 AT ROW 13.96 COL 65.14 COLON-ALIGNED NO-LABEL WIDGET-ID 224
+          VIEW-AS COMBO-BOX INNER-LINES 1
+          LIST-ITEM-PAIRS "FIRMA SOLICITANTE Y HUELLA INDICE DERECHO","FIRMA SOLICITANTE Y HUELLA INDICE DERECHO"
+          DROP-DOWN-LIST
+          SIZE 46.86 BY 1
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 1.43 ROW 8.23
+         SIZE 115.57 BY 17
+         BGCOLOR 17 FONT 5.
+
+/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
+DEFINE FRAME F_Autorizaciones
+     Anexos_Clientes.Autorizaciones[12] AT ROW 14.19 COL 5 WIDGET-ID 220
+          LABEL "12. Prioridad de Descuento"
+          VIEW-AS TOGGLE-BOX
+          SIZE 34 BY .77
+     "Fecha de Diligenciamiento" VIEW-AS TEXT
+          SIZE 30 BY .65 AT ROW 8.85 COL 68 WIDGET-ID 212
+          FGCOLOR 7 FONT 7
+     "DECLARACION VOLUNTARIA DE ORIGEN DE FONDOS" VIEW-AS TEXT
+          SIZE 50 BY .77 AT ROW 1.12 COL 25.72 WIDGET-ID 172
+          FGCOLOR 7 FONT 7
+     "contratos y reglamentos vigentes en FODUN" VIEW-AS TEXT
+          SIZE 43 BY 1.35 AT ROW 6.62 COL 66 WIDGET-ID 202
+          FONT 7
+     "AUTORIZACIONES" VIEW-AS TEXT
+          SIZE 18 BY .77 AT ROW 5.35 COL 23.14 WIDGET-ID 178
+          FGCOLOR 7 FONT 7
+     "Declaro conocer y aceptar los términos de los" VIEW-AS TEXT
+          SIZE 43.14 BY 1.35 AT ROW 5.73 COL 65.86 WIDGET-ID 200
+          FONT 7
+     RECT-304 AT ROW 1.42 COL 3 WIDGET-ID 4
+     RECT-305 AT ROW 5.62 COL 3 WIDGET-ID 176
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 1.43 ROW 8.23
+         SIZE 115.57 BY 17
+         BGCOLOR 17 FONT 5
+         TITLE "DECLARACION DE CONOCIMIENTO  Y AUTORIZACIONES".
+
+DEFINE FRAME F_Ubicacion
+     Clientes.departamento AT ROW 4.81 COL 70.57 COLON-ALIGNED NO-LABEL WIDGET-ID 326
+          VIEW-AS FILL-IN 
+          SIZE 2 BY .5
+          BGCOLOR 14 FGCOLOR 14 
+     Clientes.facultad AT ROW 4.81 COL 72.86 COLON-ALIGNED NO-LABEL WIDGET-ID 324
+          VIEW-AS FILL-IN 
+          SIZE 2 BY .5
+          BGCOLOR 14 FGCOLOR 14 
+     Anexos_Clientes.Cam_int1 AT ROW 14.69 COL 56 COLON-ALIGNED HELP
+          "Indicativo del telefono del cliente" NO-LABEL WIDGET-ID 298 FORMAT "99"
+          VIEW-AS COMBO-BOX INNER-LINES 13
+          LIST-ITEMS "0","1","2","3","4","5","6","7","8","9","10","11","12" 
+          DROP-DOWN-LIST
+          SIZE 7 BY 1 TOOLTIP "Meses Actividad"
+     Anexos_Clientes.Tel_Fax_Comercial AT ROW 11.96 COL 62.86 COLON-ALIGNED WIDGET-ID 292
+          LABEL "Fax"
+          VIEW-AS FILL-IN 
+          SIZE 19 BY .81
+          BGCOLOR 18 
+     Anexos_Clientes.Exento_retencion AT ROW 1.15 COL 13
+          LABEL "Retencion Fuente"
+          VIEW-AS TOGGLE-BOX
+          SIZE 20 BY .81 TOOLTIP "Exento Retencion fuente"
+          FONT 5
+     Anexos_Clientes.Exento_GMF AT ROW 1.15 COL 36.14
+          LABEL "GMF"
+          VIEW-AS TOGGLE-BOX
+          SIZE 8 BY .81 TOOLTIP "Exento GMF"
+     Anexos_Clientes.Declara_Renta AT ROW 1.15 COL 60.86
+          LABEL ""
+          VIEW-AS TOGGLE-BOX
+          SIZE 3 BY .77 TOOLTIP "Declara Renta"
+     Anexos_Clientes.Adm_Recursos_Publ AT ROW 1.15 COL 95.14 WIDGET-ID 8
+          LABEL ""
+          VIEW-AS TOGGLE-BOX
+          SIZE 3 BY .77 TOOLTIP "Administra Recursos Publicos"
+     Cmb_TipAct AT ROW 2 COL 3
+     Anexos_Clientes.Especifique_Ocupacion AT ROW 2 COL 65 COLON-ALIGNED WIDGET-ID 252
+          LABEL "Especifique" FORMAT "X(70)"
+          VIEW-AS FILL-IN 
+          SIZE 33.29 BY .81
+          BGCOLOR 18 
+     W_NomEmpresa AT ROW 5.73 COL 18 COLON-ALIGNED
+     Btn_Empresa AT ROW 5.85 COL 94 WIDGET-ID 260
+     Clientes.Cod_Empresa AT ROW 4.77 COL 82.72 COLON-ALIGNED NO-LABEL WIDGET-ID 264
+          VIEW-AS FILL-IN 
+          SIZE 2 BY .5
+          BGCOLOR 17 FGCOLOR 17 
+     Anexos_Clientes.Acti_Economica_emp AT ROW 4.81 COL 75 COLON-ALIGNED NO-LABEL WIDGET-ID 272 FORMAT "X(90)"
+          VIEW-AS FILL-IN 
+          SIZE 2 BY .5
+          BGCOLOR 17 FGCOLOR 17 
+     Clientes.Dir_comercial AT ROW 7.35 COL 18 COLON-ALIGNED
+          LABEL "Dirección" FORMAT "X(90)"
+          VIEW-AS FILL-IN 
+          SIZE 74 BY .81
+          BGCOLOR 18 
+     W_UbicacionComercial AT ROW 8.19 COL 18 COLON-ALIGNED
+     Btn_Lugar_Comercial AT ROW 8.31 COL 94
+     Clientes.Lugar_comercial AT ROW 4.81 COL 80.14 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 2 BY .5
+          BGCOLOR 17 FGCOLOR 17 
+     Clientes.Tel_comercial AT ROW 9.04 COL 23.43 COLON-ALIGNED NO-LABEL FORMAT "X(8)"
+          VIEW-AS FILL-IN 
+          SIZE 19.57 BY .81
+          BGCOLOR 18 
+     Anexos_Clientes.Extencion_Comercial AT ROW 9.08 COL 48 COLON-ALIGNED WIDGET-ID 280
+          LABEL "Ext" FORMAT ">>>>9"
+          VIEW-AS FILL-IN 
+          SIZE 9 BY .81
+          BGCOLOR 18 
+     W_NomCargo AT ROW 9.08 COL 65 COLON-ALIGNED WIDGET-ID 44
+     Btn_Cargo AT ROW 9.15 COL 94 WIDGET-ID 38
+     Clientes.Cod_Cargo AT ROW 4.81 COL 87.86 COLON-ALIGNED NO-LABEL WIDGET-ID 62
+          VIEW-AS FILL-IN 
+          SIZE 2 BY .5
+          BGCOLOR 17 FGCOLOR 17 
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 1.43 ROW 8.27
+         SIZE 115.57 BY 16.96
+         BGCOLOR 17 FONT 5.
+
+/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
+DEFINE FRAME F_Ubicacion
+     Clientes.Fec_IngEmpresa AT ROW 10.88 COL 23.86 COLON-ALIGNED WIDGET-ID 266
+          VIEW-AS FILL-IN 
+          SIZE 11 BY .81
+          BGCOLOR 18 FGCOLOR 0 
+     Clientes.Carnet AT ROW 11.04 COL 56 COLON-ALIGNED WIDGET-ID 42
+          LABEL "Carnet"
+          VIEW-AS FILL-IN 
+          SIZE 26 BY .81
+          BGCOLOR 18 
+     Cmb_Est_Cargo AT ROW 11.85 COL 15 COLON-ALIGNED
+     Clientes.Tip_Contrato AT ROW 12.88 COL 17.29 NO-LABEL
+          VIEW-AS RADIO-SET HORIZONTAL
+          RADIO-BUTTONS 
+                    "Término Indefinido", 1,
+"Término Fijo", 2
+          SIZE 66.72 BY .81
+          BGCOLOR 18 FONT 5
+     Anexos_Clientes.Nit_Independiente AT ROW 14.73 COL 6.29 COLON-ALIGNED
+          LABEL "Nit" FORMAT "9(5)x(7)"
+          VIEW-AS FILL-IN 
+          SIZE 28.43 BY .81
+          BGCOLOR 18 
+     Anexos_Clientes.Tiempo_Actividad AT ROW 14.77 COL 51.57 COLON-ALIGNED
+          LABEL "Tiempo Actividad"
+          VIEW-AS FILL-IN 
+          SIZE 3.43 BY .81
+          BGCOLOR 18 
+     W_NomCiiu AT ROW 15.77 COL 7 COLON-ALIGNED WIDGET-ID 30
+     Btn_Ciiu AT ROW 15.85 COL 48 WIDGET-ID 20
+     Clientes.Codigo_CIIU AT ROW 4.81 COL 92.14 NO-LABEL WIDGET-ID 268
+          VIEW-AS FILL-IN 
+          SIZE 2 BY .5
+          BGCOLOR 17 FGCOLOR 17 
+     Clientes.Grupo AT ROW 4.81 COL 92.57 COLON-ALIGNED NO-LABEL WIDGET-ID 14
+          VIEW-AS FILL-IN 
+          SIZE 2 BY .5
+          BGCOLOR 17 FGCOLOR 17 
+     Clientes.Subgrupo AT ROW 4.81 COL 95 COLON-ALIGNED NO-LABEL WIDGET-ID 16
+          VIEW-AS FILL-IN 
+          SIZE 2 BY .5
+          BGCOLOR 17 FGCOLOR 17 
+     Anexos_Clientes.Fec_Pensionado AT ROW 14.96 COL 83 COLON-ALIGNED WIDGET-ID 278
+          LABEL "Pensionado Desde"
+          VIEW-AS FILL-IN 
+          SIZE 10.57 BY .81
+          BGCOLOR 18 
+     Btn_DireccionComercial AT ROW 7.42 COL 94 WIDGET-ID 290
+     Anexos_Clientes.Ind_Comercial AT ROW 9.04 COL 18 COLON-ALIGNED WIDGET-ID 294
+          LABEL "Teléfono"
+          VIEW-AS FILL-IN 
+          SIZE 5.43 BY .81
+          BGCOLOR 18 
+     Btn_Ciiu-2 AT ROW 4.77 COL 48 WIDGET-ID 300
+     W_NomCiiu-2 AT ROW 4.62 COL 19 COLON-ALIGNED WIDGET-ID 302
+     W_NomCiiu-3 AT ROW 3.77 COL 19 COLON-ALIGNED WIDGET-ID 304
+     Btn_Ciiu-3 AT ROW 3.92 COL 48 WIDGET-ID 306
+     Clientes.cod_actividad AT ROW 4.81 COL 77.57 COLON-ALIGNED NO-LABEL WIDGET-ID 308
+          VIEW-AS FILL-IN 
+          SIZE 2 BY .5
+          BGCOLOR 17 FGCOLOR 17 
+     Clientes.Id_Micro AT ROW 2.92 COL 19 COLON-ALIGNED WIDGET-ID 310
+          VIEW-AS FILL-IN 
+          SIZE 3.43 BY .81
+          BGCOLOR 15 
+     Cmb_Situacion_Actual AT ROW 2.85 COL 65 COLON-ALIGNED WIDGET-ID 312
+     Clientes.Fuerza_Mayor AT ROW 3.77 COL 65 COLON-ALIGNED WIDGET-ID 314
+          VIEW-AS FILL-IN 
+          SIZE 3 BY .81
+          BGCOLOR 15 
+     Clientes.Situacion_Actual AT ROW 4.81 COL 85.29 COLON-ALIGNED NO-LABEL WIDGET-ID 316
+          VIEW-AS FILL-IN 
+          SIZE 2 BY .5
+          BGCOLOR 17 FGCOLOR 17 
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 1.43 ROW 8.27
+         SIZE 115.57 BY 16.96
+         BGCOLOR 17 FONT 5.
+
+/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
+DEFINE FRAME F_Ubicacion
+     FacultadDepartamento AT ROW 6.54 COL 18 COLON-ALIGNED WIDGET-ID 320
+     btnFacultadDpto AT ROW 6.62 COL 94 WIDGET-ID 322
+     " Exento" VIEW-AS TEXT
+          SIZE 8 BY .81 AT ROW 1.15 COL 4
+          FGCOLOR 7 FONT 5
+     "Pensionado" VIEW-AS TEXT
+          SIZE 10.57 BY .81 AT ROW 14 COL 68.43 WIDGET-ID 276
+          FGCOLOR 7 FONT 5
+     "Contrato:" VIEW-AS TEXT
+          SIZE 8.57 BY .81 AT ROW 12.85 COL 8.72 WIDGET-ID 60
+          FGCOLOR 7 FONT 5
+     "Empleado" VIEW-AS TEXT
+          SIZE 10.14 BY .69 AT ROW 10.38 COL 4.72
+          FGCOLOR 7 FONT 5
+     " Administra Recursos Públicos" VIEW-AS TEXT
+          SIZE 27 BY .81 AT ROW 1.19 COL 68 WIDGET-ID 4
+          FGCOLOR 7 FONT 5
+     "Declara Renta" VIEW-AS TEXT
+          SIZE 12.72 BY .81 TOOLTIP "Declara Renta" AT ROW 1.15 COL 47.29 WIDGET-ID 6
+          FGCOLOR 7 FONT 5
+     "Independiente o Empleado Socio" VIEW-AS TEXT
+          SIZE 29 BY .69 AT ROW 14.04 COL 5.29 WIDGET-ID 270
+          FGCOLOR 7 FONT 5
+     RECT-235 AT ROW 10.65 COL 3 WIDGET-ID 258
+     RECT-217 AT ROW 14.42 COL 3 WIDGET-ID 50
+     RECT-236 AT ROW 14.54 COL 67 WIDGET-ID 274
+     RECT-319 AT ROW 5.58 COL 3 WIDGET-ID 318
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 1.43 ROW 8.27
+         SIZE 115.57 BY 16.96
+         BGCOLOR 17 FONT 5
+         TITLE "3. INFORMACION ACTIVIDAD ECONÓMICA".
 
 
 /* *********************** Procedure Settings ************************ */
@@ -3147,7 +3147,7 @@ ASSIGN
    NO-ENABLE EXP-LABEL                                                  */
 /* SETTINGS FOR FRAME F_Falta
    NOT-VISIBLE                                                          */
-/* BROWSE-TAB B_Falta TEXT-29 F_Falta */
+/* BROWSE-TAB B_Falta TEXT-36 F_Falta */
 ASSIGN 
        FRAME F_Falta:HIDDEN           = TRUE
        FRAME F_Falta:MOVABLE          = TRUE.
@@ -5739,40 +5739,38 @@ END.
 &Scoped-define SELF-NAME Cmb_Relaciones
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL Cmb_Relaciones wWin
 ON VALUE-CHANGED OF Cmb_Relaciones IN FRAME F_Relaciones /* Consulta Relaciones */
-DO:  
+DO:
     DO WITH FRAME F_Relaciones:
-        FOR EACH T_Relaciones: DELETE T_Relaciones. END.
+        EMPTY TEMP-TABLE T_Relaciones.
+
         CASE Cmb_Relaciones:SCREEN-VALUE:
-            WHEN "99999 - Todas las Relaciones" 
-            THEN DO:
-                FOR EACH Relaciones NO-LOCK
-                    WHERE 
-                        Relaciones.Nit    EQ Clientes.Nit:SCREEN-VALUE IN FRAME F_Clientes 
-                    AND Relaciones.Estado EQ INTEGER(RActivas:SCREEN-VALUE) 
-                    BREAK 
-                        BY Relaciones.Cod_Relacion:
-                    IF FIRST-OF(Relaciones.Cod_Relacion) 
-                    THEN FIND Varios WHERE Varios.Tipo EQ 3 AND Varios.Codigo EQ Relaciones.Cod_Relacion NO-LOCK NO-ERROR.
-                    FIND Clientes WHERE Clientes.Nit EQ Relaciones.Nit_Relacion NO-LOCK NO-ERROR.
-                    IF AVAILABLE(Clientes) 
-                    THEN DO:
-                        FIND Anexos_Clientes NO-LOCK
-                            WHERE
-                                Anexos_Clientes.nit = Clientes.nit NO-ERROR.
+            WHEN "99999 - Todas las Relaciones" THEN DO:
+                FOR EACH Relaciones WHERE Relaciones.Nit = Clientes.Nit:SCREEN-VALUE IN FRAME F_Clientes
+                                      AND Relaciones.Estado EQ INTEGER(RActivas:SCREEN-VALUE) NO-LOCK BREAK BY Relaciones.Cod_Relacion:
+                    IF FIRST-OF(Relaciones.Cod_Relacion) THEN
+                        FIND Varios WHERE Varios.Tipo = 3
+                                      AND Varios.Codigo = Relaciones.Cod_Relacion NO-LOCK NO-ERROR.
+
+                    FIND Clientes WHERE Clientes.Nit = Relaciones.Nit_Relacion NO-LOCK NO-ERROR.
+                    IF AVAILABLE(Clientes) THEN DO:
+                        FIND Anexos_Clientes WHERE Anexos_Clientes.nit = Clientes.nit NO-LOCK NO-ERROR.
+
                         CREATE T_Relaciones.
-                        UPDATE  T_Relaciones.R_Relacion           = Varios.Descripcion
-                                T_Relaciones.R_AgeObjeto          = Clientes.Agencia
-                                T_Relaciones.R_NitObjeto          = Relaciones.Nit_Relacion
-                                T_Relaciones.R_NomObjeto          = Clientes.Nombre + " " + Clientes.Apellido1 + " " + Clientes.Apellido2
-                                T_Relaciones.R_NomDescri          = Relaciones.Descripcion
-                                T_Relaciones.R_TelObjeto          = Clientes.Tel_Residencia
-                                T_Relaciones.R_TelObjetoIndctvo   = IF AVAILABLE Anexos_Clientes THEN Anexos_Clientes.ind_cli ELSE 0
-                                T_Relaciones.R_TelComerc          = Clientes.Tel_Comercial.
+                        UPDATE T_Relaciones.R_Relacion = Varios.Descripcion
+                               T_Relaciones.R_AgeObjeto = Clientes.Agencia
+                               T_Relaciones.R_NitObjeto = Relaciones.Nit_Relacion
+                               T_Relaciones.R_NomObjeto = Clientes.Nombre + " " + Clientes.Apellido1 + " " + Clientes.Apellido2
+                               T_Relaciones.R_NomDescri = Relaciones.Descripcion
+                               T_Relaciones.R_TelObjeto = Clientes.Tel_Residencia
+                               T_Relaciones.R_TelObjetoIndctvo = IF AVAILABLE Anexos_Clientes THEN Anexos_Clientes.ind_cli ELSE 0
+                               T_Relaciones.R_TelComerc = Clientes.Tel_Comercial.
                     END.
                 END.
-            END. /* WHEN "99999 - Todas las Relaciones" */
-            WHEN "00000 - Ninguna Relacion" 
-            THEN DO:
+            END.
+
+            /* oakley */
+
+            WHEN "00000 - Ninguna Relacion" THEN DO:
                 FOR EACH T_Relaciones: DELETE T_Relaciones. END.
             END.
             OTHERWISE DO:
@@ -8191,12 +8189,12 @@ PROCEDURE adm-create-objects :
        RUN constructObject (
              INPUT  'wsolprofina.r':U ,
              INPUT  {&WINDOW-NAME} ,
-             INPUT  '':U ,
+             INPUT  'LogicalObjectNamePhysicalObjectNameDynamicObjectnoRunAttributeHideOnInitnoDisableOnInitnoObjectLayout':U ,
              OUTPUT h_wsolprofina ).
        /* Position in AB:  ( 22.62 , 134.86 ) */
        /* Size in AB:  ( 1.50 , 7.72 ) */
 
-       /* Links to  h_wsolprofina. */
+       /* Links to SmartWindow h_wsolprofina. */
        RUN addLink ( h_wgnrdordrccion , 'Data':U , h_wsolprofina ).
 
        /* Adjust the tab order of the smart objects. */
@@ -9872,14 +9870,18 @@ RUN SUPER.
 
 SUBSCRIBE TO "CierraClientesPasivosBienes" ANYWHERE.
 
-W_Ok = Cmb_Relaciones:ADD-LAST("00000 - Ninguna Relacion") IN FRAME F_Relaciones.
-W_Ok = Cmb_Relaciones:ADD-LAST("99999 - Todas las Relaciones") IN FRAME F_Relaciones.
+/*W_Ok = Cmb_Relaciones:ADD-LAST("00000 - Ninguna Relacion") IN FRAME F_Relaciones.
+W_Ok = Cmb_Relaciones:ADD-LAST("99999 - Todas las Relaciones") IN FRAME F_Relaciones.*/
 
 HIDE FRAME F_MicroEmpresas.
 
-FOR EACH Varios WHERE Varios.Tipo EQ 3 AND Varios.Codigo NE 11 NO-LOCK:
+FOR EACH Varios WHERE Varios.Tipo = 3
+                  AND Varios.Codigo <> 11
+                 AND varios.codigo = 1 NO-LOCK:
     W_Ok = Cmb_Relaciones:ADD-LAST(STRING(Varios.Codigo,"99999") + " - " + Varios.Descripcion) IN FRAME F_Relaciones.
 END.
+
+APPLY "value-changed" TO  cmb_relaciones IN FRAME f_relaciones.
 
 FIND FIRST Clientes WHERE Clientes.Agencia EQ W_Agencia NO-ERROR.
 IF AVAIL(Clientes) THEN

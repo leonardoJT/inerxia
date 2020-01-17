@@ -9,12 +9,12 @@ DEFINE TEMP-TABLE tt
     FIELD cr AS DECIMAL
     INDEX idx agencia cuenta cliente_id cen_costos.
 
-OUTPUT TO C:\Info_Fodun\Leonardo\movs_11-2019.csv.
+OUTPUT TO C:\Info_Fodun\Leonardo\movs_12-2019.csv.
 EXPORT DELIMITER ";" "AGENCIA" "FECHA" "COMPROBANTE" "NUM_DOCUMENTO" "CUENTA" "DESCRIPCION" "CLIENTE_ID" "USUARIO" "DOC_REF" "DB" "CR".
 FOR EACH agencias NO-LOCK:
     FOR EACH mov_contable WHERE mov_contable.agencia = agencias.agencia
-                            AND mov_contable.fec_contable >= 11/01/2019
-                            AND mov_contable.fec_contable <= 11/30/2019
+                            AND mov_contable.fec_contable >= 12/01/2019
+                            AND mov_contable.fec_contable <= 12/31/2019
                             /*AND mov_contable.nit = "900092385"*/
                             /*AND mov_contable.cuenta = "27259502"*/
                             AND (SUBSTRING(mov_contable.cuenta,1,1) = "1" OR

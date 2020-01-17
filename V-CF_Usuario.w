@@ -51,13 +51,8 @@ DEFINE VARIABLE P_AgeCli AS INTEGER.
 /* Need to scope the external tables to this procedure                  */
 DEFINE QUERY external_tables FOR Usuarios.
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-FIELDS Usuarios.Id_AccSimultaneo ~
-Usuarios.permiteCambiarFecha 
-&Scoped-define ENABLED-TABLES Usuarios
-&Scoped-define FIRST-ENABLED-TABLE Usuarios
 &Scoped-Define ENABLED-OBJECTS RECT-326 tgGestionCobranza 
-&Scoped-Define DISPLAYED-FIELDS Usuarios.Id_AccSimultaneo ~
-Usuarios.permiteCambiarFecha Usuarios.Fec_Creacion Usuarios.Fec_Retiro ~
+&Scoped-Define DISPLAYED-FIELDS Usuarios.Fec_Creacion Usuarios.Fec_Retiro ~
 Usuarios.Fec_UltCam 
 &Scoped-define DISPLAYED-TABLES Usuarios
 &Scoped-define FIRST-DISPLAYED-TABLE Usuarios
@@ -88,14 +83,6 @@ DEFINE VARIABLE tgGestionCobranza AS LOGICAL INITIAL no
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME F-Grupo
-     Usuarios.Id_AccSimultaneo AT ROW 9.85 COL 62.86
-          LABEL ""
-          VIEW-AS TOGGLE-BOX
-          SIZE 2 BY .77
-     Usuarios.permiteCambiarFecha AT ROW 10.58 COL 62.86 WIDGET-ID 22
-          LABEL ""
-          VIEW-AS TOGGLE-BOX
-          SIZE 2 BY .77
      tgGestionCobranza AT ROW 11.23 COL 62.86 WIDGET-ID 26
      Usuarios.Fec_Creacion AT ROW 12.54 COL 57.86 COLON-ALIGNED NO-LABEL
           VIEW-AS FILL-IN 
@@ -111,15 +98,11 @@ DEFINE FRAME F-Grupo
           BGCOLOR 18 FGCOLOR 15 
      "Permite gestión de cobranza:" VIEW-AS TEXT
           SIZE 20 BY .5 AT ROW 11.35 COL 43 WIDGET-ID 28
+     "Fecha de ingreso:" VIEW-AS TEXT
+          SIZE 12.14 BY .5 AT ROW 12.69 COL 47.43 WIDGET-ID 16
      " Información General" VIEW-AS TEXT
           SIZE 18 BY .5 AT ROW 1.27 COL 4
           FGCOLOR 7 FONT 5
-     "Fecha de ingreso:" VIEW-AS TEXT
-          SIZE 12.14 BY .5 AT ROW 12.69 COL 47.43 WIDGET-ID 16
-     "Permitir varias sesiones simultáneas del programa:" VIEW-AS TEXT
-          SIZE 33.86 BY .5 AT ROW 9.96 COL 29.14 WIDGET-ID 20
-     "Permite cambiar fecha:" VIEW-AS TEXT
-          SIZE 15.86 BY .5 AT ROW 10.69 COL 47.14 WIDGET-ID 24
      RECT-326 AT ROW 1.54 COL 3 WIDGET-ID 4
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
@@ -188,10 +171,6 @@ ASSIGN
    NO-ENABLE                                                            */
 /* SETTINGS FOR FILL-IN Usuarios.Fec_UltCam IN FRAME F-Grupo
    NO-ENABLE                                                            */
-/* SETTINGS FOR TOGGLE-BOX Usuarios.Id_AccSimultaneo IN FRAME F-Grupo
-   EXP-LABEL                                                            */
-/* SETTINGS FOR TOGGLE-BOX Usuarios.permiteCambiarFecha IN FRAME F-Grupo
-   EXP-LABEL                                                            */
 /* _RUN-TIME-ATTRIBUTES-END */
 &ANALYZE-RESUME
 

@@ -238,8 +238,6 @@ DEFINE FRAME F_CieCar
      Msaje AT ROW 11.12 COL 7.72 NO-LABEL
      "Regist.Proceso" VIEW-AS TEXT
           SIZE 14.57 BY .88 AT ROW 8.96 COL 51.29
-     "Ver- Fodun mayo 31-2011" VIEW-AS TEXT
-          SIZE 30 BY .62 AT ROW 13.38 COL 52 WIDGET-ID 2
      RECT-314 AT ROW 2.27 COL 65.86
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
@@ -2485,19 +2483,24 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE ProvisionGeneral W_Cierre_Cartera 
 PROCEDURE ProvisionGeneral :
-DEFINE VAR saldoFinal AS DECIMAL.
-DEFINE VAR cont AS INTEGER.
 DEFINE VAR provision AS DECIMAL.
 DEFINE VAR saldoActual AS DECIMAL.
 DEFINE VAR valContabilizar AS DECIMAL.
 DEFINE VAR vDebito AS DECIMAL.
 DEFINE VAR vCredito AS DECIMAL.
+DEFINE VAR totalCarteraNomina AS DECIMAL.
+DEFINE VAR totalCarteraCaja AS DECIMAL.
+DEFINE VAR totalCarteraVivienda AS DECIMAL.
 
 W_Cbte = 20.
 
 FOR EACH agencias NO-LOCK:
-    FIND FIRST Comprobantes WHERE Comprobantes.Agencia EQ agencias.agencia
-                              AND Comprobantes.Comprobante EQ W_Cbte NO-ERROR.
+    totalCarteraNomina = 0.
+    totalCarteraCaja = 0.
+    totalCarteraVivienda = 0.
+
+    FIND FIRST Comprobantes WHERE Comprobantes.Agencia = agencias.agencia
+                              AND Comprobantes.Comprobante = W_Cbte NO-ERROR.
     IF NOT AVAILABLE Comprobantes THEN DO:
         IF LOCKED Comprobantes THEN
             RETRY.
@@ -2512,34 +2515,50 @@ FOR EACH agencias NO-LOCK:
         END.
     END.
 
-    ASSIGN W_NumCbt = Comprobantes.Secuencia + 1
-           Comprobantes.Secuencia = Comprobantes.Secuencia + 1.
+    W_NumCbt = Comprobantes.Secuencia + 1.
+    Comprobantes.Secuencia = Comprobantes.Secuencia + 1.
 
     FIND CURRENT Comprobantes NO-LOCK NO-ERROR.
-    
-    /* Consumo Nómina */
-    saldoFinal = 0.
 
-    FOR EACH sal_cuenta WHERE sal_cuenta.agencia = agencias.agencia
-                          AND sal_cuenta.ano = YEAR(w_fecMes)
-                          AND SUBSTRING(sal_cuenta.cuenta,1,4) = "1441" NO-LOCK:
-        saldoFinal = saldoFinal + sal_cuenta.sal_inicial.
+    FIND FIRST cfg_creditos NO-LOCK NO-ERROR.
 
-        DO cont = 1 TO MONTH(w_fecMes):
-            saldoFinal = saldoFinal + sal_cuenta.db[cont] - sal_cuenta.cr[cont].
+    FOR EACH rep_creditos WHERE rep_creditos.fecCorte = w_fecMes
+                            AND rep_creditos.agencia = agencias.agencia
+                            AND rep_creditos.sdo_capital <> 0 NO-LOCK:
+        IF SUBSTRING(rep_creditos.cta_contable,1,4) = "1404" OR
+           SUBSTRING(rep_creditos.cta_contable,1,4) = "1405" THEN DO:
+            totalCarteraVivienda = totalCarteraVivienda + rep_creditos.sdo_capital.
+
+        END.
+
+        IF SUBSTRING(rep_creditos.cta_contable,1,4) = "1411" OR
+           SUBSTRING(rep_creditos.cta_contable,1,4) = "1441" OR
+           SUBSTRING(rep_creditos.cta_contable,1,4) = "1469" THEN DO:
+            totalCarteraNomina = totalCarteraNomina + rep_creditos.sdo_capital.
+
+        END.
+
+        IF SUBSTRING(rep_creditos.cta_contable,1,4) = "1412" OR
+           SUBSTRING(rep_creditos.cta_contable,1,4) = "1442" OR
+           SUBSTRING(rep_creditos.cta_contable,1,4) = "1448" OR
+           SUBSTRING(rep_creditos.cta_contable,1,4) = "1454" OR
+           SUBSTRING(rep_creditos.cta_contable,1,4) = "1455" OR
+           SUBSTRING(rep_creditos.cta_contable,1,4) = "1461" OR
+           SUBSTRING(rep_creditos.cta_contable,1,4) = "1462" THEN DO:
+            totalCarteraCaja = totalCarteraCaja + rep_creditos.sdo_capital.
         END.
     END.
 
-    provision = saldoFinal * 0.01.
+    /* Nómina */
+    provision = totalCarteraNomina * (cfg_creditos.provisionGeneralNomina / 100).
 
     RUN buscarSdoCta(INPUT agencias.agencia,
                      INPUT "14680501",
                      OUTPUT saldoActual).
 
-    valContabilizar = provision /*-*/ + saldoActual.
-
-    ASSIGN vDebito = valContabilizar
-           vCredito = valContabilizar * -1.
+    valContabilizar = provision + saldoActual.
+    vDebito = valContabilizar.
+    vCredito = valContabilizar * -1.
 
     RUN contab_partNuevas(INPUT agencias.agencia,
                           INPUT "51152901",
@@ -2551,20 +2570,8 @@ FOR EACH agencias NO-LOCK:
                           INPUT "ProvGeneral-Nómina",
                           INPUT vCredito).
 
-    /* Consumo Caja */
-    saldoFinal = 0.
-
-    FOR EACH sal_cuenta WHERE sal_cuenta.agencia = agencias.agencia
-                          AND sal_cuenta.ano = YEAR(w_fecMes)
-                          AND SUBSTRING(sal_cuenta.cuenta,1,4) = "1442" NO-LOCK:
-        saldoFinal = saldoFinal + sal_cuenta.sal_inicial.
-
-        DO cont = 1 TO MONTH(w_fecMes):
-            saldoFinal = saldoFinal + sal_cuenta.db[cont] - sal_cuenta.cr[cont].
-        END.
-    END.
-
-    provision = saldoFinal * 0.01.
+    /* Caja */
+    provision = totalCarteraCaja * (cfg_creditos.provisionGeneralCaja / 100).
 
     RUN buscarSdoCta(INPUT agencias.agencia,
                      INPUT "14680502",
@@ -2585,21 +2592,8 @@ FOR EACH agencias NO-LOCK:
                           INPUT "ProvGeneral-Caja",
                           INPUT vCredito).
 
-    /* Vivienda (Nómina) */
-    saldoFinal = 0.
-
-    FOR EACH sal_cuenta WHERE sal_cuenta.agencia = agencias.agencia
-                          AND sal_cuenta.ano = YEAR(w_fecMes)
-                          AND (SUBSTRING(sal_cuenta.cuenta,1,4) = "1404" OR
-                               SUBSTRING(sal_cuenta.cuenta,1,4) = "1404") NO-LOCK:
-        saldoFinal = saldoFinal + sal_cuenta.sal_inicial.
-
-        DO cont = 1 TO MONTH(w_fecMes):
-            saldoFinal = saldoFinal + sal_cuenta.db[cont] - sal_cuenta.cr[cont].
-        END.
-    END.
-
-    provision = saldoFinal * 0.01.
+    /* Vivienda */
+    provision = totalCarteraVivienda * (cfg_creditos.provisionGeneralNomina / 100).
 
     RUN buscarSdoCta(INPUT agencias.agencia,
                      INPUT "14681001",

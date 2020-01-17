@@ -355,7 +355,7 @@ DO:
 
     SESSION:SET-WAIT-STATE("GENERAL").
 
-    RUN Valida NO-ERROR. /* oakley */
+    RUN Valida NO-ERROR.
     IF ERROR-STATUS:ERROR THEN DO:
         SESSION:SET-WAIT-STATE("").
         Msaje:SCREEN-VALUE = "El proceso Liquidación de intereses de ahorros NO se efectuó... Revise por favor".
@@ -1067,7 +1067,9 @@ END PROCEDURE.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE Procesar W-Prc_LiqIntAhorro 
 PROCEDURE Procesar :
 DEFINE VAR Listado AS CHARACTER FORMAT "X(40)".
-DEFINE VAR W_ArchTR AS CHARACTER FORMAT "X(40)".
+DEFINE VAR vRutaArchivoRenovacionDeTasas AS CHARACTER FORMAT "X(40)".
+
+/* oakley */
 
 W_VrReTfte = 0.
 
@@ -1079,9 +1081,9 @@ DO TRANSACTION ON ERROR UNDO Liquidacion:
     ASSIGN listado = W_PathSpl + "\" + SUBSTRING(W_CmbOfi:SCREEN-VALUE IN FRAME F_Proc,1,3) + "-" + STRING(W_Fecha,"999999") + "CpLAho.Lst"
            Msaje:SCREEN-VALUE IN FRAME F_Proc = "Espere un momento por favor... Proceso en ejecución!".
 
-    W_ArchTR = W_PathSpl + "\" + "TasasRenov" + STRING(W_Fecha,"999999") + ".Txt".
+    vRutaArchivoRenovacionDeTasas = W_PathSpl + "\" + "TasasRenov" + STRING(W_Fecha,"999999") + ".Txt".
 
-    OUTPUT TO VALUE(W_ArchTR).
+    OUTPUT TO VALUE(vRutaArchivoRenovacionDeTasas).
     DISPLAY "Ag. Ced./Nit     No.Titulo         Tasa-Ant    Tasa-Act Fec-Apert. Fec-Vcto.  Fec-PxLiq PdoL Plazo" SKIP
             "--- ------------ -------------- ----------- ----------- ---------- ---------- --------- ---- -----"
         WITH DOWN WIDTH 120 FRAME FTitnot USE-TEXT STREAM-IO NO-LABELS NO-BOX.

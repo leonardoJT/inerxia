@@ -2,119 +2,45 @@ DEFINE INPUT PARAMETER P_Formato AS CHARACTER.
 DEFINE INPUT PARAMETER WNit AS CHARACTER.
 DEFINE INPUT PARAMETER WNumpag AS INTEGER.
 
-/* oakley */
-
 {INCLUIDO\VARIABLE.I " shared"}
 
-DEFINE VAR W_ArcSalida AS CHARACTER FORMAT "X(80)" INITIAL "".
+DEFINE VAR W_ArcSalida AS CHARACTER FORMAT "X(80)".
 
-DEFI TEMP-TABLE salidaImp
-     FIELD detalle AS CHARACTER FORMAT "x(172)".
+DEFINE TEMP-TABLE salidaImp
+    FIELD detalle AS CHARACTER FORMAT "X(172)".
 
-IF TRIM(P_Formato) EQ 'PAGARE' THEN
-   RUN Pagare.
+IF TRIM(P_Formato) = 'PAGARE' THEN
+    RUN Pagare.
 
+PROCEDURE pagare:
+    DEFINE VAR W_Cadena AS CHARACTER FORMAT "X(90)".
+    DEFINE VAR W_NomAgencia AS CHARACTER FORMAT "X(45)".
+    DEFINE VAR W_MontoLetras AS CHARACTER FORMAT "X(90)".
+    DEFINE VAR W_CiuAgencia AS CHARACTER FORMAT "X(35)".
+    DEFINE VAR W_NPagare AS INTEGER.
 
-PROCEDURE pagare.
-    /* Recibe como parametros el nit en W_ArcSalida y Nro Pagare en W_Transac */
-    DEFINE VAR W_Cadena     AS CHARACTER FORMAT "X(90)" INITIAL "".
-    DEFINE VAR NomMes AS CHARACTER FORMAT "X(12)" EXTENT 12
-           INITIAL ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-                    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"].
-    DEFINE VAR W_Municipio    AS CHARACTER FORMAT "X(60)".
-    DEFINE VAR W_Puntero      AS ROWID.
-    DEFINE VAR W_NomAgencia   AS CHARACTER FORMAT "X(45)".
-    DEFINE VAR W_NomPagador   AS CHARACTER FORMAT "X(45)".
-    DEFINE VAR W_NomEmpresa   AS CHARACTER FORMAT "X(45)".
-    DEFINE VAR W_NomEmpresa2  AS CHARACTER FORMAT "X(45)".
-    DEFINE VAR W_NomDeudor    AS CHARACTER FORMAT "X(45)".
-    DEFINE VAR W_NomDeudor2   AS CHARACTER FORMAT "X(45)".
-    DEFINE VAR W_NomDeudor3   AS CHARACTER FORMAT "X(45)".
-    DEFINE VAR W_NomDeudor4   AS CHARACTER FORMAT "X(45)".
-    DEFINE VAR W_NomDirAgenc  AS CHARACTER FORMAT "X(90)".
-    DEFINE VAR W_NomDireccion AS CHARACTER FORMAT "X(90)".
-    DEFINE VAR W_MontoLetras  AS CHARACTER FORMAT "X(90)".
-    DEFINE VAR W_NomMes       AS CHARACTER FORMAT "X(12)".
-    DEFINE VAR W_CiuAgencia   AS CHARACTER FORMAT "X(35)".
-    DEFINE VAR W_MontoIzq     AS CHARACTER FORMAT "X(20)".
-    DEFINE VAR W_fecVcto      LIKE PlanPagos.Fec_Inic. 
-
-    DEFINE VAR AH_Atermino     LIKE Ahorros.Sdo_Disponible.
-    DEFINE VAR AH_AlaVista     LIKE Ahorros.Sdo_Disponible.
-    DEFINE VAR AH_Contractual  LIKE Ahorros.Sdo_Disponible.
-    DEFINE VAR AH_Aportes      LIKE Ahorros.Sdo_Disponible.
-
-
-    DEFINE VAR CR_Comercial    LIKE Ahorros.Sdo_Disponible.
-    DEFINE VAR CR_Consumo      LIKE Ahorros.Sdo_Disponible.
-    DEFINE VAR CR_Hipotecario  LIKE Ahorros.Sdo_Disponible.
-    DEFINE VAR CR_MicroCredito LIKE Ahorros.Sdo_Disponible.
-
-    DEFINE VAR AHT LIKE Ahorros.Sdo_Disponible.
-    DEFINE VAR CRT LIKE Ahorros.Sdo_Disponible.
-    DEFINE VAR TOT LIKE Ahorros.Sdo_Disponible.
-    DEFI   VAR W_NPagare LIKE Creditos.Num_Credito.
-
-
-    FOR EACH Ahorros WHERE
-             Ahorros.Nit             EQ WNit AND
-             Ahorros.Estado          EQ 1    AND
-             Ahorros.Fec_Cancelacion EQ ?    AND
-             Ahorros.FOR_Pago        EQ 2 NO-LOCK:
-       CASE Ahorros.Tip_Ahorro:
-         WHEN 1 THEN AH_AlaVista    = AH_AlaVista    + Ahorros.Cuota.
-         WHEN 2 THEN AH_Contractual = AH_Contractual + Ahorros.Cuota.
-         WHEN 3 THEN AH_ATermino    = AH_ATermino    + Ahorros.Cuota.
-         WHEN 4 THEN AH_Aportes     = AH_Aportes     + Ahorros.Cuota.
-       END CASE.
-       ASSIGN AHT = AHT + Ahorros.Cuota.
-              TOT = TOT + Ahorros.Cuota.
-    END.
-
-    FOR EACH Creditos WHERE
-             Creditos.Nit         EQ WNit AND
-             Creditos.Estado      EQ 2 AND
-             Creditos.Sdo_Capital GT 0 AND
-             Creditos.FOR_Pago    EQ 2 NO-LOCK:
-       CASE Creditos.Tip_Credito:
-         WHEN 1 THEN CR_Consumo      = CR_Consumo      + Creditos.Cuota.
-         WHEN 2 THEN CR_Comercial    = CR_Comercial    + Creditos.Cuota.
-         WHEN 3 THEN CR_Hipotecario  = CR_Hipotecario  + Creditos.Cuota.
-         WHEN 4 THEN CR_Microcredito = CR_Microcredito + Creditos.Cuota.
-       END CASE.
-       ASSIGN CRT = CRT + Creditos.Cuota.
-              TOT = TOT + Creditos.Cuota.
-    END.
-
-    FIND Clientes WHERE Clientes.Nit EQ WNit NO-LOCK NO-ERROR.
+    FIND FIRST Clientes WHERE Clientes.Nit = WNit NO-LOCK NO-ERROR.
     IF NOT AVAILABLE Clientes THEN DO:
-       MESSAGE "No se encontró el cliente: " Clientes.nit
-           VIEW-AS ALERT-BOX ERROR TITLE "Error pagare".
-       RETURN ERROR.
-    END.
-    W_NomDireccion = Clientes.DIR_Comercial.
-    IF W_NomDireccion EQ "" THEN W_NomDireccion = Clientes.DIR_Residencia.
-    W_NomDireccion = W_NomDireccion + ",".
+        MESSAGE "No se encontró el cliente:" Clientes.nit
+            VIEW-AS ALERT-BOX ERROR TITLE "Error pagaré".
 
-    FIND Creditos WHERE Creditos.Num_credito EQ WNumpag AND
-                        Creditos.Nit         EQ WNit NO-LOCK NO-ERROR.
-    IF NOT AVAILABLE Creditos THEN DO:
-       MESSAGE "No se ha encontrado el crédito con Numero: " WNumpag SKIP
-               "del Nit: " WNit  SKIP(1)
-               "Se cancela la operación de desembolso" VIEW-AS ALERT-BOX ERROR  TITLE "Error pagare".
-       RETURN ERROR.
+        RETURN ERROR.
     END.
-   /*
-    FIND planpagos WHERE planpagos.agencia     EQ creditos.agencia     AND
-                         planpagos.nit         EQ creditos.nit         AND
-                         planpagos.num_credito EQ Creditos.num_credito AND 
-                         planpagos.nro_cuota   EQ creditos.plazo NO-LOCK NO-ERROR.
-    IF AVAILABLE(planpagos) THEN
-       w_fecvcto = PlanPagos.Fec_Inic.
-    ELSE
-       MESSAGE "NO SE ENCONTRO EL ULTIMO PLAN PAGOS"
-           VIEW-AS ALERT-BOX INFO BUTTONS OK.
-    */
+
+    FIND FIRST Creditos WHERE Creditos.Num_credito = WNumpag
+                          AND Creditos.Nit = WNit NO-LOCK NO-ERROR.
+    IF NOT AVAILABLE Creditos THEN DO:
+        MESSAGE "No se ha encontrado el crédito con Numero:" WNumpag SKIP
+                "del titular:" WNit  SKIP(1)
+                "Se cancela la operación de desembolso"
+            VIEW-AS ALERT-BOX ERROR  TITLE "Error pagaré".
+        
+        RETURN ERROR.
+    END.
+
+    /* oakley */
+
+    
     RUN MontoEsc.r (INPUT Creditos.Monto,INPUT 0, OUTPUT W_MontoLetras).
 
     FIND Agencias WHERE Agencias.Agencia EQ W_Agencia AND Agencias.Estado EQ 1 NO-LOCK NO-ERROR.
@@ -125,8 +51,7 @@ PROCEDURE pagare.
 
 
     ASSIGN W_NomAgencia   = Agencias.Nombre  + " - " + STRING(Agencias.Agencia,"999")
-           W_NPagare      = Creditos.Num_Credito
-           W_NomDirAgenc = TRIM(Agencias.direccion).
+           W_NPagare      = Creditos.Num_Credito.
 
     FIND FIRST Ubicacion WHERE SUBSTR(Ubicacion.Ubicacion,1,5) EQ SUBSTR(Agencia.Ciudad,1,5) NO-LOCK NO-ERROR.
     IF AVAILABLE Ubicacion THEN

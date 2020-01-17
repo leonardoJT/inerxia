@@ -1,10 +1,10 @@
 DEFINE TEMP-TABLE ttc LIKE calendario.
 DEFINE TEMP-TABLE ttp LIKE procDia.
 
-FOR EACH calendario WHERE ano = 2016 NO-LOCK:
+FOR EACH calendario WHERE ano = 2019 NO-LOCK:
     CREATE ttc.
     BUFFER-COPY calendario TO ttc.
-    ttc.ano = 2017.
+    ttc.ano = 2020.
 END.
 
 FOR EACH ttc NO-LOCK:
@@ -12,7 +12,7 @@ FOR EACH ttc NO-LOCK:
     BUFFER-COPY ttc TO calendario.
 END.
 
-FOR EACH procDia WHERE YEAR(fecha_proc) = 2016 AND fecha_proc NE 02/29/2016 NO-LOCK:
+FOR EACH procDia WHERE YEAR(fecha_proc) = 2019 NO-LOCK:
     CREATE ttp.
     BUFFER-COPY procDia TO ttp.
     ttp.fecha_proc = ADD-INTERVAL(ttp.fecha_proc,1,"years").

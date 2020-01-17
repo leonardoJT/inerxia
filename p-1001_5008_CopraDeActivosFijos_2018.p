@@ -57,25 +57,19 @@ DEFINE VAR totalReporte AS DECIMAL.
 DEFINE BUFFER bfrMovContable FOR mov_contable.
 DEFINE VAR vYear AS INTEGER INITIAL 2018.
 
-FOR EACH activosFijos WHERE YEAR(activosFijos.fechaCompra) = vYear
-                        AND activosFijos.nitProveedor <> ""
-                        AND activosFijos.contabilizado = YES NO-LOCK BREAK BY activosFijos.nitProveedor:
+FOR EACH rep_activosFijos WHERE YEAR(activosFijos.fechaCompra) = vYear
+                            AND activosFijos.nitProveedor <> ""
+                            AND activosFijos.contabilizado = YES NO-LOCK BREAK BY activosFijos.nitProveedor:
     IF FIRST-OF(activosFijos.nitProveedor) THEN DO:
-
-    END.
-END.
-
-
-
-        FIND FIRST F1001 WHERE F1001.nit = anexos.nit
-                           AND F1001.concepto = "5006" NO-ERROR.
+        FIND FIRST F1001 WHERE F1001.nit = activosFijos.nitProveedor
+                           AND F1001.concepto = "5008" NO-ERROR.
         IF NOT AVAILABLE F1001 THEN DO:
             CREATE F1001.
-            F1001.nit = anexos.nit.
-            F1001.concepto = "5006".
+            F1001.nit = activosFijos.nitProveedor.
+            F1001.concepto = "5008".
 
             IF pOrigen = 'E' THEN DO:
-                FIND FIRST clientes WHERE clientes.nit = anexos.nit NO-LOCK NO-ERROR.
+                FIND FIRST clientes WHERE clientes.nit = activosFijos.nitProveedor NO-LOCK NO-ERROR.
                 IF AVAILABLE clientes THEN DO:
                     CASE clientes.tipo_identificacion:
                         WHEN "R.C" THEN F1001.tipoDoc = "11".
@@ -100,18 +94,7 @@ END.
                     END.
                     ELSE
                         F1001.razonSocial = clientes.nombre.
-    
-                    IF clientes.DIR_residencia <> "" THEN
-                        F1001.direccion = clientes.DIR_residencia.
-                    ELSE
-                        F1001.direccion = clientes.DIR_comercial.
 
-                    IF F1001.direccion = "" THEN DO:
-                        FIND FIRST agencias WHERE agencias.agencia = clientes.agencia NO-LOCK NO-ERROR.
-                        IF AVAILABLE agencias THEN
-                            F1001.direccion = agencias.direccion.
-                    END.
-    
                     IF clientes.lugar_residencia <> "" THEN DO:
                         F1001.departamento = SUBSTRING(clientes.lugar_residencia,1,2).
                         F1001.municipio = SUBSTRING(clientes.lugar_residencia,3,3).
@@ -135,6 +118,18 @@ END.
 
                             WHEN 3 THEN DO:
                                 F1001.departamento = "17".
+
+                                IF clientes.DIR_residencia <> "" THEN
+                                    F1001.direccion = clientes.DIR_residencia.
+                                ELSE
+                                    F1001.direccion = clientes.DIR_comercial.
+
+                                IF F1001.direccion = "" THEN DO:
+                                    FIND FIRST agencias WHERE agencias.agencia = clientes.agencia NO-LOCK NO-ERROR.
+                                    IF AVAILABLE agencias THEN
+                                        F1001.direccion = agencias.direccion.
+                                END.
+
                                 F1001.municipio = "001".
                             END.
 
@@ -162,15 +157,34 @@ END.
         EMPTY TEMP-TABLE docs.
     END.
 
-    F1001.pagosCostoDeduccion = F1001.pagosCostoDeduccion + anexos.sdo_inicial.
+    F1001.pagosCostoDeduccion = F1001.pagosCostoDeduccion + rep_activosFijos.valorCompra.
         
-    DO cont = 1 TO 12:
-        F1001.pagosCostoDeduccion = F1001.pagosCostoDeduccion + anexos.db[cont] - anexos.cr[cont].
-    END.
+    IF LAST-OF(rep_activosFijos.nitProveedor) THEN DO:
+        FOR EACH mov_contable WHERE mov_contable.nit = rep_activosFijos.nitProveedor
+                                AND YEAR(mov_contable.fec_contable) = ano_corte
+                                AND SUBSTRING(mov_contable.cuenta,1,6) = "243540" NO-LOCK:
+            FIND FIRST F1001 WHERE F1001.nit = rep_activosFijos.nitProveedor
+                               AND F1001.concepto = "5008" NO-ERROR.
+            IF NOT AVAILABLE F1001 THEN DO:
+                CREATE F1001.
+                ASSIGN F1001.nit = rep_activosFijos.nitProveedor
+                       F1001.concepto = "5008".
+            END.
+                
+            FIND FIRST ttmov WHERE ttmov.Id = ROWID(mov_contable) NO-LOCK NO-ERROR.
+            IF NOT AVAILABLE ttmov THEN DO:
+                F1001.ReteFuenteRta = F1001.ReteFuenteRta + mov_contable.cr - mov_contable.db.
 
-    IF LAST-OF(anexos.cuenta) THEN DO:
-        IF SUBSTRING(anexos.cuenta,1,8) = "52100505" THEN
-            ctaRete = "243525".
+                CREATE ttmov.
+                ttmov.id = ROWID(mov_contable).
+            END.
+        END.
+    END.
+END.
+
+
+
+    
         ELSE
             ctaRete = "243535".
 

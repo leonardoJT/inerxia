@@ -11,6 +11,9 @@ CREATE WIDGET-POOL.
 {Incluido\VARIABLE.i "shared"}
 
 DEFINE VAR W_NomEstado AS CHARACTER FORMAT "X(10)".
+
+/* oakley */
+
 DEFINE VAR choice AS LOGICAL.
 DEFINE VAR ROWID_mov AS ROWID.
 DEFINE VAR Wk_Cambio1 AS CHARACTER.
@@ -4408,7 +4411,7 @@ DO:
         RETURN NO-APPLY.
     END.
     
-    RUN validarUsuarioSarlaft.R (INPUT Clientes.Nit, OUTPUT W_Sarlaft) NO-ERROR.
+    /*RUN validarUsuarioSarlaft.R (INPUT Clientes.Nit, OUTPUT W_Sarlaft) NO-ERROR.*/
     IF W_Sarlaft THEN DO:
          APPLY "CHOOSE" TO Btn_Cancelar.
          RETURN NO-APPLY.

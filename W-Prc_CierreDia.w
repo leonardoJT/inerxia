@@ -32,29 +32,27 @@ CREATE cierreCuentas.   cierreCuentas.cuenta = "24351502".
 CREATE cierreCuentas.   cierreCuentas.cuenta = "24351503".
 CREATE cierreCuentas.   cierreCuentas.cuenta = "24351504".
 CREATE cierreCuentas.   cierreCuentas.cuenta = "24352501".
-/* ----------------------- */
-
-24352502
-24352503
-24352504
-24352505
-24352506
-24352507
-24352508
-24353001
-24353002
-24353501
-24353502
-24353503
-24353504
-24353507
-24353508
-24353509
-24353510
-24354001
-24354002
-24358501
-24358502
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24352502".
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24352503".
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24352504".
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24352505".
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24352506".
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24352507".
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24352508".
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24353001".
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24353002".
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24353501".
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24353502".
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24353503".
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24353504".
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24353507".
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24353508".
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24353509".
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24353510".
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24354001".
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24354002".
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24358501".
+CREATE cierreCuentas.   cierreCuentas.cuenta = "24358502".
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -548,6 +546,8 @@ PROCEDURE Proceso :
 DEFINE VAR W_FecCorte AS DATE.
 DEFINE VAR K AS INTEGER.
 DEFINE VAR id AS LOGICAL.
+DEFINE VAR pSaldoCuenta AS DECIMAL.
+DEFINE VAR vSecuencia AS INTEGER.
 
 /*Validaciones*/
 FIND FIRST Agencias WHERE Agencias.Agencia >= W_OfiIni
@@ -722,10 +722,8 @@ DO TRANSACTION ON ERROR UNDO:
         END.
     END.
 
-    /* Se cierran las cuentas de impuestos */
-    IF DAY(w_fecha + 1) = 1 THEN DO:
-
-    END.
+    IF DAY(w_fecha + 1) = 1 THEN
+        RUN trasladarCuentasDeImpuestos.
     
     /* Se llenan los Hábiles para tema Alojamientos desde la página web */
     FOR EACH habiles:
@@ -989,6 +987,172 @@ PROCEDURE ProcTotInver :
                 TOTAL_Dia.Vr_Retirado   = TOTAL_Dia.Vr_Retirado   + Mov_Inversion.Vr_Retiro.
      END.    
  END. 
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE trasladarCuentasDeImpuestos W-Prc_CierreDia 
+PROCEDURE trasladarCuentasDeImpuestos :
+DEFINE VAR vSecuencia AS INTEGER.
+DEFINE VAR vTotal2430 AS DECIMAL.
+DEFINE VAR vTotal2435 AS DECIMAL.
+DEFINE VAR flagContabiliza AS LOGICAL.
+DEFINE VAR pSaldoCuenta AS DECIMAL.
+    
+FOR EACH agencias WHERE agencias.agencia <> 1 NO-LOCK:
+    vTotal2430 = 0.
+    vTotal2435 = 0.
+    flagContabiliza = FALSE.
+
+    FOR EACH cierreCuentas NO-LOCK:
+        FOR EACH cen_costos NO-LOCK:
+            RUN hallarSaldoCuenta IN w_manija (INPUT agencias.agencia,
+                                               INPUT cen_costos.cen_costo,
+                                               INPUT cierreCuentas.cuenta,
+                                               INPUT YEAR(w_fecha),
+                                               INPUT MONTH(w_fecha),
+                                               OUTPUT pSaldoCuenta) NO-ERROR.
+            IF pSaldoCuenta <> 0 THEN DO:
+                IF flagContabiliza = FALSE THEN DO:
+                    FIND FIRST comprobantes WHERE comprobantes.agencia = agencias.agencia AND comprobantes.comprobante = 20 NO-ERROR.
+                    comprobantes.secuencia = comprobantes.secuencia + 1.
+                    vSecuencia = comprobantes.secuencia.
+
+                    FIND CURRENT comprobantes NO-LOCK.
+                    flagContabiliza = TRUE.
+                END.
+
+                CREATE mov_contable.
+                Mov_Contable.agencia = agencias.agencia.
+                Mov_Contable.Cen_Costos = cen_costos.cen_costo.
+                Mov_Contable.Comentario = "Traslado automático".
+                Mov_Contable.Comprobante = comprobantes.comprobante.
+                ASSIGN Mov_Contable.Db = pSaldoCuenta WHEN pSaldoCuenta > 0.
+                ASSIGN Mov_Contable.Cr = pSaldoCuenta * -1 WHEN pSaldoCuenta < 0.
+                Mov_Contable.Cuenta = cierreCuentas.cuenta.
+                Mov_Contable.Destino = 1.
+                Mov_Contable.Estacion = "000005".
+                Mov_Contable.Fec_Contable = w_fecha.
+                Mov_Contable.Fec_Grabacion = TODAY.
+                Mov_Contable.Hora = TIME.
+                Mov_Contable.Nit = "800197268".
+                Mov_Contable.Num_Documento = vSecuencia.
+                Mov_Contable.Usuario = w_usuario.
+
+                ASSIGN vTotal2430 = vTotal2430 + pSaldoCuenta WHEN SUBSTRING(cierreCuentas.cuenta,1,4) = "2430".
+                ASSIGN vTotal2435 = vTotal2435 + pSaldoCuenta WHEN SUBSTRING(cierreCuentas.cuenta,1,4) = "2435".
+            END.
+        END.
+
+        IF vTotal2430 <> 0 THEN DO:
+            CREATE mov_contable.
+            Mov_Contable.agencia = agencias.agencia.
+            Mov_Contable.Cen_Costos = 999.
+            Mov_Contable.Comentario = "Traslado automático".
+            Mov_Contable.Comprobante = comprobantes.comprobante.
+            ASSIGN Mov_Contable.cr = vTotal2430 WHEN vTotal2430 > 0.
+            ASSIGN Mov_Contable.db = vTotal2430 * -1 WHEN vTotal2430 < 0.
+            Mov_Contable.Cuenta = "27059501".
+            Mov_Contable.Destino = 1.
+            Mov_Contable.Estacion = "000005".
+            Mov_Contable.Fec_Contable = w_fecha.
+            Mov_Contable.Fec_Grabacion = TODAY.
+            Mov_Contable.Hora = TIME.
+            Mov_Contable.Nit = "001".
+            Mov_Contable.Num_Documento = vSecuencia.
+            Mov_Contable.Usuario = w_usuario.
+
+            CREATE mov_contable.
+            Mov_Contable.agencia = 1.
+            Mov_Contable.Cen_Costos = 999.
+            Mov_Contable.Comentario = "Traslado automático".
+            Mov_Contable.Comprobante = comprobantes.comprobante.
+            ASSIGN Mov_Contable.Db = vTotal2430 WHEN vTotal2430 > 0.
+            ASSIGN Mov_Contable.Cr = vTotal2430 * -1 WHEN vTotal2430 < 0.
+            Mov_Contable.Cuenta = "27059501".
+            Mov_Contable.Destino = 1.
+            Mov_Contable.Estacion = "000005".
+            Mov_Contable.Fec_Contable = w_fecha.
+            Mov_Contable.Fec_Grabacion = TODAY.
+            Mov_Contable.Hora = TIME.
+            Mov_Contable.Nit = STRING(agencias.agencia,"999").
+            Mov_Contable.Num_Documento = vSecuencia.
+            Mov_Contable.Usuario = w_usuario.
+
+            CREATE mov_contable.
+            Mov_Contable.agencia = 1.
+            Mov_Contable.Cen_Costos = 999.
+            Mov_Contable.Comentario = "Traslado automático".
+            Mov_Contable.Comprobante = comprobantes.comprobante.
+            ASSIGN Mov_Contable.cr = vTotal2430 WHEN vTotal2430 > 0.
+            ASSIGN Mov_Contable.db = vTotal2430 * -1 WHEN vTotal2430 < 0.
+            Mov_Contable.Cuenta = cierreCuentas.cuenta.
+            Mov_Contable.Destino = 1.
+            Mov_Contable.Estacion = "000005".
+            Mov_Contable.Fec_Contable = w_fecha.
+            Mov_Contable.Fec_Grabacion = TODAY.
+            Mov_Contable.Hora = TIME.
+            Mov_Contable.Nit = "800197268".
+            Mov_Contable.Num_Documento = vSecuencia.
+            Mov_Contable.Usuario = w_usuario.
+        END.
+
+        IF vTotal2435 <> 0 THEN DO:
+            CREATE mov_contable.
+            Mov_Contable.agencia = agencias.agencia.
+            Mov_Contable.Cen_Costos = 999.
+            Mov_Contable.Comentario = "Traslado automático".
+            Mov_Contable.Comprobante = comprobantes.comprobante.
+            ASSIGN Mov_Contable.cr = vTotal2435 WHEN vTotal2430 > 0.
+            ASSIGN Mov_Contable.db = vTotal2435 * -1 WHEN vTotal2430 < 0.
+            Mov_Contable.Cuenta = "27054501".
+            Mov_Contable.Destino = 1.
+            Mov_Contable.Estacion = "000005".
+            Mov_Contable.Fec_Contable = w_fecha.
+            Mov_Contable.Fec_Grabacion = TODAY.
+            Mov_Contable.Hora = TIME.
+            Mov_Contable.Nit = "001".
+            Mov_Contable.Num_Documento = vSecuencia.
+            Mov_Contable.Usuario = w_usuario.
+
+            CREATE mov_contable.
+            Mov_Contable.agencia = 1.
+            Mov_Contable.Cen_Costos = 999.
+            Mov_Contable.Comentario = "Traslado automático".
+            Mov_Contable.Comprobante = comprobantes.comprobante.
+            ASSIGN Mov_Contable.Db = vTotal2435 WHEN vTotal2435 > 0.
+            ASSIGN Mov_Contable.Cr = vTotal2435 * -1 WHEN vTotal2435 < 0.
+            Mov_Contable.Cuenta = "27054501".
+            Mov_Contable.Destino = 1.
+            Mov_Contable.Estacion = "000005".
+            Mov_Contable.Fec_Contable = w_fecha.
+            Mov_Contable.Fec_Grabacion = TODAY.
+            Mov_Contable.Hora = TIME.
+            Mov_Contable.Nit = STRING(agencias.agencia,"999").
+            Mov_Contable.Num_Documento = vSecuencia.
+            Mov_Contable.Usuario = w_usuario.
+
+            CREATE mov_contable.
+            Mov_Contable.agencia = 1.
+            Mov_Contable.Cen_Costos = 999.
+            Mov_Contable.Comentario = "Traslado automático".
+            Mov_Contable.Comprobante = comprobantes.comprobante.
+            ASSIGN Mov_Contable.cr = vTotal2435 WHEN vTotal2435 > 0.
+            ASSIGN Mov_Contable.db = vTotal2435 * -1 WHEN vTotal2435 < 0.
+            Mov_Contable.Cuenta = cierreCuentas.cuenta.
+            Mov_Contable.Destino = 1.
+            Mov_Contable.Estacion = "000005".
+            Mov_Contable.Fec_Contable = w_fecha.
+            Mov_Contable.Fec_Grabacion = TODAY.
+            Mov_Contable.Hora = TIME.
+            Mov_Contable.Nit = "800197268".
+            Mov_Contable.Num_Documento = vSecuencia.
+            Mov_Contable.Usuario = w_usuario.
+        END.
+    END.
+END.
+
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
