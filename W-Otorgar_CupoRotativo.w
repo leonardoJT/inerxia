@@ -478,7 +478,7 @@ DO:
         flagTarjetaValida = TRUE.
 
     /* Control para el crédito de Solidaridad - Si el asociado posee un crédito activo por esta línea, se solicita autorización para la asignación del cupo rotativo */
-    FIND FIRST creditos WHERE creditos.nit = clientes.nit:SCREEN-VALUE
+    /*FIND FIRST creditos WHERE creditos.nit = clientes.nit:SCREEN-VALUE
                           AND creditos.cod_credito = 158
                           AND creditos.estado = 2 NO-LOCK NO-ERROR.
     IF AVAILABLE creditos THEN DO:
@@ -508,7 +508,7 @@ DO:
 
             RETURN NO-APPLY.
         END.
-    END.
+    END.*/
     
     FIND FIRST creditos WHERE creditos.nit = clientes.nit:SCREEN-VALUE
                           AND creditos.cod_credito = 123

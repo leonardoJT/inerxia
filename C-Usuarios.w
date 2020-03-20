@@ -6,18 +6,14 @@
 &Scoped-define WINDOW-NAME CURRENT-WINDOW
 &Scoped-define FRAME-NAME Dialog-Frame
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _DEFINITIONS Dialog-Frame 
-/* ***************************  Definitions  ************************** */
+DEFINE INPUT-OUTPUT PARAMETER pRowIdUsuario AS ROWID.
 
-/* Parameters Definitions ---                                           */
-  DEFINE INPUT-OUTPUT PARAMETER W_Rowid AS ROWID.
-/* Local Variable Definitions ---                                       */
-  {incluido\variable.i "SHARED"}
-  DEFINE VAR W_rpta AS LOGICAL.
-  DEFINE VARIABLE Wk_Agencia LIKE Usuarios.Agencia.
-  DEFINE VARIABLE Wk_SuperUsr  AS LOGICAL.
-  DEFINE VARIABLE W_Status     AS LOGICAL.
-
-  DEFINE BUFFER Tmp_Usuarios FOR Usuarios.
+{incluido\variable.i "SHARED"}
+DEFINE VAR W_rpta AS LOGICAL.
+DEFINE VARIABLE Wk_Agencia AS INTEGER.
+DEFINE VARIABLE Wk_SuperUsr AS LOGICAL.
+DEFINE VARIABLE W_Status AS LOGICAL.
+DEFINE BUFFER Tmp_Usuarios FOR Usuarios.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -186,9 +182,9 @@ ASSIGN
      _TblOptList       = "USED"
      _Where[1]         = "Usuarios.Estado EQ W_Estado"
      _FldNameList[1]   > bdcentral.Usuarios.Agencia
-"Agencia" "Agencia" ? "integer" ? ? ? ? ? ? no ? no no "7.43" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+"Usuarios.Agencia" "Agencia" ? "integer" ? ? ? ? ? ? no ? no no "7.43" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[2]   > bdcentral.Usuarios.Usuario
-"Usuario" "Usuario" "X(15)" "character" ? ? ? ? ? ? no "Usuario" no no "14" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+"Usuarios.Usuario" "Usuario" "X(15)" "character" ? ? ? ? ? ? no "Usuario" no no "14" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[3]   = bdcentral.Usuarios.Nombre
      _Query            is OPENED
 */  /* BROWSE BROWSE-2 */
@@ -235,10 +231,9 @@ END.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BROWSE-2 Dialog-Frame
 ON MOUSE-SELECT-DBLCLICK OF BROWSE-2 IN FRAME Dialog-Frame
-OR RETURN OF {&BROWSE-NAME}
-DO:
-   ASSIGN W_Rowid = ROWID(Usuarios).
-   APPLY "GO" TO FRAME {&FRAME-NAME}.
+OR RETURN OF {&BROWSE-NAME} DO:
+    pRowIdUsuario = ROWID(Usuarios).
+    APPLY "GO" TO FRAME {&FRAME-NAME}.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -249,8 +244,8 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BUTTON-48 Dialog-Frame
 ON CHOOSE OF BUTTON-48 IN FRAME Dialog-Frame /* Salir */
 DO:
-  IF Browse-2:NUM-SELECTED-ROWS > 0 THEN                 
-     ASSIGN W_Rowid = ROWID(Usuarios).
+    IF Browse-2:NUM-SELECTED-ROWS > 0 THEN
+        pRowIdUsuario = ROWID(Usuarios).
 END.
 
 /* _UIB-CODE-BLOCK-END */

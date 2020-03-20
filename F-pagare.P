@@ -115,11 +115,12 @@ listado = W_PathSpl + "L_Pagare.Lst".
 {incluido\Imprimir.I "listado"}
 
 PROCEDURE ProcesoImprimir:
- DISPLAY 
- "Día/Mes/Año    PAGARÉ No." AT 1
- /*Creditos.Pagare                         AT 27*/
- W_NPagare                               AT 27
- Creditos.Fec_Desembolso                 AT 2 SKIP(2)
+DISPLAY "Día/Mes/Año    PAGARÉ No." AT 1
+        W_NPagare                   AT 27
+        Creditos.Fec_Desembolso     AT 2 SKIP(2)
+
+        /* oakley */
+
  "AGENCIA      :"                        AT 1
  W_NomAgencia                            AT 16
  "CUENTA No.   :"                        AT 1

@@ -918,34 +918,36 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE Rp_Aprobados wWin 
 PROCEDURE Rp_Aprobados :
-DEFINE VAR GPValor    AS DECIMAL FORMAT ">>>,>>>,>>>,>>9".
-DEFINE VAR GPNumero   AS DECIMAL FORMAT ">,>>9".
-DEFINE VAR GRValor    AS DECIMAL FORMAT ">>>,>>>,>>>,>>9".
-DEFINE VAR GRNumero   AS DECIMAL FORMAT ">,>>9".            
+DEFINE VAR GPValor AS DECIMAL FORMAT ">>>,>>>,>>>,>>9".
+DEFINE VAR GPNumero AS DECIMAL FORMAT ">,>>9".
+DEFINE VAR GRValor AS DECIMAL FORMAT ">>>,>>>,>>>,>>9".
+DEFINE VAR GRNumero AS DECIMAL FORMAT ">,>>9".
 DEFINE VAR TotalAgencia AS DECIMAL FORMAT ">>>,>>>,>>>,>>9".
-DEFINE VAR TGPValor    AS DECIMAL FORMAT ">>>,>>>,>>>,>>9".
-DEFINE VAR TGPNumero   AS DECIMAL FORMAT ">,>>9".
-DEFINE VAR TGRValor    AS DECIMAL FORMAT ">>>,>>>,>>>,>>9".
-DEFINE VAR TGRNumero   AS DECIMAL FORMAT ">,>>9".
-DEFINE VAR NomAge    AS CHARACTER FORMAT "X(40)".
+DEFINE VAR TGPValor AS DECIMAL FORMAT ">>>,>>>,>>>,>>9".
+DEFINE VAR TGPNumero AS DECIMAL FORMAT ">,>>9".
+DEFINE VAR TGRValor AS DECIMAL FORMAT ">>>,>>>,>>>,>>9".
+DEFINE VAR TGRNumero AS DECIMAL FORMAT ">,>>9".
+DEFINE VAR NomAge AS CHARACTER FORMAT "X(40)".
 
-Listado = /*W_PathSpl +*/ "c:\info\TotAgencia.LST".
-/*OS-DELETE VALUE(Listado).*/
-ASSIGN J = 0 k = 0.
+Listado = "c:\info\TotAgencia.LST".
+J = 0.
+k = 0.
+
 {Incluido\RepEncabezado.i}
 
-  W_Reporte   = "REPORTE   : CREDITOS APROBADOS NO DESEMBOLSADOS"
-              + " - ENTRE: " + STRING(FecIni) + " Y " + STRING(FecFin) + " Hora: " + STRING(TIME,"hh:mm am").
-  W_EncColumna = "AGENCIA                CREDITOS GARANTIA PERSONAL                       CREDITOS GARANTIA REAL                  TOTAL".
+W_Reporte = "REPORTE   : CREDITOS APROBADOS NO DESEMBOLSADOS" + " - ENTRE: " + STRING(FecIni) + " Y " + STRING(FecFin) + " Hora: " + STRING(TIME,"hh:mm am").
+W_EncColumna = "AGENCIA                CREDITOS GARANTIA PERSONAL                       CREDITOS GARANTIA REAL                  TOTAL".
+
 OUTPUT TO VALUE(Listado) PAGED PAGE-SIZE 65 APPEND.
-  
-  VIEW FRAME F-Encabezado.
-  VIEW FRAME F-Ftr.
-  FOR EACH Creditos WHERE
-           Creditos.Estado         EQ 1 AND
-           Creditos.Fec_Desembolso EQ ? NO-LOCK
-           BREAK BY Creditos.Agencia:  
-      j = j + 1.
+VIEW FRAME F-Encabezado.
+VIEW FRAME F-Ftr.
+
+FOR EACH Creditos WHERE Creditos.Estado = 1
+                    AND Creditos.Fec_Desembolso = ? NO-LOCK BREAK BY Creditos.Agencia:
+    j = j + 1.
+
+    /* oakley */
+
       RUN Progreso.
       FIND FIRST Garantia WHERE 
                  Garantias.Tip_Credito   EQ Creditos.Tip_Credito   AND
@@ -1005,30 +1007,31 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE Rp_Desembolsados wWin 
 PROCEDURE Rp_Desembolsados :
-DEFINE VAR Valor    AS DECIMAL FORMAT ">>>,>>>,>>>,>>9".
-DEFINE VAR Numero   AS DECIMAL FORMAT ">,>>9".
+DEFINE VAR Valor AS DECIMAL FORMAT ">>>,>>>,>>>,>>9".
+DEFINE VAR Numero AS DECIMAL FORMAT ">,>>9".
 DEFINE VAR Promedio AS DECIMAL FORMAT ">>>,>>>,>>>,>>9".
-DEFINE VAR TValor    AS DECIMAL FORMAT ">>>,>>>,>>>,>>9".
-DEFINE VAR TNumero   AS DECIMAL FORMAT ">,>>9".
+DEFINE VAR TValor AS DECIMAL FORMAT ">>>,>>>,>>>,>>9".
+DEFINE VAR TNumero AS DECIMAL FORMAT ">,>>9".
 DEFINE VAR TPromedio AS DECIMAL FORMAT ">>>,>>>,>>>,>>9".
-DEFINE VAR NomAge    AS CHARACTER FORMAT "X(40)".
+DEFINE VAR NomAge AS CHARACTER FORMAT "X(40)".
 
-Listado = /*W_PathSpl +*/ "c:\info\TotAgencia.LST".
-/*OS-DELETE VALUE(Listado).*/
-ASSIGN J = 0 k = 0.
+Listado = "c:\info\TotAgencia.LST".
+J = 0.
+k = 0.
+
 {Incluido\RepEncabezado.i}
 
-  W_Reporte   = "REPORTE   : CREDITOS DESEMBOLSADOS"
-              + " - ENTRE: " + STRING(FecIni) + " Y " + STRING(FecFin) + " Hora: " + STRING(TIME,"hh:mm am").
-  W_EncColumna = "AGENCIA                                      VALOR CREDITOS       NUMERO               TOTAL".
+W_Reporte = "REPORTE   : CREDITOS DESEMBOLSADOS" + " - ENTRE: " + STRING(FecIni) + " Y " + STRING(FecFin) + " Hora: " + STRING(TIME,"hh:mm am").
+W_EncColumna = "AGENCIA                                      VALOR CREDITOS       NUMERO               TOTAL".
+
 OUTPUT TO VALUE(Listado) PAGED PAGE-SIZE 65 APPEND.
-  
-  VIEW FRAME F-Encabezado.
-  VIEW FRAME F-Ftr.
-  FOR EACH Creditos WHERE
-           Creditos.Fec_Desembolso GE FecIni AND
-           Creditos.Fec_Desembolso LE FecFin NO-LOCK
-           BREAK BY Creditos.Agencia:  
+VIEW FRAME F-Encabezado.
+VIEW FRAME F-Ftr.
+
+FOR EACH Creditos WHERE Creditos.Fec_Desembolso >= FecIni
+                    AND Creditos.Fec_Desembolso <= FecFin NO-LOCK BREAK BY Creditos.Agencia:
+    /* oakley */
+
       j = j + 1.
       RUN Progreso.
       ASSIGN Valor   = Valor  + Monto

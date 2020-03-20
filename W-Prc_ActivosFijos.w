@@ -381,7 +381,7 @@ comprobantes.secuencia = comprobantes.secuencia + 1.
 
 FOR EACH activosFijos WHERE activosFijos.agencia = agencias.agencia
                         AND activosFijos.valorActual > 0
-                        AND activosFijos.mesesDepreciar > 0
+                        /*AND activosFijos.mesesDepreciar > 0*/
                         AND activosFijos.estado = 1
                         AND activosFijos.contabilizado = TRUE
                         AND activosFijos.depreciable = YES:
@@ -389,7 +389,10 @@ FOR EACH activosFijos WHERE activosFijos.agencia = agencias.agencia
     IF AVAILABLE cfg_activosFijos THEN DO:
         flagContabilizo = TRUE.
 
-        valDepreciar = ROUND(activosFijos.valorActual / activosFijos.mesesDepreciar,0).
+        IF activosFijos.mesesDepreciar > 0 THEN
+            valDepreciar = ROUND(activosFijos.valorActual / activosFijos.mesesDepreciar,2).
+        ELSE
+            valDepreciar = activosFijos.valorActual.
 
         CREATE mov_contable.
         mov_contable.agencia = activosFijos.agencia.
@@ -421,9 +424,9 @@ FOR EACH activosFijos WHERE activosFijos.agencia = agencias.agencia
 
         activosFijos.valorActual = activosFijos.valorActual - valDepreciar.
         activosFijos.valorDepreciado = activosFijos.valorDepreciado + valDepreciar.
-        activosFijos.mesesDepreciar = activosFijos.mesesDepreciar - 1.
+        ASSIGN activosFijos.mesesDepreciar = activosFijos.mesesDepreciar - 1 WHEN activosFijos.mesesDepreciar >= 1.
         activosFijos.fecUltDepreciacion = TODAY.
-        activosFijos.anotacion = activosFijos.anotacion + "Última Depreciación: " + STRING(w_fecha,"99/99/9999") + " / ".
+        activosFijos.anotacion = activosFijos.anotacion + "Última Depreciación: " + STRING(w_fecha,"99/99/9999") + " - " + STRING(valDepreciar,"$zzz,zzz,zz9.99") + " - ".
     END.
 END.
 
@@ -483,51 +486,13 @@ DEFI VAR K AS INTEG FORM "9".
 DEFI VAR id AS LOGICAL INITIAL NO.
 
 /* Validaciones */
-FIND FIRST Agencias WHERE Agencias.Agencia >= W_OfiIni
-                      AND Agencias.Agencia <= W_OfiFin
-                      AND Agencias.Estado = 1 NO-LOCK NO-ERROR.
-IF AVAILABLE(Agencias) THEN DO:
-    MESSAGE "Todas las agencias deben estar en estado de cierre." SKIP
-            "No se permite la operación."
-        VIEW-AS ALERT-BOX TITLE "Confirmar proceso".
-
-    RETURN ERROR.
-END.
-
 FOR EACH Agencias WHERE Agencias.Agencia >= W_OfiIni
-                    AND Agencias.Agencia <= W_OfiFin
-                    AND Agencias.Estado = 2 NO-LOCK:
-    FIND FIRST Usuarios WHERE Usuarios.Agencia = Agencias.Agencia
-                          AND Usuarios.Usuario <> W_Usuario
-                          AND Usuarios.Estado EQ 1
-                          AND Usuarios.Id_Entrada NO-LOCK NO-ERROR.
-    IF AVAILABLE(Usuarios) THEN DO:
-        MESSAGE "El Usuario" Usuarios.Usuario "-" Usuarios.Nombre SKIP
-                "de la agencia" Agencias.Agencia "-" Agencias.Nombre SKIP
-                "está conectado al Aplicativo... Todos los usuarios deben estar" skip
-                "desconectados antes de realizar este proceso..."
-            VIEW-AS ALERT-BOX TITLE "Confirmar Proceso".
-
-        RUN W-Control_Usuarios.r.
-
-        FIND FIRST Usuarios WHERE Usuarios.Agencia = Agencias.Agencia
-                              AND Usuarios.Usuario <> W_Usuario
-                              AND Usuarios.Estado = 1
-                              AND Usuarios.Id_Entrada NO-LOCK NO-ERROR.
-        IF AVAILABLE(Usuarios) THEN DO:
-            MESSAGE "Aun existen Usuarios conectados al Aplicativo."
-                    "No se permite la realización del proceso..."
-                VIEW-AS ALERT-BOX TITLE "Confirmar Proceso".
-
-            RETURN ERROR.
-        END.
-    END.
-
+                    AND Agencias.Agencia <= W_OfiFin NO-LOCK:
     FIND FIRST ProcDia WHERE ProcDia.Agencia = Agencias.Agencia
                          AND MONTH(ProcDia.Fecha_Proc) = MONTH(W_Fecha)
                          AND YEAR(procDia.fecha_proc) = YEAR(w_fecha)
-                         AND ProcDia.Cod_Proceso EQ 10
-                         AND ProcDia.Estado EQ 1 NO-LOCK NO-ERROR.
+                         AND ProcDia.Cod_Proceso = 10
+                         AND ProcDia.Estado = 1 NO-LOCK NO-ERROR.
     IF NOT AVAILABLE(ProcDia) THEN DO:
         MESSAGE "Este proceso ya fue ejecutado para este mes en la agencia" agencias.nombre SKIP
                 "o no se encuentra matriculado. Revise por favor..." SKIP
@@ -540,8 +505,7 @@ END.
 
 DO TRANSACTION ON ERROR UNDO:
     FOR EACH Agencias WHERE Agencias.Agencia >= W_OfiIni
-                        AND Agencias.Agencia <= W_OfiFin
-                        AND Agencias.Estado = 2:
+                        AND Agencias.Agencia <= W_OfiFin NO-LOCK:
         W_Mensaje:SCREEN-VALUE IN FRAME F_Proc = "Realizando proceso de depreciación de Activos Fijos...".
 
         RUN Depreciacion.

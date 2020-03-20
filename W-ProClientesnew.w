@@ -328,8 +328,14 @@ DEFINE VARIABLE R_Relacion AS CHARACTER
      SIZE 30 BY 1 TOOLTIP "Parentesco O Relación"
      BGCOLOR 15  NO-UNDO.
 
+DEFINE VARIABLE fechaNacimientoRelacion AS DATE FORMAT "99/99/9999" 
+     LABEL "Fecha de nacimiento" 
+     VIEW-AS FILL-IN 
+     SIZE 15.14 BY .81 TOOLTIP "Fecha de nacimiento"
+     BGCOLOR 15  NO-UNDO.
+
 DEFINE VARIABLE Rela_Nit AS CHARACTER FORMAT "X(12)":U 
-     LABEL "Nit" 
+     LABEL "Número de identificación" 
      VIEW-AS FILL-IN 
      SIZE 33 BY .81
      BGCOLOR 15  NO-UNDO.
@@ -355,7 +361,7 @@ DEFINE VARIABLE R_Ciu_Dpt AS CHARACTER FORMAT "X(80)"
 DEFINE VARIABLE R_Direccion AS CHARACTER FORMAT "X(255)" 
      LABEL "Dirección" 
      VIEW-AS FILL-IN 
-     SIZE 48.72 BY .81
+     SIZE 37.72 BY .81
      BGCOLOR 15  NO-UNDO.
 
 DEFINE VARIABLE R_Nombre AS CHARACTER FORMAT "X(40)" 
@@ -413,15 +419,11 @@ DEFINE RECTANGLE RECT-303
 
 DEFINE RECTANGLE RECT-331
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 50 BY 3.35.
-
-DEFINE RECTANGLE RECT-332
-     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 62 BY 1.35.
+     SIZE 50 BY 4.31.
 
 DEFINE RECTANGLE RECT-333
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 60 BY 4.96.
+     SIZE 60 BY 6.04.
 
 DEFINE BUTTON Bt_FinAporte 
      LABEL "Fin Creación Aportes" 
@@ -1370,34 +1372,35 @@ DEFINE FRAME FRelNva
           "Primer apellido del cliente"
      R_Apellido2 AT ROW 6.12 COL 24 COLON-ALIGNED HELP
           "Segundo apellido del cliente"
-     R_Btn_Direccion-3 AT ROW 7.38 COL 59.86 WIDGET-ID 290
-     R_Direccion AT ROW 7.46 COL 9.29 COLON-ALIGNED HELP
+     fechaNacimientoRelacion AT ROW 7.04 COL 23.86 COLON-ALIGNED HELP
+          "Teléfono de la residencia del cliente" WIDGET-ID 318
+     R_Btn_Direccion-3 AT ROW 8.92 COL 48.43 WIDGET-ID 290
+     R_Direccion AT ROW 9 COL 9 COLON-ALIGNED HELP
           "Teléfono de la residencia del cliente"
-     R_Ciu_Dpt AT ROW 9.08 COL 8.86 COLON-ALIGNED HELP
-          "Teléfono de la residencia del cliente"
-     Btn_Lugar_Comercial-2 AT ROW 9.08 COL 48.43 WIDGET-ID 292
-     R_Sucursal AT ROW 9.88 COL 58.72 COLON-ALIGNED HELP
+     R_Sucursal AT ROW 9.81 COL 58.72 COLON-ALIGNED HELP
           "Teléfono de la residencia del cliente" WIDGET-ID 2
-     R_Tel_ResidenciaIndctvo AT ROW 10 COL 19.86 COLON-ALIGNED WIDGET-ID 298
-     R_Tel_Residencia AT ROW 10 COL 28.86 COLON-ALIGNED HELP
+     R_Ciu_Dpt AT ROW 9.96 COL 8.86 COLON-ALIGNED HELP
+          "Teléfono de la residencia del cliente"
+     Btn_Lugar_Comercial-2 AT ROW 9.96 COL 48.43 WIDGET-ID 292
+     R_Tel_ResidenciaIndctvo AT ROW 10.88 COL 19.86 COLON-ALIGNED WIDGET-ID 298
+     R_Tel_Residencia AT ROW 10.88 COL 28.86 COLON-ALIGNED HELP
           "Teléfono de la residencia del cliente" NO-LABEL
-     R_Tel_ComercialIndctvo AT ROW 10.85 COL 19.86 COLON-ALIGNED WIDGET-ID 302
-     R_Tel_Comercial AT ROW 10.88 COL 28.86 COLON-ALIGNED NO-LABEL
-     R_Producto AT ROW 10.96 COL 58.72 COLON-ALIGNED HELP
+     R_Producto AT ROW 10.88 COL 58.72 COLON-ALIGNED HELP
           "Teléfono de la residencia del cliente" WIDGET-ID 4
-     R_Numero AT ROW 12.12 COL 58.86 COLON-ALIGNED HELP
+     R_Tel_ComercialIndctvo AT ROW 11.73 COL 19.86 COLON-ALIGNED WIDGET-ID 302
+     R_Tel_Comercial AT ROW 11.77 COL 28.86 COLON-ALIGNED NO-LABEL
+     R_Numero AT ROW 12.04 COL 58.86 COLON-ALIGNED HELP
           "Teléfono de la residencia del cliente"
      "Financiera" VIEW-AS TEXT
-          SIZE 9.29 BY .81 AT ROW 8.54 COL 62 WIDGET-ID 166
+          SIZE 9.29 BY .81 AT ROW 8.42 COL 62 WIDGET-ID 166
           FGCOLOR 7 FONT 5
-     RECT-303 AT ROW 8.81 COL 53.14 WIDGET-ID 8
-     RECT-331 AT ROW 8.85 COL 2 WIDGET-ID 310
-     RECT-332 AT ROW 7.19 COL 2 WIDGET-ID 312
+     RECT-303 AT ROW 8.73 COL 53.14 WIDGET-ID 8
+     RECT-331 AT ROW 8.73 COL 2 WIDGET-ID 310
      RECT-333 AT ROW 2.23 COL 2 WIDGET-ID 314
     WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 8.86 ROW 2.31
-         SIZE 78 BY 13.23
+         AT COL 6 ROW 3.15
+         SIZE 78 BY 13.19
          BGCOLOR 17 FONT 4
          TITLE "Nueva Relacion".
 
@@ -1638,15 +1641,15 @@ DEFINE FRAME F_Segmentacion
           SIZE 11.43 BY .81
           BGCOLOR 18 
      Btn_Direccion_Ante AT ROW 16.38 COL 48 WIDGET-ID 298
-     "Tipo de Vivienda" VIEW-AS TEXT
-          SIZE 15 BY .62 AT ROW 7.38 COL 84 WIDGET-ID 142
-          BGCOLOR 18 FGCOLOR 7 FONT 5
-     "Nivel Educación" VIEW-AS TEXT
-          SIZE 15 BY .5 AT ROW 7.27 COL 2.43 WIDGET-ID 172
-          FGCOLOR 7 FONT 5
      "Teléfono" VIEW-AS TEXT
           SIZE 8 BY .5 AT ROW 14.19 COL 65.57
           FGCOLOR 7 FONT 4
+     "Envío" VIEW-AS TEXT
+          SIZE 6.57 BY .77 AT ROW 13.19 COL 84 WIDGET-ID 190
+          FGCOLOR 7 FONT 5
+     "DD/MM/AAAA" VIEW-AS TEXT
+          SIZE 11 BY .69 AT ROW 1.46 COL 49.57 WIDGET-ID 144
+          FONT 4
     WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1.43 ROW 8.27
@@ -1655,25 +1658,13 @@ DEFINE FRAME F_Segmentacion
 
 /* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
 DEFINE FRAME F_Segmentacion
-     "Vivienda Actual Menos Dos años" VIEW-AS TEXT
-          SIZE 29 BY .69 AT ROW 15.5 COL 3.14 WIDGET-ID 184
-          FGCOLOR 7 FONT 5
-     "Teléfono" VIEW-AS TEXT
-          SIZE 6.29 BY .5 AT ROW 15.69 COL 51.72 WIDGET-ID 246
-          FGCOLOR 7 FONT 4
-     "Lugar y Fecha Expedición Documento" VIEW-AS TEXT
-          SIZE 27.57 BY .69 AT ROW 1.42 COL 21.43 WIDGET-ID 104
-          FONT 4
-     "Envío" VIEW-AS TEXT
-          SIZE 6.57 BY .77 AT ROW 13.19 COL 84 WIDGET-ID 190
-          FGCOLOR 7 FONT 5
-     "DD/MM/AAAA" VIEW-AS TEXT
-          SIZE 11 BY .69 AT ROW 1.46 COL 49.57 WIDGET-ID 144
-          FONT 4
      "Estado Civil" VIEW-AS TEXT
           SIZE 11 BY .62 AT ROW 1.54 COL 89.29 WIDGET-ID 354
      "Nivel Cooperativo" VIEW-AS TEXT
           SIZE 16 BY .5 AT ROW 7.27 COL 27.43 WIDGET-ID 362
+     "Teléfono" VIEW-AS TEXT
+          SIZE 6.29 BY .5 AT ROW 15.69 COL 51.72 WIDGET-ID 246
+          FGCOLOR 7 FONT 4
      "Correspondencia" VIEW-AS TEXT
           SIZE 15.57 BY .69 AT ROW 13.81 COL 84 WIDGET-ID 186
           FGCOLOR 7 FONT 5
@@ -1690,14 +1681,26 @@ DEFINE FRAME F_Segmentacion
      "Permanencia" VIEW-AS TEXT
           SIZE 12.14 BY .81 AT ROW 14 COL 2.72 WIDGET-ID 180
           FGCOLOR 7 FONT 5
-     "Profesion" VIEW-AS TEXT
-          SIZE 8 BY .5 AT ROW 9.69 COL 2.86 WIDGET-ID 356
-     "Permanencia" VIEW-AS TEXT
-          SIZE 12.14 BY .81 AT ROW 15.5 COL 63.72 WIDGET-ID 188
+     "Nivel Educación" VIEW-AS TEXT
+          SIZE 15 BY .5 AT ROW 7.27 COL 2.43 WIDGET-ID 172
           FGCOLOR 7 FONT 5
+     "Tipo de Vivienda" VIEW-AS TEXT
+          SIZE 15 BY .62 AT ROW 7.38 COL 84 WIDGET-ID 142
+          BGCOLOR 18 FGCOLOR 7 FONT 5
      "Tipo de Vínculo" VIEW-AS TEXT
           SIZE 15 BY .77 AT ROW 1.27 COL 3
           BGCOLOR 18 FGCOLOR 7 FONT 5
+     "Permanencia" VIEW-AS TEXT
+          SIZE 12.14 BY .81 AT ROW 15.5 COL 63.72 WIDGET-ID 188
+          FGCOLOR 7 FONT 5
+     "Profesion" VIEW-AS TEXT
+          SIZE 8 BY .5 AT ROW 9.69 COL 2.86 WIDGET-ID 356
+     "Vivienda Actual Menos Dos años" VIEW-AS TEXT
+          SIZE 29 BY .69 AT ROW 15.5 COL 3.14 WIDGET-ID 184
+          FGCOLOR 7 FONT 5
+     "Lugar y Fecha Expedición Documento" VIEW-AS TEXT
+          SIZE 27.57 BY .69 AT ROW 1.42 COL 21.43 WIDGET-ID 104
+          FONT 4
      RECT-1 AT ROW 1.15 COL 63.72
      RECT-228 AT ROW 14 COL 82 WIDGET-ID 150
      RECT-306 AT ROW 7.5 COL 83 WIDGET-ID 346
@@ -2761,6 +2764,12 @@ DEFINE FRAME F_Ubicacion
 DEFINE FRAME F_Ubicacion
      FacultadDepartamento AT ROW 6.54 COL 18 COLON-ALIGNED WIDGET-ID 320
      btnFacultadDpto AT ROW 6.62 COL 94 WIDGET-ID 322
+     "Declara Renta" VIEW-AS TEXT
+          SIZE 12.72 BY .81 TOOLTIP "Declara Renta" AT ROW 1.15 COL 47.29 WIDGET-ID 6
+          FGCOLOR 7 FONT 5
+     "Independiente o Empleado Socio" VIEW-AS TEXT
+          SIZE 29 BY .69 AT ROW 14.04 COL 5.29 WIDGET-ID 270
+          FGCOLOR 7 FONT 5
      " Exento" VIEW-AS TEXT
           SIZE 8 BY .81 AT ROW 1.15 COL 4
           FGCOLOR 7 FONT 5
@@ -2775,12 +2784,6 @@ DEFINE FRAME F_Ubicacion
           FGCOLOR 7 FONT 5
      " Administra Recursos Públicos" VIEW-AS TEXT
           SIZE 27 BY .81 AT ROW 1.19 COL 68 WIDGET-ID 4
-          FGCOLOR 7 FONT 5
-     "Declara Renta" VIEW-AS TEXT
-          SIZE 12.72 BY .81 TOOLTIP "Declara Renta" AT ROW 1.15 COL 47.29 WIDGET-ID 6
-          FGCOLOR 7 FONT 5
-     "Independiente o Empleado Socio" VIEW-AS TEXT
-          SIZE 29 BY .69 AT ROW 14.04 COL 5.29 WIDGET-ID 270
           FGCOLOR 7 FONT 5
      RECT-235 AT ROW 10.65 COL 3 WIDGET-ID 258
      RECT-217 AT ROW 14.42 COL 3 WIDGET-ID 50
@@ -3147,7 +3150,7 @@ ASSIGN
    NO-ENABLE EXP-LABEL                                                  */
 /* SETTINGS FOR FRAME F_Falta
    NOT-VISIBLE                                                          */
-/* BROWSE-TAB B_Falta TEXT-36 F_Falta */
+/* BROWSE-TAB B_Falta TEXT-37 F_Falta */
 ASSIGN 
        FRAME F_Falta:HIDDEN           = TRUE
        FRAME F_Falta:MOVABLE          = TRUE.
@@ -3293,8 +3296,8 @@ ASSIGN
    NO-ENABLE                                                            */
 /* SETTINGS FOR FRAME F_Relaciones
    NOT-VISIBLE                                                          */
-ASSIGN XXTABVALXX = FRAME FRelNva:MOVE-AFTER-TAB-ITEM (Btn_CreRel:HANDLE IN FRAME F_Relaciones)
-       XXTABVALXX = FRAME FRelNva:MOVE-BEFORE-TAB-ITEM (Btn_CanRel:HANDLE IN FRAME F_Relaciones)
+ASSIGN XXTABVALXX = FRAME FRelNva:MOVE-AFTER-TAB-ITEM (Btn_CanRel:HANDLE IN FRAME F_Relaciones)
+       XXTABVALXX = FRAME FRelNva:MOVE-BEFORE-TAB-ITEM (Btn_Activas:HANDLE IN FRAME F_Relaciones)
 /* END-ASSIGN-TABS */.
 
 /* BROWSE-TAB Br_Relaciones Btn_Activas F_Relaciones */
@@ -3306,6 +3309,8 @@ ASSIGN
 /* SETTINGS FOR BUTTON Btn_CanRel IN FRAME F_Relaciones
    NO-ENABLE                                                            */
 /* SETTINGS FOR BUTTON Btn_SalRel IN FRAME F_Relaciones
+   NO-ENABLE                                                            */
+/* SETTINGS FOR COMBO-BOX Cmb_Relaciones IN FRAME F_Relaciones
    NO-ENABLE                                                            */
 /* SETTINGS FOR FILL-IN W_MenRel IN FRAME F_Relaciones
    NO-ENABLE                                                            */
@@ -4406,7 +4411,7 @@ DO:
       END.
       W_MenRel:SCREEN-VALUE = "Escoja del Combo de consulta la relación que se le asignará a la persona o empresa".
      RActivas:SCREEN-VALUE = "1".
-     ENABLE Cmb_Relaciones Btn_SalRel.
+     ENABLE /*Cmb_Relaciones*/ Btn_SalRel.
      DISABLE Btn_CreRel Btn_Activas.
 
      DISABLE R_Sucursal
@@ -5458,37 +5463,61 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BUTTON-205 wWin
 ON CHOOSE OF BUTTON-205 IN FRAME FRelNva /* Salvar */
 DO:
-    IF SUBSTR((Rela_Nit:SCREEN-VALUE),1,3) <> "SC_" THEN DO:
-       SWER1 = TRUE.
-       DO I = 1 TO 9:
-          IF SUBSTR((Rela_Nit:SCREEN-VALUE),1,1) = Xdigi[i] THEN SWER1 = FALSE.
-       END.
-       IF SWER1 THEN DO:
-          MESSAGE "Primer Digito del Nit no es Valido" VIEW-AS ALERT-BOX INFORMATION.
-          RETURN NO-APPLY.
-       END.
+    IF SUBSTRING(Rela_Nit:SCREEN-VALUE,1,3) <> "SC_" THEN DO:
+        SWER1 = TRUE.
+
+        DO I = 1 TO 9:
+            IF SUBSTRING(Rela_Nit:SCREEN-VALUE,1,1) = Xdigi[i] THEN
+                SWER1 = FALSE.
+        END.
+
+        IF SWER1 THEN DO:
+            MESSAGE "Primer Dígito del documento de identificación no es válido"
+                VIEW-AS ALERT-BOX INFORMATION.
+
+            RETURN NO-APPLY.
+        END.
     END.
-    ASSIGN FRAME FRelNva Rela_Nit R_Nombre R_nombre2 R_Apellido1 R_Apellido2 r_direccion r_ciu_dpt
-           R_Tel_Residencia R_Tel_ResidenciaIndctvo R_Relacion R_Tel_Comercial R_Tel_ComercialIndctvo.
+
+    ASSIGN FRAME FRelNva
+        Rela_Nit
+        R_Nombre
+        R_nombre2
+        R_Apellido1
+        R_Apellido2
+        fechaNacimientoRelacion
+        r_direccion
+        r_ciu_dpt
+        R_Tel_Residencia
+        R_Tel_ResidenciaIndctvo
+        R_Relacion
+        R_Tel_Comercial
+        R_Tel_ComercialIndctvo.
+
     DO WITH FRAME F_Relaciones:
-       IF Rela_Nit = "" OR (IF NOT R_Nombre:HIDDEN    THEN R_Nombre = ""    ELSE TRUE) 
-                        /* harold OR (IF NOT R_Apellido1:HIDDEN THEN R_Apellido1 = "" ELSE TRUE)*/
-                     /* OR (IF NOT R_Relacion:HIDDEN  THEN R_Relacion = ?   ELSE TRUE)*/
-          THEN DO:
-          MESSAGE "Debe entrarse minimo: Nit, Nombre, apellido1 y el tipo de relacion" SKIP
-                  "o parentesco de la persona. rectifique la informacion" VIEW-AS ALERT-BOX.
-        /*APPLY "entry" TO R_Nit.*/
-          RETURN NO-APPLY.
-       END.
-       IF INTEGER(SUBSTR(Cmb_Relaciones:SCREEN-VALUE,1,5)) = 5 AND (R_Nombre = "" OR
-          R_Direccion = "" OR r_ciu_dpt = "" OR R_Tel_Residencia = "") THEN DO:
-          MESSAGE "Faltan Datos Importantes del Representante Legal" SKIP(1) "Nombre: "
-                   R_Nombre SKIP "Apellido: " R_Apellido1 SKIP "Direccion: " R_Direccion SKIP
-                  "Ciudad: " r_ciu_dpt SKIP "Telefono: " R_Tel_Residencia VIEW-AS ALERT-BOX.
-        /*APPLY "entry" TO R_Nit.*/
-          RETURN NO-APPLY.
-       END.
+        IF Rela_Nit = "" OR (IF NOT R_Nombre:HIDDEN THEN R_Nombre = "" ELSE TRUE) THEN DO:
+            MESSAGE "Debe entrarse minimo: número de identificación, nombre, primer apellido y el tipo de relación" SKIP
+                    "o parentesco de la persona. Rectifique la información"
+                VIEW-AS ALERT-BOX.
+
+            RETURN NO-APPLY.
+        END.
+
+        IF INTEGER(SUBSTRING(Cmb_Relaciones:SCREEN-VALUE,1,5)) = 5 AND (R_Nombre = "" OR R_Direccion = "" OR r_ciu_dpt = "" OR R_Tel_Residencia = "") THEN DO:
+            MESSAGE "Faltan datos importantes del Representante Legal" SKIP(1)
+                    "Nombre:" R_Nombre SKIP
+                    "Apellido:" R_Apellido1 SKIP
+                    "Direccion:" R_Direccion SKIP
+                    "Ciudad:" r_ciu_dpt SKIP
+                    "Teléfono:" R_Tel_Residencia
+                VIEW-AS ALERT-BOX.
+
+            RETURN NO-APPLY.
+        END.
     END.
+
+    /* oakley */
+
     DO:
         IF CAN-FIND(FIRST Clientes WHERE Clientes.Nit EQ Rela_Nit) THEN do:
             FIND FIRST Clientes EXCLUSIVE-LOCK WHERE Clientes.Nit EQ Rela_Nit NO-ERROR.
@@ -5555,10 +5584,11 @@ DO:
                     R_Tel_Comercial:SCREEN-VALUE  = ""
                     R_Sucursal:SCREEN-VALUE  = ""
                     R_Producto:SCREEN-VALUE  = ""
-                    R_Numero:SCREEN-VALUE  = "".
+                    R_Numero:SCREEN-VALUE  = ""
+                    fechaNacimientoRelacion:SCREEN-VALUE = "".
             ENABLE R_Nombre R_nombre2 R_Apellido1 R_Apellido2 /* R_Direccion R_Ciu_Dpt */ R_Tel_ResidenciaIndctvo
                    R_Tel_Residencia R_Tel_ComercialIndctvo R_Tel_Comercial /* R_Ciu_DptCdgo */
-                   Btn_Lugar_Comercial-2 R_Btn_Direccion-3 WITH FRAME FRelNva.
+                   Btn_Lugar_Comercial-2 R_Btn_Direccion-3 fechaNacimientoRelacion WITH FRAME FRelNva.
         END.
         HIDE FRAME FRelNva.
         APPLY "choose" TO Btn_SalRel IN FRAME F_Relaciones.
@@ -5583,10 +5613,11 @@ DO:
             R_Tel_Residencia:SCREEN-VALUE = ""
             R_Tel_ResidenciaIndctvo:SCREEN-VALUE = ""
             R_Tel_Comercial:SCREEN-VALUE = ""
-            R_Tel_ComercialIndctvo:SCREEN-VALUE = "".
+            R_Tel_ComercialIndctvo:SCREEN-VALUE = ""
+            fechaNacimientoRelacion:SCREEN-VALUE = "".
     ENABLE R_Nombre R_Apellido1 R_Apellido2 /* R_Direccion R_Ciu_Dpt  */ R_Tel_ResidenciaIndctvo
            R_Tel_Residencia R_Tel_ComercialIndctvo R_Tel_Comercial /* R_Ciu_DptCdgo */
-           Btn_Lugar_Comercial-2 R_Btn_Direccion-3 WITH FRAME FRelNva.
+           Btn_Lugar_Comercial-2 R_Btn_Direccion-3 fechaNacimientoRelacion WITH FRAME FRelNva.
     APPLY "choose" TO Btn_CanRel IN FRAME F_Relaciones.
   /*  APPLY "choose" TO Btn_SalRel IN FRAME F_Relaciones. */
     HIDE FRAME FRelNva.
@@ -5768,53 +5799,51 @@ DO:
                 END.
             END.
 
-            /* oakley */
-
             WHEN "00000 - Ninguna Relacion" THEN DO:
-                FOR EACH T_Relaciones: DELETE T_Relaciones. END.
+                EMPTY TEMP-TABLE T_Relaciones.
             END.
+
             OTHERWISE DO:
-                FIND Varios WHERE Varios.Tipo EQ 3 AND Varios.Codigo EQ INTEGER(SUBSTRING(Cmb_Relaciones:SCREEN-VALUE,1,5)) NO-LOCK NO-ERROR.
-                FOR EACH Relaciones 
-                    WHERE 
-                        Relaciones.Nit EQ Clientes.Nit:SCREEN-VALUE IN FRAME F_Clientes 
-                    AND Relaciones.Cod_Relacion  EQ INTEGER(SUBSTRING(Cmb_Relaciones:SCREEN-VALUE,1,5)) 
-                    AND Relaciones.Estado EQ INTEGER(RActivas:SCREEN-VALUE) NO-LOCK:
-                    FIND Clientes WHERE Clientes.Nit EQ Relaciones.Nit_Relacion NO-LOCK NO-ERROR.
-                    IF AVAILABLE(Clientes) 
-                    THEN DO:
-                        FIND Anexos_Clientes NO-LOCK
-                            WHERE
-                                Anexos_Clientes.nit = Clientes.nit NO-ERROR.
+                FIND FIRST Varios WHERE Varios.Tipo = 3
+                                    AND Varios.Codigo = INTEGER(SUBSTRING(Cmb_Relaciones:SCREEN-VALUE,1,5)) NO-LOCK NO-ERROR.
+
+                FOR EACH Relaciones WHERE Relaciones.Nit = Clientes.Nit:SCREEN-VALUE IN FRAME F_Clientes
+                                      AND Relaciones.Cod_Relacion = INTEGER(SUBSTRING(Cmb_Relaciones:SCREEN-VALUE,1,5))
+                                      AND Relaciones.Estado = INTEGER(RActivas:SCREEN-VALUE) NO-LOCK:
+                    FIND FIRST Clientes WHERE Clientes.Nit = Relaciones.Nit_Relacion NO-LOCK NO-ERROR.
+                    IF AVAILABLE(Clientes) THEN DO:
+                        FIND FIRST Anexos_Clientes WHERE Anexos_Clientes.nit = Clientes.nit NO-LOCK NO-ERROR.
+
                         CREATE T_Relaciones.
-                        UPDATE  T_Relaciones.R_Relacion           = Varios.Descripcion
-                                T_Relaciones.R_AgeObjeto          = Clientes.Agencia
-                                T_Relaciones.R_NitObjeto          = Relaciones.Nit_Relacion
-                                T_Relaciones.R_NomObjeto          = Clientes.Nombre + " " + Clientes.Apellido1 + " " + Clientes.Apellido2
-                                T_Relaciones.R_NomDescri          = Relaciones.Descripcion
-                                T_Relaciones.R_TelObjeto          = Clientes.Tel_Residencia
-                                T_Relaciones.R_TelObjetoIndctvo   = IF AVAILABLE Anexos_Clientes THEN Anexos_Clientes.ind_cli ELSE 0
-                                T_Relaciones.R_TelComerc          = Clientes.Tel_Comercial.
+                        T_Relaciones.R_Relacion = Varios.Descripcion.
+                        T_Relaciones.R_AgeObjeto = Clientes.Agencia.
+                        T_Relaciones.R_NitObjeto = Relaciones.Nit_Relacion.
+                        T_Relaciones.R_NomObjeto = Clientes.Nombre + " " + Clientes.Apellido1 + " " + Clientes.Apellido2.
+                        T_Relaciones.R_NomDescri = Relaciones.Descripcion.
+                        T_Relaciones.R_TelObjeto = Clientes.Tel_Residencia.
+                        T_Relaciones.R_TelObjetoIndctvo = IF AVAILABLE Anexos_Clientes THEN Anexos_Clientes.ind_cli ELSE 0.
+                        T_Relaciones.R_TelComerc = Clientes.Tel_Comercial.
                     END.
                 END.
+
                 DO WITH FRAME FRelNva:
                     CASE substring(Cmb_Relaciones:SCREEN-VALUE,1,5):
-                        WHEN "00002" /* referencias comerciales */
-                        THEN DO:
+                        WHEN "00002" THEN DO: /* Comerciales */
                             r_apellido1:HIDDEN = TRUE.
                             r_apellido2:HIDDEN = TRUE.
                             r_relacion:HIDDEN = TRUE.
                             r_tel_residencia:HIDDEN = TRUE.
                             r_tel_residenciaIndctvo:HIDDEN = TRUE.
                         END.
-                        WHEN "00008"
-                        THEN DO:
+
+                        WHEN "00008" THEN DO:
                             r_apellido1:HIDDEN = TRUE.
                             r_apellido2:HIDDEN = TRUE.
                             r_relacion:HIDDEN = TRUE.
                             r_tel_residencia:HIDDEN = TRUE.
                             r_tel_residenciaIndctvo:HIDDEN = TRUE.
                         END.
+
                         OTHERWISE DO:
                             r_nombre:HIDDEN = FALSE.
                             r_apellido1:HIDDEN = FALSE.
@@ -5823,23 +5852,23 @@ DO:
                             r_tel_residencia:HIDDEN = FALSE.
                             r_tel_residenciaIndctvo:HIDDEN = FALSE.
                             r_relacion:HIDDEN = IF substring(Cmb_Relaciones:SCREEN-VALUE,1,5) = "00009" THEN TRUE ELSE r_relacion:HIDDEN.
+                            fechaNacimientoRelacion:HIDDEN = FALSE.
                         END.
-                    END CASE. /* CASE substring(Cmb_Relaciones:SCREEN-VALUE,1,5): */
-              /*  MESSAGE substring(Cmb_Relaciones:SCREEN-VALUE,1,5) VIEW-AS ALERT-BOX
-                        INFORMATION.*/
-                        
-             IF substring(Cmb_Relaciones:SCREEN-VALUE,1,5) NE "00003" OR
-                substring(Cmb_Relaciones:SCREEN-VALUE,1,5) NE "00005" THEN 
-                        ENABLE R_Relacion  btn_SC WITH FRAME FRelNva.
-            
-                    IF  substring(Cmb_Relaciones:SCREEN-VALUE,1,5) EQ "00005" THEN 
-                           DISABLE R_Relacion btn_SC WITH FRAME FRelNva.   
-                    IF  substring(Cmb_Relaciones:SCREEN-VALUE,1,5) EQ "00003" THEN  
-                           DISABLE  btn_SC WITH FRAME FRelNva.
-          END.
-            END. /* OTHERWISE DO: */
-        END CASE. /* CASE Cmb_Relaciones:SCREEN-VALUE: */
-        OPEN QUERY BR_Relaciones FOR EACH T_Relaciones NO-LOCK INDEXED-REPOSITION.  
+                    END CASE.
+
+                    IF SUBSTRING(Cmb_Relaciones:SCREEN-VALUE,1,5) <> "00003" AND SUBSTRING(Cmb_Relaciones:SCREEN-VALUE,1,5) <> "00005" THEN
+                        ENABLE R_Relacion btn_SC WITH FRAME FRelNva.
+
+                    IF SUBSTRING(Cmb_Relaciones:SCREEN-VALUE,1,5) = "00005" THEN
+                        DISABLE R_Relacion btn_SC WITH FRAME FRelNva.
+
+                    IF SUBSTRING(Cmb_Relaciones:SCREEN-VALUE,1,5) = "00003" THEN
+                        DISABLE  btn_SC WITH FRAME FRelNva.
+                END.
+            END.
+        END CASE.
+
+        OPEN QUERY BR_Relaciones FOR EACH T_Relaciones NO-LOCK INDEXED-REPOSITION.
     END.
 END.
 
@@ -6953,37 +6982,46 @@ END.
 &Scoped-define FRAME-NAME FRelNva
 &Scoped-define SELF-NAME Rela_Nit
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL Rela_Nit wWin
-ON LEAVE OF Rela_Nit IN FRAME FRelNva /* Nit */
+ON LEAVE OF Rela_Nit IN FRAME FRelNva /* Número de identificación */
 DO:
-  DEF VAR Ubicacionx AS CHA NO-UNDO.
-  DEF BUFFER BClientes FOR Clientes.
-  DEF BUFFER BAnexos   FOR Anexos_Clientes.
-  IF SUBSTR((Rela_Nit:SCREEN-VALUE),1,3) <> "SC_" THEN DO:
-     SWER1 = TRUE.
-     DO I = 1 TO 9:
-        IF SUBSTR((Rela_Nit:SCREEN-VALUE),1,1) = Xdigi[i] THEN SWER1 = FALSE.
-     END.
-     IF SWER1 THEN DO:
-        MESSAGE "Primer Digito del Nit no es Valido" VIEW-AS ALERT-BOX INFORMATION.
-        RETURN NO-APPLY.
-     END.
-  END.
-  FIND BClientes WHERE BClientes.Nit = Rela_Nit:SCREEN-VALUE NO-LOCK NO-ERROR.
-  IF AVAIL BClientes THEN DO:
-     Ubicacionx = "".
-     FIND FIRST Ubicacion WHERE Ubicacion.Tipo = "B" AND Ubicacion.Ubicacion = BClientes.Lugar_Residencia NO-LOCK NO-ERROR.
-     IF   AVAIL Ubicacion THEN  Ubicacionx     =  Ubicacion.Nombre +
-          IF Ubicacion.Comuna < 1 THEN "" ELSE " - Comuna " + STRING(Ubicacion.Comuna).
-     FIND FIRST Ubicacion WHERE Ubicacion.Tipo = "C" AND Ubicacion.Ubicacion BEGINS SUBSTR(BClientes.Lugar_Residencia,1,5) NO-LOCK NO-ERROR.
-     IF   AVAIL Ubicacion THEN  Ubicacionx     =  Ubicacionx + " - " + Ubicacion.Nombre.
-     FIND FIRST Ubicacion WHERE Ubicacion.Tipo = "D" AND Ubicacion.Ubicacion BEGINS SUBSTR(BClientes.Lugar_Residencia,1,2) NO-LOCK NO-ERROR.
-     IF   AVAIL Ubicacion THEN  Ubicacionx     =  Ubicacionx + " - " + Ubicacion.Nombre.
-     FIND BAnexos WHERE BAnexos.Nit = BClientes.Nit NO-LOCK NO-ERROR.
-     IF AVAIL BAnexos THEN
-        ASSIGN R_Nombre                = BAnexos.Nombre1  
-               R_Nombre2               = BAnexos.Nombre2
-               R_Tel_ResidenciaIndctvo = BAnexos.Ind_Cli
-               R_Tel_ComercialIndctvo  = BAnexos.Ind_Comercial.
+    DEFINE VAR Ubicacionx AS CHARACTER.
+
+    DEFINE BUFFER BClientes FOR Clientes.
+    DEFINE BUFFER BAnexos FOR Anexos_Clientes.
+
+    FIND FIRST BClientes WHERE BClientes.Nit = Rela_Nit:SCREEN-VALUE NO-LOCK NO-ERROR.
+    IF AVAILABLE BClientes THEN DO:
+        Ubicacionx = "".
+
+        FIND FIRST Ubicacion WHERE Ubicacion.Tipo = "B" AND Ubicacion.Ubicacion = BClientes.Lugar_Residencia NO-LOCK NO-ERROR.
+        IF AVAILABLE Ubicacion THEN
+            Ubicacionx = Ubicacion.Nombre + (IF Ubicacion.Comuna < 1 THEN "" ELSE " - Comuna " + STRING(Ubicacion.Comuna)).
+
+        FIND FIRST Ubicacion WHERE Ubicacion.Tipo = "C" AND Ubicacion.Ubicacion BEGINS SUBSTRING(BClientes.Lugar_Residencia,1,5) NO-LOCK NO-ERROR.
+        IF AVAILABLE Ubicacion THEN
+            Ubicacionx =  Ubicacionx + " - " + Ubicacion.Nombre.
+
+        FIND FIRST Ubicacion WHERE Ubicacion.Tipo = "D" AND Ubicacion.Ubicacion BEGINS SUBSTRING(BClientes.Lugar_Residencia,1,2) NO-LOCK NO-ERROR.
+        IF AVAILABLE Ubicacion THEN
+            Ubicacionx = Ubicacionx + " - " + Ubicacion.Nombre.
+
+        FIND BAnexos WHERE BAnexos.Nit = BClientes.Nit NO-LOCK NO-ERROR.
+        IF AVAILABLE BAnexos THEN DO:
+            R_Nombre = BAnexos.Nombre1.
+            R_Nombre2 = BAnexos.Nombre2.
+            R_Tel_ResidenciaIndctvo = BAnexos.Ind_Cli.
+            R_Tel_ComercialIndctvo = BAnexos.Ind_Comercial.
+        END.
+
+
+
+
+        /* oakley */
+
+
+
+
+
      ASSIGN  R_Apellido1      = BClientes.Apellido1
              R_Apellido2      = BClientes.Apellido2
              R_Direccion      = BClientes.Dir_Residencia
@@ -6992,10 +7030,10 @@ DO:
              R_Tel_Comercial  = BClientes.Tel_Comercial.
             /* R_Ciu_DptCdgo    = BClientes.Lugar_Residencia.*/
      DISPLAY R_Nombre R_nombre2 R_Apellido1 R_Apellido2 R_Direccion R_Ciu_Dpt R_Tel_ResidenciaIndctvo
-             R_Tel_Residencia R_Tel_ComercialIndctvo R_Tel_Comercial /*R_Ciu_DptCdgo*/ WITH FRAME FRelNva.
+             R_Tel_Residencia R_Tel_ComercialIndctvo R_Tel_Comercial /*R_Ciu_DptCdgo*/ fechaNacimientoRelacion WITH FRAME FRelNva.
      DISABLE R_Nombre R_Nombre2 R_Apellido1 R_Apellido2 R_Direccion R_Ciu_Dpt R_Tel_ResidenciaIndctvo
              R_Tel_Residencia R_Tel_ComercialIndctvo R_Tel_Comercial /*R_Ciu_DptCdgo*/
-             Btn_Lugar_Comercial-2 R_Btn_Direccion-3 WITH FRAME FRelNva.
+             Btn_Lugar_Comercial-2 R_Btn_Direccion-3 fechaNacimientoRelacion WITH FRAME FRelNva.
   END.
   ELSE DO:
      ASSIGN R_Nombre:SCREEN-VALUE = ""
@@ -7007,10 +7045,11 @@ DO:
             R_Tel_ResidenciaIndctvo:SCREEN-VALUE = ""
             R_Tel_Residencia:SCREEN-VALUE = ""
             R_Tel_ComercialIndctvo:SCREEN-VALUE = ""
-            R_Tel_Comercial:SCREEN-VALUE = "".
+            R_Tel_Comercial:SCREEN-VALUE = ""
+            fechaNacimientoRelacion:SCREEN-VALUE = "".
      ENABLE R_Nombre R_Nombre2 R_Apellido1 R_Apellido2 /* R_Direccion R_Ciu_Dpt */ R_Tel_ResidenciaIndctvo
             R_Tel_Residencia R_Tel_ComercialIndctvo R_Tel_Comercial /*R_Ciu_DptCdgo*/
-            Btn_Lugar_Comercial-2 R_Btn_Direccion-3 WITH FRAME FRelNva.
+            Btn_Lugar_Comercial-2 R_Btn_Direccion-3 fechaNacimientoRelacion WITH FRAME FRelNva.
      IF Cmb_Relaciones:SCREEN-VALUE IN FRAME F_Relaciones = "00003 - Rep.Legal Infantil" OR
         R_Relacion:SCREEN-VALUE = "Padre" OR  R_Relacion:SCREEN-VALUE = "Madre" THEN DO:
         MESSAGE "Nit no ha Sido Matriculado como Cliente ni Como Asociado" VIEW-AS ALERT-BOX.
@@ -7140,12 +7179,12 @@ DO:
         
             HIDE FRAME F_segmentacion FRAME F_Ubicacion FRAME F_Otros FRAME F_Economica
                  FRAME F_Autorizaciones FRAME F_Documentacion FRAME F_Juridicas.
-            Cmb_Relaciones:SCREEN-VALUE = Cmb_Relaciones:ENTRY(2).      
+            /*Cmb_Relaciones:SCREEN-VALUE = Cmb_Relaciones:ENTRY(2).*/
             VIEW FRAME F_Relaciones.
-                IF  Clientes.Tipo_Identificacion:SCREEN-VALUE <> "NIT" THEN
+                /*IF  Clientes.Tipo_Identificacion:SCREEN-VALUE <> "NIT" THEN
                 Cmb_Relaciones:SCREEN-VALUE =  "99999 - Todas las Relaciones".
                  ELSE   
-                   Cmb_Relaciones:SCREEN-VALUE = Cmb_Relaciones:ENTRY(7).  
+                   Cmb_Relaciones:SCREEN-VALUE = Cmb_Relaciones:ENTRY(7).*/
             APPLY "value-changed" TO  cmb_relaciones IN FRAME f_relaciones.
         END.
         WHEN 5 THEN DO:
@@ -8403,15 +8442,15 @@ PROCEDURE enable_UI :
       WITH FRAME F_Clientes IN WINDOW wWin.
   {&OPEN-BROWSERS-IN-QUERY-F_Clientes}
   DISPLAY R_Relacion Rela_Nit R_Nombre R_Nombre2 R_Apellido1 R_Apellido2 
-          R_Direccion R_Ciu_Dpt R_Sucursal R_Tel_ResidenciaIndctvo 
-          R_Tel_Residencia R_Tel_ComercialIndctvo R_Tel_Comercial R_Producto 
-          R_Numero 
+          fechaNacimientoRelacion R_Direccion R_Sucursal R_Ciu_Dpt 
+          R_Tel_ResidenciaIndctvo R_Tel_Residencia R_Producto 
+          R_Tel_ComercialIndctvo R_Tel_Comercial R_Numero 
       WITH FRAME FRelNva IN WINDOW wWin.
-  ENABLE RECT-303 RECT-331 RECT-332 RECT-333 Btn_SC R_Relacion Rela_Nit 
-         BUTTON-205 R_Nombre R_Nombre2 BUTTON-206 R_Apellido1 R_Apellido2 
-         R_Btn_Direccion-3 Btn_Lugar_Comercial-2 R_Sucursal 
-         R_Tel_ResidenciaIndctvo R_Tel_Residencia R_Tel_ComercialIndctvo 
-         R_Tel_Comercial R_Producto R_Numero 
+  ENABLE RECT-303 RECT-331 RECT-333 Btn_SC R_Relacion Rela_Nit BUTTON-205 
+         R_Nombre R_Nombre2 BUTTON-206 R_Apellido1 R_Apellido2 
+         fechaNacimientoRelacion R_Btn_Direccion-3 R_Sucursal 
+         Btn_Lugar_Comercial-2 R_Tel_ResidenciaIndctvo R_Tel_Residencia 
+         R_Producto R_Tel_ComercialIndctvo R_Tel_Comercial R_Numero 
       WITH FRAME FRelNva IN WINDOW wWin.
   {&OPEN-BROWSERS-IN-QUERY-FRelNva}
   DISPLAY Edit_msaje 
@@ -8526,8 +8565,7 @@ PROCEDURE enable_UI :
   {&OPEN-BROWSERS-IN-QUERY-F_Economica}
   DISPLAY RActivas Cmb_Relaciones W_MenRel 
       WITH FRAME F_Relaciones IN WINDOW wWin.
-  ENABLE RActivas Cmb_Relaciones Btn_CreRel Btn_Activas Br_Relaciones 
-         BUTTON-116 
+  ENABLE RActivas Btn_CreRel Btn_Activas Br_Relaciones BUTTON-116 
       WITH FRAME F_Relaciones IN WINDOW wWin.
   {&OPEN-BROWSERS-IN-QUERY-F_Relaciones}
   DISPLAY W_CiuExpedicion Nom_Colegio W_NomProfesion W_UbicacionResidencia 
@@ -9870,8 +9908,8 @@ RUN SUPER.
 
 SUBSCRIBE TO "CierraClientesPasivosBienes" ANYWHERE.
 
-/*W_Ok = Cmb_Relaciones:ADD-LAST("00000 - Ninguna Relacion") IN FRAME F_Relaciones.
-W_Ok = Cmb_Relaciones:ADD-LAST("99999 - Todas las Relaciones") IN FRAME F_Relaciones.*/
+W_Ok = Cmb_Relaciones:ADD-LAST("00000 - Ninguna Relacion") IN FRAME F_Relaciones.
+W_Ok = Cmb_Relaciones:ADD-LAST("99999 - Todas las Relaciones") IN FRAME F_Relaciones.
 
 HIDE FRAME F_MicroEmpresas.
 
@@ -9879,9 +9917,8 @@ FOR EACH Varios WHERE Varios.Tipo = 3
                   AND Varios.Codigo <> 11
                  AND varios.codigo = 1 NO-LOCK:
     W_Ok = Cmb_Relaciones:ADD-LAST(STRING(Varios.Codigo,"99999") + " - " + Varios.Descripcion) IN FRAME F_Relaciones.
+    Cmb_Relaciones:SCREEN-VALUE = STRING(Varios.Codigo,"99999") + " - " + Varios.Descripcion.
 END.
-
-APPLY "value-changed" TO  cmb_relaciones IN FRAME f_relaciones.
 
 FIND FIRST Clientes WHERE Clientes.Agencia EQ W_Agencia NO-ERROR.
 IF AVAIL(Clientes) THEN
@@ -9931,6 +9968,7 @@ clientes.apellido1:LABEL = "Apellido 1".
 clientes.apellido2:LABEL = "Apellido 2".
 
 APPLY "value-changed" TO Clientes.tipo_vivienda.
+APPLY "value-changed" TO  cmb_relaciones IN FRAME f_relaciones.
 
 END PROCEDURE.
 

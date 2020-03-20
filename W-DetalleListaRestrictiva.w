@@ -179,6 +179,9 @@ END.
 ON CHOOSE OF btnImportar IN FRAME DEFAULT-FRAME /* Importar */
 DO:
     DEFINE VAR nombreArchivo AS CHARACTER.
+    DEFINE VAR posicion AS INTEGER.
+    DEFINE VAR documento AS CHARACTER.
+    DEFINE VAR cLine AS CHARACTER.
     
     SYSTEM-DIALOG GET-FILE nombreArchivo
         TITLE "Archivo a importar..."
@@ -187,13 +190,6 @@ DO:
 
     IF nombreArchivo = "" THEN
         RETURN NO-APPLY.
-
-    /* oakley - Ubicar si existe contenido y en caso que si preguntar si se quiere reemplazar... */
-     
-    MESSAGE "El contenido de la lista restrictiva será reemplzado." SKIP
-            "No será posible deshacer esta operación... Está seguro" SKIP
-            "que desea continuar?"
-        VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO TITLE "Reemplazar lista"
 
     FIND FIRST cfg_contenidoListas where cfg_contenidoListas.IDLista = STRING(ROWID(cfg_listasSarlaft)) NO-LOCK NO-ERROR.
     IF AVAILABLE cfg_contenidoListas THEN DO:
@@ -209,21 +205,49 @@ DO:
         END.
     END.
 
-    INPUT FROM VALUE(Archivo_nombre).
+    INPUT FROM VALUE(nombreArchivo).
     REPEAT:
         IMPORT UNFORMAT cLine.
-        CREATE cfg_contenidolistas.
-        cfg_contenidolistas.IDLista = string(rowId(cfg_listasSarlaft)).
-        cfg_contenidolistas.linea = cLine.
-        ContadorRegistros:SCREEN-VALUE = STRING(INTEGER(ContadorRegistros:SCREEN-VALUE) + 1).
+        documento = "".
+
+        IF INDEX(cLine,"Cedula No. ") <> 0 OR INDEX(cLine,"NIT # ") <> 0 OR INDEX(cLine,"Passport ") <> 0 THEN DO:
+            IF INDEX(cLine,"Cedula No. ") <> 0 THEN
+                posicion = INDEX(cLine,"Cedula No. ") + 11.
+
+            IF INDEX(cLine,"NIT # ") <> 0 THEN
+                posicion = INDEX(cLine,"NIT # ") + 6.
+
+            IF INDEX(cLine,"Passport ") <> 0 THEN
+                posicion = INDEX(cLine,"Passport ") + 9.
+
+            REPEAT:
+                IF SUBSTRING(cLine,posicion,1) = "0" OR
+                   SUBSTRING(cLine,posicion,1) = "1" OR
+                   SUBSTRING(cLine,posicion,1) = "2" OR
+                   SUBSTRING(cLine,posicion,1) = "3" OR
+                   SUBSTRING(cLine,posicion,1) = "4" OR
+                   SUBSTRING(cLine,posicion,1) = "5" OR
+                   SUBSTRING(cLine,posicion,1) = "6" OR
+                   SUBSTRING(cLine,posicion,1) = "7" OR
+                   SUBSTRING(cLine,posicion,1) = "8" OR
+                   SUBSTRING(cLine,posicion,1) = "9" THEN DO:
+                    documento = documento + SUBSTRING(cLine,posicion,1).
+                END.
+                ELSE
+                    LEAVE.
+
+                posicion = posicion + 1.
+            END.
+
+            CREATE cfg_contenidolistas.
+            cfg_contenidolistas.IDLista = string(rowId(cfg_listasSarlaft)).
+            cfg_contenidoListas.cliente_id = documento.
+            cfg_contenidolistas.linea = cLine.
+        END.
     END.
 
     MESSAGE "La Lista Restrictiva fue cargada exitosamente!"
         VIEW-AS ALERT-BOX INFO BUTTONS OK.
-
-    hQuery = QUERY brw_lineas:HANDLE.
-    hQuery:QUERY-PREPARE("FOR EACH cfg_contenidoListas SHARE-LOCK WHERE cfg_contenidoListas.IDLista = " + quoter(STRING(ROWID(cfg_listasSarlaft)))).
-    hQuery:QUERY-OPEN().
 END.
 
 /* _UIB-CODE-BLOCK-END */

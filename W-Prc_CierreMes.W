@@ -697,6 +697,12 @@ DO TRANSACTION ON ERROR UNDO:
     W_Cont:SCREEN-VALUE IN FRAME F_Proc = STRING(W_Cont).
 
     FOR EACH Anexos WHERE Anexos.Agencia = Agencias.Agencia
+                      AND SUBSTRING(anexos.cuenta,1,1) <> "4"
+                      AND SUBSTRING(anexos.cuenta,1,1) <> "5"
+                      AND SUBSTRING(anexos.cuenta,1,1) <> "6"
+                      AND SUBSTRING(anexos.cuenta,1,4) <> "2430"
+                      AND SUBSTRING(anexos.cuenta,1,4) <> "2435"
+                      AND SUBSTRING(anexos.cuenta,1,4) <> "2440"
                       AND Anexos.Ano = W_AnoC NO-LOCK BREAK BY Anexos.Cuenta:
         FIND FIRST Cuentas WHERE Cuentas.Cuenta = Anexos.Cuenta NO-LOCK NO-ERROR.
 

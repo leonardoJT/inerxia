@@ -113,13 +113,13 @@ CREATE WIDGET-POOL.
 &Scoped-define PROCEDURE-TYPE Window
 &Scoped-define DB-AWARE no
 
-/* Name of first Frame and/or Browse and/or first Query                 */
+/* Name of designated FRAME-NAME and/or first browse and/or first query */
 &Scoped-define FRAME-NAME f-main
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS Cmb_Agencias T-Concurrente cmb-horacte ~
-t-actProg T-Inf_ahorros Cmb-hora Cmb-minutos Cmb-Meridiano T-Inf_Creditos ~
-btn-Salida RECT-285 RECT-286 RECT-287 
+&Scoped-Define ENABLED-OBJECTS RECT-285 RECT-286 RECT-287 Cmb_Agencias ~
+T-Concurrente cmb-horacte t-actProg T-Inf_ahorros Cmb-hora Cmb-minutos ~
+Cmb-Meridiano T-Inf_Creditos btn-Salida 
 &Scoped-Define DISPLAYED-OBJECTS Cmb_Agencias T-Concurrente cmb-horacte ~
 t-actProg T-Inf_ahorros Cmb-hora Cmb-minutos Cmb-Meridiano T-Inf_Creditos 
 
@@ -187,15 +187,15 @@ DEFINE VARIABLE Cmb_Agencias AS CHARACTER FORMAT "X(40)":U INITIAL "000 - Todas 
      BGCOLOR 15 FGCOLOR 0  NO-UNDO.
 
 DEFINE RECTANGLE RECT-285
-     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL 
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 17.86 BY 2.27.
 
 DEFINE RECTANGLE RECT-286
-     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL 
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 19 BY 2.23.
 
 DEFINE RECTANGLE RECT-287
-     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL 
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 40 BY 2.42.
 
 DEFINE VARIABLE t-actProg AS LOGICAL INITIAL no 
@@ -233,20 +233,20 @@ DEFINE FRAME f-main
      T-Inf_Creditos AT ROW 7.92 COL 4.57
      Btn-Procesar AT ROW 9.35 COL 2
      btn-Salida AT ROW 9.46 COL 23.43
-     RECT-285 AT ROW 6.65 COL 2.29
-     RECT-286 AT ROW 6.69 COL 23
-     RECT-287 AT ROW 3.42 COL 2
+     "Hora(s)" VIEW-AS TEXT
+          SIZE 6.72 BY .62 AT ROW 4.88 COL 34.29
+     "Concurrente" VIEW-AS TEXT
+          SIZE 12 BY .62 AT ROW 3.19 COL 4
+     "Programación" VIEW-AS TEXT
+          SIZE 14 BY .62 TOOLTIP "Señale este item, si lo desea automáticamente" AT ROW 6.27 COL 24
+     "Informes" VIEW-AS TEXT
+          SIZE 9 BY .62 AT ROW 6.35 COL 4
      "Plan de Contingencias - Reportes Generales" VIEW-AS TEXT
           SIZE 43 BY .81 AT ROW 1.04 COL 1
           BGCOLOR 15 FGCOLOR 7 
-     "Informes" VIEW-AS TEXT
-          SIZE 9 BY .62 AT ROW 6.35 COL 4
-     "Programación" VIEW-AS TEXT
-          SIZE 14 BY .62 TOOLTIP "Señale este item, si lo desea automáticamente" AT ROW 6.27 COL 24
-     "Concurrente" VIEW-AS TEXT
-          SIZE 12 BY .62 AT ROW 3.19 COL 4
-     "Hora(s)" VIEW-AS TEXT
-          SIZE 6.72 BY .62 AT ROW 4.88 COL 34.29
+     RECT-285 AT ROW 6.65 COL 2.29
+     RECT-286 AT ROW 6.69 COL 23
+     RECT-287 AT ROW 3.42 COL 2
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1 ROW 1.04
@@ -298,7 +298,7 @@ ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 /* SETTINGS FOR WINDOW C-Win
   VISIBLE,,RUN-PERSISTENT                                               */
 /* SETTINGS FOR FRAME f-main
-                                                                        */
+   FRAME-NAME                                                           */
 /* SETTINGS FOR BUTTON Btn-Procesar IN FRAME f-main
    NO-ENABLE                                                            */
 IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(C-Win)
@@ -324,7 +324,6 @@ CREATE CONTROL-FRAME CtrlFrame ASSIGN
        WIDTH           = 4
        HIDDEN          = yes
        SENSITIVE       = yes.
-      CtrlFrame:NAME = "CtrlFrame":U .
 /* CtrlFrame OCXINFO:CREATE-CONTROL from: {F0B88A90-F5DA-11CF-B545-0020AF6ED35A} type: PSTimer */
 
 &ENDIF
@@ -364,57 +363,76 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL Btn-Procesar C-Win
 ON CHOOSE OF Btn-Procesar IN FRAME f-main /* Procesar */
 DO:
-  ASSIGN FRAME F-MAIN cmb-hora Cmb-minutos cmb-meridiano Cmb_Agencias T-Concurrente cmb-horacte.
-  IF SUBSTRING(Cmb_Agencias,1,3) EQ "000" OR SUBSTRING(Cmb_Agencias,1,3) EQ "011" THEN
-      ASSIGN AgeIni = 0 AgeFin = 999.
-  ELSE ASSIGN AgeIni = INTEGER(SUBSTRING(Cmb_Agencias,1,3)) AgeFin = AgeIni.
-    
-  w-hora_prg = SUBSTR(cmb-hora,1,2) + ":" + SUBSTR(cmb-minutos,1,2) + " " + SUBSTR(cmb-meridiano,1,2).
-  w-hora_pro = w-hora_prg.
+    ASSIGN FRAME F-MAIN
+        cmb-hora
+        Cmb-minutos
+        cmb-meridiano
+        Cmb_Agencias
+        T-Concurrente
+        cmb-horacte.
 
-  IF t-Inf_Ahorros THEN DO:
-     W-Copia = TRUE.
-     RUN inf_ahorros.
-  END.
-    
-  IF t-Inf_Creditos THEN DO:
-      W-Copia = TRUE.
-      RUN inf_Creditos.
-  END.
+    IF SUBSTRING(Cmb_Agencias,1,3) EQ "000" OR SUBSTRING(Cmb_Agencias,1,3) EQ "011" THEN
+        ASSIGN AgeIni = 0
+               AgeFin = 999.
+    ELSE
+        ASSIGN AgeIni = INTEGER(SUBSTRING(Cmb_Agencias,1,3))
+               AgeFin = AgeIni.
 
-  w-hora = STRING(TIME,"HH:MM AM").
-  
-  IF t-ActProg OR t-concurrente THEN DO:
-      ASSIGN FRAME F-MAIN cmb-hora Cmb-minutos cmb-meridiano.    
-      IF INTEGER(SUBSTR(cmb-hora,1,2)) = INTEGER(SUBSTR(w-hora,1,2)) THEN
-        IF INTEGER(SUBSTR(cmb-minutos,1,2)) = INTEGER(SUBSTR(w-hora,4,2)) THEN 
-          IF SUBSTR(cmb-meridiano,1,2) = SUBSTR(w-hora,7,2) THEN DO:
-             ASSIGN t-inf_creditos = TRUE  t-inf_ahorros = TRUE w-copia = TRUE.
-             RUN inf_Ahorros.
-             RUN inf_Creditos.
-          END.
-          ELSE
-            IF t-ActProg THEN
-              RETURN.
-        ELSE
-          IF t-ActProg THEN
-            RETURN.
-      ELSE 
-         IF t-ActProg THEN
-           RETURN.
-  END.
+    w-hora_prg = SUBSTR(cmb-hora,1,2) + ":" + SUBSTR(cmb-minutos,1,2) + " " + SUBSTR(cmb-meridiano,1,2).
+    w-hora_pro = w-hora_prg.
 
-  IF t-concurrente THEN DO:
-      /*hora_act = STRING(TIME,"HH:MM AM").*/
-      /* Minutos de la hora actual */
-      w-h_act = (INTEGER(SUBSTRING(w-hora,1,2)) * 60 ) + INTEGER(SUBSTRING(w-hora,4,2)) .
-      IF (SUBSTRING(w-hora,7,2) = 'PM' AND integer(SUBSTRING(w-hora,1,2)) NE 12) OR 
-         (SUBSTRING(w-hora,7,2) = 'AM' AND integer(SUBSTRING(w-hora,1,2)) EQ 12) THEN DO:
-        w-h_act = W-h_act + 720.
-      END.
-      /* Minutos de la hora Programada */
-      w-h_prg = (INTEGER(SUBSTRING(w-hora_prg,1,2)) * 60 ) + INTEGER(SUBSTRING(w-hora_prg,4,2)) .
-      IF (SUBSTRING(w-hora_prg,7,2) = 'PM' AND integer(SUBSTRING(w-hora_prg,1,2)) NE 12)  OR 
+    IF t-Inf_Ahorros THEN DO:
+        W-Copia = TRUE.
+        RUN inf_ahorros.
+    END.
+
+    IF t-Inf_Creditos THEN DO:
+        W-Copia = TRUE.
+        RUN inf_Creditos.
+    END.
+
+    w-hora = STRING(TIME,"HH:MM AM").
+
+    IF t-ActProg OR t-concurrente THEN DO:
+        ASSIGN FRAME F-MAIN
+            cmb-hora
+            Cmb-minutos
+            cmb-meridiano.
+
+        IF INTEGER(SUBSTR(cmb-hora,1,2)) = INTEGER(SUBSTR(w-hora,1,2)) THEN
+            IF INTEGER(SUBSTR(cmb-minutos,1,2)) = INTEGER(SUBSTR(w-hora,4,2)) THEN
+                IF SUBSTR(cmb-meridiano,1,2) = SUBSTR(w-hora,7,2) THEN DO:
+                    ASSIGN t-inf_creditos = TRUE 
+                           t-inf_ahorros = TRUE
+                           w-copia = TRUE.
+
+                    RUN inf_Ahorros.
+                    RUN inf_Creditos.
+                END.
+                ELSE
+                    IF t-ActProg THEN
+                        RETURN.
+                    ELSE
+                        IF t-ActProg THEN
+                            RETURN.
+                        ELSE
+                            IF t-ActProg THEN
+                                RETURN.
+    END.
+
+    IF t-concurrente THEN DO:
+        /* Minutos de la hora actual */
+        w-h_act = (INTEGER(SUBSTRING(w-hora,1,2)) * 60 ) + INTEGER(SUBSTRING(w-hora,4,2)).
+
+        IF (SUBSTRING(w-hora,7,2) = 'PM' AND integer(SUBSTRING(w-hora,1,2)) <> 12) OR 
+           (SUBSTRING(w-hora,7,2) = 'AM' AND integer(SUBSTRING(w-hora,1,2)) = 12) THEN DO:
+            w-h_act = W-h_act + 720.
+        END.
+
+        /* Minutos de la hora Programada */
+        w-h_prg = (INTEGER(SUBSTRING(w-hora_prg,1,2)) * 60 ) + INTEGER(SUBSTRING(w-hora_prg,4,2)).
+
+        IF (SUBSTRING(w-hora_prg,7,2) = 'PM' AND integer(SUBSTRING(w-hora_prg,1,2)) NE 12)  OR 
          (SUBSTRING(w-hora_prg,7,2) = 'AM' AND integer(SUBSTRING(w-hora_prg,1,2)) EQ 12) THEN DO:
         w-h_prg = W-h_prg + 720. 
       END.
@@ -701,6 +719,7 @@ DO:
   ASSIGN
     chCtrlFrame = CtrlFrame:COM-HANDLE
     UIB_S = chCtrlFrame:LoadControls( OCXFile, "CtrlFrame":U)
+    CtrlFrame:NAME = "CtrlFrame":U
   .
   RUN initialize-controls IN THIS-PROCEDURE NO-ERROR.
 END.
@@ -749,9 +768,9 @@ PROCEDURE enable_UI :
   DISPLAY Cmb_Agencias T-Concurrente cmb-horacte t-actProg T-Inf_ahorros 
           Cmb-hora Cmb-minutos Cmb-Meridiano T-Inf_Creditos 
       WITH FRAME f-main IN WINDOW C-Win.
-  ENABLE Cmb_Agencias T-Concurrente cmb-horacte t-actProg T-Inf_ahorros 
-         Cmb-hora Cmb-minutos Cmb-Meridiano T-Inf_Creditos btn-Salida RECT-285 
-         RECT-286 RECT-287 
+  ENABLE RECT-285 RECT-286 RECT-287 Cmb_Agencias T-Concurrente cmb-horacte 
+         t-actProg T-Inf_ahorros Cmb-hora Cmb-minutos Cmb-Meridiano 
+         T-Inf_Creditos btn-Salida 
       WITH FRAME f-main IN WINDOW C-Win.
   {&OPEN-BROWSERS-IN-QUERY-f-main}
   VIEW C-Win.

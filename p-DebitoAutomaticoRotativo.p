@@ -90,6 +90,9 @@ IF AVAILABLE creditos THEN DO:
             IF ahorros.sdo_disponible - saldoMinimo < valDebitar * 1.004 THEN
                 valDebitar = TRUNCATE(((ahorros.sdo_disponible - saldoMinimo) * 100) / 100.4,0).
 
+            IF valDebitar + ROUND((valdebitar * 4) / 1000,0) > ahorros.sdo_disponible THEN
+                valDebitar = valDebitar - 1.
+
             IF valDebitar > 0 THEN DO:
                 ASSIGN Ahorros.Sdo_Disponible = Ahorros.Sdo_Disponible - valDebitar
                        Ahorros.Fec_UltTrans = TODAY
@@ -139,6 +142,9 @@ IF AVAILABLE creditos THEN DO:
 
             IF ahorros.sdo_disponible - saldoMinimo < valDebitar * 1.004 THEN
                 valDebitar = TRUNCATE(((ahorros.sdo_disponible - saldoMinimo) * 100) / 100.4,0).
+
+            IF valDebitar + ROUND((valdebitar * 4) / 1000,0) > ahorros.sdo_disponible THEN
+                valDebitar = valDebitar - 1.
 
             IF valDebitar > 0 THEN DO:
                 ASSIGN Ahorros.Sdo_Disponible = Ahorros.Sdo_Disponible - valDebitar

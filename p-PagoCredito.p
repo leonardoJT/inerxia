@@ -50,7 +50,6 @@ DEFINE VAR saldoTotalDeuda AS DECIMAL.
 DEFINE VAR flagMora AS LOGICAL.
 DEFINE VAR intPeriodo AS DECIMAL.
 DEFINE VAR diasDescontar AS INTEGER.
-DEFINE VAR aCapitalTemp AS DECIMAL.
 DEFINE VAR PorDist AS DECIMAL.
 DEFINE VAR valContabilizar AS DECIMAL.
 DEFINE VAR vCuenta AS CHARACTER.
@@ -418,14 +417,14 @@ DO TRANSACTION ON ERROR UNDO Abono:
 
     /* Capital */
     IF porDist > 0 THEN DO:
-        aCapitalTemp = pCapital.
-
-        IF PorDist >= (creditos.sdo_capital - aCapitalTemp) THEN
-            ASSIGN pCapital = pCapital + (creditos.sdo_capital - aCapitalTemp)
-                   PorDist = PorDist - (creditos.sdo_capital - aCapitalTemp).
-        ELSE
-            ASSIGN pCapital = pCapital + PorDist
-                   PorDist = 0.
+        IF PorDist >= (creditos.sdo_capital - pCapital) THEN DO:
+            PorDist = PorDist - (creditos.sdo_capital - pCapital).
+            pCapital = creditos.sdo_capital.
+        END.
+        ELSE DO:
+            pCapital = pCapital + PorDist.
+            PorDist = 0.
+        END.
     END.
 
     /* Si es un rotativo y luego de abonar el pago adicional al capital aun queda dinero para distribuir, continúo distribuyendo los demás conceptos */
@@ -467,9 +466,21 @@ DO TRANSACTION ON ERROR UNDO Abono:
                    PorDist = 0.
     END.
 
-    /* Si luego de distribuir todo el valor aun sobra dinero, se devuelve como un sobrante para que se tome la decisión desde el programa fuente */
-    IF porDist > 0 THEN
+    /* Si luego de distribuir todo el valor aun sobra dinero, se trata de llevar al capital en caso que quede algo, y lo que sobre se devuelve como un sobrante para que se tome la decisión desde el programa fuente */
+    IF porDist > 0 THEN DO:
+        IF pAtendido = TRUE THEN DO:
+            IF PorDist >= (creditos.sdo_capital - pCapital) THEN DO:
+                PorDist = PorDist - (creditos.sdo_capital - pCapital).
+                pCapital = creditos.sdo_capital.
+            END.
+            ELSE DO:
+                pCapital = pCapital + PorDist.
+                PorDist = 0.
+            END.
+        END.
+
         pSobrante = PorDist.
+    END.
     ELSE
         pSobrante = 0.
 
@@ -750,9 +761,6 @@ PROCEDURE ConfigCtas:
         RETURN ERROR.
     END.
 
-    
-    /* oakley */
-
     FIND FIRST Liqui_Int WHERE Liqui_Int.Clase_Producto = 2
                            AND Liqui_Int.Cod_Producto = CortoLargo.Cod_Producto NO-LOCK NO-ERROR.
     IF NOT AVAILABLE(Liqui_Int) THEN DO:
@@ -773,14 +781,7 @@ PROCEDURE ConfigCtas:
         RETURN ERROR.
     END.
 
-    /* Cuenta para la contabilización de honorarios */
-    IF CortoLargo.Cta_HonorariosDB  <= "0" THEN DO:
-        MESSAGE "No se encuentra configurada la cuenta en CortoLargo.Cta_HonorariosDB."
-            VIEW-AS ALERT-BOX INFO BUTTONS OK.
-
-        pSobrante = pValorAbono.
-        RETURN ERROR.
-    END.
+    /* oakley */
 
     /* Cuenta para la contabilización de Pólizas */
     IF CortoLargo.Cta_PolizasDB  <= "0" THEN DO:

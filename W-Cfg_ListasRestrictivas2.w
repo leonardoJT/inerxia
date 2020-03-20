@@ -298,7 +298,7 @@ DO:
     IF AVAILABLE cfg_listasSarlaft THEN DO:
         NombreLista:SCREEN-VALUE IN FRAME F-Main = cfg_listasSarlaft.lista.
         tipo_fill:SCREEN-VALUE = cfg_listasSarlaft.tipo.
-        estado:SCREEN-VALUE = estado:ENTRY(cfg_listasSarlaft.estado).
+        estado:SCREEN-VALUE = STRING(cfg_listasSarlaft.estado).
         btnEditar:SENSITIVE = TRUE.
     END.
 END.
@@ -340,9 +340,11 @@ DO:
 
     estado:SCREEN-VALUE = "1".
     
+    btnCrear:SENSITIVE = FALSE.
     brwListas:SENSITIVE = FALSE.
+    btnEditar:SENSITIVE = FALSE.
+    btnGuardar:SENSITIVE = FALSE.
     btnDeshacer:SENSITIVE = TRUE.
-    SELF:SENSITIVE = FALSE.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -386,6 +388,7 @@ DO:
     tipo_fill:SENSITIVE = TRUE.
     estado:SENSITIVE = TRUE.
 
+    btnCrear:SENSITIVE = FALSE.
     btnGuardar:SENSITIVE = TRUE.
     btnDeshacer:SENSITIVE = TRUE.
     btnEditar:SENSITIVE = FALSE.
@@ -554,6 +557,8 @@ DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
     END.
 
     tipo_fill:SCREEN-VALUE = "RES".
+
+    APPLY "MOUSE-SELECT-CLICK" TO brwListas.
 
     IF NOT THIS-PROCEDURE:PERSISTENT THEN
         WAIT-FOR CLOSE OF THIS-PROCEDURE.

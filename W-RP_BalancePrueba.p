@@ -62,7 +62,7 @@ DEFINE VAR fecComparado AS DATE.
 {incluido/Pantalla_Validacion3.i}
 
 
-/* Procedimientos */
+/* 1. Proceso_Imprimir */
 PROCEDURE Proceso_Imprimir:
     DEFINE VAR Listado AS CHARACTER INITIAL "".
 
@@ -88,6 +88,7 @@ PROCEDURE Proceso_Imprimir:
 END PROCEDURE.
 
 
+/* 2. Tabla temporal */
 PROCEDURE Tabla_Temporal:
     DEFINE VAR ki AS INTEGER INITIAL 1.
     
@@ -150,7 +151,7 @@ PROCEDURE Tabla_Temporal:
                 MESSAGE "La cuenta contable" tmp_saldo.cuenta "no se encuentra disponible." SKIP
                         "Por favor, informe la novedad al Administrador del Sistema."
                     VIEW-AS ALERT-BOX INFO BUTTONS OK.
-
+            
             RUN Mayorizar.
         END.
     END.
@@ -449,7 +450,7 @@ PROCEDURE Buscar_Cuentas:
 
 END PROCEDURE.
 
-
+/* 3. Mayorizar */
 PROCEDURE Mayorizar:
     DEFINE VAR SIni AS DECIMAL.
     DEFINE VAR SDb AS DECIMAL.
@@ -486,6 +487,14 @@ PROCEDURE Mayorizar:
     MFin = TSCuentas.TS_Fin.
     MNt = Cuentas.Naturaleza.
 
+    /*IF MCta = "24650501" THEN DO:
+        FOR EACH tscuentas WHERE ts_cuenta = "24650501" NO-LOCK:
+            MESSAGE 1 TSCuentas.ts_ini TSCuentas.ts_db tscuentas.ts_cr tscuentas.ts_fin
+                VIEW-AS ALERT-BOX INFO BUTTONS OK.
+        END.
+    END.*/
+
+
     DO i = Cuentas.Nivel TO 1 BY -1:
         IF LENGTH(MCta) > 2 THEN
             MCta = SUBSTRING(MCta,1,LENGTH(MCta) - 2).
@@ -514,6 +523,14 @@ PROCEDURE Mayorizar:
             TSCuentas.TS_Fin  = TSCuentas.TS_Fin + SFin.
         END.
     END.
+
+    /*IF MCta = "24650501" THEN DO:
+        FOR EACH tscuentas WHERE ts_cuenta = "24650501" NO-LOCK:
+            MESSAGE 2 TSCuentas.ts_ini TSCuentas.ts_db tscuentas.ts_cr tscuentas.ts_fin
+                VIEW-AS ALERT-BOX INFO BUTTONS OK.
+        END.
+    END.*/
+
 
 END PROCEDURE.
 
@@ -754,6 +771,11 @@ PROCEDURE ProcesoImprimir:
     Ct = Ct + 1.
     IEx.NLinea = Ct.
     IEx.Linea = "CUENTA" + Cma + "NOMBRE" + Cma + "INICIAL" + Cma + "DEBITO" + Cma + "CREDITO" + Cma + "FINAL" + Cma + "NAT".
+
+    /*FOR EACH tscuentas WHERE ts_cuenta = "24650501" NO-LOCK:
+        MESSAGE TSCuentas.ts_ini TSCuentas.ts_db tscuentas.ts_cr tscuentas.ts_fin
+            VIEW-AS ALERT-BOX INFO BUTTONS OK.
+    END.*/
 
     FOR EACH TSCuentas WHERE TSCuentas.TS_Nivel <= Cmb_Nivel
                          AND TS_Cuenta <> "" BREAK BY TSCuentas.TS_Cuenta

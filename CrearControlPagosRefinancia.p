@@ -101,10 +101,10 @@ END.
 
 RUN P-Amortizacion.
 
-FOR EACH CONTROL_pagos WHERE control_pagos.Nit = Creditos.Nit
+/*FOR EACH CONTROL_pagos WHERE control_pagos.Nit = Creditos.Nit
                          and control_pagos.Num_Credito = Creditos.Num_Credito:
     CONTROL_pagos.nro_cuota = CONTROL_pagos.nro_cuota + cuotaIni - 1.
-END.
+END.*/
 
 
 /* *********************** Fin *********************** */

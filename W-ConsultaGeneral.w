@@ -1438,329 +1438,99 @@ DEFINE FRAME F_Consulta
          SIZE 126.86 BY 24.81
          BGCOLOR 17 FONT 4.
 
-DEFINE FRAME F_Relaciones
-     B_Relaciones AT ROW 1.27 COL 3
-     BUTTON-217 AT ROW 6.38 COL 3
-     BUTTON-220 AT ROW 7.73 COL 3
-     BUTTON-218 AT ROW 8 COL 47
+DEFINE FRAME F_Opciones
+     BUTTON-5 AT ROW 12.58 COL 52
+     Id_General AT ROW 1.27 COL 4
+     Id_Saldos AT ROW 1.27 COL 35
+     Id_Economica AT ROW 2.35 COL 4.14
+     Id_Atrasos AT ROW 2.35 COL 34.29
+     Id_Ahorros AT ROW 3.12 COL 4.14
+     Id_Relaciones AT ROW 3.12 COL 34.29
+     Id_AhoCanc AT ROW 3.88 COL 4.14
+     Id_Codeudando AT ROW 3.88 COL 34.29
+     Id_Creditos AT ROW 4.65 COL 4.14
+     Id_HojaVida AT ROW 4.65 COL 34.29
+     Id_HistCreditos AT ROW 5.42 COL 4.14
+     Id_Controles AT ROW 5.42 COL 34.29
+     Id_SimulaPago AT ROW 6.19 COL 4.14
+     TCompromisos AT ROW 6.19 COL 34.29
+     Id_CredCanc AT ROW 6.96 COL 4.14
+     Id_GestCobro AT ROW 6.96 COL 34.29
+     Id_Solicitudes AT ROW 7.73 COL 4.14
+     Tg_Extras AT ROW 7.73 COL 34.29
+     Id_Especiales AT ROW 8.54 COL 4.14
+     Tg_CtasAho AT ROW 8.58 COL 34.29
+     Id_GarAdm AT ROW 9.35 COL 4
+     Tg_Plastico AT ROW 9.35 COL 34.29
+     IdFacturaCupoRotativo AT ROW 10.12 COL 4 WIDGET-ID 6
+     tgFecCorte AT ROW 12.42 COL 2.86 WIDGET-ID 2
+     FIni AT ROW 12.58 COL 35 COLON-ALIGNED
+     fechaCorte AT ROW 13.31 COL 2.43 COLON-ALIGNED NO-LABEL WIDGET-ID 4
+     FFin AT ROW 13.54 COL 35 COLON-ALIGNED
+     RECT-280 AT ROW 2.08 COL 2
+     RECT-317 AT ROW 2.08 COL 32
     WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS TOP-ONLY NO-UNDERLINE THREE-D 
-         AT COL 21 ROW 8.54
-         SIZE 63 BY 9.15
-         BGCOLOR 17 FONT 4
-         TITLE "Relaciones".
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 34 ROW 3.42
+         SIZE 62 BY 13.73
+         BGCOLOR 17 FONT 5.
 
-DEFINE FRAME F_AdmCodeudores
-     BC_Creditos AT ROW 2.08 COL 5
-     BC_Codeudores AT ROW 5.85 COL 5
-     WC_UbicacionResidencia AT ROW 9.88 COL 6.28
-     Btn_Residencia-2 AT ROW 9.88 COL 50
-     WC_UbicacionComercial AT ROW 9.88 COL 65 COLON-ALIGNED
-     BUTTON-225 AT ROW 9.88 COL 103
-     Clientes.Dir_comercial AT ROW 10.96 COL 65 COLON-ALIGNED
-          LABEL "Dirección"
-          VIEW-AS FILL-IN 
-          SIZE 36 BY .81
-          BGCOLOR 15 
-     Clientes.Dir_Residencia AT ROW 11.15 COL 13 COLON-ALIGNED
-          LABEL "Dirección"
-          VIEW-AS FILL-IN 
+DEFINE FRAME frmFacturaCupoRotativo
+     btnVolverFrmFacturaCupo AT ROW 1.27 COL 119 WIDGET-ID 2
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 2 ROW 3.15
+         SIZE 125 BY 22.35
+         TITLE "FacturaCupoRotativo" WIDGET-ID 100.
+
+DEFINE FRAME F_Compromisos
+     Cmb_estcom AT ROW 1.15 COL 78 COLON-ALIGNED
+     BRCreditos AT ROW 2.08 COL 3
+     REstado AT ROW 5.69 COL 72 NO-LABEL
+     BRCompromisos AT ROW 6.38 COL 3
+     Cobros.Estado AT ROW 10.69 COL 4 HELP
+          "Estado en que se encuentra la agencia" NO-LABEL
+          VIEW-AS RADIO-SET HORIZONTAL
+          RADIO-BUTTONS 
+                    "Solo Tramite", 0,
+"Acuerdo de Pago", 1
           SIZE 35 BY .81
-          BGCOLOR 15 
-     Clientes.Tel_comercial AT ROW 12.04 COL 65 COLON-ALIGNED
-          LABEL "Teléfono"
+          FONT 1
+     Cmb_Cpto AT ROW 10.69 COL 55 COLON-ALIGNED
+     CAgencia AT ROW 12.04 COL 14 COLON-ALIGNED
+     Ecompromiso AT ROW 12.04 COL 41 NO-LABEL
+     Cobros.Num_Credito AT ROW 13.12 COL 14 COLON-ALIGNED
+          LABEL "Num Credito" FORMAT "999999999"
           VIEW-AS FILL-IN 
-          SIZE 36 BY .81
-          BGCOLOR 15 
-     Clientes.Tel_Residencia AT ROW 12.31 COL 13 COLON-ALIGNED
-          LABEL "Teléfono"
+          SIZE 24 BY .73
+          BGCOLOR 18 FGCOLOR 15 
+     Cobros.Val_Compromiso AT ROW 14.19 COL 14 COLON-ALIGNED
+          LABEL "Val Compromiso" FORMAT ">>>,>>>,>>9"
           VIEW-AS FILL-IN 
-          SIZE 21.43 BY .81
-          BGCOLOR 15 
-     Clientes.Salario AT ROW 13.12 COL 65 COLON-ALIGNED
+          SIZE 24 BY .77 TOOLTIP "Vlr.del nuevo Compromiso"
+          BGCOLOR 15 FGCOLOR 0 
+     Cobros.Fec_Compromiso AT ROW 15.27 COL 14 COLON-ALIGNED
+          LABEL "Fecha Compromiso" FORMAT "99/99/9999"
           VIEW-AS FILL-IN 
-          SIZE 36 BY .81
-          BGCOLOR 15 
-     Clientes.Email AT ROW 15 COL 13 COLON-ALIGNED
-          LABEL "e-mail"
-          VIEW-AS FILL-IN 
-          SIZE 39 BY .81
-          BGCOLOR 15 
-     Btn_ActBasica-2 AT ROW 15.54 COL 65
-     Btn_CrearCodeudor AT ROW 15.54 COL 85
-     Clientes.Celular AT ROW 16.08 COL 30 COLON-ALIGNED
-          VIEW-AS FILL-IN 
-          SIZE 22 BY .81
-          BGCOLOR 15 
-     Btn_BorCode AT ROW 16.88 COL 65
-     BUTTON-226 AT ROW 16.88 COL 85
-     Clientes.Fec_Nacimiento AT ROW 17.15 COL 30 COLON-ALIGNED
-          LABEL "FecNacimiento"
-          VIEW-AS FILL-IN 
-          SIZE 22 BY .81
-          BGCOLOR 15 
-     " Residencia" VIEW-AS TEXT
-          SIZE 11 BY 1.08 AT ROW 8.81 COL 7
-          FGCOLOR 7 FONT 5
-     "  Creditos Disponibles del Cliente" VIEW-AS TEXT
-          SIZE 102 BY .81 AT ROW 1.27 COL 5
-          BGCOLOR 18 FGCOLOR 15 FONT 1
-     " Comercial" VIEW-AS TEXT
-          SIZE 12 BY .77 AT ROW 8.92 COL 58.43
-          FGCOLOR 7 FONT 5
-     "  Relaciones de Codeudor del Credito Seleccionado" VIEW-AS TEXT
-          SIZE 102 BY .81 AT ROW 5.04 COL 5
-          BGCOLOR 18 FGCOLOR 15 FONT 1
-     RECT-284 AT ROW 9.35 COL 5
-     RECT-285 AT ROW 9.35 COL 57
-     RECT-304 AT ROW 14.73 COL 5
+          SIZE 24 BY .77
+          BGCOLOR 15 FGCOLOR 0 
+     BUTTON-184 AT ROW 16.62 COL 99
+     Btn_AgrCompromiso AT ROW 16.88 COL 42
+     Btn_SalCom AT ROW 16.88 COL 61
+     BUTTON-212 AT ROW 16.88 COL 80
+     "  Créditos Disponibles del Cliente" VIEW-AS TEXT
+          SIZE 70 BY .81 AT ROW 1.27 COL 3
+          BGCOLOR 18 FGCOLOR 15 FONT 5
+     "  Compromisos del Crédito Seleccionado" VIEW-AS TEXT
+          SIZE 68 BY .81 AT ROW 5.58 COL 3
+          BGCOLOR 18 FGCOLOR 15 FONT 5
+     RECT-303 AT ROW 10.42 COL 2
     WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 2 ROW 4.23
          SIZE 110 BY 18.31
          BGCOLOR 17 FONT 4
-         TITLE "Administracion de Codeudores para analistas de Cobros".
-
-DEFINE FRAME F_Impresion
-     BUTTON-7 AT ROW 3.04 COL 21
-     R_Encabezado AT ROW 1.27 COL 3 NO-LABEL
-     BUTTON-6 AT ROW 3.04 COL 12
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 57 ROW 5.31
-         SIZE 31 BY 4.31
-         FONT 4.
-
-DEFINE FRAME F_Controles
-     VProcredito AT ROW 1.54 COL 24 COLON-ALIGNED NO-LABEL
-     TReportado_Procredito AT ROW 1.62 COL 3.72 HELP
-          "Si es o no es reportado a Procrédito"
-     TReportado_fiscalia AT ROW 2.62 COL 3.72 HELP
-          "Si es o no es reportado a la Fiscalía"
-     VFiscalia AT ROW 2.62 COL 24 COLON-ALIGNED NO-LABEL
-     TReportado_Super AT ROW 3.69 COL 3.72 HELP
-          "Si es o no es reportado por la cartera a la Superbancaria"
-     VSuperbancaria AT ROW 3.69 COL 24 COLON-ALIGNED NO-LABEL
-     btn_cambios AT ROW 5.31 COL 2
-     BUTTON-183 AT ROW 5.31 COL 29
-     RECT-281 AT ROW 1.27 COL 2
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 57 ROW 6.38
-         SIZE 40 BY 7
-         BGCOLOR 17 FONT 4
-         TITLE "Reportes y Controles".
-
-DEFINE FRAME F_Browser
-     Br_Clientes AT ROW 1.27 COL 3
-     TNombre AT ROW 12.31 COL 7
-     FNombre AT ROW 12.31 COL 18 COLON-ALIGNED NO-LABEL
-     BBuscar AT ROW 12.31 COL 49
-     W_CodCpto AT ROW 12.31 COL 86 COLON-ALIGNED
-     TApellido1 AT ROW 13.38 COL 7
-     FApellido1 AT ROW 13.38 COL 18 COLON-ALIGNED NO-LABEL
-     BUTTON-121 AT ROW 13.65 COL 87
-     TApellido2 AT ROW 14.46 COL 7
-     FApellido2 AT ROW 14.46 COL 18 COLON-ALIGNED NO-LABEL
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 18 ROW 5.04
-         SIZE 95 BY 15.35
-         BGCOLOR 17 FONT 4
-         TITLE "Resultado de la Consulta".
-
-DEFINE FRAME F_HojaVida
-     Cmb_Tipos AT ROW 1.27 COL 20 COLON-ALIGNED
-     Hoja_Vida.Tipo AT ROW 2.35 COL 20 COLON-ALIGNED
-          VIEW-AS FILL-IN 
-          SIZE 7 BY .81
-          BGCOLOR 18 FGCOLOR 15 
-     NomTipo AT ROW 2.35 COL 27 COLON-ALIGNED NO-LABEL
-     Cmb_CodHV AT ROW 3.42 COL 20 COLON-ALIGNED
-     Hoja_Vida.Codigo AT ROW 4.77 COL 20 COLON-ALIGNED
-          VIEW-AS FILL-IN 
-          SIZE 10 BY .81
-          BGCOLOR 18 FGCOLOR 15 
-     Nom_Codigo AT ROW 4.77 COL 30 COLON-ALIGNED NO-LABEL
-     HV_Instancia AT ROW 5.85 COL 20 COLON-ALIGNED
-     HV_Doc AT ROW 5.85 COL 30 COLON-ALIGNED NO-LABEL
-     Hoja_Vida.Usuario AT ROW 6.92 COL 20 COLON-ALIGNED
-          VIEW-AS FILL-IN 
-          SIZE 10 BY .81
-          BGCOLOR 18 FGCOLOR 15 
-     HV_NomUsuario AT ROW 6.92 COL 30 COLON-ALIGNED NO-LABEL
-     Hoja_Vida.DoctoRefer AT ROW 7.73 COL 51.57 COLON-ALIGNED
-          LABEL "Documento Referencia"
-          VIEW-AS FILL-IN 
-          SIZE 12.43 BY .81
-          BGCOLOR 18 FGCOLOR 15 
-     Hoja_Vida.Fec_Grabacion AT ROW 8.54 COL 51.57 COLON-ALIGNED
-          LABEL "Fecha"
-          VIEW-AS FILL-IN 
-          SIZE 12.43 BY .81
-          BGCOLOR 18 FGCOLOR 15 
-     HV_Hora AT ROW 9.35 COL 51.57 COLON-ALIGNED
-     BUTTON-142 AT ROW 10.15 COL 2
-     BUTTON-145 AT ROW 10.15 COL 20
-     Hoja_Vida.Asunto_Cumplido AT ROW 10.5 COL 53
-          VIEW-AS TOGGLE-BOX
-          SIZE 12 BY .81
-     Hoja_Vida.Observacion AT ROW 11.5 COL 2 NO-LABEL
-          VIEW-AS EDITOR
-          SIZE 65 BY 3.5
-          BGCOLOR 15 
-     BUTTON-127 AT ROW 15 COL 60
-     Btn_Primero AT ROW 15.27 COL 2
-     BUTTON-129 AT ROW 15.27 COL 16
-     BUTTON-128 AT ROW 15.27 COL 30
-     BUTTON-144 AT ROW 15.27 COL 44
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 44 ROW 5.04
-         SIZE 68 BY 16.69
-         BGCOLOR 17 FONT 5
-         TITLE "Hoja de Vida".
-
-DEFINE FRAME F_BuscarM
-     BR_HojaVida AT ROW 1.27 COL 3
-     BUTTON-146 AT ROW 6.38 COL 55
-     "Seleccione el Mensaje con Doble-Click sobre la linea" VIEW-AS TEXT
-          SIZE 47 BY .62 AT ROW 6.38 COL 3
-          FGCOLOR 7 
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 2 ROW 7.73
-         SIZE 65 BY 7.27
-         BGCOLOR 17 FONT 5
-         TITLE "Busqueda de Mensajes".
-
-DEFINE FRAME F_Foto
-     BUTTON-124 AT ROW 6.65 COL 8
-     Foto AT ROW 1.27 COL 3
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 90 ROW 4.08
-         SIZE 22 BY 8.35
-         TITLE "Fotografia del Cliente".
-
-DEFINE FRAME F_Firma
-     BUTTON-125 AT ROW 6.65 COL 27
-     Firma AT ROW 1.27 COL 2
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 54 ROW 4.77
-         SIZE 57 BY 8.35
-         TITLE "Firma del Cliente".
-
-DEFINE FRAME F_ConMovInstancias
-     Cmb_TipIns AT ROW 1.27 COL 8 COLON-ALIGNED
-     BCMI AT ROW 2.35 COL 2
-     Btn_OutConMovIns AT ROW 11.77 COL 58
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 5 ROW 8.81
-         SIZE 74 BY 13.19
-         FONT 4
-         TITLE "Consulta Movimiento de Instancias".
-
-DEFINE FRAME F_CobroJuridico
-     BCobro AT ROW 2.08 COL 2
-     Nit_Abogado AT ROW 6.65 COL 12 COLON-ALIGNED
-     Nom_Abogado AT ROW 6.65 COL 25 COLON-ALIGNED NO-LABEL
-     BUTTON-211 AT ROW 7.73 COL 3
-     BUTTON-229 AT ROW 7.73 COL 24 WIDGET-ID 2
-     Btn_OutCJ AT ROW 7.73 COL 44
-     "Elija el crédito que desea mandar a cobro jurídico" VIEW-AS TEXT
-          SIZE 34 BY .5 AT ROW 1.27 COL 2
-     "Elija el abogado que llevará el caso del crédito" VIEW-AS TEXT
-          SIZE 53 BY .5 AT ROW 5.85 COL 3
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 2 ROW 5.04
-         SIZE 57 BY 8.88
-         BGCOLOR 17 FONT 4
-         TITLE "Cobro Jurídico".
-
-DEFINE FRAME F_Cer
-     WFirma AT ROW 1.27 COL 9 COLON-ALIGNED
-     WCargo AT ROW 2.35 COL 9 COLON-ALIGNED
-     WCC AT ROW 3.42 COL 9 COLON-ALIGNED
-     Cmb_Doc AT ROW 4.5 COL 9 COLON-ALIGNED
-     BUTTON-148 AT ROW 5.58 COL 17
-     BUTTON-149 AT ROW 5.58 COL 42
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 59 ROW 5.04
-         SIZE 53 BY 7.81
-         BGCOLOR 17 FONT 5
-         TITLE "Cartas y Certificados".
-
-DEFINE FRAME FRelNva
-     R_Nombre AT ROW 1.27 COL 8 COLON-ALIGNED HELP
-          "Nombre del cliente"
-     R_Nit AT ROW 2.35 COL 8 COLON-ALIGNED HELP
-          "Número documento de identificación"
-     R_Tel_Comercial AT ROW 3.42 COL 8 COLON-ALIGNED
-     BUTTON-205 AT ROW 1.27 COL 41
-     BUTTON-206 AT ROW 3.69 COL 41
-     Btn_SC AT ROW 2.42 COL 41
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 49 ROW 14.19
-         SIZE 57 BY 4.85
-         BGCOLOR 17 FONT 4
-         TITLE "Empresa Nueva".
-
-DEFINE FRAME FPlastico
-     Plastico.Cue_Ahorros AT ROW 1.54 COL 14 COLON-ALIGNED
-          VIEW-AS FILL-IN 
-          SIZE 17 BY .81
-          BGCOLOR 18 FGCOLOR 15 
-     BUTTON-228 AT ROW 1.54 COL 32.86
-     Plastico.Num_Plastico AT ROW 2.62 COL 14 COLON-ALIGNED FORMAT ">>>>>>>>>>>>>>>9"
-          VIEW-AS FILL-IN 
-          SIZE 20 BY .81
-          BGCOLOR 15 
-     BUTTON-227 AT ROW 3.96 COL 3.72
-     btn_salplas AT ROW 6.12 COL 12.57
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 32 ROW 3.42
-         SIZE 37 BY 7.54
-         BGCOLOR 17 FONT 4
-         TITLE "Plástico".
-
-DEFINE FRAME F_InfCompromisos
-     ECompromisos AT ROW 1.54 COL 3 NO-LABEL NO-TAB-STOP 
-     BUTTON-214 AT ROW 16.88 COL 79
-     BUTTON-213 AT ROW 16.88 COL 94
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 2 ROW 4.23
-         SIZE 110 BY 18.31
-         BGCOLOR 17 FGCOLOR 0 FONT 4
-         TITLE "Reporte de Gestion de Cartera".
-
-DEFINE FRAME F_MovInstancias
-     HVNomInstancia AT ROW 1.27 COL 12 COLON-ALIGNED
-     HVEstado AT ROW 1.27 COL 51 COLON-ALIGNED
-     HVUsu AT ROW 2.08 COL 12 COLON-ALIGNED
-     HVFecIng AT ROW 2.08 COL 51 COLON-ALIGNED
-     HVNSol AT ROW 2.88 COL 12 COLON-ALIGNED
-     HVFecRet AT ROW 2.88 COL 51 COLON-ALIGNED
-     HVCuenta AT ROW 3.69 COL 12 COLON-ALIGNED
-     HVDes AT ROW 4.77 COL 1.57 NO-LABEL
-     BUTTON-155 AT ROW 10.15 COL 3
-     BUTTON-152 AT ROW 10.15 COL 16
-     BUTTON-153 AT ROW 10.15 COL 29.72
-     Btn_Imp AT ROW 10.15 COL 43.57
-     BUTTON-154 AT ROW 10.15 COL 57
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 44 ROW 5.04
-         SIZE 68 BY 11.31
-         FONT 4
-         TITLE "Movimientos de Instancias".
+         TITLE "Compromisos".
 
 DEFINE FRAME F_Basica
      Clientes.Dir_Residencia AT ROW 2.35 COL 10 COLON-ALIGNED
@@ -1829,99 +1599,329 @@ DEFINE FRAME F_Basica
          BGCOLOR 17 FONT 4
          TITLE "Actualización de Información Básica".
 
-DEFINE FRAME F_Compromisos
-     Cmb_estcom AT ROW 1.15 COL 78 COLON-ALIGNED
-     BRCreditos AT ROW 2.08 COL 3
-     REstado AT ROW 5.69 COL 72 NO-LABEL
-     BRCompromisos AT ROW 6.38 COL 3
-     Cobros.Estado AT ROW 10.69 COL 4 HELP
-          "Estado en que se encuentra la agencia" NO-LABEL
-          VIEW-AS RADIO-SET HORIZONTAL
-          RADIO-BUTTONS 
-                    "Solo Tramite", 0,
-"Acuerdo de Pago", 1
-          SIZE 35 BY .81
-          FONT 1
-     Cmb_Cpto AT ROW 10.69 COL 55 COLON-ALIGNED
-     CAgencia AT ROW 12.04 COL 14 COLON-ALIGNED
-     Ecompromiso AT ROW 12.04 COL 41 NO-LABEL
-     Cobros.Num_Credito AT ROW 13.12 COL 14 COLON-ALIGNED
-          LABEL "Num Credito" FORMAT "999999999"
+DEFINE FRAME F_MovInstancias
+     HVNomInstancia AT ROW 1.27 COL 12 COLON-ALIGNED
+     HVEstado AT ROW 1.27 COL 51 COLON-ALIGNED
+     HVUsu AT ROW 2.08 COL 12 COLON-ALIGNED
+     HVFecIng AT ROW 2.08 COL 51 COLON-ALIGNED
+     HVNSol AT ROW 2.88 COL 12 COLON-ALIGNED
+     HVFecRet AT ROW 2.88 COL 51 COLON-ALIGNED
+     HVCuenta AT ROW 3.69 COL 12 COLON-ALIGNED
+     HVDes AT ROW 4.77 COL 1.57 NO-LABEL
+     BUTTON-155 AT ROW 10.15 COL 3
+     BUTTON-152 AT ROW 10.15 COL 16
+     BUTTON-153 AT ROW 10.15 COL 29.72
+     Btn_Imp AT ROW 10.15 COL 43.57
+     BUTTON-154 AT ROW 10.15 COL 57
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 44 ROW 5.04
+         SIZE 68 BY 11.31
+         FONT 4
+         TITLE "Movimientos de Instancias".
+
+DEFINE FRAME F_InfCompromisos
+     ECompromisos AT ROW 1.54 COL 3 NO-LABEL NO-TAB-STOP 
+     BUTTON-214 AT ROW 16.88 COL 79
+     BUTTON-213 AT ROW 16.88 COL 94
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 2 ROW 4.23
+         SIZE 110 BY 18.31
+         BGCOLOR 17 FGCOLOR 0 FONT 4
+         TITLE "Reporte de Gestion de Cartera".
+
+DEFINE FRAME FPlastico
+     Plastico.Cue_Ahorros AT ROW 1.54 COL 14 COLON-ALIGNED
           VIEW-AS FILL-IN 
-          SIZE 24 BY .73
+          SIZE 17 BY .81
           BGCOLOR 18 FGCOLOR 15 
-     Cobros.Val_Compromiso AT ROW 14.19 COL 14 COLON-ALIGNED
-          LABEL "Val Compromiso" FORMAT ">>>,>>>,>>9"
+     BUTTON-228 AT ROW 1.54 COL 32.86
+     Plastico.Num_Plastico AT ROW 2.62 COL 14 COLON-ALIGNED FORMAT ">>>>>>>>>>>>>>>9"
           VIEW-AS FILL-IN 
-          SIZE 24 BY .77 TOOLTIP "Vlr.del nuevo Compromiso"
-          BGCOLOR 15 FGCOLOR 0 
-     Cobros.Fec_Compromiso AT ROW 15.27 COL 14 COLON-ALIGNED
-          LABEL "Fecha Compromiso" FORMAT "99/99/9999"
+          SIZE 20 BY .81
+          BGCOLOR 15 
+     BUTTON-227 AT ROW 3.96 COL 3.72
+     btn_salplas AT ROW 6.12 COL 12.57
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 32 ROW 3.42
+         SIZE 37 BY 7.54
+         BGCOLOR 17 FONT 4
+         TITLE "Plástico".
+
+DEFINE FRAME FRelNva
+     R_Nombre AT ROW 1.27 COL 8 COLON-ALIGNED HELP
+          "Nombre del cliente"
+     R_Nit AT ROW 2.35 COL 8 COLON-ALIGNED HELP
+          "Número documento de identificación"
+     R_Tel_Comercial AT ROW 3.42 COL 8 COLON-ALIGNED
+     BUTTON-205 AT ROW 1.27 COL 41
+     BUTTON-206 AT ROW 3.69 COL 41
+     Btn_SC AT ROW 2.42 COL 41
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 49 ROW 14.19
+         SIZE 57 BY 4.85
+         BGCOLOR 17 FONT 4
+         TITLE "Empresa Nueva".
+
+DEFINE FRAME F_Cer
+     WFirma AT ROW 1.27 COL 9 COLON-ALIGNED
+     WCargo AT ROW 2.35 COL 9 COLON-ALIGNED
+     WCC AT ROW 3.42 COL 9 COLON-ALIGNED
+     Cmb_Doc AT ROW 4.5 COL 9 COLON-ALIGNED
+     BUTTON-148 AT ROW 5.58 COL 17
+     BUTTON-149 AT ROW 5.58 COL 42
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 59 ROW 5.04
+         SIZE 53 BY 7.81
+         BGCOLOR 17 FONT 5
+         TITLE "Cartas y Certificados".
+
+DEFINE FRAME F_CobroJuridico
+     BCobro AT ROW 2.08 COL 2
+     Nit_Abogado AT ROW 6.65 COL 12 COLON-ALIGNED
+     Nom_Abogado AT ROW 6.65 COL 25 COLON-ALIGNED NO-LABEL
+     BUTTON-211 AT ROW 7.73 COL 3
+     BUTTON-229 AT ROW 7.73 COL 24 WIDGET-ID 2
+     Btn_OutCJ AT ROW 7.73 COL 44
+     "Elija el crédito que desea mandar a cobro jurídico" VIEW-AS TEXT
+          SIZE 34 BY .5 AT ROW 1.27 COL 2
+     "Elija el abogado que llevará el caso del crédito" VIEW-AS TEXT
+          SIZE 53 BY .5 AT ROW 5.85 COL 3
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 2 ROW 5.04
+         SIZE 57 BY 8.88
+         BGCOLOR 17 FONT 4
+         TITLE "Cobro Jurídico".
+
+DEFINE FRAME F_ConMovInstancias
+     Cmb_TipIns AT ROW 1.27 COL 8 COLON-ALIGNED
+     BCMI AT ROW 2.35 COL 2
+     Btn_OutConMovIns AT ROW 11.77 COL 58
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 5 ROW 8.81
+         SIZE 74 BY 13.19
+         FONT 4
+         TITLE "Consulta Movimiento de Instancias".
+
+DEFINE FRAME F_Firma
+     BUTTON-125 AT ROW 6.65 COL 27
+     Firma AT ROW 1.27 COL 2
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 54 ROW 4.77
+         SIZE 57 BY 8.35
+         TITLE "Firma del Cliente".
+
+DEFINE FRAME F_Foto
+     BUTTON-124 AT ROW 6.65 COL 8
+     Foto AT ROW 1.27 COL 3
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 90 ROW 4.08
+         SIZE 22 BY 8.35
+         TITLE "Fotografia del Cliente".
+
+DEFINE FRAME F_HojaVida
+     Cmb_Tipos AT ROW 1.27 COL 20 COLON-ALIGNED
+     Hoja_Vida.Tipo AT ROW 2.35 COL 20 COLON-ALIGNED
           VIEW-AS FILL-IN 
-          SIZE 24 BY .77
-          BGCOLOR 15 FGCOLOR 0 
-     BUTTON-184 AT ROW 16.62 COL 99
-     Btn_AgrCompromiso AT ROW 16.88 COL 42
-     Btn_SalCom AT ROW 16.88 COL 61
-     BUTTON-212 AT ROW 16.88 COL 80
-     "  Créditos Disponibles del Cliente" VIEW-AS TEXT
-          SIZE 70 BY .81 AT ROW 1.27 COL 3
-          BGCOLOR 18 FGCOLOR 15 FONT 5
-     "  Compromisos del Crédito Seleccionado" VIEW-AS TEXT
-          SIZE 68 BY .81 AT ROW 5.58 COL 3
-          BGCOLOR 18 FGCOLOR 15 FONT 5
-     RECT-303 AT ROW 10.42 COL 2
+          SIZE 7 BY .81
+          BGCOLOR 18 FGCOLOR 15 
+     NomTipo AT ROW 2.35 COL 27 COLON-ALIGNED NO-LABEL
+     Cmb_CodHV AT ROW 3.42 COL 20 COLON-ALIGNED
+     Hoja_Vida.Codigo AT ROW 4.77 COL 20 COLON-ALIGNED
+          VIEW-AS FILL-IN 
+          SIZE 10 BY .81
+          BGCOLOR 18 FGCOLOR 15 
+     Nom_Codigo AT ROW 4.77 COL 30 COLON-ALIGNED NO-LABEL
+     HV_Instancia AT ROW 5.85 COL 20 COLON-ALIGNED
+     HV_Doc AT ROW 5.85 COL 30 COLON-ALIGNED NO-LABEL
+     Hoja_Vida.Usuario AT ROW 6.92 COL 20 COLON-ALIGNED
+          VIEW-AS FILL-IN 
+          SIZE 10 BY .81
+          BGCOLOR 18 FGCOLOR 15 
+     HV_NomUsuario AT ROW 6.92 COL 30 COLON-ALIGNED NO-LABEL
+     Hoja_Vida.DoctoRefer AT ROW 7.73 COL 51.57 COLON-ALIGNED
+          LABEL "Documento Referencia"
+          VIEW-AS FILL-IN 
+          SIZE 12.43 BY .81
+          BGCOLOR 18 FGCOLOR 15 
+     Hoja_Vida.Fec_Grabacion AT ROW 8.54 COL 51.57 COLON-ALIGNED
+          LABEL "Fecha"
+          VIEW-AS FILL-IN 
+          SIZE 12.43 BY .81
+          BGCOLOR 18 FGCOLOR 15 
+     HV_Hora AT ROW 9.35 COL 51.57 COLON-ALIGNED
+     BUTTON-142 AT ROW 10.15 COL 2
+     BUTTON-145 AT ROW 10.15 COL 20
+     Hoja_Vida.Asunto_Cumplido AT ROW 10.5 COL 53
+          VIEW-AS TOGGLE-BOX
+          SIZE 12 BY .81
+     Hoja_Vida.Observacion AT ROW 11.5 COL 2 NO-LABEL
+          VIEW-AS EDITOR
+          SIZE 65 BY 3.5
+          BGCOLOR 15 
+     BUTTON-127 AT ROW 15 COL 60
+     Btn_Primero AT ROW 15.27 COL 2
+     BUTTON-129 AT ROW 15.27 COL 16
+     BUTTON-128 AT ROW 15.27 COL 30
+     BUTTON-144 AT ROW 15.27 COL 44
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 44 ROW 5.04
+         SIZE 68 BY 16.69
+         BGCOLOR 17 FONT 5
+         TITLE "Hoja de Vida".
+
+DEFINE FRAME F_BuscarM
+     BR_HojaVida AT ROW 1.27 COL 3
+     BUTTON-146 AT ROW 6.38 COL 55
+     "Seleccione el Mensaje con Doble-Click sobre la linea" VIEW-AS TEXT
+          SIZE 47 BY .62 AT ROW 6.38 COL 3
+          FGCOLOR 7 
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 2 ROW 7.73
+         SIZE 65 BY 7.27
+         BGCOLOR 17 FONT 5
+         TITLE "Busqueda de Mensajes".
+
+DEFINE FRAME F_Browser
+     Br_Clientes AT ROW 1.27 COL 3
+     TNombre AT ROW 12.31 COL 7
+     FNombre AT ROW 12.31 COL 18 COLON-ALIGNED NO-LABEL
+     BBuscar AT ROW 12.31 COL 49
+     W_CodCpto AT ROW 12.31 COL 86 COLON-ALIGNED
+     TApellido1 AT ROW 13.38 COL 7
+     FApellido1 AT ROW 13.38 COL 18 COLON-ALIGNED NO-LABEL
+     BUTTON-121 AT ROW 13.65 COL 87
+     TApellido2 AT ROW 14.46 COL 7
+     FApellido2 AT ROW 14.46 COL 18 COLON-ALIGNED NO-LABEL
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 18 ROW 5.04
+         SIZE 95 BY 15.35
+         BGCOLOR 17 FONT 4
+         TITLE "Resultado de la Consulta".
+
+DEFINE FRAME F_Controles
+     VProcredito AT ROW 1.54 COL 24 COLON-ALIGNED NO-LABEL
+     TReportado_Procredito AT ROW 1.62 COL 3.72 HELP
+          "Si es o no es reportado a Procrédito"
+     TReportado_fiscalia AT ROW 2.62 COL 3.72 HELP
+          "Si es o no es reportado a la Fiscalía"
+     VFiscalia AT ROW 2.62 COL 24 COLON-ALIGNED NO-LABEL
+     TReportado_Super AT ROW 3.69 COL 3.72 HELP
+          "Si es o no es reportado por la cartera a la Superbancaria"
+     VSuperbancaria AT ROW 3.69 COL 24 COLON-ALIGNED NO-LABEL
+     btn_cambios AT ROW 5.31 COL 2
+     BUTTON-183 AT ROW 5.31 COL 29
+     RECT-281 AT ROW 1.27 COL 2
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 57 ROW 6.38
+         SIZE 40 BY 7
+         BGCOLOR 17 FONT 4
+         TITLE "Reportes y Controles".
+
+DEFINE FRAME F_Impresion
+     BUTTON-7 AT ROW 3.04 COL 21
+     R_Encabezado AT ROW 1.27 COL 3 NO-LABEL
+     BUTTON-6 AT ROW 3.04 COL 12
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 57 ROW 5.31
+         SIZE 31 BY 4.31
+         FONT 4.
+
+DEFINE FRAME F_AdmCodeudores
+     BC_Creditos AT ROW 2.08 COL 5
+     BC_Codeudores AT ROW 5.85 COL 5
+     WC_UbicacionResidencia AT ROW 9.88 COL 6.28
+     Btn_Residencia-2 AT ROW 9.88 COL 50
+     WC_UbicacionComercial AT ROW 9.88 COL 65 COLON-ALIGNED
+     BUTTON-225 AT ROW 9.88 COL 103
+     Clientes.Dir_comercial AT ROW 10.96 COL 65 COLON-ALIGNED
+          LABEL "Dirección"
+          VIEW-AS FILL-IN 
+          SIZE 36 BY .81
+          BGCOLOR 15 
+     Clientes.Dir_Residencia AT ROW 11.15 COL 13 COLON-ALIGNED
+          LABEL "Dirección"
+          VIEW-AS FILL-IN 
+          SIZE 35 BY .81
+          BGCOLOR 15 
+     Clientes.Tel_comercial AT ROW 12.04 COL 65 COLON-ALIGNED
+          LABEL "Teléfono"
+          VIEW-AS FILL-IN 
+          SIZE 36 BY .81
+          BGCOLOR 15 
+     Clientes.Tel_Residencia AT ROW 12.31 COL 13 COLON-ALIGNED
+          LABEL "Teléfono"
+          VIEW-AS FILL-IN 
+          SIZE 21.43 BY .81
+          BGCOLOR 15 
+     Clientes.Salario AT ROW 13.12 COL 65 COLON-ALIGNED
+          VIEW-AS FILL-IN 
+          SIZE 36 BY .81
+          BGCOLOR 15 
+     Clientes.Email AT ROW 15 COL 13 COLON-ALIGNED
+          LABEL "e-mail"
+          VIEW-AS FILL-IN 
+          SIZE 39 BY .81
+          BGCOLOR 15 
+     Btn_ActBasica-2 AT ROW 15.54 COL 65
+     Btn_CrearCodeudor AT ROW 15.54 COL 85
+     Clientes.Celular AT ROW 16.08 COL 30 COLON-ALIGNED
+          VIEW-AS FILL-IN 
+          SIZE 22 BY .81
+          BGCOLOR 15 
+     Btn_BorCode AT ROW 16.88 COL 65
+     BUTTON-226 AT ROW 16.88 COL 85
+     Clientes.Fec_Nacimiento AT ROW 17.15 COL 30 COLON-ALIGNED
+          LABEL "FecNacimiento"
+          VIEW-AS FILL-IN 
+          SIZE 22 BY .81
+          BGCOLOR 15 
+     " Residencia" VIEW-AS TEXT
+          SIZE 11 BY 1.08 AT ROW 8.81 COL 7
+          FGCOLOR 7 FONT 5
+     "  Relaciones de Codeudor del Credito Seleccionado" VIEW-AS TEXT
+          SIZE 102 BY .81 AT ROW 5.04 COL 5
+          BGCOLOR 18 FGCOLOR 15 FONT 1
+     " Comercial" VIEW-AS TEXT
+          SIZE 12 BY .77 AT ROW 8.92 COL 58.43
+          FGCOLOR 7 FONT 5
+     "  Creditos Disponibles del Cliente" VIEW-AS TEXT
+          SIZE 102 BY .81 AT ROW 1.27 COL 5
+          BGCOLOR 18 FGCOLOR 15 FONT 1
+     RECT-284 AT ROW 9.35 COL 5
+     RECT-285 AT ROW 9.35 COL 57
+     RECT-304 AT ROW 14.73 COL 5
     WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 2 ROW 4.23
          SIZE 110 BY 18.31
          BGCOLOR 17 FONT 4
-         TITLE "Compromisos".
+         TITLE "Administracion de Codeudores para analistas de Cobros".
 
-DEFINE FRAME frmFacturaCupoRotativo
-     btnVolverFrmFacturaCupo AT ROW 1.27 COL 119 WIDGET-ID 2
+DEFINE FRAME F_Relaciones
+     B_Relaciones AT ROW 1.27 COL 3
+     BUTTON-217 AT ROW 6.38 COL 3
+     BUTTON-220 AT ROW 7.73 COL 3
+     BUTTON-218 AT ROW 8 COL 47
     WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 2 ROW 3.15
-         SIZE 125 BY 22.35
-         TITLE "FacturaCupoRotativo" WIDGET-ID 100.
-
-DEFINE FRAME F_Opciones
-     BUTTON-5 AT ROW 12.58 COL 52
-     Id_General AT ROW 1.27 COL 4
-     Id_Saldos AT ROW 1.27 COL 35
-     Id_Economica AT ROW 2.35 COL 4.14
-     Id_Atrasos AT ROW 2.35 COL 34.29
-     Id_Ahorros AT ROW 3.12 COL 4.14
-     Id_Relaciones AT ROW 3.12 COL 34.29
-     Id_AhoCanc AT ROW 3.88 COL 4.14
-     Id_Codeudando AT ROW 3.88 COL 34.29
-     Id_Creditos AT ROW 4.65 COL 4.14
-     Id_HojaVida AT ROW 4.65 COL 34.29
-     Id_HistCreditos AT ROW 5.42 COL 4.14
-     Id_Controles AT ROW 5.42 COL 34.29
-     Id_SimulaPago AT ROW 6.19 COL 4.14
-     TCompromisos AT ROW 6.19 COL 34.29
-     Id_CredCanc AT ROW 6.96 COL 4.14
-     Id_GestCobro AT ROW 6.96 COL 34.29
-     Id_Solicitudes AT ROW 7.73 COL 4.14
-     Tg_Extras AT ROW 7.73 COL 34.29
-     Id_Especiales AT ROW 8.54 COL 4.14
-     Tg_CtasAho AT ROW 8.58 COL 34.29
-     Id_GarAdm AT ROW 9.35 COL 4
-     Tg_Plastico AT ROW 9.35 COL 34.29
-     IdFacturaCupoRotativo AT ROW 10.12 COL 4 WIDGET-ID 6
-     tgFecCorte AT ROW 12.42 COL 2.86 WIDGET-ID 2
-     FIni AT ROW 12.58 COL 35 COLON-ALIGNED
-     fechaCorte AT ROW 13.31 COL 2.43 COLON-ALIGNED NO-LABEL WIDGET-ID 4
-     FFin AT ROW 13.54 COL 35 COLON-ALIGNED
-     RECT-280 AT ROW 2.08 COL 2
-     RECT-317 AT ROW 2.08 COL 32
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 34 ROW 3.42
-         SIZE 62 BY 13.73
-         BGCOLOR 17 FONT 5.
+         SIDE-LABELS TOP-ONLY NO-UNDERLINE THREE-D 
+         AT COL 21 ROW 8.54
+         SIZE 63 BY 9.15
+         BGCOLOR 17 FONT 4
+         TITLE "Relaciones".
 
 
 /* *********************** Procedure Settings ************************ */
@@ -2085,7 +2085,7 @@ ASSIGN
 
 /* SETTINGS FOR FRAME F_BuscarM
    NOT-VISIBLE                                                          */
-/* BROWSE-TAB BR_HojaVida TEXT-7 F_BuscarM */
+/* BROWSE-TAB BR_HojaVida TEXT-5 F_BuscarM */
 ASSIGN 
        FRAME F_BuscarM:HIDDEN           = TRUE.
 
@@ -2096,7 +2096,7 @@ ASSIGN
 
 /* SETTINGS FOR FRAME F_CobroJuridico
    NOT-VISIBLE                                                          */
-/* BROWSE-TAB BCobro TEXT-6 F_CobroJuridico */
+/* BROWSE-TAB BCobro TEXT-7 F_CobroJuridico */
 ASSIGN 
        FRAME F_CobroJuridico:HIDDEN           = TRUE.
 
@@ -5751,7 +5751,7 @@ END.
 w_texto = "Fecha de nacimiento: " + STRING(vFecNacimiento,"X(30)") + "Edad: " + STRING(vEdad) + " años".
 RUN Grabar_Info(INPUT "GEN",INPUT W_Texto).
 
-w_texto = "Fecha de Ingreso   : " + STRING(STRING(Tclientes.Fec_ingreso,"99/99/9999"),"X(30)"). /* Pendiente la fecha de reingreso */
+w_texto = "Fecha de Ingreso   : " + STRING(STRING(Tclientes.Fec_ingreso,"99/99/9999"),"X(30)").
 
 IF Tclientes.Fec_fallecido NE ? THEN DO:
     W_Texto = w_texto + "F A L L E C I D O       : " + STRING(Tclientes.Fec_fallecido,"99/99/9999").
@@ -5761,6 +5761,16 @@ IF Tclientes.Fec_fallecido NE ? THEN DO:
 END.
 
 RUN Grabar_Info(INPUT "GEN",INPUT W_Texto).
+
+FIND FIRST ahorros WHERE ahorros.nit = TClientes.nit
+                     AND ahorros.tip_ahorro = 4
+                     AND ahorros.estado = 1 NO-LOCK NO-ERROR.
+IF AVAILABLE ahorros THEN DO:
+    IF ahorros.fec_apertura > TClientes.fec_ingreso THEN DO:
+        w_texto = "Fecha de Reingreso : " + STRING(STRING(ahorros.fec_apertura,"99/99/9999"),"X(30)").
+        RUN Grabar_Info(INPUT "GEN",INPUT W_Texto).
+    END.
+END.
 
                                            
 RUN raya(INPUT "GEN").

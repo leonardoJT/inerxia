@@ -1,4 +1,4 @@
-FOR EACH programas WHERE ejecutable = "prCptesDescuadrados1.r" NO-LOCK:
+FOR EACH programas WHERE INDEX(ejecutable,"descuadrados") <> 0 NO-LOCK:
     DISPLAY programas WITH 1 COL.
 END.
 

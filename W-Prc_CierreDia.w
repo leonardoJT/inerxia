@@ -1006,6 +1006,9 @@ FOR EACH agencias WHERE agencias.agencia <> 1 NO-LOCK:
     flagContabiliza = FALSE.
 
     FOR EACH cierreCuentas NO-LOCK:
+        vTotal2430 = 0.
+        vTotal2435 = 0.
+
         FOR EACH cen_costos NO-LOCK:
             RUN hallarSaldoCuenta IN w_manija (INPUT agencias.agencia,
                                                INPUT cen_costos.cen_costo,
@@ -1104,8 +1107,8 @@ FOR EACH agencias WHERE agencias.agencia <> 1 NO-LOCK:
             Mov_Contable.Cen_Costos = 999.
             Mov_Contable.Comentario = "Traslado automático".
             Mov_Contable.Comprobante = comprobantes.comprobante.
-            ASSIGN Mov_Contable.cr = vTotal2435 WHEN vTotal2430 > 0.
-            ASSIGN Mov_Contable.db = vTotal2435 * -1 WHEN vTotal2430 < 0.
+            ASSIGN Mov_Contable.cr = vTotal2435 WHEN vTotal2435 > 0.
+            ASSIGN Mov_Contable.db = vTotal2435 * -1 WHEN vTotal2435 < 0.
             Mov_Contable.Cuenta = "27054501".
             Mov_Contable.Destino = 1.
             Mov_Contable.Estacion = "000005".

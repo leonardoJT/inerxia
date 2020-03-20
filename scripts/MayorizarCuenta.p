@@ -7,8 +7,8 @@ DEFINE VARIABLE w_FEC2 AS DATE.
 DEFINE VARIABLE i AS INTEGER.
 DEFINE VAR vCuenta AS CHARACTER.
 
-w_FEC1 = 12/01/2019.
-w_FEC2 = 12/31/2019.
+w_FEC1 = 01/01/2020.
+w_FEC2 = 01/31/2020.
 w_ano = YEAR(w_fec1).
 w_mes = MONTH(W_Fec1).
 dia1 = DAY(w_Fec1).
@@ -18,14 +18,14 @@ dia2 = DAY(w_fec2).
 /*vCuenta = "14680502".*/
 /*vCuenta = "14681001".*/
 /*vCuenta = "51152901".*/
-vCuenta = "51152902".
+vCuenta = "1443050133".
 
 MESSAGE "Inicia Mayorización"
     VIEW-AS ALERT-BOX INFO BUTTONS OK.
 
 FIND FIRST cuentas WHERE cuentas.cuenta = vCuenta NO-LOCK NO-ERROR.
 
-FOR EACH agencias WHERE agencias.agencia > 0 NO-LOCK:
+FOR EACH agencias WHERE agencias.agencia = 1 NO-LOCK:
     FOR EACH sal_cuenta WHERE sal_cuenta.agencia = agencias.agencia
                           AND sal_cuenta.cuenta = vCuenta
                           AND SAL_CUENTA.ano EQ w_ano:

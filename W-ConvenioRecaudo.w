@@ -189,17 +189,17 @@ DEFINE FRAME Frm-Main
      btnAplicarPSE AT ROW 13.54 COL 93.14 WIDGET-ID 188
      btnAplicarReferenciado AT ROW 15.15 COL 93.14 WIDGET-ID 204
      Btn_Done AT ROW 21.23 COL 93.14 WIDGET-ID 20
-     " Archivos exportados" VIEW-AS TEXT
-          SIZE 20.86 BY .81 AT ROW 1.19 COL 3.14 WIDGET-ID 4
-          FGCOLOR 0 
-     " Archivos importados" VIEW-AS TEXT
-          SIZE 20.86 BY .81 AT ROW 12.31 COL 3.14 WIDGET-ID 192
-          FGCOLOR 0 
      " Aplicar" VIEW-AS TEXT
           SIZE 9.57 BY .81 AT ROW 12.38 COL 93 WIDGET-ID 202
           FGCOLOR 0 
      " Exportar" VIEW-AS TEXT
           SIZE 9.57 BY .81 AT ROW 1.19 COL 93 WIDGET-ID 198
+          FGCOLOR 0 
+     " Archivos exportados" VIEW-AS TEXT
+          SIZE 20.86 BY .81 AT ROW 1.19 COL 3.14 WIDGET-ID 4
+          FGCOLOR 0 
+     " Archivos importados" VIEW-AS TEXT
+          SIZE 20.86 BY .81 AT ROW 12.31 COL 3.14 WIDGET-ID 192
           FGCOLOR 0 
      RECT-345 AT ROW 1.54 COL 2.57 WIDGET-ID 2
      RECT-346 AT ROW 12.65 COL 2.57 WIDGET-ID 190
@@ -351,6 +351,7 @@ DO:
     DEFINE VAR cont AS INTEGER.
     DEFINE VAR registro AS CHARACTER.
     DEFINE VAR fechaArchivo AS CHARACTER.
+    DEFINE VAR flagImportar AS LOGICAL.
     
     EMPTY TEMP-TABLE tt.
 
@@ -365,7 +366,7 @@ DO:
     IF vcNomArchInput <> "" THEN DO:
         MESSAGE "Se va a importar y aplicar los movimientos detallados en el archivo. Está seguro que desea" SKIP
                 "realizar esta operación...?"
-            VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO TITLE "Aplicar movimientos?" UPDATE flagImportar AS LOGICAL.
+            VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO TITLE "Aplicar movimientos?" UPDATE flagImportar.
 
         IF flagImportar THEN DO:
             Aplicacion:
@@ -378,6 +379,17 @@ DO:
                     IMPORT registro.
 
                     IF cont = 1 THEN DO:
+                        FIND FIRST recaudos_IO WHERE recaudos_IO.tipo_io = "I"
+                                                 AND recaudos_IO.tipo_convenio = "PSE"
+                                                 AND recaudos_IO.encabezado = registro NO-LOCK NO-ERROR.
+                        IF AVAILABLE recaudos_IO THEN DO:
+                            MESSAGE "Este archivo ya fue importado anteriormente. No se" SKIP
+                                    "permite la carga de un mismo archivo más de una ves."
+                                VIEW-AS ALERT-BOX INFO BUTTONS OK.
+
+                            RETURN NO-APPLY.
+                        END.
+                        
                         fechaArchivo = SUBSTRING(registro,13,8).
 
                         FIND FIRST recaudos_IO WHERE recaudos_IO.tipo_io = "I"
@@ -385,24 +397,25 @@ DO:
                                                  AND recaudos_IO.fecha = DATE(INTEGER(SUBSTRING(fechaArchivo,5,2)),INTEGER(SUBSTRING(fechaArchivo,7,2)),INTEGER(SUBSTRING(fechaArchivo,1,4))) NO-LOCK NO-ERROR.
                         IF AVAILABLE recaudos_IO THEN DO:
                             MESSAGE "Ya se encuentra un archivo aplicado correspondiente a esta fecha." SKIP
-                                    "No se permite su aplicación."
-                                VIEW-AS ALERT-BOX INFO BUTTONS OK.
+                                    "Está seguro de realizar esta operación...?"
+                                VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO TITLE "Aplicar movimientos?" UPDATE flagImportar.
 
-                            RETURN NO-APPLY.
+                            IF flagImportar = NO THEN
+                                RETURN NO-APPLY.
                         END.
-                        ELSE DO:
-                            CREATE recaudos_IO.
-                            recaudos_IO.tipo_io = "I".
-                            recaudos_io.tipo_convenio = "PSE".
-                            recaudos_IO.fecha = DATE(INTEGER(SUBSTRING(fechaArchivo,5,2)),INTEGER(SUBSTRING(fechaArchivo,7,2)),INTEGER(SUBSTRING(fechaArchivo,1,4))).
-                            recaudos_IO.nombreArchivo = vcNomArchInput.
-                            recaudos_IO.hora = TIME.
-                            recaudos_IO.usuario = w_usuario.
 
-                            fechaArchivoDate = recaudos_io.fecha.
+                        CREATE recaudos_IO.
+                        recaudos_IO.tipo_io = "I".
+                        recaudos_io.tipo_convenio = "PSE".
+                        recaudos_io.encabezado = registro.
+                        recaudos_IO.fecha = DATE(INTEGER(SUBSTRING(fechaArchivo,5,2)),INTEGER(SUBSTRING(fechaArchivo,7,2)),INTEGER(SUBSTRING(fechaArchivo,1,4))).
+                        recaudos_IO.nombreArchivo = vcNomArchInput.
+                        recaudos_IO.hora = TIME.
+                        recaudos_IO.usuario = w_usuario.
+                        
+                        fechaArchivoDate = recaudos_io.fecha.
 
-                            RUN hallarDiaHabil (INPUT "PSE").
-                        END.
+                        RUN hallarDiaHabil (INPUT "PSE").
                     END.
                     ELSE DO:
                         IF SUBSTRING(registro,1,2) = "06" THEN DO:
@@ -437,7 +450,7 @@ DO:
                 VIEW-AS ALERT-BOX INFO BUTTONS OK.
 
             OPEN QUERY brwImportados FOR EACH Recaudos_IO WHERE recaudos_IO.tipo_io = "I" NO-LOCK BY Recaudos_IO.fecha DESCENDING
-                                                                                               BY Recaudos_IO.hora DESCENDING INDEXED-REPOSITION.
+                                                                                                  BY Recaudos_IO.hora DESCENDING INDEXED-REPOSITION.
 
         END.
     END.

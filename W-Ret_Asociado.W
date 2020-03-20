@@ -1,9 +1,9 @@
 &ANALYZE-SUSPEND _VERSION-NUMBER UIB_v9r12 GUI
 &ANALYZE-RESUME
-
+/* Connected Databases 
+*/
 &Scoped-define WINDOW-NAME W-Ret_Asoc
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _DEFINITIONS W-Ret_Asoc 
-
 CREATE WIDGET-POOL.
 
 /* ***************************  Definitions  ************************** */
@@ -419,13 +419,15 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL Cmb_Ctas W-Ret_Asoc
 ON VALUE-CHANGED OF Cmb_Ctas IN FRAME F_Ret /* Cta.Contrapartida */
 DO:
-  ASSIGN W_Cta = SUBSTRING(Cmb_Ctas:SCREEN-VALUE,1,14).
+    W_Cta = SUBSTRING(Cmb_Ctas:SCREEN-VALUE,1,14).
+    W_Cta = REPLACE(W_Cta," ","").
 
-  IF W_Cta LE "0" OR W_Cta EQ ? THEN DO:
-     MESSAGE "Debe seleccionar una Cuenta Contable para el Traslado." VIEW-AS ALERT-BOX ERROR.
-    
-     W_Ok = TRUE.
-  END.
+    IF W_Cta < "0" OR W_Cta = ? THEN DO:
+        MESSAGE "Debe seleccionar una Cuenta Contable para el Traslado."
+            VIEW-AS ALERT-BOX ERROR.
+
+        W_Ok = TRUE.
+    END.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -752,8 +754,7 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE Contable_3Meses W-Ret_Asoc 
 PROCEDURE Contable_3Meses :
-
-  FIND FIRST CortoLargo WHERE CortoLargo.Agencia        EQ Ahorros.Agencia 
+FIND FIRST CortoLargo WHERE CortoLargo.Agencia        EQ Ahorros.Agencia 
                           AND CortoLargo.Clase_Producto EQ 1                                           
                           AND CortoLargo.Cod_Producto   EQ Ahorros.Cod_Ahorro NO-LOCK NO-ERROR.
   IF AVAIL(CortoLargo) THEN DO:                                                                

@@ -640,7 +640,7 @@ FOR EACH TCer WHERE TCer.Nit = clientes.Nit
     TotalRet = TotalRet + TCer.Ret.
     totalBase = totalBase + TCer.Bas.
 
-    IF LAST-OF(TCer.Nit) THEN
+    IF LAST-OF(TCer.Nit) AND totalBase > 0 THEN
         DISPLAY WKCta                                    AT 10  FORM "X(50)"
                 totalBase FORM "->>,>>>,>>>,>>9"
             WITH WIDTH 132 FRAME F-CompraDeActivosFijos USE-TEXT STREAM-IO NO-LABELS NO-BOX.
@@ -694,21 +694,35 @@ END.
         "                 de 1991."
     WITH FRAME FPieCer /*PAGE-BOTTOM*/ USE-TEXT WIDTH 132 NO-BOX STREAM-IO NO-LABELS.*/
 
-DISPLAY SKIP(2)
+IF wAno = 2018 THEN
+    DISPLAY SKIP(2)
         SKIP(3)
-        "                 Componente inflacionario - Proyecto de Decreto: El 62.97% de los rendimientos" SKIP
-        "                 financieros  obtenidos  por  personas  naturales  y  sucesiones ilíquidas, no" SKIP
-        "                 obligadas a llevar libros de contabilidad obtenidos en el año gravable" STRING(WAno,"9999") SKIP
-        "                 no constituyen renta ni ganancia ocasional." SKIP
-        "" SKIP
-        "" SKIP
-        "" SKIP
-        "" SKIP
-        "" SKIP(1)
-        "                 Este  documento no requiere para su validez firma autógrafa de acuerdo con el" SKIP
-        "                 artículo  10  del  Decreto 836 de 1991, recopilado en el artículo 1.6.1.12.12" SKIP
-        "                 del  DUT  1625 de octubre 11 de 2016, que regula el contenido del certificado" SKIP
-        "                 de retenciones a título de renta."
+            "                 Componente inflacionario - Proyecto de Decreto: El 62.97% de los rendimientos" SKIP
+            "                 financieros  obtenidos  por  personas  naturales  y  sucesiones ilíquidas, no" SKIP
+            "                 obligadas a llevar libros de contabilidad obtenidos en el año gravable" STRING(WAno,"9999") SKIP
+            "                 no constituyen renta ni ganancia ocasional." SKIP
+            "" SKIP
+            "" SKIP
+            "" SKIP
+            "" SKIP
+            "" SKIP(1)
+            "                 Este  documento no requiere para su validez firma autógrafa de acuerdo con el" SKIP
+            "                 artículo  10  del  Decreto 836 de 1991, recopilado en el artículo 1.6.1.12.12" SKIP
+            "                 del  DUT  1625 de octubre 11 de 2016, que regula el contenido del certificado" SKIP
+            "                 de retenciones a título de renta."
+    WITH FRAME FPieCer USE-TEXT WIDTH 132 NO-BOX STREAM-IO NO-LABELS.
+ELSE
+    DISPLAY SKIP(2)
+        SKIP(3)
+            "" SKIP
+            "" SKIP
+            "" SKIP
+            "" SKIP
+            "" SKIP(1)
+            "                 Este  documento no requiere para su validez firma autógrafa de acuerdo con el" SKIP
+            "                 artículo  10  del  Decreto 836 de 1991, recopilado en el artículo 1.6.1.12.12" SKIP
+            "                 del  DUT  1625 de octubre 11 de 2016, que regula el contenido del certificado" SKIP
+            "                 de retenciones a título de renta."
     WITH FRAME FPieCer USE-TEXT WIDTH 132 NO-BOX STREAM-IO NO-LABELS.
 
 
@@ -768,17 +782,7 @@ FOR EACH rep_ahorros WHERE rep_ahorros.nit = clientes.nit AND rep_ahorros.fecCor
     END.
 
     CASE rep_ahorros.tip_ahorro:
-        WHEN 4 THEN DO:
-            saldos.totalAportes = saldos.totalAportes + rep_ahorros.Sdo_disponible.
-
-            IF FIRST-OF(rep_ahorros.tip_ahorro) THEN DO:
-                FOR EACH mov_contable WHERE YEAR(mov_contable.fec_contable) = wAno
-                                        AND mov_contable.nit = rep_ahorros.nit
-                                        AND mov_contable.comentario = "Revalorización de Aportes" NO-LOCK:
-                    saldos.totalRevalorizacionAportes = saldos.totalRevalorizacionAportes + mov_contable.cr.
-                END.
-            END.
-        END.
+        WHEN 4 THEN saldos.totalAportes = saldos.totalAportes + rep_ahorros.Sdo_disponible.
         
         WHEN 1 OR
         WHEN 2 THEN saldos.totalAhorros = saldos.totalAhorros + rep_ahorros.Sdo_disponible.
@@ -786,6 +790,21 @@ FOR EACH rep_ahorros WHERE rep_ahorros.nit = clientes.nit AND rep_ahorros.fecCor
         WHEN 3 THEN saldos.totalCDAT = saldos.totalCDAT + rep_ahorros.Sdo_disponible.
     END CASE.
 END.
+
+FOR EACH mov_contable WHERE mov_contable.agencia <> 0
+                        AND YEAR(mov_contable.fec_contable) = wAno
+                        AND mov_contable.nit = clientes.nit
+                        AND mov_contable.comentario = "Revalorización de Aportes" NO-LOCK:
+    FIND FIRST saldos WHERE saldos.cedula = clientes.nit NO-ERROR.
+    IF NOT AVAILABLE saldos THEN DO:
+        CREATE saldos.
+        saldos.cedula = clientes.nit.
+        saldos.nombre = clientes.nombre + " " + clientes.apellido1 + " " + clientes.apellido2.
+    END.
+
+    saldos.totalRevalorizacionAportes = saldos.totalRevalorizacionAportes + mov_contable.cr.
+END.
+
 
 FOR EACH rep_creditos WHERE rep_creditos.nit = saldos.cedula AND rep_creditos.fecCorte = date(12, 31, wAno) NO-LOCK BREAK BY rep_credito.nit:
     IF FIRST-OF(rep_creditos.nit) THEN DO:
@@ -878,38 +897,15 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE CompraDeActivosFijos wWin 
 PROCEDURE CompraDeActivosFijos :
-DEFINE VAR cont AS INTEGER.
+CREATE TCer.
+TCer.Nit = clientes.nit.
+TCer.CBa = "COMPRA DE ACTIVOS FIJOS".
 
-EMPTY TEMP-TABLE ttmov.
-
-FOR EACH rep_activosFijos WHERE rep_activosFijos.fecCorte = DATE(12,31,wAno)
-                            AND YEAR(rep_activosFijos.fechaCompra) = wAno
-                            AND rep_activosFijos.nitProveedor = clientes.nit
-                            AND rep_activosFijos.contabilizado = YES NO-LOCK BREAK BY rep_activosFijos.nitProveedor:
-    FIND FIRST TCer WHERE TCer.nit = clientes.nit
-                      AND TCer.CBa = "COMPRA DE ACTIVOS FIJOS" NO-ERROR.
-    IF NOT AVAILABLE TCer THEN DO:
-        CREATE TCer.
-        ASSIGN TCer.Nit = clientes.Nit
-               TCer.CBa = "COMPRA DE ACTIVOS FIJOS".
-    END.
-
-    TCer.Bas = TCer.Bas + rep_activosFijos.valorCompra.
-
-    IF LAST-OF(rep_activosFijos.nitProveedor) THEN DO:
-        FOR EACH mov_contable WHERE mov_contable.nit = rep_activosFijos.nitProveedor
-                                AND YEAR(mov_contable.fec_contable) = wAno
-                                AND SUBSTRING(mov_contable.cuenta,1,6) = "243540" NO-LOCK:
-            FIND FIRST ttmov WHERE ttmov.Id = ROWID(mov_contable) NO-LOCK NO-ERROR.
-            IF NOT AVAILABLE ttmov THEN DO:
-                TCer.Ret = TCer.Ret + mov_contable.cr - mov_contable.db.
-
-                CREATE ttmov.
-                ttmov.id = ROWID(mov_contable).
-            END.
-        END.
-    END.
-END.
+RUN VALUE("p-1001_5008_CompraDeActivosFijos_" + STRING(wAno) + ".r") (INPUT 'C',
+                                                                      INPUT clientes.nit,
+                                                                      INPUT 0,
+                                                                      OUTPUT TCer.Bas,
+                                                                      OUTPUT TCer.Ret).
 
 END PROCEDURE.
 
@@ -941,7 +937,7 @@ FOR EACH anexos WHERE anexos.nit = clientes.nit
                        SUBSTRING(anexos.cuenta,1,10) = "6140101102" OR SUBSTRING(anexos.cuenta,1,10) = "6140101108" OR SUBSTRING(anexos.cuenta,1,10) = "6140101110" OR SUBSTRING(anexos.cuenta,1,10) = "6140101114" OR
                        SUBSTRING(anexos.cuenta,1,10) = "6140101116" OR SUBSTRING(anexos.cuenta,1,10) = "6140101118" OR SUBSTRING(anexos.cuenta,1,10) = "6140101122" OR SUBSTRING(anexos.cuenta,1,10) = "6140101136" OR
                        SUBSTRING(anexos.cuenta,1,10) = "6140101140" OR SUBSTRING(anexos.cuenta,1,10) = "6140101195" OR SUBSTRING(anexos.cuenta,1,10) = "6140101251" OR SUBSTRING(anexos.cuenta,1,8) = "61509501" OR
-                       SUBSTRING(anexos.cuenta,1,8) = "61509502" OR SUBSTRING(anexos.cuenta,1,8) = "61509512")
+                       SUBSTRING(anexos.cuenta,1,8) = "61509502" OR SUBSTRING(anexos.cuenta,1,8) = "61509505" OR SUBSTRING(anexos.cuenta,1,8) = "61509512")
                   AND anexos.ano = wAno NO-LOCK BREAK BY anexos.nit
                                                       BY anexos.cuenta:
     FIND FIRST cuentas WHERE cuentas.cuenta = anexos.cuenta NO-LOCK NO-ERROR.
@@ -1242,20 +1238,19 @@ DEFINE BUFFER bfrMovContable FOR mov_contable.
 EMPTY TEMP-TABLE docs.
 
 FOR EACH anexos WHERE anexos.nit = clientes.nit
-                    AND (SUBSTRING(anexos.cuenta,1,6) = "511028" OR
-                         SUBSTRING(anexos.cuenta,1,8) = "6140101154" OR
-                         SUBSTRING(anexos.cuenta,1,8) = "6140101155" OR
-                         SUBSTRING(anexos.cuenta,1,6) = "511001" OR
-                         SUBSTRING(anexos.cuenta,1,8) = "51102711" OR
-                         SUBSTRING(anexos.cuenta,1,8) = "51102712" OR
-                         SUBSTRING(anexos.cuenta,1,8) = "51102713" OR
-                         SUBSTRING(anexos.cuenta,1,8) = "51102714" OR
-                         SUBSTRING(anexos.cuenta,1,6) = "511030" OR
-                         SUBSTRING(anexos.cuenta,1,8) = "61509512")
-                    AND anexos.ano = wAno NO-LOCK BREAK BY anexos.nit
-                                                          BY anexos.cuenta:
-    FIND FIRST cuentas WHERE cuentas.cuenta = anexos.cuenta NO-LOCK NO-ERROR.
-    
+                  AND (SUBSTRING(anexos.cuenta,1,6) = "262505" OR
+                       SUBSTRING(anexos.cuenta,1,6) = "511028" OR
+                       SUBSTRING(anexos.cuenta,1,10) = "6140101154" OR
+                       SUBSTRING(anexos.cuenta,1,10) = "6140101155" OR
+                       SUBSTRING(anexos.cuenta,1,6) = "511001" OR
+                       SUBSTRING(anexos.cuenta,1,8) = "51102711" OR
+                       SUBSTRING(anexos.cuenta,1,8) = "51102712" OR
+                       SUBSTRING(anexos.cuenta,1,8) = "51102713" OR
+                       SUBSTRING(anexos.cuenta,1,8) = "51102714" OR
+                       SUBSTRING(anexos.cuenta,1,6) = "511030" OR
+                       SUBSTRING(anexos.cuenta,1,8) = "61509512")
+                  AND anexos.ano = wAno NO-LOCK BREAK BY anexos.nit
+                                                      BY anexos.cuenta:
     FIND FIRST TCer WHERE TCer.nit = clientes.nit
                       AND TCer.CBa = "ICA" NO-ERROR.
     IF NOT AVAILABLE TCer THEN DO:
@@ -1267,37 +1262,31 @@ FOR EACH anexos WHERE anexos.nit = clientes.nit
     TCer.Bas = TCer.Bas + anexos.sdo_inicial.
 
     DO cont = 1 TO 12:
-        TCer.Bas = TCer.Bas + anexos.db[cont] - anexos.cr[cont].
+        IF SUBSTRING(anexos.cuenta,1,6) = "260505" THEN
+            TCer.Bas = TCer.Bas + anexos.cr[cont] - anexos.db[cont].
+        ELSE
+            TCer.Bas = TCer.Bas + anexos.db[cont] - anexos.cr[cont].
     END.
 END.
         
 FOR EACH anexos WHERE anexos.nit = clientes.nit
-                    AND SUBSTRING(anexos.cuenta,1,6) = "243575"
-                    AND anexos.ano = wAno NO-LOCK BREAK BY anexos.nit
-                                                          BY anexos.cuenta:
-    IF FIRST-OF(anexos.cuenta) THEN
-        FIND FIRST cuentas WHERE cuentas.cuenta = anexos.cuenta NO-LOCK NO-ERROR.
-
-    IF FIRST-OF(anexos.nit) THEN DO:
-        FIND FIRST TCer WHERE TCer.nit = clientes.nit
-                          AND TCer.CBa = "ICA" NO-ERROR.
-        IF NOT AVAILABLE TCer THEN DO:
-            CREATE TCer.
-            ASSIGN TCer.Nit = clientes.Nit
-                   TCer.CBa = "ICA".
-        END.
+                  AND SUBSTRING(anexos.cuenta,1,6) = "243575"
+                  AND anexos.ano = wAno NO-LOCK BREAK BY anexos.nit
+                                                      BY anexos.cuenta:
+    FIND FIRST TCer WHERE TCer.nit = clientes.nit
+                      AND TCer.CBa = "ICA" NO-ERROR.
+    IF NOT AVAILABLE TCer THEN DO:
+        CREATE TCer.
+        ASSIGN TCer.Nit = clientes.Nit
+               TCer.CBa = "ICA".
     END.
 
     TCer.Ret = TCer.Ret + anexos.sdo_inicial.
 
     DO cont = 1 TO 12:
-        IF cuentas.naturaleza = "DB" THEN
-            TCer.Ret = TCer.Ret + anexos.db[cont] - anexos.cr[cont].
-        ELSE
-            TCer.Ret = TCer.Ret + anexos.cr[cont] - anexos.db[cont].
+        TCer.Ret = TCer.Ret + anexos.cr[cont] - anexos.db[cont].
     END.
 END.
-
 
 END PROCEDURE.
 

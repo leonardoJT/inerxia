@@ -51,12 +51,12 @@ DEFINE VARIABLE P_AgeCli AS INTEGER.
 /* Need to scope the external tables to this procedure                  */
 DEFINE QUERY external_tables FOR Usuarios.
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS RECT-326 tgGestionCobranza 
+&Scoped-Define ENABLED-OBJECTS RECT-326 
 &Scoped-Define DISPLAYED-FIELDS Usuarios.Fec_Creacion Usuarios.Fec_Retiro ~
 Usuarios.Fec_UltCam 
 &Scoped-define DISPLAYED-TABLES Usuarios
 &Scoped-define FIRST-DISPLAYED-TABLE Usuarios
-&Scoped-Define DISPLAYED-OBJECTS tgGestionCobranza 
+
 
 /* Custom List Definitions                                              */
 /* ADM-CREATE-FIELDS,ADM-ASSIGN-FIELDS,List-3,List-4,List-5,List-6      */
@@ -74,16 +74,10 @@ DEFINE RECTANGLE RECT-326
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 70 BY 10.77.
 
-DEFINE VARIABLE tgGestionCobranza AS LOGICAL INITIAL no 
-     LABEL "" 
-     VIEW-AS TOGGLE-BOX
-     SIZE 2.72 BY .77 NO-UNDO.
-
 
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME F-Grupo
-     tgGestionCobranza AT ROW 11.23 COL 62.86 WIDGET-ID 26
      Usuarios.Fec_Creacion AT ROW 12.54 COL 57.86 COLON-ALIGNED NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 13.29 BY .81
@@ -95,9 +89,7 @@ DEFINE FRAME F-Grupo
      Usuarios.Fec_UltCam AT ROW 14.23 COL 57.86 COLON-ALIGNED
           VIEW-AS FILL-IN 
           SIZE 13.29 BY .81
-          BGCOLOR 18 FGCOLOR 15 
-     "Permite gestión de cobranza:" VIEW-AS TEXT
-          SIZE 20 BY .5 AT ROW 11.35 COL 43 WIDGET-ID 28
+          BGCOLOR 18 FGCOLOR 15 FONT 15
      "Fecha de ingreso:" VIEW-AS TEXT
           SIZE 12.14 BY .5 AT ROW 12.69 COL 47.43 WIDGET-ID 16
      " Información General" VIEW-AS TEXT

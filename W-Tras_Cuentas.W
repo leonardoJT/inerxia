@@ -674,27 +674,27 @@ DEFINE FRAME F_Proc
      TotC AT ROW 21.12 COL 36.43 COLON-ALIGNED NO-LABEL
      W_TGmf AT ROW 21.12 COL 50.29 COLON-ALIGNED NO-LABEL
      TotH AT ROW 21.12 COL 65.57 COLON-ALIGNED NO-LABEL
-     "Concepto  Contrapartida     Ced./Nit            Ref. /Cheq." VIEW-AS TEXT
-          SIZE 44.57 BY .62 AT ROW 4.54 COL 2.72
-          BGCOLOR 18 FGCOLOR 15 
-     "Concepto         Valor Débitos       Valor Créditos        Descripción Contrap." VIEW-AS TEXT
-          SIZE 60.86 BY .62 AT ROW 4.54 COL 49
-          BGCOLOR 18 FGCOLOR 15 
-     "A C C I Ó N" VIEW-AS TEXT
-          SIZE 9.72 BY .54 AT ROW 2.73 COL 81
+     "Tip   Ag.   Pdto  Cuenta                  Descripción" VIEW-AS TEXT
+          SIZE 37.43 BY .62 AT ROW 2.54 COL 2.57
+          BGCOLOR 17 FGCOLOR 0 
+     "TOT.DEBITOS" VIEW-AS TEXT
+          SIZE 13.14 BY .54 AT ROW 20.54 COL 38.43
           BGCOLOR 18 FGCOLOR 15 
      "TOT.CREDITOS" VIEW-AS TEXT
           SIZE 14.29 BY .54 AT ROW 20.54 COL 67.72
           BGCOLOR 18 FGCOLOR 15 
-     "TOT.DEBITOS" VIEW-AS TEXT
-          SIZE 13.14 BY .54 AT ROW 20.54 COL 38.43
+     "A C C I Ó N" VIEW-AS TEXT
+          SIZE 9.72 BY .54 AT ROW 2.73 COL 81
+          BGCOLOR 18 FGCOLOR 15 
+     "Concepto         Valor Débitos       Valor Créditos        Descripción Contrap." VIEW-AS TEXT
+          SIZE 60.86 BY .62 AT ROW 4.54 COL 49
+          BGCOLOR 18 FGCOLOR 15 
+     "Concepto  Contrapartida     Ced./Nit            Ref. /Cheq." VIEW-AS TEXT
+          SIZE 44.57 BY .62 AT ROW 4.54 COL 2.72
           BGCOLOR 18 FGCOLOR 15 
      "        Total Gmf" VIEW-AS TEXT
           SIZE 14.86 BY .54 AT ROW 20.54 COL 52.29
           BGCOLOR 18 FGCOLOR 15 
-     "Tip   Ag.   Pdto  Cuenta                  Descripción" VIEW-AS TEXT
-          SIZE 37.43 BY .62 AT ROW 2.54 COL 2.57
-          BGCOLOR 17 FGCOLOR 0 
      RECT-314 AT ROW 8.54 COL 101.14
      RECT-318 AT ROW 2.27 COL 63.86
      RECT-320 AT ROW 3.31 COL 64
@@ -1544,7 +1544,7 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL Btn_Contabilizar W-Tras_Cuentas
 ON CHOOSE OF Btn_Contabilizar IN FRAME F_Proc /* Contabilizar */
 DO:
-    DEFINE VAR TGmf LIKE TPC.Gmf INITIAL 0.
+    DEFINE VAR TGmf AS DECIMAL INITIAL 0.
 
     vTime = TIME.
 
@@ -1572,7 +1572,7 @@ DO:
         RETURN.
     END.
 
-    RUN Valida NO-ERROR.
+    RUN Valida NO-ERROR. /* oakley */
     IF ERROR-STATUS:ERROR THEN DO:
         MESSAGE "La configuración contable presentó errores... Proceso cancelado."
             VIEW-AS ALERT-BOX ERROR.
@@ -4126,16 +4126,21 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE DetectaMismoCliente W-Tras_Cuentas 
 PROCEDURE DetectaMismoCliente :
-DEFINE VAR Xnit LIKE Clientes.Nit.
-  W_MismoCliente = YES.
-  FIND FIRST Tpc WHERE Tpc.Nitp NE "".
-  XNit = Tpc.NitP.
-  FOR EACH TPC:
-      IF XNit NE Tpc.NitP THEN DO:
-         W_MismoCliente = NO. 
-         NEXT.
-      END.
-  END.
+DEFINE VAR Xnit AS CHARACTER.
+
+W_MismoCliente = YES.
+
+FIND FIRST Tpc WHERE Tpc.Nitp <> "".
+
+XNit = Tpc.NitP.
+
+FOR EACH TPC:
+    IF XNit <> Tpc.NitP THEN DO:
+        W_MismoCliente = NO.
+        NEXT.
+    END.
+END.
+
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
@@ -6697,30 +6702,30 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE Valida W-Tras_Cuentas 
 PROCEDURE Valida :
-DEFINE VAR xagencia LIKE cortolargo.agencia INITIAL 1.
+DEFINE VAR xagencia AS INTEGER INITIAL 1.
 
-FOR EACH Pro_Ahorros WHERE Pro_Ahorros.Estado EQ 1 NO-LOCK BY Pro_Ahorros.Cod_Ahorro:
+FOR EACH Pro_Ahorros WHERE Pro_Ahorros.Estado = 1 NO-LOCK BY Pro_Ahorros.Cod_Ahorro:
     DO xagencia = 1 TO 100:
         FOR EACH CortoLargo WHERE cortolargo.agencia = xagencia
-                              AND CortoLargo.Clase_Producto EQ 1
-                              AND CortoLargo.Cod_Producto EQ Pro_Ahorros.Cod_Ahorro
-                              AND CortoLargo.Plazo_Inicial GE 0 NO-LOCK BREAK BY CortoLargo.Agencia
+                              AND CortoLargo.Clase_Producto = 1
+                              AND CortoLargo.Cod_Producto = Pro_Ahorros.Cod_Ahorro
+                              AND CortoLargo.Plazo_Inicial >= 0 NO-LOCK BREAK BY CortoLargo.Agencia
                                                                               BY CortoLargo.Cod_Producto
                                                                               BY CortoLargo.Plazo_Inicial:
             IF FIRST-OF(CortoLargo.Cod_Producto) THEN DO:
                 CREATE TempCtas.
-                ASSIGN TempCtas.Age = CortoLargo.Agencia
-                       TempCtas.TipP = "A"
-                       TempCtas.Pto = CortoLargo.Cod_Producto
-                       TempCtas.CtaPro = CortoLargo.Cta_AsoAd
-                       TempCtas.CtaSyA = CortoLargo.Cta_SyA.
+                TempCtas.Age = CortoLargo.Agencia.
+                TempCtas.TipP = "A".
+                TempCtas.Pto = CortoLargo.Cod_Producto.
+                TempCtas.CtaPro = CortoLargo.Cta_AsoAd.
+                TempCtas.CtaSyA = CortoLargo.Cta_SyA.
 
-                IF Pro_Ahorros.Tip_Ahorro GE 4 THEN
+                IF Pro_Ahorros.Tip_Ahorro >= 4 THEN
                     NEXT.
 
-                FIND FIRST Liqui_Int WHERE Liqui_Int.Clase_Producto EQ 1
-                                       AND Liqui_Int.Cod_Producto EQ CortoLargo.Cod_Producto NO-LOCK NO-ERROR.
-                IF NOT AVAIL(Liqui_Int) THEN DO:
+                FIND FIRST Liqui_Int WHERE Liqui_Int.Clase_Producto = 1
+                                       AND Liqui_Int.Cod_Producto = CortoLargo.Cod_Producto NO-LOCK NO-ERROR.
+                IF NOT AVAILABLE(Liqui_Int) THEN DO:
                     MESSAGE "Falta Liqui_Int Para el Pro_Ahorros.Cod_Ahorro : " Pro_Ahorros.Cod_Ahorro SKIP
                         VIEW-AS ALERT-BOX ERROR.
 
@@ -6735,66 +6740,54 @@ FOR EACH Pro_Ahorros WHERE Pro_Ahorros.Estado EQ 1 NO-LOCK BY Pro_Ahorros.Cod_Ah
     END.
 END.
 
-/* oakley */
-
-/*IF AVAILABLE creditos THEN DO:*/
-    FOR EACH Pro_Creditos WHERE Pro_Creditos.Estado EQ 1 NO-LOCK BY Pro_Creditos.Cod_Credito:
-        DO xagencia = 1 TO 100:
-            FOR EACH CortoLargo WHERE cortolargo.agencia = xagencia
-                                  AND CortoLargo.Clase_Producto EQ 2
-                                  AND CortoLargo.Cod_Producto EQ Pro_Creditos.Cod_Credito
-                                  AND CortoLargo.Plazo_Inicial GE 0 NO-LOCK BREAK BY CortoLargo.Agencia
-                                                                                  BY CortoLargo.Cod_Producto
-                                                                                  BY CortoLargo.Plazo_Inicial:
-                IF FIRST-OF(CortoLargo.Cod_Producto) THEN DO:
-                    CREATE TempCtas.
-                    ASSIGN TempCtas.Age = CortoLargo.Agencia
-                           TempCtas.TipP = "C"
-                           TempCtas.Pto = CortoLargo.Cod_Producto
-                           TempCtas.CtaSyA = CortoLargo.Cta_SyA
-                           TempCtas.CtaHon = CortoLargo.Cta_HonorariosDB
-                           TempCtas.CtaPol = CortoLargo.Cta_PolizasDB
-                           TempCtas.CtaCos = CortoLargo.Cta_CostasDB
-                           TempCtas.CtaGar = CortoLargo.Cta_VigGarAd
-                           TempCtas.CtaCGa = CortoLargo.Cta_ContrapartidaGar.
-
-                    /*IF creditos.FOR_pago = 2 THEN*/
-                        TempCtas.CtaPro = CortoLargo.Cta_AsoAd.
-                        TempCtas.CtaProCaja = CortoLargo.Cta_NoaAd.
-                    /*ELSE
-                        TempCtas.CtaPro = CortoLargo.Cta_NoaAd.*/
-                    
-                    FIND FIRST Liqui_Int WHERE Liqui_Int.Clase_Producto EQ 2
-                                           AND Liqui_Int.Cod_Producto EQ CortoLargo.Cod_Producto NO-LOCK NO-ERROR.
-                    IF NOT AVAIL(Liqui_Int) THEN DO:
-                        MESSAGE "Falta Liqui_Int Para el Pro_Creditos.Cod_Credito : " Pro_Creditos.Cod_Credito SKIP
-                            VIEW-AS ALERT-BOX ERROR.
-
-                        /*RETURN ERROR.*/
-                    END.
-
-                    /*IF creditos.FOR_pago = 2 THEN*/
-                        ASSIGN TempCtas.CtaLiq = Liqui_Int.CtaDb_LiqAso
-                               TempCtas.CtaIng = Liqui_Int.CtaCr_LiqAso
-                               TempCtas.IntAnt = Liqui_Int.CtaInt_AntAso
-                               TempCtas.IntMor = Liqui_Int.CtaDb_MoraAso
-                               TempCtas.DifCoD = Liqui_Int.CtaDb_DifCobAso
-                               TempCtas.DifCoH = Liqui_Int.CtaCr_DifCobAso
-                               TempCtas.Oper = Liqui_Int.Cod_Operacion
-                               TempCtas.MorIng = Liqui_Int.CtaCr_MoraAso.
-                    /*ELSE*/
-                        ASSIGN TempCtas.CtaLiqCaja = Liqui_Int.CtaDb_Liq
-                               TempCtas.CtaIngCaja = Liqui_Int.CtaCr_Liq
-                               TempCtas.IntAntCaja = Liqui_Int.CtaInt_Ant
-                               TempCtas.IntMorCaja = Liqui_Int.CtaDb_Mora
-                               TempCtas.DifCoDCaja = Liqui_Int.CtaDb_DifCob
-                               TempCtas.DifCoHCaja = Liqui_Int.CtaCr_DifCob
-                               TempCtas.MorIngCaja = Liqui_Int.CtaCr_Mora.
+FOR EACH Pro_Creditos WHERE Pro_Creditos.Estado = 1 NO-LOCK BY Pro_Creditos.Cod_Credito:
+    DO xagencia = 1 TO 100:
+        FOR EACH CortoLargo WHERE cortolargo.agencia = xagencia
+                              AND CortoLargo.Clase_Producto = 2
+                              AND CortoLargo.Cod_Producto = Pro_Creditos.Cod_Credito
+                              AND CortoLargo.Plazo_Inicial >= 0 NO-LOCK BREAK BY CortoLargo.Agencia
+                                                                              BY CortoLargo.Cod_Producto
+                                                                              BY CortoLargo.Plazo_Inicial:
+            IF FIRST-OF(CortoLargo.Cod_Producto) THEN DO:
+                CREATE TempCtas.
+                TempCtas.Age = CortoLargo.Agencia.
+                TempCtas.TipP = "C".
+                TempCtas.Pto = CortoLargo.Cod_Producto.
+                TempCtas.CtaSyA = CortoLargo.Cta_SyA.
+                TempCtas.CtaHon = CortoLargo.Cta_HonorariosDB.
+                TempCtas.CtaPol = CortoLargo.Cta_PolizasDB.
+                TempCtas.CtaCos = CortoLargo.Cta_CostasDB.
+                TempCtas.CtaGar = CortoLargo.Cta_VigGarAd.
+                TempCtas.CtaCGa = CortoLargo.Cta_ContrapartidaGar.
+                TempCtas.CtaPro = CortoLargo.Cta_AsoAd.
+                TempCtas.CtaProCaja = CortoLargo.Cta_NoaAd.
+                
+                FIND FIRST Liqui_Int WHERE Liqui_Int.Clase_Producto = 2
+                                       AND Liqui_Int.Cod_Producto = CortoLargo.Cod_Producto NO-LOCK NO-ERROR.
+                IF NOT AVAILABLE(Liqui_Int) THEN DO:
+                    MESSAGE "Falta Liqui_Int Para el Pro_Creditos.Cod_Credito : " Pro_Creditos.Cod_Credito
+                        VIEW-AS ALERT-BOX ERROR.
                 END.
+
+                TempCtas.CtaLiq = Liqui_Int.CtaDb_LiqAso.
+                TempCtas.CtaIng = Liqui_Int.CtaCr_LiqAso.
+                TempCtas.IntAnt = Liqui_Int.CtaInt_AntAso.
+                TempCtas.IntMor = Liqui_Int.CtaDb_MoraAso.
+                TempCtas.DifCoD = Liqui_Int.CtaDb_DifCobAso.
+                TempCtas.DifCoH = Liqui_Int.CtaCr_DifCobAso.
+                TempCtas.Oper = Liqui_Int.Cod_Operacion.
+                TempCtas.MorIng = Liqui_Int.CtaCr_MoraAso.
+                TempCtas.CtaLiqCaja = Liqui_Int.CtaDb_Liq.
+                TempCtas.CtaIngCaja = Liqui_Int.CtaCr_Liq.
+                TempCtas.IntAntCaja = Liqui_Int.CtaInt_Ant.
+                TempCtas.IntMorCaja = Liqui_Int.CtaDb_Mora.
+                TempCtas.DifCoDCaja = Liqui_Int.CtaDb_DifCob.
+                TempCtas.DifCoHCaja = Liqui_Int.CtaCr_DifCob.
+                TempCtas.MorIngCaja = Liqui_Int.CtaCr_Mora.
             END.
         END.
     END.
-/*END.*/
+END.
 
 END PROCEDURE.
 

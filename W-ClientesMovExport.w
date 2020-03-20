@@ -178,17 +178,17 @@ DEFINE FRAME Frm-Main
      "Total Disponible:" VIEW-AS TEXT
           SIZE 16 BY .81 AT ROW 5.23 COL 5.43 WIDGET-ID 174
           FGCOLOR 12 
-     "Total Montos:" VIEW-AS TEXT
-          SIZE 13 BY .81 AT ROW 4.35 COL 8.29 WIDGET-ID 172
+     " Registros Leídos:" VIEW-AS TEXT
+          SIZE 17.14 BY .81 AT ROW 3.42 COL 4.29 WIDGET-ID 8
           FGCOLOR 12 
-     " Resumen:" VIEW-AS TEXT
-          SIZE 11 BY .81 AT ROW 2.69 COL 3.14 WIDGET-ID 4
-          FGCOLOR 0 
      "EXPORTAR CLIENTES - SALDOS" VIEW-AS TEXT
           SIZE 30 BY .5 AT ROW 1.73 COL 6.86 WIDGET-ID 26
           BGCOLOR 8 FONT 1
-     " Registros Leídos:" VIEW-AS TEXT
-          SIZE 17.14 BY .81 AT ROW 3.42 COL 4.29 WIDGET-ID 8
+     " Resumen:" VIEW-AS TEXT
+          SIZE 11 BY .81 AT ROW 2.69 COL 3.14 WIDGET-ID 4
+          FGCOLOR 0 
+     "Total Montos:" VIEW-AS TEXT
+          SIZE 13 BY .81 AT ROW 4.35 COL 8.29 WIDGET-ID 172
           FGCOLOR 12 
      RECT-345 AT ROW 3.19 COL 2.57 WIDGET-ID 2
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
@@ -577,11 +577,11 @@ DO:
                     cupo = 0.
 
                 /* Validar crédito de solidaridad */
-                FIND FIRST bfrCreditos WHERE bfrCreditos.nit = clientes.nit
+                /*FIND FIRST bfrCreditos WHERE bfrCreditos.nit = clientes.nit
                                          AND bfrCreditos.cod_credito = 158
                                          AND bfrCreditos.estado = 2 NO-LOCK NO-ERROR.
                 IF AVAILABLE bfrCreditos THEN
-                    cupo = 0.
+                    cupo = 0.*/
                 
                 /*RUN validarUsuarioSarlaft.R (INPUT clientes.nit, OUTPUT W_Sarlaft) NO-ERROR.
                 IF W_Sarlaft THEN
