@@ -705,10 +705,9 @@ DO TRANSACTION ON ERROR UNDO Liquidando:
                                      AND facturacion.num_credito = creditos.num_credito
                                      AND facturacion.estado = 1 NO-LOCK NO-ERROR.
             IF AVAILABLE facturacion THEN
-                RUN p-debitoAutomaticoRotativo.r (INPUT creditos.nit,
-                                                  INPUT creditos.cod_credito,
-                                                  INPUT creditos.num_credito,
-                                                  INPUT FALSE /* No debita del Ahorro Permanente */).
+                RUN p-debitoAutomaticoRotativo.r (INPUT ROWID(credito),
+                                                  INPUT FALSE, /* No debita del Ahorro Permanente */
+                                                  INPUT w_usuario) NO-ERROR.
         END.
     END.
     

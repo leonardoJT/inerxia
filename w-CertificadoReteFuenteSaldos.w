@@ -924,20 +924,20 @@ EMPTY TEMP-TABLE docs.
 EMPTY TEMP-TABLE ttmov.
 
 FOR EACH anexos WHERE anexos.nit = clientes.nit
-                  AND (SUBSTRING(anexos.cuenta,1,4) = "2695" OR SUBSTRING(anexos.cuenta,1,6) = "262505" OR SUBSTRING(anexos.cuenta,1,6) = "510521" OR SUBSTRING(anexos.cuenta,1,6) = "510595" OR
-                       SUBSTRING(anexos.cuenta,1,6) = "511002" OR SUBSTRING(anexos.cuenta,1,6) = "511005" OR SUBSTRING(anexos.cuenta,1,6) = "511006" OR SUBSTRING(anexos.cuenta,1,6) = "511007" OR
-                       SUBSTRING(anexos.cuenta,1,6) = "511009" OR SUBSTRING(anexos.cuenta,1,6) = "511010" OR SUBSTRING(anexos.cuenta,1,6) = "511011" OR SUBSTRING(anexos.cuenta,1,6) = "511012" OR
-                       SUBSTRING(anexos.cuenta,1,6) = "511013" OR SUBSTRING(anexos.cuenta,1,6) = "511014" OR SUBSTRING(anexos.cuenta,1,6) = "511015" OR SUBSTRING(anexos.cuenta,1,6) = "511016" OR
-                       SUBSTRING(anexos.cuenta,1,6) = "511018" OR SUBSTRING(anexos.cuenta,1,6) = "511019" OR SUBSTRING(anexos.cuenta,1,6) = "511020" OR SUBSTRING(anexos.cuenta,1,6) = "511021" OR
-                       SUBSTRING(anexos.cuenta,1,6) = "511022" OR SUBSTRING(anexos.cuenta,1,6) = "511023" OR SUBSTRING(anexos.cuenta,1,6) = "511024" OR SUBSTRING(anexos.cuenta,1,6) = "511025" OR
-                       SUBSTRING(anexos.cuenta,1,6) = "511026" OR SUBSTRING(anexos.cuenta,1,8) = "51102701" OR SUBSTRING(anexos.cuenta,1,8) = "51102702" OR SUBSTRING(anexos.cuenta,1,8) = "51102703" OR
-                       SUBSTRING(anexos.cuenta,1,8) = "51102704" OR SUBSTRING(anexos.cuenta,1,8) = "51102705" OR SUBSTRING(anexos.cuenta,1,6) = "511031" OR SUBSTRING(anexos.cuenta,1,6) = "511032" OR
-                       SUBSTRING(anexos.cuenta,1,6) = "511095" OR SUBSTRING(anexos.cuenta,1,4) = "5115" OR SUBSTRING(anexos.cuenta,1,4) = "5125" OR SUBSTRING(anexos.cuenta,1,6) = "521005" OR
-                       SUBSTRING(anexos.cuenta,1,6) = "521020" OR SUBSTRING(anexos.cuenta,1,6) = "523020" OR SUBSTRING(anexos.cuenta,1,6) = "523035" OR /*SUBSTRING(anexos.cuenta,1,6) = "523050" OR*/ /* Solicita Iván 04/04/2019 */
-                       SUBSTRING(anexos.cuenta,1,10) = "6140101102" OR SUBSTRING(anexos.cuenta,1,10) = "6140101108" OR SUBSTRING(anexos.cuenta,1,10) = "6140101110" OR SUBSTRING(anexos.cuenta,1,10) = "6140101114" OR
-                       SUBSTRING(anexos.cuenta,1,10) = "6140101116" OR SUBSTRING(anexos.cuenta,1,10) = "6140101118" OR SUBSTRING(anexos.cuenta,1,10) = "6140101122" OR SUBSTRING(anexos.cuenta,1,10) = "6140101136" OR
-                       SUBSTRING(anexos.cuenta,1,10) = "6140101140" OR SUBSTRING(anexos.cuenta,1,10) = "6140101195" OR SUBSTRING(anexos.cuenta,1,10) = "6140101251" OR SUBSTRING(anexos.cuenta,1,8) = "61509501" OR
-                       SUBSTRING(anexos.cuenta,1,8) = "61509502" OR SUBSTRING(anexos.cuenta,1,8) = "61509505" OR SUBSTRING(anexos.cuenta,1,8) = "61509512")
+                  AND (SUBSTRING(anexos.cuenta,1,4) = "2695"        OR  SUBSTRING(anexos.cuenta,1,6) = "262505"         OR  SUBSTRING(anexos.cuenta,1,6) = "510521"         OR  SUBSTRING(anexos.cuenta,1,6) = "510595"         OR
+                       SUBSTRING(anexos.cuenta,1,6) = "510522"      OR  SUBSTRING(anexos.cuenta,1,6) = "511005"         OR  SUBSTRING(anexos.cuenta,1,6) = "511006"         OR  SUBSTRING(anexos.cuenta,1,6) = "511007"         OR
+                       SUBSTRING(anexos.cuenta,1,6) = "511008"      OR  SUBSTRING(anexos.cuenta,1,6) = "511009"         OR  SUBSTRING(anexos.cuenta,1,6) = "511010"         OR  SUBSTRING(anexos.cuenta,1,6) = "511011"         OR
+                       SUBSTRING(anexos.cuenta,1,6) = "511012"      OR  SUBSTRING(anexos.cuenta,1,6) = "511013"         OR  SUBSTRING(anexos.cuenta,1,6) = "511014"         OR  SUBSTRING(anexos.cuenta,1,6) = "511015"         OR
+                       SUBSTRING(anexos.cuenta,1,6) = "511016"      OR  SUBSTRING(anexos.cuenta,1,6) = "511018"         OR  SUBSTRING(anexos.cuenta,1,6) = "511019"         OR  SUBSTRING(anexos.cuenta,1,6) = "511020"         OR
+                       SUBSTRING(anexos.cuenta,1,6) = "511021"      OR  SUBSTRING(anexos.cuenta,1,6) = "511022"         OR  SUBSTRING(anexos.cuenta,1,6) = "511023"         OR  SUBSTRING(anexos.cuenta,1,6) = "511024"         OR
+                       SUBSTRING(anexos.cuenta,1,6) = "511025"      OR  SUBSTRING(anexos.cuenta,1,6) = "511026"         OR  SUBSTRING(anexos.cuenta,1,8) = "51102701"       OR  SUBSTRING(anexos.cuenta,1,8) = "51102702"       OR
+                       SUBSTRING(anexos.cuenta,1,8) = "51102703"    OR  SUBSTRING(anexos.cuenta,1,8) = "51102704"       OR  SUBSTRING(anexos.cuenta,1,8) = "51102705"       OR  SUBSTRING(anexos.cuenta,1,6) = "511031"         OR
+                       SUBSTRING(anexos.cuenta,1,6) = "511032"      OR  SUBSTRING(anexos.cuenta,1,6) = "511095"         OR  SUBSTRING(anexos.cuenta,1,4) = "5115"           OR  SUBSTRING(anexos.cuenta,1,4) = "5125"           OR
+                       SUBSTRING(anexos.cuenta,1,6) = "521005"      OR  SUBSTRING(anexos.cuenta,1,6) = "521020"         OR  SUBSTRING(anexos.cuenta,1,6) = "523020"         OR  SUBSTRING(anexos.cuenta,1,6) = "523035"         OR
+                       SUBSTRING(anexos.cuenta,1,10) = "6140101102" OR  SUBSTRING(anexos.cuenta,1,10) = "6140101108"    OR  SUBSTRING(anexos.cuenta,1,10) = "6140101110"    OR  SUBSTRING(anexos.cuenta,1,10) = "6140101114"    OR
+                       SUBSTRING(anexos.cuenta,1,10) = "6140101116" OR  SUBSTRING(anexos.cuenta,1,10) = "6140101118"    OR  SUBSTRING(anexos.cuenta,1,10) = "6140101122"    OR  SUBSTRING(anexos.cuenta,1,10) = "6140101136"    OR
+                       SUBSTRING(anexos.cuenta,1,10) = "6140101140" OR  SUBSTRING(anexos.cuenta,1,10) = "6140101195"    OR  SUBSTRING(anexos.cuenta,1,10) = "6140101251"    OR  SUBSTRING(anexos.cuenta,1,8) = "61509501"       OR
+                       SUBSTRING(anexos.cuenta,1,8) = "61509502"    OR  SUBSTRING(anexos.cuenta,1,8) = "61509505"       OR  SUBSTRING(anexos.cuenta,1,8) = "61509512")
                   AND anexos.ano = wAno NO-LOCK BREAK BY anexos.nit
                                                       BY anexos.cuenta:
     FIND FIRST cuentas WHERE cuentas.cuenta = anexos.cuenta NO-LOCK NO-ERROR.
@@ -962,7 +962,8 @@ FOR EACH anexos WHERE anexos.nit = clientes.nit
         ELSE DO:
             TCer.Bas = TCer.Bas + anexos.db[cont].
 
-            FOR EACH mov_contable WHERE mov_contable.cuenta = anexos.cuenta
+            FOR EACH mov_contable WHERE mov_contable.agencia = anexos.agencia
+                                    AND mov_contable.cuenta = anexos.cuenta
                                     AND mov_contable.nit = anexos.nit
                                     AND YEAR(mov_contable.fec_contable) = wAno
                                     AND MONTH(mov_contable.fec_contable) = cont
@@ -975,38 +976,43 @@ FOR EACH anexos WHERE anexos.nit = clientes.nit
     END.
 
     IF LAST-OF(anexos.cuenta) THEN DO:
-        IF SUBSTRING(anexos.cuenta,1,6) = "511005" OR SUBSTRING(anexos.cuenta,1,6) = "511013" OR SUBSTRING(anexos.cuenta,1,6) = "511014" OR SUBSTRING(anexos.cuenta,1,6) = "511016" OR SUBSTRING(anexos.cuenta,1,6) = "511019" OR
-           SUBSTRING(anexos.cuenta,1,6) = "511024" OR SUBSTRING(anexos.cuenta,1,6) = "511025" OR SUBSTRING(anexos.cuenta,1,8) = "51102701" OR SUBSTRING(anexos.cuenta,1,8) = "51102702" OR SUBSTRING(anexos.cuenta,1,8) = "51102703" OR
-           SUBSTRING(anexos.cuenta,1,8) = "51102704" OR SUBSTRING(anexos.cuenta,1,8) = "51102705" OR SUBSTRING(anexos.cuenta,1,6) = "511031" OR SUBSTRING(anexos.cuenta,1,6) = "511032" OR SUBSTRING(anexos.cuenta,1,8) = "52100501" OR
-           SUBSTRING(anexos.cuenta,1,8) = "52100502" OR SUBSTRING(anexos.cuenta,1,8) = "52100504" OR SUBSTRING(anexos.cuenta,1,8) = "52100510" OR SUBSTRING(anexos.cuenta,1,6) = "521020" OR
-           SUBSTRING(anexos.cuenta,1,10) = "6140101108" OR SUBSTRING(anexos.cuenta,1,10) = "6140101114" OR SUBSTRING(anexos.cuenta,1,10) = "6140101136" OR SUBSTRING(anexos.cuenta,1,10) = "6140101140" OR
-            SUBSTRING(anexos.cuenta,1,8) = "61509502" OR SUBSTRING(anexos.cuenta,1,8) = "61509512" THEN
-            ASSIGN ctaRete1 = "243525"
-                   ctaRete2 = "243525"
-                   ctaRete3 = "243525".
+        IF SUBSTRING(anexos.cuenta,1,6) = "511005"      OR  SUBSTRING(anexos.cuenta,1,6) = "511013"         OR  SUBSTRING(anexos.cuenta,1,6) = "511014"         OR  SUBSTRING(anexos.cuenta,1,6) = "511016"     OR  SUBSTRING(anexos.cuenta,1,6) = "511019"         OR
+           SUBSTRING(anexos.cuenta,1,6) = "511024"      OR  SUBSTRING(anexos.cuenta,1,6) = "511025"         OR  SUBSTRING(anexos.cuenta,1,8) = "51102701"       OR  SUBSTRING(anexos.cuenta,1,8) = "51102702"   OR  SUBSTRING(anexos.cuenta,1,8) = "51102703"       OR
+           SUBSTRING(anexos.cuenta,1,8) = "51102704"    OR  SUBSTRING(anexos.cuenta,1,8) = "51102705"       OR  SUBSTRING(anexos.cuenta,1,6) = "511031"         OR  SUBSTRING(anexos.cuenta,1,6) = "511032"     OR  SUBSTRING(anexos.cuenta,1,8) = "52100501"       OR
+           SUBSTRING(anexos.cuenta,1,8) = "52100502"    OR  SUBSTRING(anexos.cuenta,1,8) = "52100504"       OR  SUBSTRING(anexos.cuenta,1,8) = "52100510"       OR  SUBSTRING(anexos.cuenta,1,6) = "521020"     OR  SUBSTRING(anexos.cuenta,1,10) = "6140101108"    OR
+           SUBSTRING(anexos.cuenta,1,10) = "6140101114" OR  SUBSTRING(anexos.cuenta,1,10) = "6140101136"    OR  SUBSTRING(anexos.cuenta,1,10) = "6140101140"    OR  SUBSTRING(anexos.cuenta,1,8) = "61509502"   OR  SUBSTRING(anexos.cuenta,1,8) = "61509512" THEN DO:
+            ctaRete1 = "243525".
+            ctaRete2 = "243525".
+            ctaRete3 = "243525".
+        END.
 
-        IF SUBSTRING(anexos.cuenta,1,6) = "510521" OR SUBSTRING(anexos.cuenta,1,6) = "511011" OR SUBSTRING(anexos.cuenta,1,6) = "511015" OR SUBSTRING(anexos.cuenta,1,10) = "6140101195" OR
-            SUBSTRING(anexos.cuenta,1,10) = "6140101251" THEN
-            ASSIGN ctaRete1 = "243540"
-                   ctaRete2 = "243540"
-                   ctaRete3 = "243540".
+        IF SUBSTRING(anexos.cuenta,1,6) = "510521"  OR  SUBSTRING(anexos.cuenta,1,6) = "510522" OR  SUBSTRING(anexos.cuenta,1,6) = "511011" OR  SUBSTRING(anexos.cuenta,1,6) = "511015" OR  SUBSTRING(anexos.cuenta,1,10) = "6140101195"    OR
+           SUBSTRING(anexos.cuenta,1,10) = "6140101251" THEN DO:
+            ctaRete1 = "243525".
+            ctaRete2 = "243540".
+            ctaRete3 = "243540".
+        END.
 
-        IF SUBSTRING(anexos.cuenta,1,4) = "2695" THEN
-            ASSIGN ctaRete1 = "243585"
-                   ctaRete2 = "243585"
-                   ctaRete3 = "243585".
+        IF SUBSTRING(anexos.cuenta,1,4) = "2695" THEN DO:
+            ctaRete1 = "243585".
+            ctaRete2 = "243585".
+            ctaRete3 = "243585".
+        END.
 
-        IF SUBSTRING(anexos.cuenta,1,6) = "511006" OR SUBSTRING(anexos.cuenta,1,6) = "511007" OR SUBSTRING(anexos.cuenta,1,6) = "511009" OR SUBSTRING(anexos.cuenta,1,6) = "511010" OR SUBSTRING(anexos.cuenta,1,6) = "511018" OR
-           SUBSTRING(anexos.cuenta,1,6) = "511020" OR SUBSTRING(anexos.cuenta,1,6) = "511021" OR SUBSTRING(anexos.cuenta,1,6) = "511022" OR SUBSTRING(anexos.cuenta,1,6) = "511023" OR SUBSTRING(anexos.cuenta,1,6) = "511026" OR
-           SUBSTRING(anexos.cuenta,1,6) = "511095" OR SUBSTRING(anexos.cuenta,1,10) = "6140101110" OR SUBSTRING(anexos.cuenta,1,10) = "6140101116" OR SUBSTRING(anexos.cuenta,1,10) = "6140101118" THEN
-            ASSIGN ctaRete1 = "243525"
-                   ctaRete2 = "243540"
-                   ctaRete3 = "243540".
+        IF SUBSTRING(anexos.cuenta,1,6) = "262505"  OR  SUBSTRING(anexos.cuenta,1,6) = "511006" OR  SUBSTRING(anexos.cuenta,1,6) = "511007" OR  SUBSTRING(anexos.cuenta,1,6) = "511008"         OR  SUBSTRING(anexos.cuenta,1,6) = "511009"         OR
+           SUBSTRING(anexos.cuenta,1,6) = "511010"  OR  SUBSTRING(anexos.cuenta,1,6) = "511018" OR  SUBSTRING(anexos.cuenta,1,6) = "511020" OR  SUBSTRING(anexos.cuenta,1,6) = "511021"         OR  SUBSTRING(anexos.cuenta,1,6) = "511022"         OR
+           SUBSTRING(anexos.cuenta,1,6) = "511023"  OR SUBSTRING(anexos.cuenta,1,6) = "511026"  OR  SUBSTRING(anexos.cuenta,1,6) = "511095" OR  SUBSTRING(anexos.cuenta,1,10) = "6140101110"    OR  SUBSTRING(anexos.cuenta,1,10) = "6140101116"    OR
+           SUBSTRING(anexos.cuenta,1,10) = "6140101118" THEN DO:
+            ctaRete1 = "243525".
+            ctaRete2 = "243540".
+            ctaRete3 = "243585".
+        END.
 
-        IF SUBSTRING(anexos.cuenta,1,6) = "262505" THEN
-            ASSIGN ctaRete1 = "243585"
-                   ctaRete2 = "243525"
-                   ctaRete3 = "243540".
+        IF SUBSTRING(anexos.cuenta,1,6) = "511029" THEN DO:
+            ctaRete1 = "243515".
+            ctaRete2 = "243525".
+            ctaRete3 = "243585".
+        END.
 
         FOR EACH mov_contable WHERE mov_contable.cuenta = anexos.cuenta
                                 AND YEAR(mov_contable.fec_contable) = wAno

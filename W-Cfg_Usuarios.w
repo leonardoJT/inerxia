@@ -233,11 +233,11 @@ DEFINE FRAME DEFAULT-FRAME
            VIEW-AS TEXT 
           SIZE 12 BY .62
           BGCOLOR 3 FGCOLOR 3 
+     "Datos Básicos" VIEW-AS TEXT
+          SIZE 15 BY .62 AT ROW 2.62 COL 3 WIDGET-ID 40
      "               ADMINISTRACIÓN DE USUARIOS" VIEW-AS TEXT
           SIZE 102.29 BY 1.08 AT ROW 1.27 COL 1.72 WIDGET-ID 8
           BGCOLOR 3 
-     "Datos Básicos" VIEW-AS TEXT
-          SIZE 15 BY .62 AT ROW 2.62 COL 3 WIDGET-ID 40
      " Estado y contraseña" VIEW-AS TEXT
           SIZE 20.43 BY .62 AT ROW 2.62 COL 76.57 WIDGET-ID 70
      RECT-1 AT ROW 11.5 COL 61.57 WIDGET-ID 26
@@ -400,31 +400,50 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnAgregar C-Win
 ON CHOOSE OF btnAgregar IN FRAME DEFAULT-FRAME /* Button 231 */
 DO:
-    DEFINE VAR cont AS INTEGER.
+    cId:SENSITIVE = TRUE.
+    cId:SCREEN-VALUE = "".
+
+    btnBuscarCliente:SENSITIVE = TRUE.
+
+    cNombre:SCREEN-VALUE = "".
+
+    cEmail:SCREEN-VALUE = "".
+
+    cUsuario:SENSITIVE = TRUE.
+    cUsuario:SCREEN-VALUE = "".
+
+    cmbPerfiles:SENSITIVE = TRUE.
+    cmbPerfiles:SCREEN-VALUE = "".
 
     cmbAgencia:SENSITIVE = TRUE.
     cmbAgencia:SCREEN-VALUE = cmbAgencia:ENTRY(1).
+
     cmbPrivilegios:SENSITIVE = TRUE.
-    CmbPrivilegios:SCREEN-VALUE = CmbPrivilegios:ENTRY(1).
-    cUsuario:SENSITIVE = TRUE.
-    cUsuario:SCREEN-VALUE = "".
-    cNombre:SENSITIVE = TRUE.
-    cNombre:SCREEN-VALUE = "".
-    cId:SENSITIVE = TRUE.
-    cId:SCREEN-VALUE = "".
-    cEmail:SCREEN-VALUE = "".
-    cmbPerfiles:SENSITIVE = TRUE.
+    /*CmbPrivilegios:SCREEN-VALUE = CmbPrivilegios:ENTRY(1).*/
+    CmbPrivilegios:SCREEN-VALUE = "".
+
+    usuarios.id_opeOfi:SENSITIVE = TRUE.
+    usuarios.id_opeOfi:SCREEN-VALUE = "no".
+    
     tgPermiteCambioDeFecha:SENSITIVE = TRUE.
     tgPermiteCambioDeFecha:SCREEN-VALUE = "no".
+
     tgPermiteGestionDeCobranza:SENSITIVE = TRUE.
     tgPermiteGestionDeCobranza:SCREEN-VALUE = "no".
+
     usuarios.pedir_clave:SCREEN-VALUE = "no".
-    usuarios.id_opeOfi:SCREEN-VALUE = "no".
+    
+    usuarios.fec_creacion:SCREEN-VALUE = STRING(TODAY,"99/99/9999").
+
     usuarios.fec_retiro:SCREEN-VALUE = "".
+    
     usuarios.fec_ultCam:SCREEN-VALUE = "".
 
-    btnGuardar:SENSITIVE = TRUE.
+    btnBuscar:SENSITIVE = FALSE.
+    btnAgregar:SENSITIVE = FALSE.
+    btnEliminar:SENSITIVE = FALSE.
     btnEditar:SENSITIVE = FALSE.
+    btnGuardar:SENSITIVE = TRUE.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -439,7 +458,7 @@ DO:
 
     ASSIGN C-Win:SENSITIVE = FALSE.
 
-    RUN C-Usuarios.R(OUTPUT rowIdUsuario).
+    RUN C-Usuarios.R (OUTPUT rowIdUsuario).
 
     ASSIGN C-Win:SENSITIVE = TRUE.
 
@@ -448,13 +467,17 @@ DO:
         cId:SCREEN-VALUE = usuarios.nit.
         cId:SENSITIVE = FALSE.
         cNombre:SCREEN-VALUE = usuarios.nombre.
-        cNombre:SENSITIVE = TRUE.
+        cNombre:SENSITIVE = FALSE.
         cEmail:SCREEN-VALUE = usuarios.email.
-        cEmail:SENSITIVE = TRUE.
+        cEmail:SENSITIVE = FALSE.
         cUsuario:SCREEN-VALUE = usuarios.usuario.
         cUsuario:SENSITIVE = FALSE.
 
         FIND FIRST grupos WHERE grupos.grupo = usuarios.grupo NO-LOCK NO-ERROR.
+
+        cmbPerfiles:SCREEN-VALUE = STRING(grupos.grupo,"99") + " - " + grupos.nombre.
+        cmbPerfiles:SENSITIVE = FALSE.
+
         FIND FIRST agencias WHERE agencias.agencia = usuarios.agencia NO-LOCK NO-ERROR.
 
         cmbAgencia:SCREEN-VALUE = STRING(agencias.agencia,"99") + " - " + agencias.nombre.
@@ -475,13 +498,6 @@ DO:
         btnEditar:SENSITIVE = TRUE.
         btnEliminar:SENSITIVE = TRUE.
         btnAgregar:SENSITIVE = TRUE.
-
-        /* oakley */
-
-        IF activosFijos.estado = 2 THEN DO:
-            btnEditar:SENSITIVE = FALSE.
-            btnEliminar:SENSITIVE = FALSE.
-        END.
     END.
     ELSE DO:
         cmbAgencia:SENSITIVE = FALSE.
@@ -494,6 +510,7 @@ DO:
         cNombre:SCREEN-VALUE = "".
         cId:SENSITIVE = FALSE.
         cId:SCREEN-VALUE = "".
+        cEmail:SENSITIVE = FALSE.
         cEmail:SCREEN-VALUE = "".
         cmbPerfiles:SENSITIVE = FALSE.
         cmbPerfiles:SCREEN-VALUE = "".

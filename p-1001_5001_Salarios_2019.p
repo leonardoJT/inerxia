@@ -60,6 +60,7 @@ DEFINE VAR vYear AS INTEGER INITIAL 2019.
 
 FOR EACH anexos WHERE (SUBSTRING(anexos.cuenta,1,6) = "510503" OR
                        SUBSTRING(anexos.cuenta,1,6) = "510505" OR
+                       SUBSTRING(anexos.cuenta,1,6) = "510508" OR
                        SUBSTRING(anexos.cuenta,1,6) = "510509" OR
                        SUBSTRING(anexos.cuenta,1,6) = "510510" OR
                        SUBSTRING(anexos.cuenta,1,6) = "510511" OR
@@ -229,6 +230,7 @@ IF pOrigen = "E" THEN DO:
     FOR EACH sal_cuenta WHERE (SUBSTRING(sal_cuenta.cuenta,1,6) = "510503" OR
                                SUBSTRING(sal_cuenta.cuenta,1,6) = "510505" OR
                                SUBSTRING(sal_cuenta.cuenta,1,6) = "510509" OR
+                               SUBSTRING(sal_cuenta.cuenta,1,6) = "510508" OR
                                SUBSTRING(sal_cuenta.cuenta,1,6) = "510510" OR
                                SUBSTRING(sal_cuenta.cuenta,1,6) = "510511" OR
                                SUBSTRING(sal_cuenta.cuenta,1,6) = "510512" OR

@@ -196,6 +196,8 @@ DEFINE TEMP-TABLE tt_correos
     FIELD nit AS CHARACTER
     FIELD email AS CHARACTER.
 
+DEFINE VAR tasaRotativos AS DECIMAL.
+
 /************************************************/
 
 /* _UIB-CODE-BLOCK-END */
@@ -1842,12 +1844,14 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE CorteRotativos wWin 
 PROCEDURE CorteRotativos :
+DEFINE OUTPUT PARAMETER pResult AS LOGICAL.
+
 DEFINE VAR flagAtraso AS LOGICAL.
 DEFINE VAR atrasoInteres AS DECIMAL.
 DEFINE VAR atrasoInteresDifCobro AS DECIMAL.
 DEFINE VAR atrasoMora AS DECIMAL.
 DEFINE VAR fechaPago AS DATE.
-DEFINE VAR cuotaCapital AS DECIMAL.
+DEFINE VAR plazoDiferir AS INTEGER.
 
 IF cfg_tarjetaDB.diaPagoCupoRotativo > cfg_tarjetaDB.diaCorteCupoRotativo THEN
     fechaPago = DATE(MONTH(w_fecha), cfg_tarjetaDB.diaPagoCupoRotativo, YEAR(w_fecha)).
@@ -1855,6 +1859,12 @@ ELSE DO:
     fechaPago = ADD-INTERVAL(w_fecha,1,"months").
     fechaPago = DATE(MONTH(fechaPago), cfg_tarjetaDB.diaPagoCupoRotativo, YEAR(fechaPago)).
 END.
+
+creditos.tasa = tasaRotativos * 12.
+
+/* Revisamos si es posible facturar el crédito o este se encuentra prorrogado */
+IF creditos.fec_pago >= DATE(MONTH(ADD-INTERVAL(fechaPago,1,"months")),1,YEAR(ADD-INTERVAL(fechaPago,1,"months"))) THEN
+    RETURN.
 
 /* Calculamos los valores pendientes */
 FOR EACH facturacion WHERE facturacion.nit = creditos.nit
@@ -1881,36 +1891,29 @@ IF facturacion.INT_corriente < 0 THEN facturacion.INT_corriente = 0.
 IF facturacion.INT_difCobro < 0 THEN facturacion.INT_difCobro = 0.
 IF facturacion.INT_mora < 0 THEN facturacion.INT_mora = 0.
 
-/* Recorremos mov_Creditos para identificar si es necesario refinanciar */
-FOR EACH mov_creditos WHERE mov_creditos.nit = creditos.nit
-                        AND mov_creditos.num_credito = creditos.num_credito
-                        AND mov_creditos.fecha > ADD-INTERVAL(w_fecha,-1,"months")
-                        AND mov_Creditos.cod_operacion <> 020102008 NO-LOCK BY mov_creditos.fecha DESCENDING:
-    FIND FIRST operacion WHERE operacion.cod_operacion = mov_creditos.cod_operacion NO-LOCK NO-ERROR.
-    IF AVAILABLE operacion THEN DO:
-        IF operacion.tipo_operacion = 2 THEN DO:
-            facturacion.capital = ROUND(creditos.sdo_capital / 36,0).
-            creditos.cuo_pagadas = 0.
+IF creditos.sdo_capital > 0 THEN DO:
+    FOR EACH utilizacionesRotativo WHERE utilizacionesRotativo.cliente_id = creditos.nit
+                                     AND utilizacionesRotativo.credito_id = creditos.num_credito
+                                     AND utilizacionesRotativo.saldo > 0
+                                     AND utilizacionesRotativo.estado = 1 BY utilizaciones.cuotas_restantes:
+        IF utilizaciones.cuotas_restantes > plazoDiferir THEN DO:
+            plazoDiferir = utilizaciones.cuotas_restantes.
 
-            FIND FIRST cfg_tarjetaDB NO-LOCK NO-ERROR.
-            IF AVAILABLE cfg_tarjetaDB THEN
-                creditos.plazo = cfg_tarjetaDB.plazoCupo.
-
-            LEAVE.
+            IF plazoDiferir > creditos.plazo - creditos.cuo_pagadas THEN DO:
+                creditos.plazo = plazoDiferir.
+                creditos.cuo_pagadas = 0.
+            END.
         END.
+
+        utilizacionesRotativo.cuota_capital = utilizacionesRotativo.cuota_capital + ROUND(utilizacionesRotativo.saldo / plazoDiferir,0).
+        facturacion.capital = facturacion.capital + ROUND(utilizacionesRotativo.saldo / plazoDiferir,0).
+        utilizacionesRotativo.cuotas_restantes = plazoDiferir - 1.
     END.
 END.
-
-IF creditos.sdo_capital > 0 THEN
-    facturacion.capital = ROUND(creditos.sdo_capital / (creditos.plazo - creditos.cuo_pagadas),0).
 
 facturacion.cuota = facturacion.capital + facturacion.INT_corriente + facturacion.INT_difCobro + facturacion.INT_mora.
 
 IF facturacion.cuota = 0 THEN DO:
-    /*facturacion.INT_corriente = creditos.INT_corriente.
-    facturacion.INT_difCobro = creditos.INT_difCobro.
-    facturacion.INT_mora = creditos.INT_mora.
-    facturacion.cuota = facturacion.capital + facturacion.INT_corriente + facturacion.INT_difCobro + facturacion.INT_mora.*/
     DELETE facturacion.
     LEAVE.
 END.
@@ -1949,7 +1952,10 @@ ASSIGN Mov_Creditos.Agencia = Creditos.Agencia
 
 RUN Rp_FacturaCupoRotativo.r (INPUT creditos.nit,
                               INPUT creditos.num_credito,
-                              INPUT w_fecha) NO-ERROR.
+                              INPUT w_fecha,
+                              INPUT tasaRotativos) NO-ERROR.
+
+pResult = TRUE.
 
 END PROCEDURE.
 
@@ -2172,23 +2178,18 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE Fin_Liquidacion wWin 
 PROCEDURE Fin_Liquidacion :
-/*------------------------------------------------------------------------------
-  Purpose:     
-  Parameters:  <none>
-  Notes:       
-------------------------------------------------------------------------------*/
- HIDE FRAME F_Progreso.
+HIDE FRAME F_Progreso.
 
- ASSIGN P_Age:SCREEN-VALUE IN FRAME F_Progreso    = "0"
-        P_NroCre:SCREEN-VALUE IN FRAME F_Progreso = "0"
-        P_Nit:SCREEN-VALUE IN FRAME F_Progreso    = ""
-        W_Mensaje:SCREEN-VALUE IN FRAME F_Progreso = "".
+P_Age:SCREEN-VALUE IN FRAME F_Progreso = "0".
+P_NroCre:SCREEN-VALUE IN FRAME F_Progreso = "0".
+P_Nit:SCREEN-VALUE IN FRAME F_Progreso = "".
+W_Mensaje:SCREEN-VALUE IN FRAME F_Progreso = "".
 
- /*Grabación del listado de liquidacion*/
-  DEFINE VAR Listado AS CHARACTER INITIAL "".
+/*Grabación del listado de liquidacion*/
+DEFINE VAR Listado AS CHARACTER INITIAL "".
 
-  listado = W_PathSpl + "\000-" + STRING(W_Fecha,"999999") + "CpLCre.Lst".
-  {incluido/ImpArch.I "Listado"} 
+listado = W_PathSpl + "\000-" + STRING(W_Fecha,"999999") + "CpLCre.Lst".
+{incluido/ImpArch.I "Listado"}
 
 END PROCEDURE.
 
@@ -2500,24 +2501,33 @@ END PROCEDURE.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE Liquidacion wWin 
 PROCEDURE Liquidacion :
 DEFINE VAR interesDia AS DECIMAL.
-DEFINE VAR basetem AS DECIMAL.
+DEFINE VAR baseLiquidacion AS DECIMAL.
 DEFINE VAR flagDebitar AS LOGICAL.
 DEFINE VAR sumaDebitar AS DECIMAL.
 DEFINE VAR valorCxC AS DECIMAL.
 DEFINE VAR cont AS INTEGER.
 DEFINE VAR vPath AS CHARACTER.
+DEFINE VAR pResult AS LOGICAL.
 
 Liquidando:
 DO TRANSACTION ON ERROR UNDO Liquidando:
     FIND FIRST cfg_creditos NO-LOCK NO-ERROR.
     FIND FIRST cfg_tarjetaDB NO-LOCK NO-ERROR.
 
-    IF DAY(w_fecha) = cfg_tarjetaDB.diaCorteCupoRotativo THEN
+    IF DAY(w_fecha) = cfg_tarjetaDB.diaCorteCupoRotativo THEN DO:
         MESSAGE "Se realizará la generación de facturas de cupos rotativos." SKIP
                 "Recomendamos borrar el contenido de la carpeta donde se" SKIP
                 "encuentran ubicados los históricos antes de cerrar esta" SKIP
                 "ventana..."
             VIEW-AS ALERT-BOX INFO BUTTONS OK.
+
+        FIND FIRST pro_creditos WHERE pro_credito.cod_credito = 123 NO-LOCK NO-ERROR.
+        IF AVAILABLE(pro_creditos) THEN DO:
+            FIND FIRST indicadores WHERE Indicadores.indicador = pro_creditos.cod_tasa  NO-LOCK NO-ERROR.
+            IF AVAILABLE(indicadores) THEN
+                tasaRotativos = (((EXP((indicadores.tasa / 100) + 1,1 / 12)) - 1) * 100).
+        END.
+    END.
 
     FOR EACH Agencias WHERE Agencias.Estado <> 3
                         AND Agencias.Agencia >= W_OfiIni
@@ -2555,10 +2565,9 @@ DO TRANSACTION ON ERROR UNDO Liquidando:
                                              AND facturacion.num_credito = creditos.num_credito
                                              AND facturacion.estado = 1 NO-LOCK NO-ERROR.
                     IF AVAILABLE facturacion THEN DO:
-                        RUN p-debitoAutomaticoRotativo.r (INPUT creditos.nit,
-                                                          INPUT creditos.cod_credito,
-                                                          INPUT creditos.num_credito,
-                                                          INPUT TRUE /* Debita incluso del Ahorro Permanente */).
+                        RUN p-debitoAutomaticoRotativo.r (INPUT ROWID(creditos),
+                                                          INPUT TRUE, /* Debita incluso del Ahorro Permanente */
+                                                          INPUT w_usuario).
                     END.
                 END.
                 ELSE
@@ -2582,10 +2591,9 @@ DO TRANSACTION ON ERROR UNDO Liquidando:
                                      AND facturacion.num_credito = creditos.num_credito
                                      AND facturacion.estado = 1 NO-LOCK NO-ERROR.
             IF AVAILABLE facturacion THEN
-                RUN p-debitoAutomaticoRotativo.r (INPUT creditos.nit,
-                                                  INPUT creditos.cod_credito,
-                                                  INPUT creditos.num_credito,
-                                                  INPUT FALSE /* No debita del Ahorro Permanente */).
+                RUN p-debitoAutomaticoRotativo.r (INPUT ROWID(creditos),
+                                                  INPUT FALSE, /* No debita del Ahorro Permanente */
+                                                  INPUT w_usuario).
         END.
         /* ---------------------------- */
 
@@ -2683,23 +2691,23 @@ DO TRANSACTION ON ERROR UNDO Liquidando:
             IF creditos.cod_credito <> 123 THEN
                 RUN ActualizarDiasDeAtraso.
             ELSE
-                RUN ActualizarDiasDeAtrasoRotativos. /* oakley */
+                RUN ActualizarDiasDeAtrasoRotativos.
 
-            FIND FIRST Indicadores WHERE Indicadores.Indicador EQ Pro_Creditos.Cod_TasaMax
-                                     AND Indicadores.Estado EQ 1
-                                     AND Indicadores.FecVcto GE W_Fecha NO-LOCK NO-ERROR.
+            FIND FIRST Indicadores WHERE Indicadores.Indicador = Pro_Creditos.Cod_TasaMax
+                                     AND Indicadores.Estado = 1
+                                     AND Indicadores.FecVcto >= W_Fecha NO-LOCK NO-ERROR.
             IF AVAILABLE Indicadores THEN
                 tasaUsura = Indicadores.Tasa.
             ELSE DO:
-                FIND LAST Indicadores WHERE Indicadores.Indicador  EQ Entidad.Ind_Usura
-                                        AND Indicadores.Estado EQ 1 NO-LOCK NO-ERROR.
+                FIND LAST Indicadores WHERE Indicadores.Indicador = Entidad.Ind_Usura
+                                        AND Indicadores.Estado = 1 NO-LOCK NO-ERROR.
                 IF AVAILABLE Indicadores THEN
                     tasaUsura = Indicadores.Tasa.
                 ELSE
                     tasaUsura = 0.
             END.
 
-            IF tasaUsura GT 0 THEN DO:
+            IF tasaUsura > 0 THEN DO:
                 RUN EFNV IN W_ManFin (INPUT tasaUsura / 100,
                                       INPUT periodos,
                                       OUTPUT tasaUsura).
@@ -2707,83 +2715,94 @@ DO TRANSACTION ON ERROR UNDO Liquidando:
                 tasaUsura = tasaUsura * 100 * periodos.
             END.
 
-            ASSIGN P_Age:SCREEN-VALUE IN FRAME F_Progreso = STRING(Creditos.Agencia,"999")
-                   P_NroCre:SCREEN-VALUE IN FRAME F_Progreso = STRING(Creditos.Num_Credito,"999999999")
-                   P_Nit:SCREEN-VALUE IN FRAME F_Progreso = Creditos.Nit
-                   W_Mensaje:SCREEN-VALUE IN FRAME F_Progreso = "Liquidando Creditos"
-                   W_IntMora = 0.
+            P_Age:SCREEN-VALUE IN FRAME F_Progreso = STRING(Creditos.Agencia,"999").
+            P_NroCre:SCREEN-VALUE IN FRAME F_Progreso = STRING(Creditos.Num_Credito,"999999999").
+            P_Nit:SCREEN-VALUE IN FRAME F_Progreso = Creditos.Nit.
+            W_Mensaje:SCREEN-VALUE IN FRAME F_Progreso = "Liquidando Creditos".
+            W_IntMora = 0.
             
-            FIND FIRST Tmp-Conta WHERE Tmp-Conta.WC_Age EQ Creditos.Agencia
-                                   AND Tmp-Conta.WC_CodPdt EQ Creditos.Cod_Credito
-                                   AND Tmp-Conta.WC_ForPag EQ Creditos.FOR_Pago
+            FIND FIRST Tmp-Conta WHERE Tmp-Conta.WC_Age = Creditos.Agencia
+                                   AND Tmp-Conta.WC_CodPdt = Creditos.Cod_Credito
+                                   AND Tmp-Conta.WC_ForPag = Creditos.FOR_Pago
                                    AND Tmp-Conta.WC_Nit = creditos.nit NO-ERROR.
-            
             IF NOT AVAILABLE Tmp-Conta THEN DO:
                 CREATE Tmp-Conta.
-                ASSIGN Tmp-Conta.WC_Age = Creditos.Agencia
-                       Tmp-Conta.WC_CodPdt = Creditos.Cod_Credito
-                       Tmp-Conta.WC_ForPag = Creditos.FOR_Pago
-                       Tmp-Conta.WC_Nit = creditos.nit.
+                Tmp-Conta.WC_Age = Creditos.Agencia.
+                Tmp-Conta.WC_CodPdt = Creditos.Cod_Credito.
+                Tmp-Conta.WC_ForPag = Creditos.FOR_Pago.
+                Tmp-Conta.WC_Nit = creditos.nit.
             END.
 
-            IF Creditos.Tasa GT tasaUsura THEN         /*Tasas para liquid.respetando la Proyecc del PlanPagos*/
-                ASSIGN tasaLiquidacion = tasaUsura.
+            IF Creditos.Tasa > tasaUsura THEN
+                tasaLiquidacion = tasaUsura.
             ELSE
-                ASSIGN tasaLiquidacion = Creditos.Tasa.
+                tasaLiquidacion = Creditos.Tasa.
             
             RUN Dias_DificilCobro.
 
             IF creditos.cod_credito = 108 OR creditos.cod_credito = 113 THEN DO:
-                basetem = creditos.sdo_capital + creditos.INT_corriente.
+                baseLiquidacion = creditos.sdo_capital + creditos.INT_corriente.
 
-                IF basetem >= creditos.cuota THEN
-                    basetem = 0.
+                IF baseLiquidacion >= creditos.cuota THEN
+                    baseLiquidacion = 0.
             END.
             ELSE
-                basetem = creditos.sdo_capital - creditos.val_atraso.
+                baseLiquidacion = creditos.sdo_capital - creditos.val_atraso.
 
-            ASSIGN interesDia = ROUND(basetem * (tasaLiquidacion / 360),0) * dias_aLiquidar
-                   interesDia = ROUND(interesDia / 100,0)
-                   Tmpi.T_BaseLiq = basetem 
-                   Tmpi.T_TasaLiq = (tasaLiquidacion / 360)
-                   Tmpi.T_TasaDes = (Creditos.Tasa / 360).
+            IF creditos.cod_credito <> 123 THEN DO:
+                interesDia = ROUND(baseLiquidacion * (tasaLiquidacion / 360),0) * dias_aLiquidar.
+                interesDia = ROUND(interesDia / 100,0).
+                Tmpi.T_BaseLiq = baseLiquidacion.
+                Tmpi.T_TasaLiq = (tasaLiquidacion / 360).
+                Tmpi.T_TasaDes = (Creditos.Tasa / 360).
 
-            /* Para todas las periodicidades, excepto la semanal, no se liquida interés el 31 */
-            IF creditos.per_pago = 1 AND dias_aLiquidar = 0 THEN
-                ASSIGN interesDia = ROUND(basetem * (tasaLiquidacion / 360),0) * 1
-                       interesDia = ROUND(interesDia / 100,0)
-                       Tmpi.T_BaseLiq = basetem 
-                       Tmpi.T_TasaLiq = (tasaLiquidacion  / 360)
-                       Tmpi.T_TasaDes = (Creditos.Tasa / 360).
-            
-            /* Crédito Rotatorios a 01 cuota (1 mes) no tienen interès */
-            IF creditos.cod_credito = 123 AND diasPeriodo = 30 AND creditos.plazo = 1 THEN
-                interesDia = 0.
-
-            IF interesDia > 0 THEN DO:
-                /* Revisamos que el interés no sobrepase el interés ya calculado para los créditos de cuota única (108-113) */
-                IF (creditos.cod_credito = 108 OR creditos.cod_credito = 113 OR creditos.plazo = 1) AND creditos.sdo_capital + creditos.INT_corriente + interesDia > creditos.cuota THEN
-                    interesDia = creditos.cuota - (creditos.sdo_capital + creditos.INT_corriente).
-
-                IF Creditos.Dias_Atraso > W_Diaddc THEN
-                    ASSIGN Creditos.Int_DifCobro = Creditos.Int_DifCobro + interesDia /* Contingente */
-                           tmp-conta.WC_DifCob = tmp-conta.WC_DifCob + interesDia
-                           Tmpi.T_DifCob = interesDia.
-                ELSE
-                    ASSIGN tmp-conta.WC_IntCte = tmp-conta.WC_IntCte + interesDia
-                           Tmpi.T_IntCte = interesDia
-                           Creditos.Int_Corrientes = Creditos.Int_Corrientes + interesDia.
-
-                /* Acumulamos el interés corriente en el respectivo registro del Plan de Pagos */
-                FIND FIRST CONTROL_pagos WHERE CONTROL_pagos.nit = creditos.nit
-                                           AND CONTROL_pagos.num_credito = creditos.num_credito
-                                           AND CONTROL_pagos.fec_Vcto > w_fecha
-                                           AND CONTROL_pagos.Id_PdoMes < 2 USE-INDEX ppal4 NO-ERROR.
-                IF AVAILABLE CONTROL_pagos THEN
-                    CONTROL_pagos.causacion = CONTROL_pagos.causacion + interesDia.
+                /* Para todas las periodicidades, excepto la semanal, no se liquida interés el 31 */
+                IF creditos.per_pago = 1 AND dias_aLiquidar = 0 THEN DO:
+                    interesDia = ROUND(baseLiquidacion * (tasaLiquidacion / 360),0) * 1.
+                    interesDia = ROUND(interesDia / 100,0).
+                    Tmpi.T_BaseLiq = baseLiquidacion.
+                    Tmpi.T_TasaLiq = (tasaLiquidacion / 360).
+                    Tmpi.T_TasaDes = (Creditos.Tasa / 360).
+                END.
+            END.
+            ELSE DO:
+                FOR EACH utilizacionesRotativo WHERE utilizacionesRotativo.cliente_id = creditos.nit
+                                                 AND utilizacionesRotativo.credito_id = creditos.num_credito
+                                                 AND utilizacionesRotativo.fec_utilizacion <= w_fecha
+                                                 AND utilizacionesRotativo.saldo > 0
+                                                 AND utilizacionesRotativo.estado = 1 NO-LOCK:
+                    interesDia = interesDia + (ROUND((utilizacionesRotativo.saldo * ((utilizacionesRotativo.tasa / 30) / 100)),0) * dias_aLiquidar).
+                END.
             END.
 
-            IF Creditos.Val_Atraso GT 0 AND Creditos.Dias_Atraso GT 0 THEN DO:
+            IF interesDia > 0 THEN DO:
+                /* Revisamos que el interés no sobrepase el interés ya calculado para los créditos de cuota única */
+                IF (creditos.cod_credito = 108 OR creditos.cod_credito = 113 OR creditos.cod_credito = 114) AND creditos.sdo_capital + creditos.INT_corriente + interesDia > creditos.cuota THEN
+                    interesDia = creditos.cuota - (creditos.sdo_capital + creditos.INT_corriente).
+
+                IF Creditos.Dias_Atraso > W_Diaddc THEN DO:
+                    Creditos.Int_DifCobro = Creditos.Int_DifCobro + interesDia.
+                    tmp-conta.WC_DifCob = tmp-conta.WC_DifCob + interesDia.
+                    Tmpi.T_DifCob = interesDia.
+                END.
+                ELSE DO:
+                    tmp-conta.WC_IntCte = tmp-conta.WC_IntCte + interesDia.
+                    Tmpi.T_IntCte = interesDia.
+                    Creditos.Int_Corrientes = Creditos.Int_Corrientes + interesDia.
+                END.
+
+                /* Acumulamos el interés corriente en el respectivo registro del Plan de Pagos */
+                IF creditos.cod_credito <> 123 THEN DO:
+                    FIND FIRST CONTROL_pagos WHERE CONTROL_pagos.nit = creditos.nit
+                                               AND CONTROL_pagos.num_credito = creditos.num_credito
+                                               AND CONTROL_pagos.fec_Vcto > w_fecha
+                                               AND CONTROL_pagos.Id_PdoMes < 2 USE-INDEX ppal4 NO-ERROR.
+                    IF AVAILABLE CONTROL_pagos THEN
+                        CONTROL_pagos.causacion = CONTROL_pagos.causacion + interesDia.
+                END.
+            END.
+            
+            IF Creditos.Val_Atraso > 0 AND Creditos.Dias_Atraso > 0 THEN DO:
                 ASSIGN W_IntMora = ROUND(Creditos.Val_Atraso * (tasaUsura / 360),0) * dias_aLiquidar
                        W_IntMora = ROUND(W_IntMora / 100 ,0)
                        Tmpi.T_BaseMora = Creditos.Val_Atraso
@@ -2795,49 +2814,33 @@ DO TRANSACTION ON ERROR UNDO Liquidando:
                     W_IntMora = 0.
                 /* ----------------------------------------------------------------------- */
 
-                IF Creditos.Int_Anticipado GT 0 AND W_IntMora GT 0 THEN DO:  /*Anticipados con Int-mora por si se DA*/
-                    IF Creditos.Int_Anticipado GE W_IntMora THEN
-                        ASSIGN Creditos.Int_Anticipado = Creditos.Int_Anticipado - W_IntMora
-                               Tmpi.T_IntAnt = Tmpi.T_IntAnt + W_IntMora
-                               Tmpi.T_IntMorAmor = W_IntMora
-                               Tmp-Conta.WC_IntAnt = tmp-conta.WC_IntAnt + W_IntMora
-                               W_IntMora = 0.
-                    ELSE
-                        ASSIGN W_IntMora = W_IntMora - Creditos.Int_Anticipado
-                               Tmpi.T_IntAnt = Tmpi.T_IntAnt + Creditos.INT_Anticipado
-                               Tmpi.T_IntMorAmor = Creditos.INT_Anticipado
-                               tmp-conta.WC_IntAnt = tmp-conta.WC_IntAnt + Creditos.INT_Anticipado
-
-                               /* oakley */
-
-                               Creditos.Int_Anticipado = 0.
-                END.
-
                 /* Control para los créditos rotativos con dos días de mora: Deben liquidar dos días de interés */
                 IF creditos.cod_credito = 123 AND creditos.dias_atraso = 2 THEN
                     w_intMora = w_intMora * 2.
                 /* ----------------------- */
 
-                ASSIGN Creditos.Int_MorCobrar = Creditos.Int_MorCobrar + W_IntMora
-                       tmp-conta.WC_IntMor = tmp-conta.WC_IntMor + W_IntMora
-                       Tmpi.T_IntMor = W_IntMora.
+                Creditos.Int_MorCobrar = Creditos.Int_MorCobrar + W_IntMora.
+                tmp-conta.WC_IntMor = tmp-conta.WC_IntMor + W_IntMora.
+                Tmpi.T_IntMor = W_IntMora.
 
-                FOR EACH CONTROL_pagos WHERE CONTROL_pagos.nit = creditos.nit
-                                         AND CONTROL_pagos.num_credito = creditos.num_credito
-                                         AND CONTROL_pagos.Id_PdoMes < 2 BY CONTROL_pagos.fec_vcto:
-                    CONTROL_pagos.INT_mora = creditos.INT_morCobrar.
-                    LEAVE.
+                IF creditos.cod_credito <> 123 THEN DO:
+                    FOR EACH CONTROL_pagos WHERE CONTROL_pagos.nit = creditos.nit
+                                             AND CONTROL_pagos.num_credito = creditos.num_credito
+                                             AND CONTROL_pagos.Id_PdoMes < 2 BY CONTROL_pagos.fec_vcto:
+                        CONTROL_pagos.INT_mora = creditos.INT_morCobrar.
+                        LEAVE.
+                    END.
                 END.
             END.
 
-            ASSIGN Creditos.Fec_UltLiquidacion = W_Fecha
-                   Creditos.Fec_ProxLiquidacion = W_Fecha + 1
-                   Tmpi.T_Catego = Creditos.Categoria.
+            Creditos.Fec_UltLiquidacion = W_Fecha.
+            Creditos.Fec_ProxLiquidacion = W_Fecha + 1.
+            Tmpi.T_Catego = Creditos.Categoria.
 
             IF creditos.cod_credito = 123 AND creditos.fec_pago = w_fecha THEN
                 creditos.dias_atraso = 0.
         END.
-        
+
         /* Corte Rotativos */
         IF DAY(w_fecha) = cfg_tarjetaDB.diaCorteCupoRotativo THEN DO:
             FOR EACH Creditos WHERE Creditos.Agencia = agencias.agencia
@@ -2845,18 +2848,19 @@ DO TRANSACTION ON ERROR UNDO Liquidando:
                                 AND creditos.sdo_Capital + creditos.INT_corriente + creditos.INT_morCobrar + creditos.INT_difCobro + creditos.Int_MoraDifCob > 0
                                 AND Creditos.Estado = 2
                                 AND creditos.detalle_estado <> 2:
-                FIND FIRST clientes WHERE clientes.nit = creditos.nit NO-LOCK NO-ERROR.
-                CREATE tt_correos.
-                tt_correos.nit = creditos.nit.
-                tt_correos.email = clientes.email.
+                RUN corteRotativos (OUTPUT pResult) NO-ERROR.
 
-                RUN corteRotativos.
+                IF pResult = TRUE THEN DO:
+                    FIND FIRST clientes WHERE clientes.nit = creditos.nit NO-LOCK NO-ERROR.
+                    CREATE tt_correos.
+                    tt_correos.nit = creditos.nit.
+                    tt_correos.email = clientes.email.
+                END.
             END.
         END.
         /* --------------- */
     END.
 
-    
     IF DAY(w_fecha) = cfg_tarjetaDB.diaCorteCupoRotativo THEN DO:
         OUTPUT TO Reportes\FacturasCupos\correos.csv.
         EXPORT DELIMITER ";" "Num_Id" "email".
@@ -2866,13 +2870,9 @@ DO TRANSACTION ON ERROR UNDO Liquidando:
         OUTPUT CLOSE.
     END.
     
-    IF ERROR-STATUS:ERROR THEN DO:
-        /*RETURN ERROR.*/
-    END.
-
     RUN Contabilizar NO-ERROR.
     IF ERROR-STATUS:ERROR THEN DO:
-        MESSAGE "Error en Contabilizacion"
+        MESSAGE "Error en Contabilización"
             VIEW-AS ALERT-BOX ERROR.
 
         RETURN ERROR.
@@ -2881,15 +2881,15 @@ DO TRANSACTION ON ERROR UNDO Liquidando:
     W_SiProceso = TRUE.
 
     FOR EACH Agencias WHERE Agencias.Estado <> 3
-                        AND Agencias.Agencia GE W_OfiIni
-                        AND Agencias.Agencia LE W_OfiFin NO-LOCK:
-        FIND FIRST ProcDia WHERE ProcDia.Agencia EQ agencias.agencia
-                             AND ProcDia.Cod_Proceso EQ 1
-                             AND ProcDia.Fecha_Proc EQ W_Fecha NO-ERROR.
+                        AND Agencias.Agencia >= W_OfiIni
+                        AND Agencias.Agencia <= W_OfiFin NO-LOCK:
+        FIND FIRST ProcDia WHERE ProcDia.Agencia = agencias.agencia
+                             AND ProcDia.Cod_Proceso = 1
+                             AND ProcDia.Fecha_Proc = W_Fecha NO-ERROR.
         IF AVAILABLE(ProcDia) AND ProcDia.Estado = 1 THEN
             ProcDia.Estado = 2.
     END.
-END.  /*Fin Tx*/
+END.
 
 RUN Fin_Liquidacion.
 

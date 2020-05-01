@@ -6,7 +6,6 @@ DEFINE OUTPUT PARAMETER pRetencion AS DECIMAL.
 
 DEFINE VAR vNumId_ini AS CHARACTER.
 DEFINE VAR vNumId_fin AS CHARACTER.
-DEFINE VAR ctaRete AS CHARACTER.
 
 IF pOrigen = 'C' THEN DO:
     vNumId_ini = pNumId.
@@ -59,8 +58,7 @@ DEFINE BUFFER bfrMovContable FOR mov_contable.
 DEFINE VAR vYear AS INTEGER INITIAL 2019.
 
 
-FOR EACH anexos WHERE (SUBSTRING(anexos.cuenta,1,8) = "52100505" OR
-                       SUBSTRING(anexos.cuenta,1,6) = "615005" OR
+FOR EACH anexos WHERE (SUBSTRING(anexos.cuenta,1,6) = "615005" OR
                        SUBSTRING(anexos.cuenta,1,6) = "615010" OR
                        SUBSTRING(anexos.cuenta,1,8) = "61501501" OR
                        SUBSTRING(anexos.cuenta,1,6) = "615020" OR
@@ -172,11 +170,6 @@ FOR EACH anexos WHERE (SUBSTRING(anexos.cuenta,1,8) = "52100505" OR
     END.
 
     IF LAST-OF(anexos.cuenta) THEN DO:
-        IF SUBSTRING(anexos.cuenta,1,8) = "52100505" THEN
-            ctaRete = "243525".
-        ELSE
-            ctaRete = "243535".
-
         FOR EACH mov_contable WHERE mov_contable.cuenta = anexos.cuenta
                                 AND mov_contable.nit = anexos.nit
                                 AND YEAR(mov_contable.fec_contable) = vYear NO-LOCK:
@@ -198,7 +191,7 @@ FOR EACH anexos WHERE (SUBSTRING(anexos.cuenta,1,8) = "52100505" OR
                                           AND bfrMovContable.num_documento = docs.num_documento
                                           AND bfrMovContable.nit = docs.nit
                                           AND bfrMovContable.fec_contable = docs.fec_contable
-                                          AND SUBSTRING(bfrMovContable.cuenta,1,6) = ctaRete NO-LOCK:
+                                          AND SUBSTRING(bfrMovContable.cuenta,1,6) = "243535" NO-LOCK:
                     F1001.ReteFuenteRta = F1001.ReteFuenteRta + bfrMovContable.cr - bfrMovContable.db.
                 END.
             END.
@@ -219,8 +212,7 @@ IF pOrigen = "E" THEN DO:
         totalReporte = totalReporte + F1001.pagosCostoDeduccion.
     END.
 
-    FOR EACH sal_cuenta WHERE (SUBSTRING(sal_cuenta.cuenta,1,8) = "52100505" OR
-                               SUBSTRING(sal_cuenta.cuenta,1,6) = "615005" OR
+    FOR EACH sal_cuenta WHERE (SUBSTRING(sal_cuenta.cuenta,1,6) = "615005" OR
                                SUBSTRING(sal_cuenta.cuenta,1,6) = "615010" OR
                                SUBSTRING(sal_cuenta.cuenta,1,8) = "61501501" OR
                                SUBSTRING(sal_cuenta.cuenta,1,6) = "615020" OR

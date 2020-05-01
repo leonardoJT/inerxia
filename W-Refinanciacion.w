@@ -576,7 +576,8 @@ ON CHOOSE OF btnFecPago IN FRAME F_Creditos /* Fecha de próximo pago */
 DO:
     IF creditos.cuo_pagadas = 0 AND (creditos.cod_credito <> 108 AND
                                      creditos.cod_credito <> 113 AND
-                                     creditos.cod_credito <> 114) THEN DO:
+                                     creditos.cod_credito <> 114 AND
+                                     creditos.cod_credito <> 123) THEN DO:
         MESSAGE "No se permite esta operación ya que el crédito no registra" SKIP
                 "registra cuotas pagadas. Use la opción 'Fecha de primer pago'."
             VIEW-AS ALERT-BOX INFO BUTTONS OK.
@@ -903,11 +904,11 @@ DO:
         flagFormaDePago = FALSE.
     END.
 
-    IF flagRearmarAmortizacion = TRUE THEN
+    IF flagRearmarAmortizacion = TRUE AND creditos.cod_credito <> 123 THEN
         RUN crearControlPagosRefinancia.r (INPUT creditos.nit,
                                            INPUT creditos.num_credito,
                                            INPUT creditos.tasa,
-                                           INPUT "Se modifica periodicidad de pago").
+                                           INPUT novedad).
 
     RUN cambiarEstado.
     
@@ -1718,6 +1719,8 @@ DEFINE VAR numPeriodos AS INTEGER.
 DEFINE VAR P_NomPer AS CHARACTER.
 DEFINE VAR interesPreinicio AS INTEGER.
 DEFINE VAR totalMonto AS INTEGER.
+DEFINE VAR vValorPresenteCuotaExtra AS DECIMAL.
+DEFINE VAR vTotalValorPresenteCuotaExtra AS DECIMAL.
 
 /* Simulamos el cambio */
 vPlazo = creditos.plazo.
@@ -1730,7 +1733,18 @@ IF creditos.cod_credito <> 123 THEN DO:
                                    OUTPUT numPeriodos,
                                    OUTPUT P_NomPer).
 
-    RUN NVEF IN w_manFin (INPUT creditos.tasa / 100 / numPeriodos,
+    FOR EACH Extras WHERE Extras.Nit = creditos.nit
+                      AND Extras.Num_Solicitud = creditos.num_solicitud
+                      AND extras.Fec_Vcto >= creditos.fec_pago NO-LOCK BY Extras.Nro_Cuota:
+        RUN HPDF IN W_ManFin (INPUT Extras.Vr_CuoExtra,
+                              INPUT (creditos.tasa / (numPeriodos * 100)),
+                              INPUT Extras.Nro_Cuota - creditos.cuo_pagadas,
+                              OUTPUT vValorPresenteCuotaExtra).
+        
+        vTotalValorPresenteCuotaExtra = vTotalValorPresenteCuotaExtra + vValorPresenteCuotaExtra.
+    END.
+
+    RUN NVEF IN w_manFin (INPUT creditos.tasa / 100,
                           INPUT numPeriodos,
                           OUTPUT vTasa).
 
@@ -1741,7 +1755,7 @@ IF creditos.cod_credito <> 123 THEN DO:
     intCorriente = creditos.INT_corriente + creditos.INT_difCobro.
     vTasa = vTasa * 100.
 
-    totalMonto = creditos.sdo_capital + interesPreinicio.
+    totalMonto = creditos.sdo_capital - vTotalValorPresenteCuotaExtra + interesPreinicio.
 
     RUN Calculo_Cuota.R (INPUT-OUTPUT totalMonto,
                          INPUT-OUTPUT nuevoPlazo,
@@ -1768,55 +1782,55 @@ IF flagYes = TRUE THEN DO:
     
     IF creditos.cod_credito <> 123 THEN DO:
         creditos.fec_pagAnti = creditos.fec_pago.
-        creditos.fec_desembolso = w_fecha.
+        
+        IF creditos.fec_pago <= w_fecha THEN
+            creditos.fec_desembolso = creditos.fec_pago - diasPeriodo.
+        ELSE
+            creditos.fec_desembolso = w_fecha.
+
         creditos.cuo_pagadas = 0.
         creditos.monto = creditos.sdo_Capital.
     END.
 
     creditos.plazo = nuevoPlazo.
     creditos.cuota = vCuota.
-    
-    IF creditos.cod_credito <> 123 THEN DO:
-        RUN CrearControlPagos.r(INPUT creditos.nit,
-                                INPUT creditos.num_credito).
-    END.
 
     CREATE Mov_Creditos.
-    ASSIGN Mov_Creditos.Agencia = Creditos.Agencia
-           Mov_Creditos.Cod_Credito = Creditos.Cod_Credito
-           Mov_Creditos.Nit = Creditos.Nit
-           Mov_Creditos.Num_Credito = Creditos.Num_Credito
-           Mov_Creditos.Cod_Operacion = 999999999
-           Mov_Creditos.Ofi_Destino = Creditos.Agencia
-           Mov_Creditos.Ofi_Fuente = W_Agencia
-           Mov_Creditos.Pagare = Creditos.Pagare
-           Mov_Creditos.Fecha = W_Fecha
-           Mov_Creditos.Hora = vTime
-           Mov_Creditos.Usuario = W_Usuario
-           Mov_Creditos.Int_Corriente = Creditos.Int_Corriente + creditos.INT_difCobro
-           Mov_Creditos.Int_MorCobrar = Creditos.Int_MorCobrar + Creditos.Int_MoraDifCob
-           Mov_Creditos.Sdo_Capital = Creditos.Sdo_Capital
-           Mov_Creditos.Cpte = 20
-           Mov_Creditos.Descrip = "Plazo - " + STRING(vPlazo) + " --> " + STRING(creditos.plazo).
+    Mov_Creditos.Agencia = Creditos.Agencia.
+    Mov_Creditos.Cod_Credito = Creditos.Cod_Credito.
+    Mov_Creditos.Nit = Creditos.Nit.
+    Mov_Creditos.Num_Credito = Creditos.Num_Credito.
+    Mov_Creditos.Cod_Operacion = 999999999.
+    Mov_Creditos.Ofi_Destino = Creditos.Agencia.
+    Mov_Creditos.Ofi_Fuente = W_Agencia.
+    Mov_Creditos.Pagare = Creditos.Pagare.
+    Mov_Creditos.Fecha = W_Fecha.
+    Mov_Creditos.Hora = vTime.
+    Mov_Creditos.Usuario = W_Usuario.
+    Mov_Creditos.Int_Corriente = Creditos.Int_Corriente + creditos.INT_difCobro.
+    Mov_Creditos.Int_MorCobrar = Creditos.Int_MorCobrar + Creditos.Int_MoraDifCob.
+    Mov_Creditos.Sdo_Capital = Creditos.Sdo_Capital.
+    Mov_Creditos.Cpte = 20.
+    Mov_Creditos.Descrip = "Plazo - " + STRING(vPlazo) + " --> " + STRING(creditos.plazo).
 
     IF creditos.cod_credito <> 123 THEN DO:
         CREATE Mov_Creditos.
-        ASSIGN Mov_Creditos.Agencia = Creditos.Agencia
-               Mov_Creditos.Cod_Credito = Creditos.Cod_Credito
-               Mov_Creditos.Nit = Creditos.Nit
-               Mov_Creditos.Num_Credito = Creditos.Num_Credito
-               Mov_Creditos.Cod_Operacion = 999999999
-               Mov_Creditos.Ofi_Destino = Creditos.Agencia
-               Mov_Creditos.Ofi_Fuente = W_Agencia
-               Mov_Creditos.Pagare = Creditos.Pagare
-               Mov_Creditos.Fecha = W_Fecha
-               Mov_Creditos.Hora = vTime
-               Mov_Creditos.Usuario = W_Usuario
-               Mov_Creditos.Int_Corriente = Creditos.Int_Corriente + creditos.INT_difCobro
-               Mov_Creditos.Int_MorCobrar = Creditos.Int_MorCobrar + Creditos.Int_MoraDifCob
-               Mov_Creditos.Sdo_Capital = Creditos.Sdo_Capital
-               Mov_Creditos.Cpte = 20
-               Mov_Creditos.Descrip = "Cuota - $" + replace(STRING(cuotaAnterior,">>>,>>>,>>9")," ","") + " --> $" + replace(STRING(creditos.cuota,">>>,>>>,>>9")," ","").
+        Mov_Creditos.Agencia = Creditos.Agencia.
+        Mov_Creditos.Cod_Credito = Creditos.Cod_Credito.
+        Mov_Creditos.Nit = Creditos.Nit.
+        Mov_Creditos.Num_Credito = Creditos.Num_Credito.
+        Mov_Creditos.Cod_Operacion = 999999999.
+        Mov_Creditos.Ofi_Destino = Creditos.Agencia.
+        Mov_Creditos.Ofi_Fuente = W_Agencia.
+        Mov_Creditos.Pagare = Creditos.Pagare.
+        Mov_Creditos.Fecha = W_Fecha.
+        Mov_Creditos.Hora = vTime.
+        Mov_Creditos.Usuario = W_Usuario.
+        Mov_Creditos.Int_Corriente = Creditos.Int_Corriente + creditos.INT_difCobro.
+        Mov_Creditos.Int_MorCobrar = Creditos.Int_MorCobrar + Creditos.Int_MoraDifCob.
+        Mov_Creditos.Sdo_Capital = Creditos.Sdo_Capital.
+        Mov_Creditos.Cpte = 20.
+        Mov_Creditos.Descrip = "Cuota - $" + replace(STRING(cuotaAnterior,">>>,>>>,>>9")," ","") + " --> $" + replace(STRING(creditos.cuota,">>>,>>>,>>9")," ","").
     END.
 
     CLOSE QUERY Br_Pdctos.

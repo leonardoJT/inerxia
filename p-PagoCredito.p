@@ -194,6 +194,15 @@ DO TRANSACTION ON ERROR UNDO Abono:
                                    AND facturacion.estado = 1 BY facturacion.fec_pago:
                 facturacion.estado = 2.
             END.
+
+            /* Cancelo las utilizaciones pendientes */
+            FOR EACH utilizacionesRotativo WHERE utilizacionesRotativo.cliente_id = creditos.nit
+                                             AND utilizacionesRotativo.credito_id = creditos.num_credito
+                                             AND utilizacionesRotativo.saldo > 0
+                                             AND utilizacionesRotativo.estado = 1:
+                utilizacionesRotativo.saldo = 0.
+                utilizacionesRotativo.fec_cancelacion = TODAY.
+            END.
         END.
 
         RUN MovCreditos NO-ERROR.
@@ -203,10 +212,15 @@ DO TRANSACTION ON ERROR UNDO Abono:
     ELSE DO:
         INT_corrienteDev = 0.
         
-        IF creditos.cod_credito = 123 AND creditos.fec_pago < TODAY AND creditos.dias_atraso = 0 THEN
+        IF creditos.cod_credito <> 123 OR
+           creditos.fec_pago >= TODAY OR
+           creditos.dias_atraso <> 0 THEN
+            INT_moraDev = 0.
+
+        /*IF creditos.cod_credito = 123 AND creditos.fec_pago < TODAY AND creditos.dias_atraso = 0 THEN
             INT_moraDev = INT_moraDev.
         ELSE
-            INT_moraDev = 0.
+            INT_moraDev = 0.*/
 
         INT_difCobroDev = 0.
         INT_moraDifCobroDev = 0.
@@ -249,7 +263,7 @@ DO TRANSACTION ON ERROR UNDO Abono:
     END.
 
     /* Pólizas */
-    IF PorDist GT 0 THEN DO:
+    IF PorDist > 0 THEN DO:
         IF PorDist >= Creditos.Polizas AND Creditos.Polizas > 0 THEN
             ASSIGN pPoliza = Creditos.Polizas
                    PorDist = PorDist - pPoliza.
@@ -505,8 +519,10 @@ DO TRANSACTION ON ERROR UNDO Abono:
         IF creditos.detalle_estado <> 2 THEN /* Si el crédito no está congelado */
             RUN A_controlpagos NO-ERROR.
     END.
-    ELSE
-        RUN ActualizaFacturacion.
+    ELSE DO:
+        RUN ActualizaFacturacion (INPUT pCapital) NO-ERROR.
+        RUN actualizaUtilizaciones (INPUT pCapital) NO-ERROR.
+    END.
 
     RETURN.
 END.
@@ -782,15 +798,6 @@ PROCEDURE ConfigCtas:
     END.
 
     /* oakley */
-
-    /* Cuenta para la contabilización de Pólizas */
-    IF CortoLargo.Cta_PolizasDB  <= "0" THEN DO:
-        MESSAGE "No se encuentra configurada la cuenta en CortoLargo.Cta_PolizasDB."
-            VIEW-AS ALERT-BOX INFO BUTTONS OK.
-
-        pSobrante = pValorAbono.
-        RETURN ERROR.
-    END.
 
     /* Cuenta para la contabilización de costas */
     IF CortoLargo.Cta_CostasDB <= "0" THEN DO:
@@ -1280,6 +1287,8 @@ PROCEDURE actualizaInteresContingente:
 END PROCEDURE.
 
 PROCEDURE ActualizaFacturacion:
+    DEFINE INPUT PARAMETER pCapitalFacturas AS DECIMAL.
+
     DEFINE VAR pagaCuotas AS INTEGER.
 
     FOR EACH facturacion WHERE facturacion.nit = creditos.nit
@@ -1314,14 +1323,14 @@ PROCEDURE ActualizaFacturacion:
             pIntDifCobro = 0.
         END.
 
-        IF pCapital >= facturacion.capital - facturacion.pago_capital THEN DO:
+        IF pCapitalFacturas >= facturacion.capital - facturacion.pago_capital THEN DO:
             /*facturacion.pago_capital = facturacion.pago_capital + (facturacion.capital - facturacion.pago_capital).*/
-            pCapital = pCapital - (facturacion.capital - facturacion.pago_capital).
+            pCapitalFacturas = pCapitalFacturas - (facturacion.capital - facturacion.pago_capital).
             facturacion.pago_capital = facturacion.capital.
         END.
         ELSE DO:
-            facturacion.pago_capital = facturacion.pago_capital + pCapital.
-            pCapital = 0.
+            facturacion.pago_capital = facturacion.pago_capital + pCapitalFacturas.
+            pCapitalFacturas = 0.
         END.
 
         IF facturacion.int_mora - facturacion.pago_mora <= 0 AND
@@ -1358,4 +1367,63 @@ PROCEDURE ActualizaFacturacion:
     ELSE
         creditos.sdo_proyectado = creditos.sdo_capital.
 
+END PROCEDURE.
+
+
+PROCEDURE actualizaUtilizaciones:
+    DEFINE INPUT PARAMETER pCapitalUtilizaciones AS DECIMAL.
+
+    /* 1. Reocrro todas las utilizaciones cancelando los valores pendientes */
+    FOR EACH utilizacionesRotativo WHERE utilizacionesRotativo.cliente_id = creditos.nit
+                                     AND utilizacionesRotativo.credito_id = creditos.num_credito
+                                     AND utilizacionesRotativo.saldo > 0
+                                     AND utilizaciones.cuota_capital > 0
+                                     AND utilizacionesRotativo.estado = 1 BY utilizacionesRotativo.fec_utilizacion
+                                                                          BY utilizacionesRotativo.hora_utilizacion:
+        IF pCapitalUtilizaciones >= utilizacionesRotativo.cuota_Capital THEN DO:
+            utilizacionesRotativo.saldo = utilizacionesRotativo.saldo - utilizacionesRotativo.cuota_Capital.
+            pCapitalUtilizaciones = pCapitalUtilizaciones - utilizacionesRotativo.cuota_Capital.
+            utilizacionesRotativo.cuota_capital = 0.
+        END.
+        ELSE DO:
+            utilizacionesRotativo.saldo = utilizacionesRotativo.saldo - pCapitalUtilizaciones.
+            utilizacionesRotativo.cuota_capital = utilizacionesRotativo.cuota_capital - pCapitalUtilizaciones.
+            pCapitalUtilizaciones = 0.
+        END.
+        
+        IF utilizacionesRotativo.saldo = 0 THEN DO:
+            utilizacionesRotativo.fec_cancelacion = TODAY.
+            utilizacionesRotativo.estado = 2.
+        END.
+
+        IF pCapitalUtilizaciones = 0 THEN
+            LEAVE.
+    END.
+
+    /* 2. Distribuyo el excedente a partir de la utilización más antigua */
+    IF pCapitalUtilizaciones > 0 THEN DO:
+        FOR EACH utilizacionesRotativo WHERE utilizacionesRotativo.cliente_id = creditos.nit
+                                         AND utilizacionesRotativo.credito_id = creditos.num_credito
+                                         AND utilizacionesRotativo.saldo > 0
+                                         AND utilizacionesRotativo.estado = 1 BY utilizacionesRotativo.fec_utilizacion
+                                                                              BY utilizacionesRotativo.hora_utilizacion:
+            
+            IF pCapitalUtilizaciones >= utilizacionesRotativo.saldo THEN DO:
+                pCapitalUtilizaciones = pCapitalUtilizaciones - utilizacionesRotativo.saldo.
+                utilizacionesRotativo.saldo = 0.
+            END.
+            ELSE DO:
+                utilizacionesRotativo.saldo = utilizacionesRotativo.saldo - pCapitalUtilizaciones.
+                pCapitalUtilizaciones = 0.
+            END.
+
+            IF utilizacionesRotativo.saldo = 0 THEN DO:
+                utilizacionesRotativo.fec_cancelacion = TODAY.
+                utilizacionesRotativo.estado = 2.
+            END.
+
+            IF pCapitalUtilizaciones = 0 THEN
+                LEAVE.
+        END.
+    END.
 END PROCEDURE.

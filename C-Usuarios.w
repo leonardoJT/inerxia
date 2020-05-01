@@ -6,7 +6,7 @@
 &Scoped-define WINDOW-NAME CURRENT-WINDOW
 &Scoped-define FRAME-NAME Dialog-Frame
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _DEFINITIONS Dialog-Frame 
-DEFINE INPUT-OUTPUT PARAMETER pRowIdUsuario AS ROWID.
+DEFINE OUTPUT PARAMETER pRowIdUsuario AS ROWID.
 
 {incluido\variable.i "SHARED"}
 DEFINE VAR W_rpta AS LOGICAL.
@@ -273,7 +273,7 @@ DO:
   ELSE DO:
      ASSIGN W_Valor:HIDDEN = FALSE.
      IF RADIO-SET-2 EQ 1 THEN
-        ASSIGN W_Valor:FORMAT      = "X(4)".
+        ASSIGN W_Valor:FORMAT      = "X(20)".
      ELSE
      IF RADIO-SET-2 EQ 2 THEN
         ASSIGN W_Valor:FORMAT      = "X(40)".

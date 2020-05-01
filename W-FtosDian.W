@@ -375,8 +375,8 @@ DEFINE TEMP-TABLE F2276
 &Scoped-define FRAME-NAME F_Ftos
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS Ano_Corte Cmb_Ftos tgTope Btn_Proc 
-&Scoped-Define DISPLAYED-OBJECTS Ano_Corte Cmb_Ftos tope tgTope 
+&Scoped-Define ENABLED-OBJECTS Ano_Corte Cmb_Ftos tope Btn_Proc 
+&Scoped-Define DISPLAYED-OBJECTS Ano_Corte Cmb_Ftos tope 
 
 /* Custom List Definitions                                              */
 /* List-1,List-2,List-3,List-4,List-5,List-6                            */
@@ -415,11 +415,6 @@ DEFINE VARIABLE tope AS DECIMAL FORMAT "->>>,>>>,>>9.99":U INITIAL 0
      SIZE 17 BY 1
      BGCOLOR 15  NO-UNDO.
 
-DEFINE VARIABLE tgTope AS LOGICAL INITIAL no 
-     LABEL "Generar con tope" 
-     VIEW-AS TOGGLE-BOX
-     SIZE 20.14 BY .77 NO-UNDO.
-
 
 /* ************************  Frame Definitions  *********************** */
 
@@ -427,7 +422,6 @@ DEFINE FRAME F_Ftos
      Ano_Corte AT ROW 1.5 COL 21.43 COLON-ALIGNED
      Cmb_Ftos AT ROW 2.65 COL 21.43 COLON-ALIGNED
      tope AT ROW 3.81 COL 21.43 COLON-ALIGNED WIDGET-ID 2
-     tgTope AT ROW 3.96 COL 41.29 WIDGET-ID 4
      Btn_Proc AT ROW 5.58 COL 64
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
@@ -480,8 +474,6 @@ ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
   VISIBLE,,RUN-PERSISTENT                                               */
 /* SETTINGS FOR FRAME F_Ftos
    FRAME-NAME                                                           */
-/* SETTINGS FOR FILL-IN tope IN FRAME F_Ftos
-   NO-ENABLE                                                            */
 IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(W_FtosDian)
 THEN W_FtosDian:HIDDEN = no.
 
@@ -646,7 +638,6 @@ DO:
     tope:LABEL = "Tope".
     
     CASE Cmb_Ftos:SCREEN-VALUE:
-        WHEN "1001_5001" THEN tope:SCREEN-VALUE = STRING(500000).
         WHEN "Formato_1003" THEN tope:LABEL = "Tope 1306".
         WHEN "Formato_1007" THEN tope:LABEL = "Tope 4001".
         WHEN "SHD_ReteICA" THEN tope:HIDDEN = TRUE.
@@ -1465,20 +1456,20 @@ EMPTY TEMP-TABLE F1001.
 EMPTY TEMP-TABLE otros1001.
 EMPTY TEMP-TABLE docs.
 
-FOR EACH anexos WHERE (SUBSTRING(anexos.cuenta,1,4) = "2695" OR SUBSTRING(anexos.cuenta,1,6) = "262505" OR SUBSTRING(anexos.cuenta,1,6) = "510521" OR SUBSTRING(anexos.cuenta,1,6) = "510595" OR
-                       SUBSTRING(anexos.cuenta,1,6) = "511002" OR SUBSTRING(anexos.cuenta,1,6) = "511005" OR SUBSTRING(anexos.cuenta,1,6) = "511006" OR SUBSTRING(anexos.cuenta,1,6) = "511007" OR
-                       SUBSTRING(anexos.cuenta,1,6) = "511009" OR SUBSTRING(anexos.cuenta,1,6) = "511010" OR SUBSTRING(anexos.cuenta,1,6) = "511011" OR SUBSTRING(anexos.cuenta,1,6) = "511012" OR
-                       SUBSTRING(anexos.cuenta,1,6) = "511013" OR SUBSTRING(anexos.cuenta,1,6) = "511014" OR SUBSTRING(anexos.cuenta,1,6) = "511015" OR SUBSTRING(anexos.cuenta,1,6) = "511016" OR
-                       SUBSTRING(anexos.cuenta,1,6) = "511018" OR SUBSTRING(anexos.cuenta,1,6) = "511019" OR SUBSTRING(anexos.cuenta,1,6) = "511020" OR SUBSTRING(anexos.cuenta,1,6) = "511021" OR
-                       SUBSTRING(anexos.cuenta,1,6) = "511022" OR SUBSTRING(anexos.cuenta,1,6) = "511023" OR SUBSTRING(anexos.cuenta,1,6) = "511024" OR SUBSTRING(anexos.cuenta,1,6) = "511025" OR
-                       SUBSTRING(anexos.cuenta,1,6) = "511026" OR SUBSTRING(anexos.cuenta,1,8) = "51102701" OR SUBSTRING(anexos.cuenta,1,8) = "51102702" OR SUBSTRING(anexos.cuenta,1,8) = "51102703" OR
-                       SUBSTRING(anexos.cuenta,1,8) = "51102704" OR SUBSTRING(anexos.cuenta,1,8) = "51102705" OR SUBSTRING(anexos.cuenta,1,6) = "511031" OR SUBSTRING(anexos.cuenta,1,6) = "511032" OR
-                       SUBSTRING(anexos.cuenta,1,6) = "511095" OR SUBSTRING(anexos.cuenta,1,4) = "5115" OR SUBSTRING(anexos.cuenta,1,4) = "5125" OR SUBSTRING(anexos.cuenta,1,6) = "521005" OR
-                       SUBSTRING(anexos.cuenta,1,6) = "521020" OR SUBSTRING(anexos.cuenta,1,6) = "523020" OR SUBSTRING(anexos.cuenta,1,6) = "523035" OR /*SUBSTRING(anexos.cuenta,1,6) = "523050" OR*/
-                       SUBSTRING(anexos.cuenta,1,10) = "6140101102" OR SUBSTRING(anexos.cuenta,1,10) = "6140101108" OR SUBSTRING(anexos.cuenta,1,10) = "6140101110" OR SUBSTRING(anexos.cuenta,1,10) = "6140101114" OR
-                       SUBSTRING(anexos.cuenta,1,10) = "6140101116" OR SUBSTRING(anexos.cuenta,1,10) = "6140101118" OR SUBSTRING(anexos.cuenta,1,10) = "6140101122" OR SUBSTRING(anexos.cuenta,1,10) = "6140101136" OR
-                       SUBSTRING(anexos.cuenta,1,10) = "6140101140" OR SUBSTRING(anexos.cuenta,1,10) = "6140101195" OR SUBSTRING(anexos.cuenta,1,10) = "6140101251" OR SUBSTRING(anexos.cuenta,1,8) = "61509501" OR
-                       SUBSTRING(anexos.cuenta,1,8) = "61509502" OR SUBSTRING(anexos.cuenta,1,8) = "61509512")
+FOR EACH anexos WHERE (SUBSTRING(anexos.cuenta,1,4) = "2695"        OR  SUBSTRING(anexos.cuenta,1,6) = "262505"         OR  SUBSTRING(anexos.cuenta,1,6) = "510521"         OR  SUBSTRING(anexos.cuenta,1,6) = "510595"         OR
+                       SUBSTRING(anexos.cuenta,1,6) = "510522"      OR  SUBSTRING(anexos.cuenta,1,6) = "511005"         OR  SUBSTRING(anexos.cuenta,1,6) = "511006"         OR  SUBSTRING(anexos.cuenta,1,6) = "511007"         OR
+                       SUBSTRING(anexos.cuenta,1,6) = "511008"      OR  SUBSTRING(anexos.cuenta,1,6) = "511009"         OR  SUBSTRING(anexos.cuenta,1,6) = "511010"         OR  SUBSTRING(anexos.cuenta,1,6) = "511011"         OR
+                       SUBSTRING(anexos.cuenta,1,6) = "511012"      OR  SUBSTRING(anexos.cuenta,1,6) = "511013"         OR  SUBSTRING(anexos.cuenta,1,6) = "511014"         OR  SUBSTRING(anexos.cuenta,1,6) = "511015"         OR
+                       SUBSTRING(anexos.cuenta,1,6) = "511016"      OR  SUBSTRING(anexos.cuenta,1,6) = "511018"         OR  SUBSTRING(anexos.cuenta,1,6) = "511019"         OR  SUBSTRING(anexos.cuenta,1,6) = "511020"         OR
+                       SUBSTRING(anexos.cuenta,1,6) = "511021"      OR  SUBSTRING(anexos.cuenta,1,6) = "511022"         OR  SUBSTRING(anexos.cuenta,1,6) = "511023"         OR  SUBSTRING(anexos.cuenta,1,6) = "511024"         OR 
+                       SUBSTRING(anexos.cuenta,1,6) = "511025"      OR  SUBSTRING(anexos.cuenta,1,6) = "511026"         OR  SUBSTRING(anexos.cuenta,1,8) = "51102701"       OR  SUBSTRING(anexos.cuenta,1,8) = "51102702"       OR
+                       SUBSTRING(anexos.cuenta,1,8) = "51102703"    OR  SUBSTRING(anexos.cuenta,1,8) = "51102704"       OR  SUBSTRING(anexos.cuenta,1,8) = "51102705"       OR  SUBSTRING(anexos.cuenta,1,6) = "511029"         OR
+                       SUBSTRING(anexos.cuenta,1,6) = "511031"      OR  SUBSTRING(anexos.cuenta,1,6) = "511032"         OR  SUBSTRING(anexos.cuenta,1,6) = "511095"         OR  SUBSTRING(anexos.cuenta,1,4) = "5115"           OR
+                       SUBSTRING(anexos.cuenta,1,4) = "5125"        OR  SUBSTRING(anexos.cuenta,1,6) = "521005"         OR  SUBSTRING(anexos.cuenta,1,6) = "521020"         OR  SUBSTRING(anexos.cuenta,1,6) = "523020"         OR
+                       SUBSTRING(anexos.cuenta,1,6) = "523035"      OR  SUBSTRING(anexos.cuenta,1,10) = "6140101102"    OR  SUBSTRING(anexos.cuenta,1,10) = "6140101108"    OR  SUBSTRING(anexos.cuenta,1,10) = "6140101110"    OR
+                       SUBSTRING(anexos.cuenta,1,10) = "6140101114" OR  SUBSTRING(anexos.cuenta,1,10) = "6140101116"    OR  SUBSTRING(anexos.cuenta,1,10) = "6140101118"    OR  SUBSTRING(anexos.cuenta,1,10) = "6140101122"    OR
+                       SUBSTRING(anexos.cuenta,1,10) = "6140101136" OR  SUBSTRING(anexos.cuenta,1,10) = "6140101140"    OR  SUBSTRING(anexos.cuenta,1,10) = "6140101195"    OR  SUBSTRING(anexos.cuenta,1,10) = "6140101251"    OR
+                       SUBSTRING(anexos.cuenta,1,8) = "61509501"    OR  SUBSTRING(anexos.cuenta,1,8) = "61509502"       OR  SUBSTRING(anexos.cuenta,1,8) = "61509512")
                   AND anexos.ano = ano_corte NO-LOCK BREAK BY anexos.nit
                                                            BY anexos.cuenta:
     nitTemporal = anexos.nit.
@@ -1498,87 +1489,14 @@ FOR EACH anexos WHERE (SUBSTRING(anexos.cuenta,1,4) = "2695" OR SUBSTRING(anexos
     
             FIND FIRST clientes WHERE clientes.nit = nitTemporal NO-LOCK NO-ERROR.
             IF AVAILABLE clientes THEN DO:
-                CASE clientes.tipo_identificacion:
-                    WHEN "R.C" THEN F1001.tipoDoc = "11".
-                    WHEN "T.I" THEN F1001.tipoDoc = "12".
-                    WHEN "C.C" THEN F1001.tipoDoc = "13".
-                    WHEN "T.E" THEN F1001.tipoDoc = "21".
-                    WHEN "C.E" THEN F1001.tipoDoc = "22".
-                    WHEN "NIT" THEN F1001.tipoDoc = "31".
-                    WHEN "PPTE" THEN F1001.tipoDoc = "41".
-                END CASE.
-    
-                IF clientes.tipo_identificacion <> "NIT" THEN DO:
-                    F1001.apellido1 = clientes.apellido1.
-                    F1001.apellido2 = clientes.apellido2.
-    
-                    IF INDEX(clientes.nombre," ") > 0 THEN DO:
-                        F1001.nombre1 = SUBSTRING(clientes.nombre,1,INDEX(clientes.nombre," ") - 1).
-                        F1001.nombre2 = SUBSTRING(clientes.nombre,INDEX(clientes.nombre," ") + 1).
-                    END.
-                    ELSE
-                        F1001.nombre1 = clientes.nombre.
-                END.
-                ELSE
-                    F1001.razonSocial = clientes.nombre.
-    
-                IF clientes.DIR_residencia <> "" THEN
-                    F1001.direccion = clientes.DIR_residencia.
-                ELSE
-                    F1001.direccion = clientes.DIR_comercial.
+                RUN 1001_5016.1 NO-ERROR.
 
-                IF F1001.direccion = "" THEN DO:
-                    FIND FIRST agencias WHERE agencias.agencia = clientes.agencia NO-LOCK NO-ERROR.
-                    IF AVAILABLE agencias THEN
-                        F1001.direccion = agencias.direccion.
-                END.
+                F1001.nit = nitTemporal.
 
-                IF clientes.lugar_residencia <> "" AND clientes.lugar_residencia <> ? THEN DO:
-                    F1001.departamento = SUBSTRING(clientes.lugar_residencia,1,2).
-                    F1001.municipio = SUBSTRING(clientes.lugar_residencia,3,3).
-                END.
-                ELSE DO:
-                    F1001.departamento = SUBSTRING(clientes.lugar_comercial,1,2).
-                    F1001.municipio = SUBSTRING(clientes.lugar_comercial,3,3).
-                END.
-
-                IF F1001.departamento = "" OR F1001.departamento = ? THEN DO:
-                    CASE clientes.agencia:
-                        WHEN 1 THEN DO:
-                            F1001.departamento = "11".
-                            F1001.municipio = "001".
-                        END.
-
-                        WHEN 2 THEN DO:
-                            F1001.departamento = "05".
-                            F1001.municipio = "001".
-                        END.
-
-                        WHEN 3 THEN DO:
-                            F1001.departamento = "17".
-                            F1001.municipio = "001".
-                        END.
-
-                        WHEN 4 THEN DO:
-                            F1001.departamento = "76".
-                            F1001.municipio = "250".
-                        END.
-
-                        OTHERWISE DO:
-                            F1001.departamento = "11".
-                            F1001.municipio = "001".
-                        END.
-                    END CASE.
-                END.
-
-                F1001.pais = "169".
+                IF clientes.tipo_identificacion = "NIT" THEN
+                    RUN digitoVerificacion.r(INPUT clientes.nit,
+                                             OUTPUT F1001.dv) NO-ERROR.
             END.
-    
-            F1001.nit = nitTemporal.
-    
-            IF clientes.tipo_identificacion = "NIT" THEN
-                RUN digitoVerificacion.r(INPUT clientes.nit,
-                                         OUTPUT F1001.dv) NO-ERROR.
         END.
     END.
 
@@ -1591,7 +1509,8 @@ FOR EACH anexos WHERE (SUBSTRING(anexos.cuenta,1,4) = "2695" OR SUBSTRING(anexos
         ELSE DO:
             F1001.pagosCostoDeduccion = F1001.pagosCostoDeduccion + anexos.db[cont].
 
-            FOR EACH mov_contable WHERE mov_contable.cuenta = anexos.cuenta
+            FOR EACH mov_contable WHERE mov_contable.agencia = anexos.agencia
+                                    AND mov_contable.cuenta = anexos.cuenta
                                     AND mov_contable.nit = anexos.nit
                                     AND YEAR(mov_contable.fec_contable) = ano_corte
                                     AND MONTH(mov_contable.fec_contable) = cont
@@ -1605,39 +1524,43 @@ FOR EACH anexos WHERE (SUBSTRING(anexos.cuenta,1,4) = "2695" OR SUBSTRING(anexos
     END.
 
     IF LAST-OF(anexos.cuenta) THEN DO:
-        IF SUBSTRING(anexos.cuenta,1,6) = "511005" OR SUBSTRING(anexos.cuenta,1,6) = "511013" OR SUBSTRING(anexos.cuenta,1,6) = "511014" OR SUBSTRING(anexos.cuenta,1,6) = "511016" OR SUBSTRING(anexos.cuenta,1,6) = "511019" OR
-           SUBSTRING(anexos.cuenta,1,6) = "511024" OR SUBSTRING(anexos.cuenta,1,6) = "511025" OR SUBSTRING(anexos.cuenta,1,8) = "51102701" OR SUBSTRING(anexos.cuenta,1,8) = "51102702" OR SUBSTRING(anexos.cuenta,1,8) = "51102703" OR
-           SUBSTRING(anexos.cuenta,1,8) = "51102704" OR SUBSTRING(anexos.cuenta,1,8) = "51102705" OR SUBSTRING(anexos.cuenta,1,6) = "511031" OR SUBSTRING(anexos.cuenta,1,6) = "511032" OR SUBSTRING(anexos.cuenta,1,8) = "52100501" OR
-           SUBSTRING(anexos.cuenta,1,8) = "52100502" OR SUBSTRING(anexos.cuenta,1,8) = "52100504" OR SUBSTRING(anexos.cuenta,1,8) = "52100510" OR SUBSTRING(anexos.cuenta,1,6) = "521020" OR
-           SUBSTRING(anexos.cuenta,1,10) = "6140101108" OR SUBSTRING(anexos.cuenta,1,10) = "6140101114" OR SUBSTRING(anexos.cuenta,1,10) = "6140101136" OR SUBSTRING(anexos.cuenta,1,10) = "6140101140" OR
-            SUBSTRING(anexos.cuenta,1,8) = "61509502" OR SUBSTRING(anexos.cuenta,1,8) = "61509512" THEN
-            ASSIGN ctaRete1 = "243525"
-                   ctaRete2 = "243525"
-                   ctaRete3 = "243525".
+        IF SUBSTRING(anexos.cuenta,1,6) = "511005"      OR  SUBSTRING(anexos.cuenta,1,6) = "511013"         OR  SUBSTRING(anexos.cuenta,1,6) = "511014"         OR  SUBSTRING(anexos.cuenta,1,6) = "511016"     OR  SUBSTRING(anexos.cuenta,1,6) = "511019"         OR
+           SUBSTRING(anexos.cuenta,1,6) = "511024"      OR  SUBSTRING(anexos.cuenta,1,6) = "511025"         OR  SUBSTRING(anexos.cuenta,1,8) = "51102701"       OR  SUBSTRING(anexos.cuenta,1,8) = "51102702"   OR  SUBSTRING(anexos.cuenta,1,8) = "51102703"       OR
+           SUBSTRING(anexos.cuenta,1,8) = "51102704"    OR  SUBSTRING(anexos.cuenta,1,8) = "51102705"       OR  SUBSTRING(anexos.cuenta,1,6) = "511031"         OR  SUBSTRING(anexos.cuenta,1,6) = "511032"     OR  SUBSTRING(anexos.cuenta,1,8) = "52100501"       OR
+           SUBSTRING(anexos.cuenta,1,8) = "52100502"    OR  SUBSTRING(anexos.cuenta,1,8) = "52100504"       OR  SUBSTRING(anexos.cuenta,1,8) = "52100510"       OR  SUBSTRING(anexos.cuenta,1,6) = "521020"     OR  SUBSTRING(anexos.cuenta,1,10) = "6140101108"    OR
+           SUBSTRING(anexos.cuenta,1,10) = "6140101114" OR  SUBSTRING(anexos.cuenta,1,10) = "6140101136"    OR  SUBSTRING(anexos.cuenta,1,10) = "6140101140"    OR  SUBSTRING(anexos.cuenta,1,8) = "61509502"   OR  SUBSTRING(anexos.cuenta,1,8) = "61509512" THEN DO:
+            ctaRete1 = "243525".
+            ctaRete2 = "243525".
+            ctaRete3 = "243525".
+        END.
 
-        IF SUBSTRING(anexos.cuenta,1,6) = "510521" OR SUBSTRING(anexos.cuenta,1,6) = "511011" OR SUBSTRING(anexos.cuenta,1,6) = "511015" OR SUBSTRING(anexos.cuenta,1,10) = "6140101195" OR
-            SUBSTRING(anexos.cuenta,1,10) = "6140101251" THEN
-            ASSIGN ctaRete1 = "243540"
-                   ctaRete2 = "243540"
-                   ctaRete3 = "243540".
+        IF SUBSTRING(anexos.cuenta,1,6) = "510521"  OR  SUBSTRING(anexos.cuenta,1,6) = "510522" OR  SUBSTRING(anexos.cuenta,1,6) = "511011" OR  SUBSTRING(anexos.cuenta,1,6) = "511015" OR  SUBSTRING(anexos.cuenta,1,10) = "6140101195"    OR
+           SUBSTRING(anexos.cuenta,1,10) = "6140101251" THEN DO:
+            ctaRete1 = "243525".
+            ctaRete2 = "243540".
+            ctaRete3 = "243540".
+        END.
 
-        IF SUBSTRING(anexos.cuenta,1,4) = "2695" THEN
-            ASSIGN ctaRete1 = "243585"
-                   ctaRete2 = "243585"
-                   ctaRete3 = "243585".
+        IF SUBSTRING(anexos.cuenta,1,4) = "2695" THEN DO:
+            ctaRete1 = "243585".
+            ctaRete2 = "243585".
+            ctaRete3 = "243585".
+        END.
 
-        IF SUBSTRING(anexos.cuenta,1,6) = "511006" OR SUBSTRING(anexos.cuenta,1,6) = "511007" OR SUBSTRING(anexos.cuenta,1,6) = "511009" OR SUBSTRING(anexos.cuenta,1,6) = "511010" OR SUBSTRING(anexos.cuenta,1,6) = "511018" OR
-           SUBSTRING(anexos.cuenta,1,6) = "511020" OR SUBSTRING(anexos.cuenta,1,6) = "511021" OR SUBSTRING(anexos.cuenta,1,6) = "511022" OR SUBSTRING(anexos.cuenta,1,6) = "511023" OR SUBSTRING(anexos.cuenta,1,6) = "511026" OR
-           SUBSTRING(anexos.cuenta,1,6) = "511095" OR SUBSTRING(anexos.cuenta,1,10) = "6140101110" OR SUBSTRING(anexos.cuenta,1,10) = "6140101116" OR SUBSTRING(anexos.cuenta,1,10) = "6140101118" THEN
-            ASSIGN ctaRete1 = "243525"
-                   ctaRete2 = "243540"
-                   ctaRete3 = "243540".
+        IF SUBSTRING(anexos.cuenta,1,6) = "262505"  OR  SUBSTRING(anexos.cuenta,1,6) = "511006" OR  SUBSTRING(anexos.cuenta,1,6) = "511007" OR  SUBSTRING(anexos.cuenta,1,6) = "511008"         OR  SUBSTRING(anexos.cuenta,1,6) = "511009"         OR
+            SUBSTRING(anexos.cuenta,1,6) = "511010" OR  SUBSTRING(anexos.cuenta,1,6) = "511018" OR  SUBSTRING(anexos.cuenta,1,6) = "511020" OR  SUBSTRING(anexos.cuenta,1,6) = "511021"         OR  SUBSTRING(anexos.cuenta,1,6) = "511022"         OR
+            SUBSTRING(anexos.cuenta,1,6) = "511023" OR  SUBSTRING(anexos.cuenta,1,6) = "511026" OR  SUBSTRING(anexos.cuenta,1,6) = "511095" OR  SUBSTRING(anexos.cuenta,1,10) = "6140101110"    OR  SUBSTRING(anexos.cuenta,1,10) = "6140101116"    OR
+            SUBSTRING(anexos.cuenta,1,10) = "6140101118" THEN DO:
+            ctaRete1 = "243525".
+            ctaRete2 = "243540".
+            ctaRete3 = "243585".
+        END.
 
-        IF SUBSTRING(anexos.cuenta,1,6) = "262505" THEN
-            ASSIGN ctaRete1 = "243585"
-                   ctaRete2 = "243525"
-                   ctaRete3 = "243540".
-
+        IF SUBSTRING(anexos.cuenta,1,6) = "511029" THEN DO:
+            ctaRete1 = "243515".
+            ctaRete2 = "243525".
+            ctaRete3 = "243585".
+        END.
 
         FOR EACH mov_contable WHERE mov_contable.cuenta = anexos.cuenta
                                 AND YEAR(mov_contable.fec_contable) = ano_corte
@@ -1679,20 +1602,20 @@ FOR EACH F1001 WHERE F1001.concepto = "5016" NO-LOCK:
     totalReporte = totalReporte + F1001.pagosCostoDeduccion.
 END.
 
-FOR EACH sal_cuenta WHERE (SUBSTRING(sal_cuenta.cuenta,1,4) = "2695" OR SUBSTRING(sal_cuenta.cuenta,1,6) = "262505" OR SUBSTRING(sal_cuenta.cuenta,1,6) = "510521" OR SUBSTRING(sal_cuenta.cuenta,1,6) = "510595" OR
-                           SUBSTRING(sal_cuenta.cuenta,1,6) = "511002" OR SUBSTRING(sal_cuenta.cuenta,1,6) = "511005" OR SUBSTRING(sal_cuenta.cuenta,1,6) = "511006" OR SUBSTRING(sal_cuenta.cuenta,1,6) = "511007" OR
-                           SUBSTRING(sal_cuenta.cuenta,1,6) = "511009" OR SUBSTRING(sal_cuenta.cuenta,1,6) = "511010" OR SUBSTRING(sal_cuenta.cuenta,1,6) = "511011" OR SUBSTRING(sal_cuenta.cuenta,1,6) = "511012" OR
-                           SUBSTRING(sal_cuenta.cuenta,1,6) = "511013" OR SUBSTRING(sal_cuenta.cuenta,1,6) = "511014" OR SUBSTRING(sal_cuenta.cuenta,1,6) = "511015" OR SUBSTRING(sal_cuenta.cuenta,1,6) = "511016" OR
-                           SUBSTRING(sal_cuenta.cuenta,1,6) = "511018" OR SUBSTRING(sal_cuenta.cuenta,1,6) = "511019" OR SUBSTRING(sal_cuenta.cuenta,1,6) = "511020" OR SUBSTRING(sal_cuenta.cuenta,1,6) = "511021" OR
-                           SUBSTRING(sal_cuenta.cuenta,1,6) = "511022" OR SUBSTRING(sal_cuenta.cuenta,1,6) = "511023" OR SUBSTRING(sal_cuenta.cuenta,1,6) = "511024" OR SUBSTRING(sal_cuenta.cuenta,1,6) = "511025" OR
-                           SUBSTRING(sal_cuenta.cuenta,1,6) = "511026" OR SUBSTRING(sal_cuenta.cuenta,1,8) = "51102701" OR SUBSTRING(sal_cuenta.cuenta,1,8) = "51102702" OR SUBSTRING(sal_cuenta.cuenta,1,8) = "51102703" OR
-                           SUBSTRING(sal_cuenta.cuenta,1,8) = "51102704" OR SUBSTRING(sal_cuenta.cuenta,1,8) = "51102705" OR SUBSTRING(sal_cuenta.cuenta,1,6) = "511031" OR SUBSTRING(sal_cuenta.cuenta,1,6) = "511032" OR
-                           SUBSTRING(sal_cuenta.cuenta,1,6) = "511095" OR SUBSTRING(sal_cuenta.cuenta,1,4) = "5115" OR SUBSTRING(sal_cuenta.cuenta,1,4) = "5125" OR SUBSTRING(sal_cuenta.cuenta,1,6) = "521005" OR
-                           SUBSTRING(sal_cuenta.cuenta,1,6) = "521020" OR SUBSTRING(sal_cuenta.cuenta,1,6) = "523020" OR SUBSTRING(sal_cuenta.cuenta,1,6) = "523035" OR /*SUBSTRING(sal_cuenta.cuenta,1,6) = "523050" OR*/
-                           SUBSTRING(sal_cuenta.cuenta,1,10) = "6140101102" OR SUBSTRING(sal_cuenta.cuenta,1,10) = "6140101108" OR SUBSTRING(sal_cuenta.cuenta,1,10) = "6140101110" OR SUBSTRING(sal_cuenta.cuenta,1,10) = "6140101114" OR
-                           SUBSTRING(sal_cuenta.cuenta,1,10) = "6140101116" OR SUBSTRING(sal_cuenta.cuenta,1,10) = "6140101118" OR SUBSTRING(sal_cuenta.cuenta,1,10) = "6140101122" OR SUBSTRING(sal_cuenta.cuenta,1,10) = "6140101136" OR
-                           SUBSTRING(sal_cuenta.cuenta,1,10) = "6140101140" OR SUBSTRING(sal_cuenta.cuenta,1,10) = "6140101195" OR SUBSTRING(sal_cuenta.cuenta,1,10) = "6140101251" OR SUBSTRING(sal_cuenta.cuenta,1,8) = "61509501" OR
-                           SUBSTRING(sal_cuenta.cuenta,1,8) = "61509502" OR SUBSTRING(sal_cuenta.cuenta,1,8) = "61509512")
+FOR EACH sal_cuenta WHERE (SUBSTRING(sal_cuenta.cuenta,1,4) = "2695"        OR  SUBSTRING(sal_cuenta.cuenta,1,6) = "262505"         OR  SUBSTRING(sal_cuenta.cuenta,1,6) = "510521"         OR  SUBSTRING(sal_cuenta.cuenta,1,6) = "510595"         OR
+                           SUBSTRING(sal_cuenta.cuenta,1,6) = "510522"      OR  SUBSTRING(sal_cuenta.cuenta,1,6) = "511005"         OR  SUBSTRING(sal_cuenta.cuenta,1,6) = "511006"         OR  SUBSTRING(sal_cuenta.cuenta,1,6) = "511007"         OR
+                           SUBSTRING(sal_cuenta.cuenta,1,6) = "511009"      OR  SUBSTRING(sal_cuenta.cuenta,1,6) = "511010"         OR  SUBSTRING(sal_cuenta.cuenta,1,6) = "511011"         OR  SUBSTRING(sal_cuenta.cuenta,1,6) = "511012"         OR
+                           SUBSTRING(sal_cuenta.cuenta,1,6) = "511013"      OR  SUBSTRING(sal_cuenta.cuenta,1,6) = "511014"         OR  SUBSTRING(sal_cuenta.cuenta,1,6) = "511015"         OR  SUBSTRING(sal_cuenta.cuenta,1,6) = "511016"         OR
+                           SUBSTRING(sal_cuenta.cuenta,1,6) = "511018"      OR  SUBSTRING(sal_cuenta.cuenta,1,6) = "511019"         OR  SUBSTRING(sal_cuenta.cuenta,1,6) = "511020"         OR  SUBSTRING(sal_cuenta.cuenta,1,6) = "511021"         OR
+                           SUBSTRING(sal_cuenta.cuenta,1,6) = "511022"      OR  SUBSTRING(sal_cuenta.cuenta,1,6) = "511023"         OR  SUBSTRING(sal_cuenta.cuenta,1,6) = "511024"         OR  SUBSTRING(sal_cuenta.cuenta,1,6) = "511025"         OR
+                           SUBSTRING(sal_cuenta.cuenta,1,6) = "511026"      OR  SUBSTRING(sal_cuenta.cuenta,1,8) = "51102701"       OR  SUBSTRING(sal_cuenta.cuenta,1,8) = "51102702"       OR  SUBSTRING(sal_cuenta.cuenta,1,8) = "51102703"       OR
+                           SUBSTRING(sal_cuenta.cuenta,1,8) = "51102704"    OR  SUBSTRING(sal_cuenta.cuenta,1,8) = "51102705"       OR  SUBSTRING(sal_cuenta.cuenta,1,6) = "511029"         OR  SUBSTRING(sal_cuenta.cuenta,1,6) = "511031"         OR
+                           SUBSTRING(sal_cuenta.cuenta,1,6) = "511032"      OR  SUBSTRING(sal_cuenta.cuenta,1,6) = "511095"         OR  SUBSTRING(sal_cuenta.cuenta,1,4) = "5115"           OR  SUBSTRING(sal_cuenta.cuenta,1,4) = "5125"           OR
+                           SUBSTRING(sal_cuenta.cuenta,1,6) = "521005"      OR  SUBSTRING(sal_cuenta.cuenta,1,6) = "521020"         OR  SUBSTRING(sal_cuenta.cuenta,1,6) = "523020"         OR  SUBSTRING(sal_cuenta.cuenta,1,6) = "523035"         OR
+                           SUBSTRING(sal_cuenta.cuenta,1,10) = "6140101102" OR  SUBSTRING(sal_cuenta.cuenta,1,10) = "6140101108"    OR  SUBSTRING(sal_cuenta.cuenta,1,10) = "6140101110"    OR  SUBSTRING(sal_cuenta.cuenta,1,10) = "6140101114"    OR
+                           SUBSTRING(sal_cuenta.cuenta,1,10) = "6140101116" OR  SUBSTRING(sal_cuenta.cuenta,1,10) = "6140101118"    OR  SUBSTRING(sal_cuenta.cuenta,1,10) = "6140101122"    OR  SUBSTRING(sal_cuenta.cuenta,1,10) = "6140101136"    OR
+                           SUBSTRING(sal_cuenta.cuenta,1,10) = "6140101140" OR  SUBSTRING(sal_cuenta.cuenta,1,10) = "6140101195"    OR  SUBSTRING(sal_cuenta.cuenta,1,10) = "6140101251"    OR  SUBSTRING(sal_cuenta.cuenta,1,8) = "61509501"       OR
+                           SUBSTRING(sal_cuenta.cuenta,1,8) = "61509502"    OR  SUBSTRING(sal_cuenta.cuenta,1,8) = "61509512")
                       AND sal_cuenta.ano = ano_corte NO-LOCK:
     IF SUBSTRING(sal_cuenta.cuenta,1,2) <> "26" THEN
         totalContable = totalContable + sal_cuenta.sal_inicial.
@@ -1703,7 +1626,8 @@ FOR EACH sal_cuenta WHERE (SUBSTRING(sal_cuenta.cuenta,1,4) = "2695" OR SUBSTRIN
         ELSE DO:
             totalContable = totalContable + sal_cuenta.db[cont].
             
-            FOR EACH mov_contable WHERE mov_contable.cuenta = sal_cuenta.cuenta
+            FOR EACH mov_contable WHERE mov_contable.agencia = sal_cuenta.agencia
+                                    AND mov_contable.cuenta = sal_cuenta.cuenta
                                     AND YEAR(mov_contable.fec_contable) = ano_corte
                                     AND MONTH(mov_contable.fec_contable) = cont
                                     AND (mov_contable.comprobante = 9 OR INDEX(mov_contable.comentario,"rev") > 0)
@@ -1750,6 +1674,88 @@ IF AVAILABLE otros1001 THEN
 
 OUTPUT CLOSE.
     
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE 1001_5016.1 W_FtosDian 
+PROCEDURE 1001_5016.1 :
+CASE clientes.tipo_identificacion:
+    WHEN "R.C" THEN F1001.tipoDoc = "11".
+    WHEN "T.I" THEN F1001.tipoDoc = "12".
+    WHEN "C.C" THEN F1001.tipoDoc = "13".
+    WHEN "T.E" THEN F1001.tipoDoc = "21".
+    WHEN "C.E" THEN F1001.tipoDoc = "22".
+    WHEN "NIT" THEN F1001.tipoDoc = "31".
+    WHEN "PPTE" THEN F1001.tipoDoc = "41".
+END CASE.
+
+IF clientes.tipo_identificacion <> "NIT" THEN DO:
+    F1001.apellido1 = clientes.apellido1.
+    F1001.apellido2 = clientes.apellido2.
+
+    IF INDEX(clientes.nombre," ") > 0 THEN DO:
+        F1001.nombre1 = SUBSTRING(clientes.nombre,1,INDEX(clientes.nombre," ") - 1).
+        F1001.nombre2 = SUBSTRING(clientes.nombre,INDEX(clientes.nombre," ") + 1).
+    END.
+    ELSE
+        F1001.nombre1 = clientes.nombre.
+END.
+ELSE
+    F1001.razonSocial = clientes.nombre.
+
+IF clientes.DIR_residencia <> "" THEN
+    F1001.direccion = clientes.DIR_residencia.
+ELSE
+    F1001.direccion = clientes.DIR_comercial.
+
+IF F1001.direccion = "" THEN DO:
+    FIND FIRST agencias WHERE agencias.agencia = clientes.agencia NO-LOCK NO-ERROR.
+    IF AVAILABLE agencias THEN
+        F1001.direccion = agencias.direccion.
+END.
+
+IF clientes.lugar_residencia <> "" AND clientes.lugar_residencia <> ? THEN DO:
+    F1001.departamento = SUBSTRING(clientes.lugar_residencia,1,2).
+    F1001.municipio = SUBSTRING(clientes.lugar_residencia,3,3).
+END.
+ELSE DO:
+    F1001.departamento = SUBSTRING(clientes.lugar_comercial,1,2).
+    F1001.municipio = SUBSTRING(clientes.lugar_comercial,3,3).
+END.
+
+IF F1001.departamento = "" OR F1001.departamento = ? THEN DO:
+    CASE clientes.agencia:
+        WHEN 1 THEN DO:
+            F1001.departamento = "11".
+            F1001.municipio = "001".
+        END.
+
+        WHEN 2 THEN DO:
+            F1001.departamento = "05".
+            F1001.municipio = "001".
+        END.
+
+        WHEN 3 THEN DO:
+            F1001.departamento = "17".
+            F1001.municipio = "001".
+        END.
+
+        WHEN 4 THEN DO:
+            F1001.departamento = "76".
+            F1001.municipio = "250".
+        END.
+
+        OTHERWISE DO:
+            F1001.departamento = "11".
+            F1001.municipio = "001".
+        END.
+    END CASE.
+END.
+
+F1001.pais = "169".
+
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
@@ -5598,9 +5604,9 @@ PROCEDURE enable_UI :
                These statements here are based on the "Other 
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
-  DISPLAY Ano_Corte Cmb_Ftos tope tgTope 
+  DISPLAY Ano_Corte Cmb_Ftos tope 
       WITH FRAME F_Ftos IN WINDOW W_FtosDian.
-  ENABLE Ano_Corte Cmb_Ftos tgTope Btn_Proc 
+  ENABLE Ano_Corte Cmb_Ftos tope Btn_Proc 
       WITH FRAME F_Ftos IN WINDOW W_FtosDian.
   {&OPEN-BROWSERS-IN-QUERY-F_Ftos}
   VIEW W_FtosDian.

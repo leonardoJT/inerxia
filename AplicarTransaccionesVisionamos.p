@@ -37,11 +37,11 @@ DEFINE TEMP-TABLE tt
     FIELD s025 AS CHARACTER /* Entidad Dueña Cuenta Origen */
     FIELD s027 AS CHARACTER /* Entidad dueña Terminal */
     FIELD s02b AS CHARACTER /* Cheque - Cuenta de Banco */
+    FIELD s02c AS CHARACTER /* Cheque - Número */
+    FIELD s030 AS CHARACTER /* Número de Tarjeta */
 
     /* oakley */
     
-    FIELD s02c AS CHARACTER /* Cheque - Número */
-    FIELD s030 AS CHARACTER /* Número de Tarjeta */
     FIELD s031 AS CHARACTER /* Fecha contable */
     FIELD s032 AS DECIMAL /* Valor */
     FIELD s033 AS DECIMAL /* Valor Base */
@@ -646,30 +646,30 @@ PROCEDURE consignacion:
                    vdb = 0.
 
             IF aplicarVisionamos.grupo_Transaccional <> "0400" AND aplicarVisionamos.grupo_Transaccional <> "0420" THEN DO:
-                RUN p-pagoCredito.r (INPUT YES,
-                                     INPUT Creditos.Cod_Credito,
-                                     INPUT Creditos.Nit,
-                                     INPUT Creditos.Num_Credito,
-                                     INPUT vcr,
-                                     INPUT Comprobantes.Comprobante,
-                                     INPUT pNumDocumento,
-                                     INPUT 0,
-                                     INPUT 1,
-                                     INPUT TODAY,
-                                     INPUT NO,
-                                     OUTPUT P_Poliza,
-                                     OUTPUT P_Honora,
-                                     OUTPUT P_Costas,
-                                     OUTPUT P_SeguroVida,
-                                     OUTPUT P_SeguroDeudor,
-                                     OUTPUT P_IMorDifC,
-                                     OUTPUT P_IMora,
-                                     OUTPUT P_IDifCob,
-                                     OUTPUT P_ICte,
-                                     OUTPUT P_IAntic,
-                                     OUTPUT P_Capit,
-                                     OUTPUT P_VlrNoDist,
-                                     OUTPUT pError).
+                RUN \\192.168.1.101\Aplicacion\Obj\p-pagoCredito.r (INPUT YES,
+                                                                    INPUT Creditos.Cod_Credito,
+                                                                    INPUT Creditos.Nit,
+                                                                    INPUT Creditos.Num_Credito,
+                                                                    INPUT vcr,
+                                                                    INPUT Comprobantes.Comprobante,
+                                                                    INPUT pNumDocumento,
+                                                                    INPUT 0,
+                                                                    INPUT 1,
+                                                                    INPUT TODAY,
+                                                                    INPUT NO,
+                                                                    OUTPUT P_Poliza,
+                                                                    OUTPUT P_Honora,
+                                                                    OUTPUT P_Costas,
+                                                                    OUTPUT P_SeguroVida,
+                                                                    OUTPUT P_SeguroDeudor,
+                                                                    OUTPUT P_IMorDifC,
+                                                                    OUTPUT P_IMora,
+                                                                    OUTPUT P_IDifCob,
+                                                                    OUTPUT P_ICte,
+                                                                    OUTPUT P_IAntic,
+                                                                    OUTPUT P_Capit,
+                                                                    OUTPUT P_VlrNoDist,
+                                                                    OUTPUT pError).
 
                 aplicarVisionamos.estado = 2.
             END.
@@ -709,6 +709,19 @@ PROCEDURE consignacion:
                 Mov_Contable.Nit = creditos.nit.
                 Mov_contable.db = vdb.
                 mov_contable.cr = vcr.
+
+                FIND FIRST utilizacionesRotativo WHERE utilizacionesRotativo.cliente_id = creditos.nit
+                                                   AND utilizacionesRotativo.credito_id = creditos.num_credito
+                                                   AND utilizacionesRotativo.canal = "RED"
+                                                   AND utilizacionesRotativo.descripcion = aplicarVisionamos.TERMINAL_ubicacion
+                                                   AND utilizacionesRotativo.estado = 1
+                                                   AND utilizacionesRotativo.fec_utilizacion = TODAY
+                                                   AND utilizacionesRotativo.monto = vCr
+                                                   AND utilizacionesRotativo.saldo = vCr NO-ERROR.
+                IF AVAILABLE utilizacionesRotativo THEN DO:
+                    utilizacionesRotativo.estado = 3.
+                    utilizacionesRotativo.fec_cancelacion = TODAY.
+                END.
             END.
 
             CREATE mov_contable.
@@ -775,7 +788,6 @@ END PROCEDURE.
 PROCEDURE retiroAvance:
     DEFINE VARIABLE vdb AS DECIMAL.
     DEFINE VARIABLE vcr AS DECIMAL.
-    DEFINE VAR tasaCredito AS DECIMAL.
     DEFINE VAR gmfAplicado AS DECIMAL.
 
     IF INTEGER(aplicarVisionamos.tipoCuenta1_origen) = 10 THEN DO:
@@ -937,25 +949,6 @@ PROCEDURE retiroAvance:
                        Mov_Creditos.Descrip = vRev + aplicarVisionamos.TERMINAL_ubicacion.
             END.
 
-
-            FIND FIRST pro_creditos WHERE pro_credito.cod_credito = creditos.cod_credito NO-LOCK NO-ERROR.
-            IF AVAILABLE(pro_creditos) THEN
-                FIND FIRST indicadores WHERE Indicadores.indicador = pro_creditos.cod_tasa  NO-LOCK NO-ERROR.
-
-            IF AVAILABLE(indicadores) THEN DO:
-                tasaCredito = (((EXP((indicadores.tasa / 100) + 1,1 / 12)) - 1) * 100) * 12.
-
-                IF STRING(tasaCredito,">>9.99") <> STRING(creditos.tasa,">>9.99") THEN DO:
-                    CREATE Mov_Creditos.
-                    RUN movCreditos.
-
-                    ASSIGN Mov_Creditos.Cod_Operacion = 999999999
-                           Mov_Creditos.Descrip = "Cambio de Tasa " + STRING(creditos.tasa,">>9.99") + "-->" + STRING(tasaCredito,">>9.99").
-
-                    creditos.tasa = tasaCredito.
-                END.
-            END.
-
             CREATE mov_contable.
             RUN movContable.
 
@@ -1021,6 +1014,15 @@ PROCEDURE retiroAvance:
                        Mov_contable.db = vcr
                        mov_contable.cr = vdb.
             END.
+
+            RUN \\192.168.1.101\Aplicacion\Obj\p-UtilizacionRotativo.r (INPUT "RED",
+                                                                        INPUT creditos.nit,
+                                                                        INPUT creditos.num_credito,
+                                                                        INPUT aplicarVisionamos.terminal_ubicacion,
+                                                                        INPUT vDb,
+                                                                        OUTPUT pError) NO-ERROR.
+
+
 
             RELEASE creditos.
         END.

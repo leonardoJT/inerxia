@@ -1,88 +1,74 @@
-/*
-    Nombre: super001.p
-    Descripcion: Superprocedimiento
-    Log: Por cada función
-*/
-
-/*
-D I R E C T O R I O  D E  F U N C I O N E S
-
-*/
 SESSION:TIME-SOURCE = "bdcentral".
-DEF VAR chExcel AS COM-HANDLE NO-UNDO.
-DEF VAR GAGNCIA AS INTEGER NO-UNDO.    
-DEF VAR GUSUARIO AS CHAR NO-UNDO.    
-DEF VAR GIAGENCIAACTUAL AS INTEGER NO-UNDO.
-DEF VAR GSguimientoUOtrgmiento AS CHAR NO-UNDO. /* Toma Los Valores 0=Total o Seguimiento, 1=Otorgamiento O Solo Los Desembolsos Del Mes */
-DEF TEMP-TABLE tbh NO-UNDO
-    FIELD ctbla AS CHAR
-    FIELD ccmpo AS CHAR
-    FIELD htbla AS HANDLE 
+
+DEFINE VAR chExcel AS COM-HANDLE.
+DEFINE VAR gagncia AS INTEGER.
+DEFINE VAR gUsuario AS CHARACTER.
+DEFINE VAR giagenciaactual AS INTEGER.
+DEFINE VAR gsguimientouotrgmiento AS CHARACTER. /* Toma Los Valores 0=Total o Seguimiento, 1=Otorgamiento O Solo Los Desembolsos Del Mes */
+
+DEFINE TEMP-TABLE tbh
+    FIELD ctbla AS CHARACTER
+    FIELD ccmpo AS CHARACTER
+    FIELD htbla AS HANDLE
     FIELD hcmpo AS HANDLE
-    INDEX tblacmpo  ctbla ccmpo
+    INDEX tblacmpo ctbla ccmpo
     INDEX htbla ccmpo.
-EMPTY TEMP-TABLE tbh.
+
 SUBSCRIBE "DNEElHdeExel" ANYWHERE.
 SUBSCRIBE "AgnciaSlccionda" ANYWHERE. 
 SUBSCRIBE "UsuarioActual" ANYWHERE.
 SUBSCRIBE "AgenciaActual" ANYWHERE.    
 SUBSCRIBE "SeguimientoUOtorgamiento" ANYWHERE.
+
 {incluido\StoreTableBuffers.i} /* crea los handles de las tablas fijas */
-        
+
 FUNCTION fPropath RETURN CHAR():
-    /*
-        Descripcion: Devuelve el PROPATH con separador chr(10)
-        Creado: 20 de nov de 2007, Ing. Edilberto Mariño Moya
-    */
     RETURN REPLACE(PROPATH,",",CHR(10)).
-END FUNCTION. /* FUNCTION fPropath RETURN CHAR(): */
+END FUNCTION.
 
 FUNCTION fCambiaLabelFilter RETURNS CHAR(h_dynfilter AS HANDLE):
-    /*  
-        Descripcion: CAMBIA LABELS DEL SMARTFILTER
-        ADAPTADO: 6 NOV 2007, Ing. Edilberto Mariño Moya
-    */
-    DEFINE VARIABLE iNumObjects AS INTEGER NO-UNDO.
-    DEFINE VARIABLE cObjects AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE hObject AS HANDLE NO-UNDO.
-    
-    ASSIGN cObjects = DYNAMIC-FUNCTION('getEnabledObjHdls':U IN h_dynfilter).
-    
+    DEFINE VAR iNumObjects AS INTEGER.
+    DEFINE VAR cObjects AS CHARACTER.
+    DEFINE VAR hObject AS HANDLE.
+
+    cObjects = DYNAMIC-FUNCTION('getEnabledObjHdls':U IN h_dynfilter).
+
     DO iNumObjects = 1 TO NUM-ENTRIES(cObjects):
         hObject = widget-handle(ENTRY(iNumObjects, cObjects)).
-        
-        IF hObject:TYPE = "BUTTON":U 
-        THEN DO:
-            IF hObject:LABEL = "&Apply Filter" THEN ASSIGN hObject:LABEL = "Aplicar".
-            IF hObject:LABEL = "&Blank" THEN ASSIGN hObject:LABEL = "Blanco".
-            IF hObject:LABEL = "&Reset" THEN ASSIGN hObject:LABEL = "Reinicia".    
+
+        IF hObject:TYPE = "BUTTON":U THEN DO:
+            IF hObject:LABEL = "&Apply Filter" THEN
+                hObject:LABEL = "Aplicar".
+
+            IF hObject:LABEL = "&Blank" THEN
+                hObject:LABEL = "Blanco".
+
+            IF hObject:LABEL = "&Reset" THEN
+                hObject:LABEL = "Reinicia".
         END.
     END.
 
-  RETURN "".
-    
-END FUNCTION. /* FUNCTION fCambiaLabelFilter RETURNS CHAR(h_dynfilter AS HANDLE): */
+    RETURN "".
 
+END FUNCTION.
 
 FUNCTION fToExcelVlor RETURNS LOGICAL(pCol AS char,pval AS char):
-    /*  
-        Descripcion: Envia Valor A Excel
-        creado: 29 oct 2007, Ing. Edilberto Mariño Moya
-    */
-    IF SUBSTRING(pval,1,1) = "="
-    THEN chExcel:Range(pCol):FORMULA = trim(pVal) NO-ERROR.
-    ELSE chExcel:Range(pCol):VALUE = pVal NO-ERROR.
-    RETURN TRUE.    
-END FUNCTION. /* FUNCTION fToExcelVlor RETURNS LOGICAL(pCol AS char,pval AS char): */
+    IF SUBSTRING(pval,1,1) = "=" THEN
+        chExcel:Range(pCol):FORMULA = trim(pVal) NO-ERROR.
+    ELSE
+        chExcel:Range(pCol):VALUE = pVal NO-ERROR.
+
+    RETURN TRUE.
+
+END FUNCTION.
 
 FUNCTION fColExcel RETURN CHAR(j AS INTEGER):
-    /*  
-        Descripcion: Devuelve en letras el equivalente a una columna de excel
-        creado: 29 oct 2007, Ing. Edilberto Mariño Moya
-    */
-    DEF VAR i AS INTEGER NO-UNDO.
-    DEF VAR k AS INTEGER NO-UNDO.
-    DEF VAR cRt AS CHAR NO-UNDO.
+    DEFINE VAR i AS INTEGER.
+    DEFINE VAR k AS INTEGER.
+    DEFINE VAR cRt AS CHARACTER.
+
+    /* oakley */
+
     i = TRUNCATE(j / 26,0).
     k = j MOD 26.
     crt = CHR(i + 64) + CHR(1) + CHR(k + 64).

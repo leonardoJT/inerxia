@@ -222,12 +222,13 @@ DO:
                     FIND FIRST comprobantes WHERE comprobantes.comprobante = vComprobante NO-ERROR.
                     /* ----------------------- */
 
+                    /* Inicia la aplicación de las transacciones */
                     IF vValEfectivo <> 0 OR vValCheque <> 0 OR vValComision <> 0 THEN DO:
                         /* Se aplica la lògica para determinar qué clase de Tx es, y hacer el llamado a la rutina que corresponda */
                         IF ttRecibir.operacion = 'DEBITO' THEN DO: /* Retiros */
                             IF ttRecibir.tipo = 'AH' THEN DO:
                                 /* Ahorro a la Vista */
-                                IF ttRecibir.tipo_ah = 'AV' THEN DO:
+                                IF ttRecibir.tipo_ah = 'AV' THEN DO: /* Retiro de ahorro a la vista */
                                     FIND FIRST ahorros WHERE ahorros.nit = ttRecibir.documento
                                                          AND ahorros.tip_ahorro = 1
                                                          AND ahorros.cue_ahorros = ttRecibir.cuenta
@@ -294,10 +295,7 @@ DO:
                                 END.
                             END.
                             ELSE DO:
-                                /* oakley */
-                                IF ttRecibir.tipo = "CR" THEN DO:
-                                    /* Avance cupo rotativo */
-                                
+                                IF ttRecibir.tipo = "CR" THEN DO: /* Avance cupo rotativo */
                                     FIND FIRST creditos WHERE creditos.nit = ttRecibir.documento
                                                           AND creditos.num_credito = INTEGER(ttRecibir.cuenta)
                                                           AND credito.estado = 2 NO-LOCK NO-ERROR.
@@ -316,43 +314,43 @@ DO:
                                                                     INPUT vUsuario,
                                                                     OUTPUT pError) NO-ERROR.
 
-                                        /* oakley */
-
                                         IF pError = FALSE THEN DO:
                                             CREATE mov_contable.
+                                            Mov_Contable.Agencia = vAgenciaDelUsuario.
+                                            Mov_Contable.Destino = vAgenciaDelUsuario.
 
                                             RUN movContable.
 
                                             /* Transacción en oficina propia */
-                                            IF ttRecibir.canal = "OFI" AND ttRecibir.dispositivo = "PROPIO" THEN DO:
-                                                Mov_Contable.Agencia = usuarios.agencia.
-                                                Mov_Contable.Destino = usuarios.agencia.
-                                                mov_contable.cuenta = vCuentaCaja. /* O cheque */
-                                    
-                                                vAgenciaDestino = usuarios.agencia.
-                                            END.
+                                            IF ttRecibir.canal = "OFI" AND ttRecibir.dispositivo = "PROPIO" THEN
+                                                mov_contable.cuenta = vCuentaCaja.
                                             /* Transacción externa */
                                             ELSE DO:
-                                                mov_contable.agencia = 1.
-                                                mov_contable.destino = 1.
                                                 Mov_Contable.Cuenta = vCuentaCompensacion.
                                                 Mov_Contable.Nit = nitCompensacion.
-
-                                                vAgenciaDestino = 1.
                                             END.
 
-                                            mov_contable.cr = vValEfectivo + vValCheque.
-                                            mov_contable.usuario = ttRecibir.usuario.
-
+                                            mov_contable.cr = vValEfectivo + vValCheque + vValComision.
+                                            
                                             /* Sucursales y Agencias */
-                                            IF vAgenciaDestino <> ahorros.agencia THEN DO:
+                                            IF vAgenciaDelUsuario <> ahorros.agencia THEN DO:
                                                 RUN cuentaSucursales&Agencias.
 
+                                                CREATE mov_contable.
                                                 RUN movContable.
-                                                mov_contable.agencia = ahorros.agencia.
+                                                mov_contable.agencia = creditos.agencia.
+                                                mov_contable.destino = 1.
+                                                mov_contable.cuenta = cuentaSyA.
+                                                mov_contable.nit = '001'.
+                                                mov_contable.cr = vValEfectivo + vValCheque + vValComision.
+
+                                                CREATE mov_contable.
+                                                RUN movContable.
+                                                mov_contable.agencia = vAgenciaDelUsuario.
                                                 mov_contable.destino = usuarios.agencia.
                                                 mov_contable.cuenta = cuentaSyA.
-                                                mov_contable.nit = STRING().
+                                                mov_contable.nit = STRING(creditos.agencia,"999").
+                                                mov_contable.db = vValEfectivo + vValCheque + vValComision.
                                             END.
                                         END.
                                     END.
@@ -481,8 +479,7 @@ END PROCEDURE.
 
 
 
-/*FIELD indx AS CHARACTER /* Índice */
-    FIELD s001 AS CHARACTER /* Fecha */
+/*FIELD s001 AS CHARACTER /* Fecha */
     FIELD s002 AS CHARACTER /* Hora */
     FIELD s003 AS CHARACTER /* Comercio */
     FIELD s004 AS CHARACTER /* Sucursal */

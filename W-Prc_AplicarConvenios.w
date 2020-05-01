@@ -222,9 +222,7 @@ END.
 ON CHOOSE OF btnAplicar IN FRAME DEFAULT-FRAME /* Aplicar */
 DO:
     DEFINE VAR retiro AS DECIMAL.
-    DEFINE VAR cont AS INTEGER.
-    DEFINE VAR tipoAhorro AS INTEGER.
-    DEFINE VAR codAhorro AS INTEGER.
+    DEFINE VAR pError AS LOGICAL.
     
     vTime = TIME.
     
@@ -233,7 +231,7 @@ DO:
            nitContrapartida
            valorTotal.
 
-    MESSAGE "Está seguro que desea recaudar los valores para el convenio" convenio:SCREEN-VALUE "?." SKIP
+    MESSAGE "Está seguro que desea recaudar los valores para el convenio" convenio:SCREEN-VALUE + "?." SKIP
             "Esta operacion no se puede deshacer, continue sólo si está seguro(a)."
         VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO TITLE "Confirmar Recaudo de Convenio" UPDATE aplicar AS LOGICAL.
 
@@ -254,85 +252,6 @@ DO:
                 FIND CURRENT comprobantes NO-LOCK NO-ERROR.
             END.
         END.
-
-        /*DO cont = 1 TO 2:
-            CASE cont:
-                WHEN 1 THEN
-                    ASSIGN tipoAhorro = 1
-                           codAhorro = 4.
-
-                WHEN 2 THEN
-                    ASSIGN tipoAhorro = 2
-                           codAhorro = 3.
-            END CASE.
-
-            retiro = 0.
-
-            IF registro.valor > 0 THEN DO:
-                IF (tipoAhorro = 2 AND codAhorro = 3 AND convenio:SCREEN-VALUE <> "Seguro Tarjeta") OR (tipoAhorro = 1 AND codAhorro = 4) THEN DO:
-                    FIND FIRST ahorros WHERE ahorros.nit = registro.cedula
-                                         AND ahorros.tip_ahorro = tipoAhorro
-                                         AND ahorros.cod_ahorro = codAhorro
-                                         AND ahorros.agencia = registro.agencia
-                                         AND ahorros.sdo_disponible > 0
-                                         AND ahorros.estado = 1 NO-ERROR.
-                    IF AVAILABLE ahorros THEN DO:
-                        FIND FIRST Pro_Ahorros WHERE Pro_Ahorros.Tip_Ahorro = ahorros.tip_ahorro
-                                                 AND pro_ahorros.cod_ahorro = ahorros.cod_ahorro
-                                                 AND Pro_Ahorros.Estado EQ 1 NO-LOCK NO-ERROR.
-                        IF AVAILABLE pro_ahorros THEN DO:
-                            FIND FIRST CortoLargo WHERE CortoLargo.Clase_Producto EQ 1
-                                                    AND CortoLargo.Cod_Producto EQ Pro_Ahorros.Cod_Ahorro NO-LOCK NO-ERROR.
-                            IF AVAILABLE cortoLargo THEN
-                                vCuenta = CortoLargo.Cta_AsoAd.
-                        END.
-
-                        IF ahorros.sdo_disponible >= registro.valor * 1.004 THEN DO:
-                            ahorros.sdo_disponible = ahorros.sdo_disponible - registro.valor.
-                            ahorros.fec_ultTrans = w_fecha.
-                            retiro = registro.valor.
-                            registro.valor = 0.
-                        END.
-                        ELSE DO:
-                            retiro = TRUNCATE((ahorros.sdo_disponible * 100) / 100.4,0).
-                            ahorros.sdo_disponible = ahorros.sdo_disponible - TRUNCATE((ahorros.sdo_disponible * 100) / 100.4,0).
-                            ahorros.fec_ultTrans = w_fecha.
-                            registro.valor = registro.valor - retiro.
-                        END.
-
-                        IF retiro > 0 THEN DO:
-                            DISPLAY ahorros.agencia ahorros.nit ahorros.tip_ahorro ahorros.cod_ahorro Pro_Ahorros.Nom_Producto FORMAT "X(20)" retiro FORMAT ">>>,>>>,>>9"
-                                WITH WIDTH 150 NO-LABELS.
-                            RUN movAhorros.
-                            IF AVAILABLE mov_ahorros THEN
-                                mov_ahorros.val_efectivo = retiro.
-
-                            RUN movContable.
-                            IF AVAILABLE mov_contable THEN
-                                mov_contable.db = retiro.
-
-                            totalCxP = totalCxP + retiro.
-
-                            RUN rutGMF.r(INPUT TRUE,
-                                         INPUT w_agencia,
-                                         INPUT Ahorros.Agencia,
-                                         INPUT 1,
-                                         INPUT Ahorros.Cod_Ahorro,
-                                         INPUT Ahorros.Nit,
-                                         INPUT Ahorros.Cue_Ahorro,
-                                         INPUT 010102001,
-                                         INPUT retiro,
-                                         INPUT 21,
-                                         INPUT STRING(numDocumento),
-                                         INPUT convenio:SCREEN-VALUE,
-                                         INPUT 0,
-                                         INPUT 3,
-                                         OUTPUT GMF_Aplicado) NO-ERROR.
-                        END.
-                    END.
-                END.
-            END.
-        END.*/
 
         retiro = 0.
 
@@ -418,6 +337,13 @@ DO:
                 END.
 
                 creditos.Sdo_capital = Creditos.Sdo_capital + registro.valor.
+
+                RUN p-utilizacionRotativo.r (INPUT 'INT',
+                                             INPUT creditos.nit,
+                                             INPUT creditos.num_credito,
+                                             INPUT 'Cobro Seguro Tarjeta',
+                                             INPUT registro.valor,
+                                             OUTPUT pError) NO-ERROR.
 
                 CREATE mov_contable.
                 ASSIGN Mov_Contable.Agencia = creditos.agencia

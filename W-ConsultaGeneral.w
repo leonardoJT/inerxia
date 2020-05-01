@@ -1057,11 +1057,16 @@ DEFINE VARIABLE FIni AS DATE FORMAT "99/99/9999":U
 
 DEFINE RECTANGLE RECT-280
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 30 BY 8.88.
+     SIZE 30 BY 9.69.
 
 DEFINE RECTANGLE RECT-317
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 30 BY 8.88.
+     SIZE 30 BY 9.69.
+
+DEFINE VARIABLE chkUtilizacionesRotativo AS LOGICAL INITIAL no 
+     LABEL "Utilizaciones Cupo Rotativo" 
+     VIEW-AS TOGGLE-BOX
+     SIZE 27 BY .69 NO-UNDO.
 
 DEFINE VARIABLE IdFacturaCupoRotativo AS LOGICAL INITIAL no 
      LABEL "Extracto Cupo Rotativo" 
@@ -1438,43 +1443,6 @@ DEFINE FRAME F_Consulta
          SIZE 126.86 BY 24.81
          BGCOLOR 17 FONT 4.
 
-DEFINE FRAME F_Opciones
-     BUTTON-5 AT ROW 12.58 COL 52
-     Id_General AT ROW 1.27 COL 4
-     Id_Saldos AT ROW 1.27 COL 35
-     Id_Economica AT ROW 2.35 COL 4.14
-     Id_Atrasos AT ROW 2.35 COL 34.29
-     Id_Ahorros AT ROW 3.12 COL 4.14
-     Id_Relaciones AT ROW 3.12 COL 34.29
-     Id_AhoCanc AT ROW 3.88 COL 4.14
-     Id_Codeudando AT ROW 3.88 COL 34.29
-     Id_Creditos AT ROW 4.65 COL 4.14
-     Id_HojaVida AT ROW 4.65 COL 34.29
-     Id_HistCreditos AT ROW 5.42 COL 4.14
-     Id_Controles AT ROW 5.42 COL 34.29
-     Id_SimulaPago AT ROW 6.19 COL 4.14
-     TCompromisos AT ROW 6.19 COL 34.29
-     Id_CredCanc AT ROW 6.96 COL 4.14
-     Id_GestCobro AT ROW 6.96 COL 34.29
-     Id_Solicitudes AT ROW 7.73 COL 4.14
-     Tg_Extras AT ROW 7.73 COL 34.29
-     Id_Especiales AT ROW 8.54 COL 4.14
-     Tg_CtasAho AT ROW 8.58 COL 34.29
-     Id_GarAdm AT ROW 9.35 COL 4
-     Tg_Plastico AT ROW 9.35 COL 34.29
-     IdFacturaCupoRotativo AT ROW 10.12 COL 4 WIDGET-ID 6
-     tgFecCorte AT ROW 12.42 COL 2.86 WIDGET-ID 2
-     FIni AT ROW 12.58 COL 35 COLON-ALIGNED
-     fechaCorte AT ROW 13.31 COL 2.43 COLON-ALIGNED NO-LABEL WIDGET-ID 4
-     FFin AT ROW 13.54 COL 35 COLON-ALIGNED
-     RECT-280 AT ROW 2.08 COL 2
-     RECT-317 AT ROW 2.08 COL 32
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 34 ROW 3.42
-         SIZE 62 BY 13.73
-         BGCOLOR 17 FONT 5.
-
 DEFINE FRAME frmFacturaCupoRotativo
      btnVolverFrmFacturaCupo AT ROW 1.27 COL 119 WIDGET-ID 2
     WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
@@ -1810,26 +1778,6 @@ DEFINE FRAME F_Browser
          BGCOLOR 17 FONT 4
          TITLE "Resultado de la Consulta".
 
-DEFINE FRAME F_Controles
-     VProcredito AT ROW 1.54 COL 24 COLON-ALIGNED NO-LABEL
-     TReportado_Procredito AT ROW 1.62 COL 3.72 HELP
-          "Si es o no es reportado a Procrédito"
-     TReportado_fiscalia AT ROW 2.62 COL 3.72 HELP
-          "Si es o no es reportado a la Fiscalía"
-     VFiscalia AT ROW 2.62 COL 24 COLON-ALIGNED NO-LABEL
-     TReportado_Super AT ROW 3.69 COL 3.72 HELP
-          "Si es o no es reportado por la cartera a la Superbancaria"
-     VSuperbancaria AT ROW 3.69 COL 24 COLON-ALIGNED NO-LABEL
-     btn_cambios AT ROW 5.31 COL 2
-     BUTTON-183 AT ROW 5.31 COL 29
-     RECT-281 AT ROW 1.27 COL 2
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 57 ROW 6.38
-         SIZE 40 BY 7
-         BGCOLOR 17 FONT 4
-         TITLE "Reportes y Controles".
-
 DEFINE FRAME F_Impresion
      BUTTON-7 AT ROW 3.04 COL 21
      R_Encabezado AT ROW 1.27 COL 3 NO-LABEL
@@ -1889,6 +1837,9 @@ DEFINE FRAME F_AdmCodeudores
           VIEW-AS FILL-IN 
           SIZE 22 BY .81
           BGCOLOR 15 
+     "  Creditos Disponibles del Cliente" VIEW-AS TEXT
+          SIZE 102 BY .81 AT ROW 1.27 COL 5
+          BGCOLOR 18 FGCOLOR 15 FONT 1
      " Residencia" VIEW-AS TEXT
           SIZE 11 BY 1.08 AT ROW 8.81 COL 7
           FGCOLOR 7 FONT 5
@@ -1898,9 +1849,6 @@ DEFINE FRAME F_AdmCodeudores
      " Comercial" VIEW-AS TEXT
           SIZE 12 BY .77 AT ROW 8.92 COL 58.43
           FGCOLOR 7 FONT 5
-     "  Creditos Disponibles del Cliente" VIEW-AS TEXT
-          SIZE 102 BY .81 AT ROW 1.27 COL 5
-          BGCOLOR 18 FGCOLOR 15 FONT 1
      RECT-284 AT ROW 9.35 COL 5
      RECT-285 AT ROW 9.35 COL 57
      RECT-304 AT ROW 14.73 COL 5
@@ -1922,6 +1870,64 @@ DEFINE FRAME F_Relaciones
          SIZE 63 BY 9.15
          BGCOLOR 17 FONT 4
          TITLE "Relaciones".
+
+DEFINE FRAME F_Controles
+     VProcredito AT ROW 1.54 COL 24 COLON-ALIGNED NO-LABEL
+     TReportado_Procredito AT ROW 1.62 COL 3.72 HELP
+          "Si es o no es reportado a Procrédito"
+     TReportado_fiscalia AT ROW 2.62 COL 3.72 HELP
+          "Si es o no es reportado a la Fiscalía"
+     VFiscalia AT ROW 2.62 COL 24 COLON-ALIGNED NO-LABEL
+     TReportado_Super AT ROW 3.69 COL 3.72 HELP
+          "Si es o no es reportado por la cartera a la Superbancaria"
+     VSuperbancaria AT ROW 3.69 COL 24 COLON-ALIGNED NO-LABEL
+     btn_cambios AT ROW 5.31 COL 2
+     BUTTON-183 AT ROW 5.31 COL 29
+     RECT-281 AT ROW 1.27 COL 2
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 57 ROW 6.38
+         SIZE 40 BY 7
+         BGCOLOR 17 FONT 4
+         TITLE "Reportes y Controles".
+
+DEFINE FRAME F_Opciones
+     BUTTON-5 AT ROW 12.58 COL 52
+     Id_General AT ROW 1.27 COL 4
+     Id_Saldos AT ROW 1.27 COL 35
+     Id_Economica AT ROW 2.35 COL 4.14
+     Id_Atrasos AT ROW 2.35 COL 34.29
+     Id_Ahorros AT ROW 3.12 COL 4.14
+     Id_Relaciones AT ROW 3.12 COL 34.29
+     Id_AhoCanc AT ROW 3.88 COL 4.14
+     Id_Codeudando AT ROW 3.88 COL 34.29
+     Id_Creditos AT ROW 4.65 COL 4.14
+     Id_HojaVida AT ROW 4.65 COL 34.29
+     Id_HistCreditos AT ROW 5.42 COL 4.14
+     Id_Controles AT ROW 5.42 COL 34.29
+     Id_SimulaPago AT ROW 6.19 COL 4.14
+     TCompromisos AT ROW 6.19 COL 34.29
+     Id_CredCanc AT ROW 6.96 COL 4.14
+     Id_GestCobro AT ROW 6.96 COL 34.29
+     Id_Solicitudes AT ROW 7.73 COL 4.14
+     Tg_Extras AT ROW 7.73 COL 34.29
+     Id_Especiales AT ROW 8.54 COL 4.14
+     Tg_CtasAho AT ROW 8.58 COL 34.29
+     Id_GarAdm AT ROW 9.35 COL 4
+     Tg_Plastico AT ROW 9.35 COL 34.29
+     IdFacturaCupoRotativo AT ROW 10.12 COL 4 WIDGET-ID 6
+     chkUtilizacionesRotativo AT ROW 10.88 COL 4 WIDGET-ID 8
+     tgFecCorte AT ROW 12.42 COL 2.86 WIDGET-ID 2
+     FIni AT ROW 12.58 COL 35 COLON-ALIGNED
+     fechaCorte AT ROW 13.31 COL 2.43 COLON-ALIGNED NO-LABEL WIDGET-ID 4
+     FFin AT ROW 13.54 COL 35 COLON-ALIGNED
+     RECT-280 AT ROW 2.08 COL 2
+     RECT-317 AT ROW 2.08 COL 32
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 34 ROW 3.42
+         SIZE 62 BY 13.73
+         BGCOLOR 17 FONT 5.
 
 
 /* *********************** Procedure Settings ************************ */
@@ -3594,37 +3600,40 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL Btn_Tipos wWin
 ON CHOOSE OF Btn_Tipos IN FRAME F_Consulta /* Tipos de Información */
 DO:
-  VIEW FRAME F_Opciones.
+    VIEW FRAME F_Opciones.
 
-  ASSIGN Id_Creditos = FALSE
-         Id_Creditos:SCREEN-VALUE = "No"
+    Id_Creditos = FALSE.
+    Id_Creditos:SCREEN-VALUE = "No".
 
-         Id_AhoCanc = FALSE
-         Id_AhoCanc:SCREEN-VALUE = "No"                
-         
-         Id_Solicitudes = FALSE
-         Id_Solicitudes:SCREEN-VALUE = "No"
-         
-         Id_CredCanc = FALSE
-         Id_CredCanc:SCREEN-VALUE = "No"
-                       
-         Id_GarAdm = FALSE
-         Id_GarAdm:SCREEN-VALUE = "No"
-         
-         Id_Relaciones = FALSE
-         Id_Relaciones:SCREEN-VALUE = "No"
-                     
-         Id_Codeudando = FALSE
-         Id_Codeudando:SCREEN-VALUE = "No"
-                         
-         Id_HojaVida = FALSE
-         Id_HojaVida:SCREEN-VALUE = "No" 
+    Id_AhoCanc = FALSE.
+    Id_AhoCanc:SCREEN-VALUE = "No".
 
-         Id_GestCobro = FALSE
-         Id_GestCobro:SCREEN-VALUE = "No"
+    Id_Solicitudes = FALSE.
+    Id_Solicitudes:SCREEN-VALUE = "No".
 
-         idFacturaCupoRotativo = FALSE
-         idFacturaCupoRotativo:SCREEN-VALUE = "no".
+    Id_CredCanc = FALSE.
+    Id_CredCanc:SCREEN-VALUE = "No".
+
+    Id_GarAdm = FALSE.
+    Id_GarAdm:SCREEN-VALUE = "No".
+
+    Id_Relaciones = FALSE.
+    Id_Relaciones:SCREEN-VALUE = "No".
+
+    Id_Codeudando = FALSE.
+    Id_Codeudando:SCREEN-VALUE = "No".
+
+    Id_HojaVida = FALSE.
+    Id_HojaVida:SCREEN-VALUE = "No".
+
+    Id_GestCobro = FALSE.
+    Id_GestCobro:SCREEN-VALUE = "No".
+
+    idFacturaCupoRotativo = FALSE.
+    idFacturaCupoRotativo:SCREEN-VALUE = "no".
+
+    chkUtilizacionesRotativo = FALSE.
+    chkUtilizacionesRotativo:SCREEN-VALUE = "no".
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -3647,7 +3656,7 @@ ON LEAVE OF Buscar IN FRAME F_Consulta
 DO:
     DEFINE VAR i AS INTEGER.
 
-    FOR EACH TSaldos WHERE TSaldos.Cla EQ 0:
+    FOR EACH TSaldos WHERE TSaldos.Cla = 0:
         DELETE TSaldos.
     END.
 
@@ -4672,6 +4681,18 @@ ON ROW-DISPLAY OF B_Relaciones IN FRAME F_Relaciones
 DO:
   FIND FIRST TCli WHERE TCli.Nit EQ Relaciones.Nit_Relacion NO-LOCK NO-ERROR.
   IF AVAILABLE TCli THEN W_NomEmpresa = TCli.Nombre.
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&Scoped-define FRAME-NAME F_Opciones
+&Scoped-define SELF-NAME chkUtilizacionesRotativo
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL chkUtilizacionesRotativo wWin
+ON VALUE-CHANGED OF chkUtilizacionesRotativo IN FRAME F_Opciones /* Utilizaciones Cupo Rotativo */
+DO:
+  ASSIGN idFacturaCupoRotativo.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -7546,13 +7567,14 @@ PROCEDURE enable_UI :
           Id_AhoCanc Id_Codeudando Id_Creditos Id_HojaVida Id_HistCreditos 
           Id_Controles Id_SimulaPago TCompromisos Id_CredCanc Id_GestCobro 
           Id_Solicitudes Tg_Extras Id_Especiales Tg_CtasAho Id_GarAdm 
-          Tg_Plastico IdFacturaCupoRotativo tgFecCorte FIni fechaCorte FFin 
+          Tg_Plastico IdFacturaCupoRotativo chkUtilizacionesRotativo tgFecCorte 
+          FIni fechaCorte FFin 
       WITH FRAME F_Opciones IN WINDOW wWin.
   ENABLE BUTTON-5 RECT-280 RECT-317 Id_General Id_Saldos Id_Economica 
          Id_Ahorros Id_Relaciones Id_AhoCanc Id_Codeudando Id_Creditos 
          Id_HojaVida Id_HistCreditos Id_Controles Id_SimulaPago TCompromisos 
          Id_CredCanc Id_GestCobro Id_Solicitudes Tg_CtasAho Id_GarAdm 
-         Tg_Plastico IdFacturaCupoRotativo tgFecCorte 
+         Tg_Plastico IdFacturaCupoRotativo chkUtilizacionesRotativo tgFecCorte 
       WITH FRAME F_Opciones IN WINDOW wWin.
   {&OPEN-BROWSERS-IN-QUERY-F_Opciones}
   ENABLE Foto BUTTON-124 

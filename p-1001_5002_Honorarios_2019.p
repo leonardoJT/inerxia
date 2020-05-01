@@ -154,11 +154,11 @@ FOR EACH anexos WHERE (SUBSTRING(anexos.cuenta,1,6) = "511001" OR
                     END.
 
                     F1001.pais = "169".
+
+                    IF clientes.tipo_identificacion = "NIT" THEN
+                        RUN digitoVerificacion.r(INPUT clientes.nit,
+                                                 OUTPUT F1001.dv) NO-ERROR.
                 END.
-    
-                IF clientes.tipo_identificacion = "NIT" THEN
-                    RUN digitoVerificacion.r(INPUT clientes.nit,
-                                             OUTPUT F1001.dv) NO-ERROR.
             END.
         END.
 
@@ -197,7 +197,8 @@ FOR EACH anexos WHERE (SUBSTRING(anexos.cuenta,1,6) = "511001" OR
                                           AND bfrMovContable.num_documento = docs.num_documento
                                           AND bfrMovContable.nit = docs.nit
                                           AND bfrMovContable.fec_contable = docs.fec_contable
-                                          AND SUBSTRING(mov_contable.cuenta,1,6) = "243505" NO-LOCK:
+                                          AND (SUBSTRING(bfrMovContable.cuenta,1,6) = "243515" OR
+                                               SUBSTRING(bfrMovContable.cuenta,1,6) = "243525") NO-LOCK:
                     F1001.ReteFuenteRta = F1001.ReteFuenteRta + bfrMovContable.cr - bfrMovContable.db.
                 END.
             END.

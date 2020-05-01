@@ -959,98 +959,104 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL Btn_Contabilizar W-Rec_XLibranza
 ON CHOOSE OF Btn_Contabilizar IN FRAME F_Proc /* Contabilizar */
 DO:
-    DEFINE VARIABLE vlOp AS LOGICAL INITIAL NO NO-UNDO.  
-    
-    MESSAGE "Esta seguro de Recaudar" SKIP
-            "para le Mes " W_sem:SCREEN-VALUE
+    DEFINE VARIABLE vlOp AS LOGICAL.
+
+    MESSAGE "Está seguro de aplicar la distribución" SKIP
+            "para el mes" W_sem:SCREEN-VALUE
         VIEW-AS ALERT-BOX INFO BUTTONS YES-NO SET vlOp.
-    
+
     IF NOT vlOP THEN
         RETURN NO-APPLY.
 
-    ASSIGN W_Inf = TRUE
-           W_SiContab = TRUE
-           Msaje:SCREEN-VALUE IN FRAME F_Proc = "Generando Distrib.Contable desde Pdctos de C/Cliente..."
-           Msaje:VISIBLE = TRUE
-           W_TotNoD = 0
-           W_TotNoD:SCREEN-VALUE = STRING(W_TotNoD)
-           W_ContabDistSi = 0
-           W_ContabDistNo = 0.
+    W_Inf = TRUE.
+    W_SiContab = TRUE.
+    Msaje:SCREEN-VALUE IN FRAME F_Proc = "Generando Distrib.Contable desde Pdctos de C/Cliente...".
+    Msaje:VISIBLE = TRUE.
+    W_TotNoD = 0.
+    W_TotNoD:SCREEN-VALUE = STRING(W_TotNoD).
+    W_ContabDistSi = 0.
+    W_ContabDistNo = 0.
 
     EMPTY TEMP-TABLE CopTPdctos.
     EMPTY TEMP-TABLE TPdctos.
     EMPTY TEMP-TABLE CopMov_Contable.
     EMPTY TEMP-TABLE TempCtas.
-    
-    CLOSE QUERY Br_Rec.                                              
-    CLOSE QUERY Br_Pdctos.  
-    
-    IF w_sem:SCREEN-VALUE NE "" AND txt_contrapartida:SCREEN-VALUE NE ""  THEN /* 27950501*/ DO:
+
+    CLOSE QUERY Br_Rec.
+    CLOSE QUERY Br_Pdctos.
+
+    IF w_sem:SCREEN-VALUE <> "" AND txt_contrapartida:SCREEN-VALUE <> "" THEN DO:
         RUN CambioExaso NO-ERROR.
 
-        MESSAGE "               Segura(o) de Contablizar el mes de Pago :" w_sem /*Tg_SemP*/
-               VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO TITLE "Confirmar Contabilizar" 
-               UPDATE W_SiNeg AS LOGICAL.
+        MESSAGE "Está seguro(a) de contablizar el mes de pago:" w_sem "?"
+            VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO TITLE "Confirmar Contabilizar" UPDATE W_SiNeg AS LOGICAL.
+
         IF NOT W_SiNeg THEN
-           RETURN.
-           
+            RETURN.
+
         RUN Valida NO-ERROR.
         IF ERROR-STATUS:ERROR THEN DO:
-           MESSAGE "La Configuración Contable Presento Errores...Proceso cancelado."
-                  VIEW-AS ALERT-BOX ERROR.
-    
-           ASSIGN Msaje:SCREEN-VALUE IN FRAME F_Proc = "Distrib.Contable Cancelada...Revise por favor"
-                  W_Inf                              = FALSE
-                  W_SiContab                         = FALSE.
-    
-           RETURN.
-        END.
-        
-        IF txt_contrapartida:SCREEN-VALUE EQ "" THEN DO:
-            MESSAGE "Debe ingresar la cuenta de contrapartida ..Proceso cancelado."
-                VIEW-AS ALERT-BOX INFO BUTTONS OK.
-    
-           ASSIGN Msaje:SCREEN-VALUE IN FRAME F_Proc = "Distrib.Contable Cancelada...Revise por favor"
-           W_Inf                              = FALSE
-           W_SiContab                         = FALSE.
-    
+            MESSAGE "La configuración contable presenta Eerores. Proceso cancelado."
+                VIEW-AS ALERT-BOX ERROR.
+
+            Msaje:SCREEN-VALUE IN FRAME F_Proc = "Distrib.Contable Cancelada...Revise por favor".
+            W_Inf = FALSE.
+            W_SiContab = FALSE.
+
             RETURN.
         END.
-    
-        FIND FIRST Cuentas WHERE Cuentas.Tipo EQ 2
-                             AND Cuentas.Cuenta EQ txt_contrapartida:SCREEN-VALUE 
-                             AND Cuentas.Estado EQ 1 NO-LOCK NO-ERROR.
 
-        FIND FIRST Empresas WHERE Empresas.Cod_Empresa EQ W_CodEmp NO-ERROR.
-    
-        IF NOT AVAIL(Cuentas) OR NOT AVAIL(Empresas) THEN DO:
-           MESSAGE "La Cuenta de Caja y la Empresa deben existir Activas..." SKIP
-                 "               No se acepta la Operación." VIEW-AS ALERT-BOX ERROR.
-           ASSIGN Msaje:SCREEN-VALUE IN FRAME F_Proc = "Distrib.Contable Cancelada...Revise por favor"
-                  W_Inf                              = FALSE
-                  W_SiContab                         = FALSE.
-           RETURN.
+        IF txt_contrapartida:SCREEN-VALUE = "" THEN DO:
+            MESSAGE "Debe ingresar la cuenta de contrapartida. Proceso cancelado."
+                VIEW-AS ALERT-BOX INFO BUTTONS OK.
+
+            Msaje:SCREEN-VALUE IN FRAME F_Proc = "Distrib.Contable Cancelada...Revise por favor".
+            W_Inf = FALSE.
+            W_SiContab = FALSE.
+
+            RETURN.
         END.
-    
-        FIND FIRST Entidad WHERE Entidad.Entidad EQ W_Entidad NO-LOCK NO-ERROR.
-        IF AVAIL(Entidad) THEN
-           FIND FIRST Comprobantes WHERE Comprobantes.Agencia EQ W_Agencia
-                                     AND Comprobantes.Comprob EQ Entidad.Cpte_REcNom
-                                     AND Comprobantes.Estado  EQ 1 NO-ERROR.
-    
-        IF NOT AVAIL(Comprobantes) OR NOT AVAIL(Entidad) THEN DO:
-           MESSAGE "El Comprobante-Fuente Contable para el proceso debe existir en Entidad y en Comprobantes" SKIP
-                 "                        No se acepta la Operación." VIEW-AS ALERT-BOX ERROR.
-           ASSIGN Msaje:SCREEN-VALUE IN FRAME F_Proc = "Distrib.Contable Cancelada...Revise por favor"
-                  W_Inf                              = FALSE
-                  W_SiContab                         = FALSE.
-    
-           RETURN.
+
+        FIND FIRST Cuentas WHERE Cuentas.Tipo = 2
+                             AND Cuentas.Cuenta = txt_contrapartida:SCREEN-VALUE
+                             AND Cuentas.Estado = 1 NO-LOCK NO-ERROR.
+
+        FIND FIRST Empresas WHERE Empresas.Cod_Empresa = W_CodEmp NO-ERROR.
+
+        IF NOT AVAILABLE(Cuentas) OR NOT AVAILABLE(Empresas) THEN DO:
+            MESSAGE "La cuenta de caja y la Empresa deben existir Activas..." SKIP
+                    "No se acepta la operación."
+                VIEW-AS ALERT-BOX ERROR.
+
+            Msaje:SCREEN-VALUE IN FRAME F_Proc = "Distrib.Contable Cancelada...Revise por favor".
+            W_Inf = FALSE.
+            W_SiContab = FALSE.
+
+            RETURN.
         END.
-    
+
+        FIND FIRST Entidad WHERE Entidad.Entidad = W_Entidad NO-LOCK NO-ERROR.
+        IF AVAILABLE(Entidad) THEN
+            FIND FIRST Comprobantes WHERE Comprobantes.Agencia = W_Agencia
+                                      AND Comprobantes.Comprobante = Entidad.Cpte_REcNom
+                                      AND Comprobantes.Estado = 1 NO-ERROR.
+
+        IF NOT AVAILABLE(Comprobantes) OR NOT AVAILABLE(Entidad) THEN DO:
+            MESSAGE "El comprobante-fuente contable para el proceso debe existir en Entidad y en Comprobantes." SKIP
+                    "No se acepta la operación."
+                VIEW-AS ALERT-BOX ERROR.
+
+            Msaje:SCREEN-VALUE IN FRAME F_Proc = "Distrib.Contable Cancelada...Revise por favor".
+            W_Inf = FALSE.
+            W_SiContab = FALSE.
+
+            RETURN.
+        END.
+
         SESSION:SET-WAIT-STATE("GENERAL").
-    
-        RUN Contabilizar NO-ERROR.
+
+        RUN Contabilizar NO-ERROR. /* oakley */
+
         IF ERROR-STATUS:ERROR THEN DO:
            MESSAGE "La Contabilización Presento Errores...Proceso cancelado."
                   VIEW-AS ALERT-BOX ERROR.
@@ -1581,35 +1587,36 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL Rs_Opcrea W-Rec_XLibranza
 ON MOUSE-SELECT-CLICK OF Rs_Opcrea IN FRAME F_Proc
 DO:
+    ASSIGN Rs_OpCrea.
 
-  ASSIGN Rs_OpCrea
-         W_NroPago              = 1
-         W_NroPago:SCREEN-VALUE = "000001"
-         Rs_OpCrea:SENSITIVE    = FALSE.
-    
-  FIND LAST Rec_Nomina WHERE Rec_Nomina.Cod_Empresa EQ W_CodEmp
-                         AND Rec_Nomina.Nro_Pago    GT 0 NO-LOCK NO-ERROR.
-  IF AVAIL(Rec_Nomina) THEN
-     ASSIGN W_NroPago              = Rec_Nomina.Nro_Pago + 1
-            W_NroPago:SCREEN-VALUE = STRING(Rec_Nomina.Nro_Pago + 1).
+    W_NroPago = 1.
+    W_NroPago:SCREEN-VALUE = "000001".
+    Rs_OpCrea:SENSITIVE = FALSE.
 
-  IF Rs_OpCrea EQ 1 THEN
-     APPLY "ENTRY" TO W_NitCte.
-  ELSE DO:
-     IF Rs_OpCrea EQ 2 THEN DO:
-        RUN HallaArchivo.
-        /*RUN InfExasoc. - Este Si*/
-/*         RUN Infsinrema.  */
-     END.
-     ELSE DO:           
-        IF Rs_OpCrea EQ 3 THEN 
-           RUN HallaPdctos.
-        ELSE do:
-            IF W_CodEmp = 1 THEN RUN Hallaas400n.
-            IF W_CodEmp = 2 THEN RUN Hallaas400l.
+    FIND LAST Rec_Nomina WHERE Rec_Nomina.Cod_Empresa = W_CodEmp
+                           AND Rec_Nomina.Nro_Pago > 0 NO-LOCK NO-ERROR.
+    IF AVAILABLE(Rec_Nomina) THEN DO:
+        W_NroPago = Rec_Nomina.Nro_Pago + 1.
+        W_NroPago:SCREEN-VALUE = STRING(Rec_Nomina.Nro_Pago + 1).
+    END.
+
+    IF Rs_OpCrea = 1 THEN
+        APPLY "ENTRY" TO W_NitCte.
+    ELSE DO:
+        IF Rs_OpCrea = 2 THEN
+            RUN HallaArchivo.
+        ELSE DO:
+            IF Rs_OpCrea = 3 THEN
+                RUN HallaPdctos.
+            ELSE DO:
+                IF W_CodEmp = 1 THEN
+                    RUN Hallaas400n.
+
+                IF W_CodEmp = 2 THEN
+                    RUN Hallaas400l.
+            END.
         END.
-     END.
-  END.
+    END.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -2125,19 +2132,12 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE CambioExaso W-Rec_XLibranza 
 PROCEDURE CambioExaso :
-/*------------------------------------------------------------------------------
-  Purpose: Cambia la Empresa Para los Exasociados y lo Activa de Nuevo, siempre que sea de 
-           la misma pagaduria.     
-------------------------------------------------------------------------------*/
-FOR EACH Rec_Nomina WHERE Rec_Nomina.Cod_Empresa EQ W_CodEmp                             
-                      AND Rec_Nomina.Nro_Pago    EQ W_NroPago                            
-                      AND Rec_Nomina.Num_Cuotas  EQ 99  
-                      BY Rec_Nomina.Nit:
-    FIND FIRST Clientes WHERE clientes.nit EQ Rec_Nomina.Nit NO-LOCK NO-ERROR.
-    IF AVAILABLE(Clientes) AND Clientes.Estado      EQ 1 AND
-                               Clientes.Cod_Empresa EQ Rec_Nomina.Cod_Empresa  THEN DO:
-       ASSIGN Rec_Nomina.Num_Cuotas  = 1.
-    END.
+FOR EACH Rec_Nomina WHERE Rec_Nomina.Cod_Empresa = W_CodEmp
+                      AND Rec_Nomina.Nro_Pago = W_NroPago
+                      AND Rec_Nomina.Num_Cuotas = 99 BY Rec_Nomina.Nit:
+    FIND FIRST Clientes WHERE clientes.nit = Rec_Nomina.Nit NO-LOCK NO-ERROR.
+    IF AVAILABLE(Clientes) AND Clientes.Estado = 1 AND Clientes.Cod_Empresa = Rec_Nomina.Cod_Empresa THEN
+        ASSIGN Rec_Nomina.Num_Cuotas  = 1.
 END.
 
 END PROCEDURE.
@@ -2147,20 +2147,17 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE ComboPagos W-Rec_XLibranza 
 PROCEDURE ComboPagos :
-/*------------------------------------------------------------------------------
-  Purpose:     
-------------------------------------------------------------------------------*/
 Cmb_Pagos:LIST-ITEMS IN FRAME F_Proc = "".
 
-FOR EACH Rec_Nomina WHERE Rec_Nomina.Cod_Empr EQ W_CodEmp
-                      AND Rec_Nomina.Fec_Contabilizacion EQ ? NO-LOCK BREAK BY Rec_Nomina.Nro_pago:
-    IF Rec_nomina.carnet NE "3" THEN
+FOR EACH Rec_Nomina WHERE Rec_Nomina.Cod_Empr = W_CodEmp
+                      AND Rec_Nomina.Fec_Contabilizacion = ? NO-LOCK BREAK BY Rec_Nomina.Nro_pago:
+    IF Rec_nomina.carnet <> "3" THEN
         NEXT.
 
     IF FIRST-OF(Rec_Nomina.Nro_pago) THEN DO:
         Cmb_Pagos:ADD-LAST(STRING(Rec_Nomina.Nro_pago,"999999") + " - " + STRING(Rec_Nomina.Fec_Pago,"99/99/9999")).
 
-        IF Rec_Nomina.Nro_Pago EQ W_NroPago THEN
+        IF Rec_Nomina.Nro_Pago = W_NroPago THEN
             Cmb_Pagos:SCREEN-VALUE = STRING(Rec_Nomina.Nro_pago,"999999") + " - " + STRING(Rec_Nomina.Fec_Pago,"99/99/9999").
     END.
 END.
@@ -2309,39 +2306,37 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE Contabilizar W-Rec_XLibranza 
 PROCEDURE Contabilizar :
-DEFI VAR TotT LIKE Mov_Contable.Db INIT 0.
-DEFI VAR Listado AS CHAR FORM "X(40)".
-DEFI VAR W_SiErr AS LOG INIT FALSE.
+DEFINE VAR TotT AS DECIMAL.
+DEFINE VAR Listado AS CHARACTER.
+DEFINE VAR W_SiErr AS LOGICAL.
 
-ASSIGN W_Cont = 0
-       W_Cont:SCREEN-VALUE IN FRAME F_Proc = "0".
+W_Cont = 0.
+W_Cont:SCREEN-VALUE IN FRAME F_Proc = "0".
 
 TranConta:
 REPEAT TRANSACTION ON ERROR UNDO TranConta, LEAVE TranConta:
-    ASSIGN Comprobantes.Secuencia = Comprobantes.Secuencia + 1
-           Empresas.Consecutivo_Pago = Empresas.Consecutivo_Pago + 1
-           Empresas.Fec_UltPago[1] = W_Fecha.
+    Comprobantes.Secuencia = Comprobantes.Secuencia + 1.
+    Empresas.Consecutivo_Pago = Empresas.Consecutivo_Pago + 1.
+    Empresas.Fec_UltPago[1] = W_Fecha.
 
     FIND CURRENT Comprobantes NO-LOCK NO-ERROR.
     FIND CURRENT Empresas NO-LOCK NO-ERROR.
 
-    FOR EACH Rec_Nomina WHERE Rec_Nomina.Cod_Empresa EQ W_CodEmp
-                          AND Rec_Nomina.Nro_Pago EQ W_NroPago
-                          AND Rec_Nomina.Num_Cuotas NE 99
-                          AND Rec_Nomina.Fec_Contab EQ ?:
-        IF Rec_nomina.carnet NE "3" THEN
-            NEXT.
-
-        IF Rec_Nomina.Val_Deduc GT 0 THEN DO:
-            ASSIGN W_NitCte = Rec_Nomina.Nit
-                   W_Cont = W_Cont + 1.
+    FOR EACH Rec_Nomina WHERE Rec_Nomina.Cod_Empresa = W_CodEmp
+                          AND Rec_Nomina.Nro_Pago = W_NroPago
+                          AND Rec_Nomina.Num_Cuotas <> 99
+                          AND Rec_Nomina.Fec_Contab = ?
+                          AND rec_nomina.carnet = "3":
+        IF Rec_Nomina.Val_Deduc > 0 THEN DO:
+            W_NitCte = Rec_Nomina.Nit.
+            W_Cont = W_Cont + 1.
 
             W_Cont:SCREEN-VALUE IN FRAME F_Proc = STRING(W_Cont).
 
-            IF W_Cont GT 3000 THEN
-                LEAVE. 
+            IF W_Cont > 3000 THEN
+                LEAVE.
 
-            RUN DistRecaudo NO-ERROR.
+            RUN DistRecaudo NO-ERROR. /* oakley */
             IF ERROR-STATUS:ERROR THEN DO:
                 MESSAGE "Error en distribucion recuado"
                     VIEW-AS ALERT-BOX INFO BUTTONS OK.
@@ -2822,29 +2817,27 @@ DEFINE VAR pSeguroDeudor AS DECIMAL.
 DEFINE VAR pMoraDifCobro AS DECIMAL.
 DEFINE VAR pError AS LOGICAL.
 
-/* oakley */
-
 EMPTY TEMP-TABLE TPdctos.
 
-ASSIGN W_PorD = 0
-       W_PorD:SCREEN-VALUE IN FRAME F_Proc = "0.00"
-       W_Dist = 0
-       W_Dist:SCREEN-VALUE = "0.00".
+W_PorD = 0.
+W_PorD:SCREEN-VALUE IN FRAME F_Proc = "0.00".
+W_Dist = 0.
+W_Dist:SCREEN-VALUE = "0.00".
 
 W_Cont:SCREEN-VALUE = STRING(W_Cont).
 
 IF NOT W_Inf THEN
-    FIND LAST Rec_Nomina WHERE Rec_Nomina.Cod_Empresa EQ W_CodEmp
-                           AND Rec_Nomina.Nro_Pago EQ W_NroPago
-                           AND Rec_Nomina.Fec_Contab EQ ?
-                           AND Rec_Nomina.Nit EQ W_NitCte
-                           AND Rec_Nomina.Num_Cuotas NE 99
-                           AND rec_nomina.carnet EQ "3" NO-LOCK NO-ERROR.
+    FIND LAST Rec_Nomina WHERE Rec_Nomina.Cod_Empresa = W_CodEmp
+                           AND Rec_Nomina.Nro_Pago = W_NroPago
+                           AND Rec_Nomina.Fec_Contab = ?
+                           AND Rec_Nomina.Nit = W_NitCte
+                           AND Rec_Nomina.Num_Cuotas <> 99
+                           AND rec_nomina.carnet = "3" NO-LOCK NO-ERROR.
 
-IF NOT AVAIL(Rec_Nomina) THEN
+IF NOT AVAILABLE(Rec_Nomina) THEN
     RETURN.
 
-IF Rec_Nomina.Val_Deduc LE 0 THEN
+IF Rec_Nomina.Val_Deduc <= 0 THEN
     RETURN.
 
 w_fecha1 = DATE(INTEGER(w_sem),1,viano).
@@ -2852,27 +2845,23 @@ w_fecha2 = DATE(INTEGER(w_sem),1,viano) - 1.
 
 IF INTEGER(w_sem) = 1 OR INTEGER(w_sem) = 3 OR INTEGER(w_sem) = 5 OR INTEGER(w_sem) = 7 OR INTEGER(w_sem) = 8 OR INTEGER(w_sem) = 10 OR INTEGER(w_sem) = 12 THEN
     w_fecha3 = w_fecha1 + 31.
-ELSE
+ELSE DO:
     IF INTEGER(w_sem) = 2 THEN
         w_fecha3 = w_fecha1 + DAY(DATE(3,1,viano) - 1).
     ELSE
         w_fecha3 = w_fecha1 + 30.
+END.
 
-/*FOR EACH Ahorros WHERE Ahorros.Nit EQ W_NitCte
-                   AND (Ahorros.FOR_Pago EQ 2 OR
-                        Ahorros.FOR_Pago EQ 4)
-                   AND Ahorros.Estado EQ 1 NO-LOCK BY Ahorros.Cod_Ahorro:
-    NEXT.
-END.*/
-
-FOR EACH Creditos WHERE Creditos.Nit EQ W_NitCte
-                    AND (Creditos.FOR_Pago EQ 2 OR Creditos.FOR_Pago EQ 4)
-                    AND Creditos.Estado EQ 2 NO-LOCK BY Creditos.Cod_Credito:
-    IF Creditos.Cuota LE 0 OR
+FOR EACH Creditos WHERE Creditos.Nit = W_NitCte
+                    AND (Creditos.FOR_Pago = 2 OR Creditos.FOR_Pago = 4)
+                    AND Creditos.Estado = 2 NO-LOCK BY Creditos.Cod_Credito:
+    IF Creditos.Cuota <= 0 OR
        creditos.sdo_capital <= 0 OR
-       creditos.Fec_PagAnti GE (w_fecha + 20) OR
-       (creditos.Fec_Pago GE (w_fecha + 30) AND (creditos.plazo = 1 /* Emergencia y Corto Plazo */ OR creditos.per_pago > 4 /* Superiores a mensual */)) THEN
+       creditos.Fec_PagAnti >= (w_fecha + 20) OR
+       (creditos.Fec_Pago >= (w_fecha + 30) AND (creditos.plazo = 1 /* Emergencia y Corto Plazo */ OR creditos.per_pago > 4 /* Superiores a mensual */)) THEN
         NEXT.
+
+    /* oakley */
 
     FIND FIRST exc_abono WHERE exc_abono.nit = creditos.nit
                            AND exc_abono.producto = 2
@@ -3154,18 +3143,17 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE HallaArchivo W-Rec_XLibranza 
 PROCEDURE HallaArchivo :
-DEFINE VAR Archivo AS CHARACTER FORMAT "X(40)".
-DEFINE VAR Datos AS CHARACTER FORMAT "X(80)".
+DEFINE VAR Archivo AS CHARACTER.
 
 SESSION:SET-WAIT-STATE("GENERAL").
 
-ASSIGN Msaje:SCREEN-VALUE IN FRAME F_Proc = "Generando Nuevo-Recaudo desde Archivo..."
-       Msaje:VISIBLE = TRUE
-       W_Cont:SCREEN-VALUE = "0"
-       W_Cont = 0
-       TImp = 0
-       TNoImp = 0
-       NNoImp = 0.
+Msaje:SCREEN-VALUE IN FRAME F_Proc = "Generando Nuevo-Recaudo desde Archivo...".
+Msaje:VISIBLE = TRUE.
+W_Cont:SCREEN-VALUE = "0".
+W_Cont = 0.
+TImp = 0.
+TNoImp = 0.
+NNoImp = 0.
 
 SYSTEM-DIALOG GET-FILE Archivo
     TITLE "Selecc.el Archivo...Diseño : Cédula-X(12),Valor-9999999999.99"
@@ -3178,102 +3166,103 @@ REPEAT:
     CREATE tmp.
     IMPORT DELIMITER ";" tmp.
     
-    FIND FIRST Clientes WHERE Clientes.Nit EQ Tmp.Ced
-                          AND Clientes.Estado EQ 1 NO-LOCK NO-ERROR.
-    IF AVAIL(Clientes) THEN DO:
-        IF Tmp.Vr GT 0 THEN DO:
-            ASSIGN Tmp.Age = clientes.agencia
-                   Tmp.Nom = clientes.nombre + " " + clientes.apellido1 + " " + clientes.apellido2.
-            
-            FIND FIRST Rec_Nomina WHERE Rec_Nomina.Cod_Empresa EQ W_CodEmp
-                                    AND Rec_Nomina.Nro_Pago EQ W_NroPago
-                                    AND Rec_Nomina.Nit EQ Tmp.Ced
-                                    AND Rec_Nomina.Fec_Contab EQ ? NO-ERROR.
-            IF NOT AVAIL(Rec_Nomina) THEN
+    /* Buscamos un Cliente activo que coincida a la identificación reportada */
+    FIND FIRST Clientes WHERE Clientes.Nit = Tmp.Ced
+                          AND Clientes.Estado = 1 NO-LOCK NO-ERROR.
+    IF AVAILABLE(Clientes) THEN DO:
+        IF Tmp.Vr > 0 THEN DO:
+            Tmp.Age = clientes.agencia.
+            Tmp.Nom = clientes.nombre + " " + clientes.apellido1 + " " + clientes.apellido2.
+
+            FIND FIRST Rec_Nomina WHERE Rec_Nomina.Cod_Empresa = W_CodEmp
+                                    AND Rec_Nomina.Nro_Pago = W_NroPago
+                                    AND Rec_Nomina.Nit = Tmp.Ced
+                                    AND Rec_Nomina.Fec_Contab = ? NO-ERROR.
+            IF NOT AVAILABLE(Rec_Nomina) THEN
                 CREATE Rec_Nomina.
 
-            ASSIGN Rec_Nomina.Agencia = W_Agencia
-                   Rec_Nomina.Cod_Empresa = W_CodEmp
-                   Rec_Nomina.Nro_Pago = W_NroPago
-                   Rec_Nomina.Nit = Tmp.Ced
-                   Rec_Nomina.Num_Cuotas = integer(W_NCuotas:SCREEN-VALUE in FRAME F_Proc) /* 1 */
-                   Rec_Nomina.Fec_Contab = ?
-                   Rec_Nomina.Fec_Grabac = W_Fecha
-                   Rec_Nomina.Fec_Pago = W_Fecha
-                   Rec_Nomina.Val_Deducido = Rec_Nomina.Val_Deducido + Tmp.Vr
-                   Rec_nomina.carnet = "3"
-                   W_Cont = W_Cont + 1
-                   W_Cont:SCREEN-VALUE = STRING(W_Cont)
-                   TImp = TImp + Tmp.Vr.
+            Rec_Nomina.Agencia = W_Agencia.
+            Rec_Nomina.Cod_Empresa = W_CodEmp.
+            Rec_Nomina.Nro_Pago = W_NroPago.
+            Rec_Nomina.Nit = Tmp.Ced.
+            Rec_Nomina.Num_Cuotas = INTEGER(W_NCuotas:SCREEN-VALUE in FRAME F_Proc).
+            Rec_Nomina.Fec_Contab = ?.
+            Rec_Nomina.Fec_Grabac = W_Fecha.
+            Rec_Nomina.Fec_Pago = W_Fecha.
+            Rec_Nomina.Val_Deducido = Rec_Nomina.Val_Deducido + Tmp.Vr.
+            Rec_nomina.carnet = "3".
+            W_Cont = W_Cont + 1.
+            W_Cont:SCREEN-VALUE = STRING(W_Cont).
+            TImp = TImp + Tmp.Vr.
         END.
     END.
     ELSE DO:
-        MESSAGE "La Cédula : " Tmp.Ced " de : " Tmp.Nom SKIP
-                "por valor de $ " Tmp.Vr "...No aparece activa en Clientes...O" SKIP
-                "El valor no es mayor que CERO(0)...........Registro Ignorado."
+        MESSAGE "La Cédula:" Tmp.Ced "de:" Tmp.Nom SKIP
+                "por valor de $" + STRING(Tmp.Vr,"$>>>,>>>,>>9.99") "no pertenece a un cliente activo." SKIP
+                "El registro será ignorado."
             VIEW-AS ALERT-BOX.
 
-        ASSIGN NNoImp = NNoImp + 1
-               TNoImp = TNoImp + Tmp.Vr
-               Tmp.Err = "Cliente No Existe-inactivo o de otra empresa..".
+        NNoImp = NNoImp + 1.
+        TNoImp = TNoImp + Tmp.Vr.
+        Tmp.Err = "No se encuentra Cliente activo".
 
-        FIND FIRST Clientes WHERE Clientes.Nit EQ Tmp.Ced NO-LOCK NO-ERROR.
+        /* Buscamos un Cliente en estado distinto a activo que coincida con la identificación reportada */
+        FIND FIRST Clientes WHERE Clientes.Nit = Tmp.Ced NO-LOCK NO-ERROR.
         IF AVAILABLE(Clientes) THEN DO:
-            FIND FIRST Rec_Nomina WHERE Rec_Nomina.Cod_Empresa EQ W_CodEmp
-                                    AND Rec_Nomina.Nro_Pago EQ W_NroPago
-                                    AND Rec_Nomina.Nit EQ Tmp.Ced
-                                    AND Rec_Nomina.Fec_Contab EQ ? NO-ERROR.
-            IF NOT AVAIL(Rec_Nomina) THEN
+            FIND FIRST Rec_Nomina WHERE Rec_Nomina.Cod_Empresa = W_CodEmp
+                                    AND Rec_Nomina.Nro_Pago = W_NroPago
+                                    AND Rec_Nomina.Nit = Tmp.Ced
+                                    AND Rec_Nomina.Fec_Contab = ? NO-ERROR.
+            IF NOT AVAILABLE(Rec_Nomina) THEN
                 CREATE Rec_Nomina.
 
-            ASSIGN Rec_Nomina.Agencia = W_Agencia
-                   Rec_Nomina.Cod_Empresa = W_CodEmp
-                   Rec_Nomina.Nro_Pago = W_NroPago
-                   Rec_Nomina.Nit = Tmp.Ced
-                   Rec_Nomina.Num_Cuotas = 99
-                   Rec_Nomina.Fec_Contab = ?
-                   Rec_Nomina.Fec_Grabac = W_Fecha
-                   Rec_Nomina.Fec_Pago = W_Fecha
-                   Rec_Nomina.Val_Deducido = Rec_Nomina.Val_Deducido + Tmp.Vr
-                   Rec_nomina.carnet = "3".
-        END. /* Existe Cliente */
+            Rec_Nomina.Agencia = W_Agencia.
+            Rec_Nomina.Cod_Empresa = W_CodEmp.
+            Rec_Nomina.Nro_Pago = W_NroPago.
+            Rec_Nomina.Nit = Tmp.Ced.
+            Rec_Nomina.Num_Cuotas = 99.
+            Rec_Nomina.Fec_Contab = ?.
+            Rec_Nomina.Fec_Grabac = W_Fecha.
+            Rec_Nomina.Fec_Pago = W_Fecha.
+            Rec_Nomina.Val_Deducido = Rec_Nomina.Val_Deducido + Tmp.Vr.
+            Rec_nomina.carnet = "3".
+        END.
         ELSE DO:
-            FIND FIRST Rec_Tmp WHERE Rec_Tmp.Cod_Empresa EQ W_CodEmp
-                                 AND Rec_Tmp.Nro_Pago EQ W_NroPago
-                                 AND Rec_Tmp.Nit EQ Tmp.Ced NO-ERROR.
-            IF NOT AVAIL(Rec_Tmp) THEN
+            FIND FIRST Rec_Tmp WHERE Rec_Tmp.Cod_Empresa = W_CodEmp
+                                 AND Rec_Tmp.Nro_Pago = W_NroPago
+                                 AND Rec_Tmp.Nit = Tmp.Ced NO-ERROR.
+            IF NOT AVAILABLE(Rec_Tmp) THEN
                 CREATE Rec_Tmp.
 
-            ASSIGN Rec_Tmp.Agencia = "000"
-                   Rec_Tmp.Cod_Empresa = W_CodEmp
-                   Rec_Tmp.Empresa = "0-No Existe"
-                   Rec_Tmp.Nro_Pago = W_NroPago
-                   Rec_Tmp.Nit = Tmp.Ced
-                   Rec_Tmp.Nombre = "No Existe en Clientes"
-                   Rec_Tmp.Esta = "0-No Existe"
-                   Rec_Tmp.fecing = ?
-                   Rec_Tmp.fecret = ?
-                   Rec_Tmp.fecpag = W_Fecha
-                   Rec_Tmp.Vr = Rec_Tmp.Vr + Tmp.Vr
-                   Rec_Tmp.Err = "Cliente No Existe..".
+            Rec_Tmp.Agencia = "000".
+            Rec_Tmp.Cod_Empresa = W_CodEmp.
+            Rec_Tmp.Empresa = "0 - No existe".
+            Rec_Tmp.Nro_Pago = W_NroPago.
+            Rec_Tmp.Nit = Tmp.Ced.
+            Rec_Tmp.Nombre = "No existe el Cliente".
+            Rec_Tmp.Esta = "0 - No existe".
+            Rec_Tmp.fecing = ?.
+            Rec_Tmp.fecret = ?.
+            Rec_Tmp.fecpag = W_Fecha.
+            Rec_Tmp.Vr = Rec_Tmp.Vr + Tmp.Vr.
+            Rec_Tmp.Err = "Cliente no Existe".
         END.
     END.
 END.
 
-MESSAGE "Se Importaron : " W_cont " Registros, por valor de $ " TImp SKIP
-        "Se Omitieron  : " NNoImp " Registros, por valor de $ " TNoImp
+MESSAGE "Se importaron:" W_cont "registros, por un valor total de $" + STRING(TImp,">>>,>>>,>>>,>>9.99") SKIP
+        "Se omitieron:" NNoImp "registros, por un valor total de $" + STRING(TNoImp,">>>,>>>,>>>,>>9.99")
     VIEW-AS ALERT-BOX.
 
 INPUT CLOSE.
 
 RUN QueryRec.
-
 RUN ImpExaso.
 
-DEFI VAR Listado AS CHAR FORM "X(40)".
-ASSIGN W_SiImp = TRUE
-       listado = W_PathSpl + "ImpRec-" + STRING(W_CodEmp) + "-" + STRING(W_NroPago) + ".Lst".
-/*          listado = W_PathSpl + "ImpRec.Lst". */
+DEFINE VAR Listado AS CHARACTER.
+
+W_SiImp = TRUE.
+listado = W_PathSpl + "ImpRec-" + STRING(W_CodEmp) + "-" + STRING(W_NroPago) + ".Lst".
 
 {Incluido\Imprimir.I "listado"}
 
@@ -3282,8 +3271,8 @@ W_SiImp = FALSE.
 EMPTY TEMP-TABLE Tmp.
 SESSION:SET-WAIT-STATE("").
 
-ASSIGN Msaje:SCREEN-VALUE IN FRAME F_Proc = "Generado Nuevo-Recaudo desde Archivo..."
-       Msaje:VISIBLE = FALSE.
+Msaje:SCREEN-VALUE IN FRAME F_Proc = "Generado Nuevo-Recaudo desde Archivo...".
+Msaje:VISIBLE = FALSE.
 
 END PROCEDURE.
 
@@ -3611,103 +3600,93 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE ImpExaso W-Rec_XLibranza 
 PROCEDURE ImpExaso :
-/*------------------------------------------------------------------------------
-  Purpose:     
-  Parameters:  <none>
-  Notes:       
-------------------------------------------------------------------------------*/
-  DEFINE VARIABLE WTotRec  LIKE Mov_Contable.Db INIT 0.
-  DEFINE VARIABLE w_nomemp LIKE Empresas.ALIAS_Empresa INITIAL "".
+DEFINE VAR WTotRec AS DECIMAL.
+DEFINE VAR w_nomemp AS CHARACTER.
 
-  RUN _SetCurs.r ("WAIT").
-  DEFINE VARIABLE Listado1 AS CHAR FORM "X(40)".
-/*   ASSIGN listado1 = W_PathSpl + "ImpExaso-" + W_Usuario + ".Lst".  */
-  ASSIGN listado1 = W_PathSpl + "ImpExaso-" + STRING(W_CodEmp) + "-" + STRING(W_NroPago) + ".Lst".
-  OS-DELETE VALUE(Listado1).
-  OUTPUT TO value(Listado1).
+RUN _SetCurs.r ("WAIT").
 
-  {Incluido\RepEncabezado.I}
+DEFINE VAR Listado1 AS CHARACTER.
 
-  ASSIGN W_Reporte    = "Exasociado: Informe de Exasociados de Recaudo      Fecha del Informe: " +
-                        STRING(W_Fecha,"99/99/9999") + "      Hora : " + STRING(TIME,"HH:MM:SS")
-         W_EncColumna = "Empresa     : " + STRING(W_CodEmp) + " - Nro.Pago: " + STRING(W_NroPago).
+listado1 = W_PathSpl + "ImpExaso-" + STRING(W_CodEmp) + "-" + STRING(W_NroPago) + ".Lst".
 
-  VIEW FRAME F-Encabezado.
-  /*VIEW FRAME f-ftr.*/
+OS-DELETE VALUE(Listado1).
+OUTPUT TO value(Listado1).
 
-  FOR EACH Rec_Nomina WHERE Rec_Nomina.Cod_Empresa EQ W_CodEmp                             
-                        AND Rec_Nomina.Nro_Pago    EQ W_NroPago                            
-                        AND Rec_Nomina.Num_Cuotas  EQ 99 NO-LOCK 
-                        BY Rec_Nomina.Nit:
+{Incluido\RepEncabezado.I}
 
-      ASSIGN WTotRec  = WTotRec + Rec_Nomina.Val_Deducido
-             W_estado = "0-No Existe"
-             W_nomcli = "No Existe".
-      FIND FIRST Clientes WHERE clientes.nit EQ Rec_Nomina.Nit NO-LOCK NO-ERROR.
-      IF AVAILABLE(Clientes) THEN DO:
-         ASSIGN W_nomcli = Clientes.Nombre + " " + Clientes.Apellido1 + " " + Clientes.Apellido2.
-         CASE Clientes.Estado:
-             WHEN 1 THEN ASSIGN W_estado = "1-Activo".    
-             WHEN 2 THEN ASSIGN W_estado = "2-Inactivo".  
-             OTHERWISE                                     
-                ASSIGN W_estado = "No Asignado".    
-         END CASE.
-         FIND FIRST Empresas WHERE Empresas.Cod_Empresa EQ Clientes.Cod_Empresa NO-LOCK NO-ERROR.
-         IF AVAILABLE(Empresas) THEN
-            ASSIGN w_nomemp = STRING(empresa.cod_empresa) + "-" + Empresas.Alias_Empresa.
-         ELSE
-            ASSIGN w_nomemp = STRING(clientes.cod_empresa) + "-No Existe".
-         DISPLAY Rec_Nomina.Nit          LABEL "Cedula/Nit"
-                 W_nomcli                LABEL "Nombres"     FORMAT "X(40)"
-                 Clientes.Agencia        LABEL "Agencia"     
-                 W_nomemp                LABEL "Empresa"     FORMAT "X(20)"
-                 W_estado                LABEL "Estado"
-                 Clientes.Fec_Ingreso    LABEL "Fec_Ingreso" 
-                 Clientes.Fec_Retiro     LABEL "Fec_Retiro"  
-                 Rec_Nomina.Fec_Pago     LABEL "Fec_Pago" 
-                 Rec_Nomina.Val_Deducido LABEL "TOTAL RECAUDO" FORMAT "->>>,>>>,>>>,>>9.99"
-         WITH DOWN WIDTH 180 FRAME FImpExaso USE-TEXT NO-LABELS STREAM-IO NO-BOX.  
-         ASSIGN W_exasoc = W_exasoc + 1. 
-       END.
-  END.
+W_Reporte = "Exasociado: Informe de Exasociados de Recaudo      Fecha del Informe: " + STRING(W_Fecha,"99/99/9999") + "      Hora : " + STRING(TIME,"HH:MM:SS").
+W_EncColumna = "Empresa     : " + STRING(W_CodEmp) + " - Nro.Pago: " + STRING(W_NroPago).
 
-  FOR EACH Rec_Tmp BY Rec_Tmp.Cod_Empresa BY Rec_Tmp.Nit:
-      ASSIGN WTotRec  = WTotRec + Rec_Tmp.Vr.
-      DISPLAY Rec_Tmp.Nit      LABEL "Cedula/Nit"
-              Rec_Tmp.Nombre   LABEL "Nombres" FORMAT "X(40)"
-              Rec_Tmp.Agencia  LABEL "Agencia"                                    
-              Rec_Tmp.Empresa  LABEL "Empresa" FORMAT "X(20)"                    
-              Rec_Tmp.Estado   LABEL "Estado"                                     
-              Rec_Tmp.fecing   LABEL "Fec_Ingreso"                               
-              Rec_Tmp.fecret   LABEL "Fec_Retiro"                                 
-              Rec_Tmp.fecpag   LABEL "Fec_Pago"                                   
-              Rec_Tmp.Vr       LABEL "TOTAL RECAUDO" FORMAT "->>>,>>>,>>>,>>9.99"
-      WITH DOWN WIDTH 180 FRAME FImpExaso1 USE-TEXT NO-LABELS STREAM-IO NO-BOX.  
-      ASSIGN W_exasoc = W_exasoc + 1.
-  END.
+VIEW FRAME F-Encabezado.
 
-/*   FOR EACH tmp-exasoc BY codempre BY nit :                                          */
-/*       ASSIGN WTotRec  = WTotRec + tmp-exasoc.valrec.                                */
-/*       DISPLAY tmp-exasoc.codempre LABEL "Empresa"                                   */
-/*               tmp-exasoc.nit      LABEL "Nit"                                       */
-/*               tmp-exasoc.nombre   LABEL "Nombres"                                   */
-/*               tmp-exasoc.valrec   LABEL "TOTAL RECAUDO"  FORM "->>>>>>,>>>,>>9.99"  */
-/*          WITH DOWN WIDTH 140 FRAME F21 USE-TEXT NO-LABELS STREAM-IO NO-BOX.         */
-/*       ASSIGN W_exasoc = W_exasoc + 1.                                               */
-/*   END.                                                                              */
+FOR EACH Rec_Nomina WHERE Rec_Nomina.Cod_Empresa = W_CodEmp
+                      AND Rec_Nomina.Nro_Pago = W_NroPago
+                      AND Rec_Nomina.Num_Cuotas = 99 NO-LOCK BY Rec_Nomina.Nit:
+    WTotRec = WTotRec + Rec_Nomina.Val_Deducido.
+    W_estado = "0 - No existe".
+    W_nomcli = "No existe".
 
-  DISPLAY SKIP(1)
-  "    TOTAL RECAUDO------------>   "
-  SPACE(98)
-  WTotRec      FORM "->>>>>>,>>>,>>9.99"
+    FIND FIRST Clientes WHERE clientes.nit = Rec_Nomina.Nit NO-LOCK NO-ERROR.
+    IF AVAILABLE(Clientes) THEN DO:
+        W_nomcli = Clientes.Nombre + " " + Clientes.Apellido1 + " " + Clientes.Apellido2.
+
+        CASE Clientes.Estado:
+            WHEN 1 THEN W_estado = "1-Activo".
+            WHEN 2 THEN W_estado = "2-Inactivo".
+            OTHERWISE W_estado = "No Asignado".
+        END CASE.
+
+        FIND FIRST Empresas WHERE Empresas.Cod_Empresa = Clientes.Cod_Empresa NO-LOCK NO-ERROR.
+        IF AVAILABLE(Empresas) THEN
+            w_nomemp = STRING(empresa.cod_empresa) + "-" + Empresas.Alias_Empresa.
+        ELSE
+            w_nomemp = STRING(clientes.cod_empresa) + "-No Existe".
+
+        DISPLAY Rec_Nomina.Nit          LABEL "Identificación"
+                W_nomcli                LABEL "Nombres" FORMAT "X(40)"
+                Clientes.Agencia        LABEL "Agencia"
+                W_nomemp                LABEL "Empresa" FORMAT "X(20)"
+                W_estado                LABEL "Estado"
+                Clientes.Fec_Ingreso    LABEL "Fec_Ingreso" 
+                Clientes.Fec_Retiro     LABEL "Fec_Retiro"
+                Rec_Nomina.Fec_Pago     LABEL "Fec_Pago"
+                Rec_Nomina.Val_Deducido LABEL "TOTAL RECAUDO" FORMAT "->>>,>>>,>>>,>>9.99"
+            WITH DOWN WIDTH 180 FRAME FImpExaso USE-TEXT NO-LABELS STREAM-IO NO-BOX.
+
+        W_exasoc = W_exasoc + 1.
+    END.
+END.
+
+FOR EACH Rec_Tmp BY Rec_Tmp.Cod_Empresa
+                 BY Rec_Tmp.Nit:
+    WTotRec = WTotRec + Rec_Tmp.Vr.
+
+    DISPLAY Rec_Tmp.Nit     LABEL "Cedula/Nit"
+            Rec_Tmp.Nombre  LABEL "Nombres" FORMAT "X(40)"
+            Rec_Tmp.Agencia LABEL "Agencia"
+            Rec_Tmp.Empresa LABEL "Empresa" FORMAT "X(20)"
+            Rec_Tmp.Estado  LABEL "Estado"
+            Rec_Tmp.fecing  LABEL "Fec_Ingreso"
+            Rec_Tmp.fecret  LABEL "Fec_Retiro"
+            Rec_Tmp.fecpag  LABEL "Fec_Pago"
+            Rec_Tmp.Vr      LABEL "TOTAL RECAUDO" FORMAT "->>>,>>>,>>>,>>9.99"
+        WITH DOWN WIDTH 180 FRAME FImpExaso1 USE-TEXT NO-LABELS STREAM-IO NO-BOX.
+
+    W_exasoc = W_exasoc + 1.
+END.
+
+DISPLAY SKIP(1)
+        "    TOTAL RECAUDO------------>   "
+        SPACE(98)
+        WTotRec FORMAT "->>>,>>>,>>>,>>9.99"
     WITH DOWN WIDTH 180 FRAME FTotImpExaso USE-TEXT NO-LABELS STREAM-IO NO-BOX.
 
-  /* Nuevo */
-  EMPTY TEMP-TABLE Rec_Tmp.
-  OUTPUT CLOSE.
-  MESSAGE "El archivo plano esta en " listado1
-     VIEW-AS ALERT-BOX INFO BUTTONS OK.
-  /********/
+EMPTY TEMP-TABLE Rec_Tmp.
+OUTPUT CLOSE.
+
+MESSAGE "El archivo plano esta en " listado1
+    VIEW-AS ALERT-BOX INFO BUTTONS OK.
+
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
@@ -4086,48 +4065,46 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE QueryRec W-Rec_XLibranza 
 PROCEDURE QueryRec :
-/*------------------------------------------------------------------------------
-  Purpose:      
-------------------------------------------------------------------------------*/
-  ASSIGN W_TotRec                              = 0
-         W_TotRec:SCREEN-VALUE IN FRAME F_Proc = "0.00".
-    
-  CLOSE QUERY Br_Rec.                                              
-  CLOSE QUERY Br_Pdctos.  
-  /* Nuevo 07/Feb/2008*/
-  ASSIGN vdfecpago = ?
-         viano = 0.
-  /********************/
-  FOR EACH Rec_Nomina WHERE Rec_Nomina.Cod_Empresa EQ W_CodEmp          
-                        AND Rec_Nomina.Nro_Pago    EQ W_NroPago         
-                        AND Rec_Nomina.Fec_Contab  EQ ?
-                        AND Rec_Nomina.Num_Cuotas  NE 99 NO-LOCK:
-      ASSIGN W_TotRec              = W_TotRec + Rec_Nomina.Val_Deduc
-             W_TotRec:SCREEN-VALUE = STRING(W_TotRec).
-      /* Nuevo 07/Feb/2008*/
-      IF vdfecpago = ? THEN DO:
-         ASSIGN vdfecpago = rec_nomina.fec_pago.
-         ASSIGN viano = YEAR(vdfecpago).
-         IF MONTH(vdfecpago) = 1 THEN
-            ASSIGN vimesini = 12
-                   vimesfin = MONTH(vdfecpago).
-         ELSE
-            ASSIGN vimesini = MONTH(vdfecpago) - 1
-                   vimesfin = MONTH(vdfecpago).
-      END.
-      /*********************/
-  END.
-    
-                                                                         
-  OPEN QUERY Br_Rec FOR EACH Rec_Nomina WHERE Rec_Nomina.Cod_Empresa EQ W_CodEmp          
-                                          AND Rec_Nomina.Nro_Pago    EQ W_NroPago         
-                                          AND Rec_Nomina.Fec_Contab  EQ ? 
-                                          AND Rec_Nomina.Num_Cuotas  NE 99 
-                                          AND rec_nomina.carnet      EQ "3" NO-LOCK,        
-                        EACH Clientes WHERE Clientes.Nit    EQ Rec_Nomina.Nit
-                                        AND Clientes.Estado EQ 1 NO-LOCK.       
-                                                                                                             
-  RUN ComboPagos.
+W_TotRec = 0.
+W_TotRec:SCREEN-VALUE IN FRAME F_Proc = "0.00".
+
+CLOSE QUERY Br_Rec.
+CLOSE QUERY Br_Pdctos.
+
+vdfecpago = ?.
+viano = 0.
+
+FOR EACH Rec_Nomina WHERE Rec_Nomina.Cod_Empresa = W_CodEmp
+                      AND Rec_Nomina.Nro_Pago = W_NroPago
+                      AND Rec_Nomina.Fec_Contab = ?
+                      AND Rec_Nomina.Num_Cuotas <> 99 NO-LOCK:
+    W_TotRec = W_TotRec + Rec_Nomina.Val_Deduc.
+    W_TotRec:SCREEN-VALUE = STRING(W_TotRec).
+
+    IF vdfecpago = ? THEN DO:
+        vdfecpago = rec_nomina.fec_pago.
+        viano = YEAR(vdfecpago).
+
+        IF MONTH(vdfecpago) = 1 THEN DO:
+            vimesini = 12.
+            vimesfin = MONTH(vdfecpago).
+        END.
+        ELSE DO:
+            vimesini = MONTH(vdfecpago) - 1.
+            vimesfin = MONTH(vdfecpago).
+        END.
+    END.
+END.
+
+OPEN QUERY Br_Rec FOR EACH Rec_Nomina WHERE Rec_Nomina.Cod_Empresa = W_CodEmp
+                                        AND Rec_Nomina.Nro_Pago = W_NroPago
+                                        AND Rec_Nomina.Fec_Contab = ?
+                                        AND Rec_Nomina.Num_Cuotas <> 99
+                                        AND rec_nomina.carnet = "3" NO-LOCK,
+                      EACH Clientes WHERE Clientes.Nit = Rec_Nomina.Nit
+                                      AND Clientes.Estado = 1 NO-LOCK.
+
+RUN ComboPagos.
     
 END PROCEDURE.
 
@@ -4168,148 +4145,147 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE Valida W-Rec_XLibranza 
 PROCEDURE Valida :
-/*------------------------------------------------------------------------------
-  Purpose: Valida y halla las Ctas-Contables (Las Graba en tabla-temp TempCtas).
-------------------------------------------------------------------------------*/
-  FOR EACH Pro_Ahorros WHERE Pro_Ahorros.Estado EQ 1 NO-LOCK 
-                          BY Pro_Ahorros.Cod_Ahorro:
-      FOR EACH CortoLargo WHERE CortoLargo.Clase_Producto EQ 1
-                            AND CortoLargo.Cod_Producto   EQ Pro_Ahorros.Cod_Ahorro
-                            AND CortoLargo.Plazo_Inicial  GE 0 NO-LOCK
-               BREAK BY CortoLargo.Agencia BY CortoLargo.Cod_Producto BY CortoLargo.Plazo_Inicial:
-          IF FIRST-OF(CortoLargo.Cod_Producto) THEN DO:
-             FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ CortoLargo.Cta_AsoAd
-                                  AND Cuentas.Tipo   EQ 2
-                                  AND Cuentas.Estado EQ 1 NO-LOCK NO-ERROR.
-             IF AVAIL(Cuentas) THEN 
-                FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ CortoLargo.Cta_SyA
-                                     AND Cuentas.Tipo   EQ 2
-                                     AND Cuentas.Estado EQ 1 NO-LOCK NO-ERROR.
+FOR EACH Pro_Ahorros WHERE Pro_Ahorros.Estado = 1 NO-LOCK BY Pro_Ahorros.Cod_Ahorro:
+    FOR EACH CortoLargo WHERE CortoLargo.Clase_Producto = 1
+                          AND CortoLargo.Cod_Producto = Pro_Ahorros.Cod_Ahorro
+                          AND CortoLargo.Plazo_Inicial >= 0 NO-LOCK BREAK BY CortoLargo.Agencia
+                                                                          BY CortoLargo.Cod_Producto
+                                                                          BY CortoLargo.Plazo_Inicial:
+        IF FIRST-OF(CortoLargo.Cod_Producto) THEN DO:
+            FIND FIRST Cuentas WHERE Cuentas.Cuenta = CortoLargo.Cta_AsoAd
+                                 AND Cuentas.Tipo = 2
+                                 AND Cuentas.Estado = 1 NO-LOCK NO-ERROR.
+            IF AVAILABLE(Cuentas) THEN
+                FIND FIRST Cuentas WHERE Cuentas.Cuenta = CortoLargo.Cta_SyA
+                                     AND Cuentas.Tipo = 2
+                                     AND Cuentas.Estado = 1 NO-LOCK NO-ERROR.
 
-             IF NOT AVAIL(Cuentas) THEN DO:
+            IF NOT AVAILABLE(Cuentas) THEN DO:
                 MESSAGE "En CortoLargo.Cta_AsoAd y CortoLargo.Cta_SyA deben existir Activas en Cuentas..." SKIP
-                        "Para el Pro_Ahorros.Cod_Ahorro : " Pro_Ahorros.Cod_Ahorro   SKIP
-                        "De la Agencia : "                  CortoLargo.Agencia
-                        VIEW-AS ALERT-BOX ERROR.
-                RETURN ERROR.
-             END.
+                        "para el Pro_Ahorros.Cod_Ahorro:" Pro_Ahorros.Cod_Ahorro SKIP
+                        "de la Agencia:" CortoLargo.Agencia
+                    VIEW-AS ALERT-BOX ERROR.
 
-             CREATE TempCtas.
-             ASSIGN TempCtas.Age    = CortoLargo.Agencia
-                    TempCtas.TipP   = "A"
-                    TempCtas.Pto    = CortoLargo.Cod_Producto
-                    TempCtas.CtaPro = CortoLargo.Cta_AsoAd
-                    TempCtas.CtaSyA = CortoLargo.Cta_SyA.
-          END.
-      END.
-  END.
-    
-  FOR EACH Pro_Creditos WHERE Pro_Creditos.Estado EQ 1 NO-LOCK 
-                           BY Pro_Creditos.Cod_Credito:
-      IF tip_credito GT 4 THEN NEXT.
-      FOR EACH CortoLargo WHERE CortoLargo.Clase_Producto EQ 2
-                            AND CortoLargo.Cod_Producto   EQ Pro_Creditos.Cod_Credito
-                            AND CortoLargo.Plazo_Inicial  GE 0 NO-LOCK
-               BREAK BY CortoLargo.Agencia BY CortoLargo.Cod_Producto BY CortoLargo.Plazo_Inicial:
-          IF FIRST-OF(CortoLargo.Cod_Producto) THEN DO:
-             FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ CortoLargo.Cta_AsoAd
-                                  AND Cuentas.Tipo   EQ 2
-                                  AND Cuentas.Estado EQ 1 NO-LOCK NO-ERROR.
-             IF AVAIL(Cuentas) THEN DO:
-                FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ CortoLargo.Cta_SyA
-                                     AND Cuentas.Tipo   EQ 2
-                                     AND Cuentas.Estado EQ 1 NO-LOCK NO-ERROR.
-                IF AVAIL(Cuentas) THEN DO:
-                   FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ CortoLargo.Cta_CostasDB 
-                                        AND Cuentas.Tipo   EQ 2
-                                        AND Cuentas.Estado EQ 1 NO-LOCK NO-ERROR.
-                   IF AVAIL(Cuentas) THEN DO:
-                      FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ CortoLargo.Cta_HonorariosDB 
-                                           AND Cuentas.Tipo   EQ 2
-                                           AND Cuentas.Estado EQ 1 NO-LOCK NO-ERROR.
-                      IF AVAIL(Cuentas) THEN
-                         FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ CortoLargo.Cta_PolizasDB 
-                                              AND Cuentas.Tipo   EQ 2
-                                              AND Cuentas.Estado EQ 1 NO-LOCK NO-ERROR. 
-                   END.
+                RETURN ERROR.
+            END.
+
+            CREATE TempCtas.
+            TempCtas.Age = CortoLargo.Agencia.
+            TempCtas.TipP = "A".
+            TempCtas.Pto = CortoLargo.Cod_Producto.
+            TempCtas.CtaPro = CortoLargo.Cta_AsoAd.
+            TempCtas.CtaSyA = CortoLargo.Cta_SyA.
+        END.
+    END.
+END.
+
+FOR EACH Pro_Creditos WHERE pro_creditos.tip_credito <= 4
+                        AND Pro_Creditos.Estado = 1 NO-LOCK BY Pro_Creditos.Cod_Credito:
+    FOR EACH CortoLargo WHERE CortoLargo.Clase_Producto = 2
+                          AND CortoLargo.Cod_Producto = Pro_Creditos.Cod_Credito
+                          AND CortoLargo.Plazo_Inicial >= 0 NO-LOCK BREAK BY CortoLargo.Agencia
+                                                                          BY CortoLargo.Cod_Producto
+                                                                          BY CortoLargo.Plazo_Inicial:
+        IF FIRST-OF(CortoLargo.Cod_Producto) THEN DO:
+            FIND FIRST Cuentas WHERE Cuentas.Cuenta = CortoLargo.Cta_AsoAd
+                                 AND Cuentas.Tipo = 2
+                                 AND Cuentas.Estado = 1 NO-LOCK NO-ERROR.
+            IF AVAILABLE(Cuentas) THEN DO:
+                FIND FIRST Cuentas WHERE Cuentas.Cuenta = CortoLargo.Cta_SyA
+                                     AND Cuentas.Tipo = 2
+                                     AND Cuentas.Estado = 1 NO-LOCK NO-ERROR.
+                IF AVAILABLE(Cuentas) THEN DO:
+                    FIND FIRST Cuentas WHERE Cuentas.Cuenta = CortoLargo.Cta_CostasDB
+                                         AND Cuentas.Tipo = 2
+                                         AND Cuentas.Estado = 1 NO-LOCK NO-ERROR.
+                    IF AVAILABLE(Cuentas) THEN DO:
+                        FIND FIRST Cuentas WHERE Cuentas.Cuenta = CortoLargo.Cta_HonorariosDB
+                                             AND Cuentas.Tipo = 2
+                                             AND Cuentas.Estado = 1 NO-LOCK NO-ERROR.
+                        IF AVAILABLE(Cuentas) THEN
+                            FIND FIRST Cuentas WHERE Cuentas.Cuenta = CortoLargo.Cta_PolizasDB
+                                                 AND Cuentas.Tipo = 2
+                                                 AND Cuentas.Estado = 1 NO-LOCK NO-ERROR.
+                    END.
                 END.
-             END.
-                
-             IF NOT AVAIL(Cuentas) THEN DO:
+            END.
+
+            IF NOT AVAILABLE(Cuentas) THEN DO:
                 MESSAGE "En CortoLargo.Cta_AsoAd,Cta_SyA,Cta_CostasDB,Cta_HonorariosDB,Cta_PolizasDB..." SKIP
-                        "deben existir Activas en Cuentas...Para el Pro_Creditos.Cod_Credito : " Pro_Creditos.Cod_Credito   SKIP
-                        "De la Agencia : "                  CortoLargo.Agencia
-                        VIEW-AS ALERT-BOX ERROR.
-                RETURN ERROR.
-             END.
-
-             CREATE TempCtas.
-             ASSIGN TempCtas.Age    = CortoLargo.Agencia
-                    TempCtas.TipP   = "C"
-                    TempCtas.Pto    = CortoLargo.Cod_Producto
-                    TempCtas.CtaPro = CortoLargo.Cta_AsoAd
-                    TempCtas.CtaSyA = CortoLargo.Cta_SyA
-                    TempCtas.CtaHon = CortoLargo.Cta_HonorariosDB
-                    TempCtas.CtaPol = CortoLargo.Cta_PolizasDB
-                    TempCtas.CtaCos = CortoLargo.Cta_CostasDB.
-                
-             FIND FIRST Liqui_Int WHERE Liqui_Int.Clase_Producto EQ 2
-                                    AND Liqui_Int.Cod_Producto   EQ CortoLargo.Cod_Producto NO-LOCK NO-ERROR.
-             IF NOT AVAIL(Liqui_Int) THEN DO:
-                MESSAGE "Falta Liqui_Int Para el Pro_Creditos.Cod_Credito : " Pro_Creditos.Cod_Credito   SKIP
-                        VIEW-AS ALERT-BOX ERROR.
+                        "deben existir activas en Cuentas para el Pro_Creditos.Cod_Credito:" Pro_Creditos.Cod_Credito SKIP
+                        "de la agencia:" CortoLargo.Agencia
+                    VIEW-AS ALERT-BOX ERROR.
 
                 RETURN ERROR.
-             END.
-             
-             FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ Liqui_Int.CtaCr_LiqAso
-                                  AND Cuentas.Tipo   EQ 2
-                                  AND Cuentas.Estado EQ 1 NO-LOCK NO-ERROR.
-             IF AVAIL(Cuentas) THEN DO:
-                FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ Liqui_Int.CtaDb_LiqAso 
-                                     AND Cuentas.Tipo   EQ 2
-                                     AND Cuentas.Estado EQ 1 NO-LOCK NO-ERROR.
-                IF AVAIL(Cuentas) THEN DO:
-                   FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ Liqui_Int.CtaInt_AntAso 
-                                        AND Cuentas.Tipo   EQ 2
-                                        AND Cuentas.Estado EQ 1 NO-LOCK NO-ERROR.
-                   IF AVAIL(Cuentas) THEN DO:
-                      FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ Liqui_Int.CtaDb_MoraAso 
-                                           AND Cuentas.Tipo   EQ 2
-                                           AND Cuentas.Estado EQ 1 NO-LOCK NO-ERROR.
-                      IF AVAIL(Cuentas) THEN DO:
-                         FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ Liqui_Int.CtaDb_DifCobAso 
-                                              AND Cuentas.Tipo   EQ 2
-                                              AND Cuentas.Estado EQ 1 NO-LOCK NO-ERROR.
-                         IF AVAIL(Cuentas) THEN
-                            FIND FIRST Cuentas WHERE Cuentas.Cuenta EQ Liqui_Int.CtaCr_DifCobAso 
-                                                 AND Cuentas.Tipo   EQ 2
-                                                 AND Cuentas.Estado EQ 1 NO-LOCK NO-ERROR.
-                      END.
-                   END.
+            END.
+
+            CREATE TempCtas.
+            TempCtas.Age = CortoLargo.Agencia.
+            TempCtas.TipP = "C".
+            TempCtas.Pto = CortoLargo.Cod_Producto.
+            TempCtas.CtaPro = CortoLargo.Cta_AsoAd.
+            TempCtas.CtaSyA = CortoLargo.Cta_SyA.
+            TempCtas.CtaHon = CortoLargo.Cta_HonorariosDB.
+            TempCtas.CtaPol = CortoLargo.Cta_PolizasDB.
+            TempCtas.CtaCos = CortoLargo.Cta_CostasDB.
+
+            FIND FIRST Liqui_Int WHERE Liqui_Int.Clase_Producto = 2
+                                   AND Liqui_Int.Cod_Producto = CortoLargo.Cod_Producto NO-LOCK NO-ERROR.
+            IF NOT AVAILABLE(Liqui_Int) THEN DO:
+                MESSAGE "Falta Liqui_Int para el pro_Creditos.cod_Credito:" Pro_Creditos.Cod_Credito SKIP
+                    VIEW-AS ALERT-BOX ERROR.
+
+                RETURN ERROR.
+            END.
+
+            FIND FIRST Cuentas WHERE Cuentas.Cuenta = Liqui_Int.CtaCr_LiqAso
+                                 AND Cuentas.Tipo = 2
+                                 AND Cuentas.Estado = 1 NO-LOCK NO-ERROR.
+            IF AVAILABLE(Cuentas) THEN DO:
+                FIND FIRST Cuentas WHERE Cuentas.Cuenta = Liqui_Int.CtaDb_LiqAso
+                                     AND Cuentas.Tipo = 2
+                                     AND Cuentas.Estado = 1 NO-LOCK NO-ERROR.
+                IF AVAILABLE(Cuentas) THEN DO:
+                    FIND FIRST Cuentas WHERE Cuentas.Cuenta = Liqui_Int.CtaInt_AntAso
+                                         AND Cuentas.Tipo = 2
+                                         AND Cuentas.Estado = 1 NO-LOCK NO-ERROR.
+                    IF AVAILABLE(Cuentas) THEN DO:
+                        FIND FIRST Cuentas WHERE Cuentas.Cuenta = Liqui_Int.CtaDb_MoraAso
+                                             AND Cuentas.Tipo = 2
+                                             AND Cuentas.Estado = 1 NO-LOCK NO-ERROR.
+                        IF AVAILABLE(Cuentas) THEN DO:
+                            FIND FIRST Cuentas WHERE Cuentas.Cuenta = Liqui_Int.CtaDb_DifCobAso
+                                                 AND Cuentas.Tipo = 2
+                                                 AND Cuentas.Estado = 1 NO-LOCK NO-ERROR.
+                            IF AVAILABLE(Cuentas) THEN
+                                FIND FIRST Cuentas WHERE Cuentas.Cuenta = Liqui_Int.CtaCr_DifCobAso
+                                                     AND Cuentas.Tipo = 2
+                                                     AND Cuentas.Estado = 1 NO-LOCK NO-ERROR.
+                        END.
+                    END.
                 END.
-             END.
+            END.
 
-             IF NOT AVAIL(Cuentas) THEN DO:
-                MESSAGE "En Liqui_Int las Cuentas : CtaCr_LiqAso,CtaDb_LiqAso,CtaCr_DifCobAso"
-                        "                           CtaInt_AntAso,CtaDb_MoraAso,CtaDb_DifCobAso" SKIP
-                        "Deben existir Activas en Plan de Cuentas..." SKIP
-                        "Para el Pro_Creditos.Cod_Credito : " Pro_Creditos.Cod_Credito
-                        VIEW-AS ALERT-BOX ERROR.
+            IF NOT AVAILABLE(Cuentas) THEN DO:
+                MESSAGE "En Liqui_Int las cuentas: CtaCr_LiqAso,CtaDb_LiqAso,CtaCr_DifCobAso" SKIP
+                        "                          CtaInt_AntAso,CtaDb_MoraAso,CtaDb_DifCobAso" SKIP
+                        "deben existir activas en l catálogo de cuentas para el pro_Creditos.Cod_Credito:" Pro_Creditos.Cod_Credito
+                    VIEW-AS ALERT-BOX ERROR.
 
                 RETURN ERROR.
-             END.
+            END.
 
-             ASSIGN TempCtas.CtaLiq = Liqui_Int.CtaDb_LiqAso
-                    TempCtas.CtaIng = Liqui_Int.CtaCr_LiqAso
-                    TempCtas.IntAnt = Liqui_Int.CtaInt_AntAso
-                    TempCtas.IntMor = Liqui_Int.CtaDb_MoraAso 
-                    TempCtas.DifCoD = Liqui_Int.CtaDb_DifCobAso
-                    TempCtas.DifCoH = Liqui_Int.CtaCr_DifCobAso
-                    TempCtas.Oper   = Liqui_Int.Cod_Operacion.
-          END.
-      END.
-  END.
+            TempCtas.CtaLiq = Liqui_Int.CtaDb_LiqAso.
+            TempCtas.CtaIng = Liqui_Int.CtaCr_LiqAso.
+            TempCtas.IntAnt = Liqui_Int.CtaInt_AntAso.
+            TempCtas.IntMor = Liqui_Int.CtaDb_MoraAso.
+            TempCtas.DifCoD = Liqui_Int.CtaDb_DifCobAso.
+            TempCtas.DifCoH = Liqui_Int.CtaCr_DifCobAso.
+            TempCtas.Oper   = Liqui_Int.Cod_Operacion.
+        END.
+    END.
+END.
+
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */

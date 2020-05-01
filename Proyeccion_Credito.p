@@ -230,10 +230,6 @@ PROCEDURE P-Amortizacion:
 
             fechaAnterior = creditos.fec_pagAnti.
             
-            /*FOR EACH amortizacion WHERE amortizacion.nit = p_nit
-                                    AND amortizacion.num_credito = vNumCredito NO-LOCK BY amortizacion.sdo_capital DESC /*amortizacion.fec_pago*/
-                                                                                       BY amortizacion.nro_cuota:*/
-
             FOR EACH amortizacion WHERE amortizacion.nit = p_nit
                                     AND amortizacion.num_credito = vNumCredito NO-LOCK BY amortizacion.fec_pago:
 
@@ -273,7 +269,8 @@ PROCEDURE P-Amortizacion:
     END.
 
     IF W_TotInt <> 0 THEN DO:
-        FOR EACH W_TabAmor WITH FRAME F-Amortizacion:
+        FOR EACH W_TabAmor NO-LOCK WITH FRAME F-Amortizacion BY W_TabAmor.w_fecha
+                                                             BY W_TabAmor.w_periodo:
             DISPLAY W_Periodo W_TabAmor.W_Fecha W_CuoEx W_TabAmor.W_Cuota W_AboCap W_AboInt W_SdoCap W_TabAmor.descripcion
                 WITH DOWN WIDTH 140 USE-TEXT STREAM-IO NO-LABELS.
         END.

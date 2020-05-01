@@ -1,14 +1,13 @@
 &ANALYZE-SUSPEND _VERSION-NUMBER AB_v10r12 GUI ADM2
 &ANALYZE-RESUME
-
+/* Connected Databases 
+          bdcentral        PROGRESS
+*/
 &Scoped-define WINDOW-NAME wWin
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _DEFINITIONS wWin 
 CREATE WIDGET-POOL.
 
 DEFINE BUFFER BSolicitud FOR solicitud.
-
-    /* oakley */ 
-
 DEFINE VAR tasa1 AS DECIMAL.
 
 {INCLUIDO\VARIABLE.I "SHARED"}
@@ -53,6 +52,8 @@ DEFINE VAR k AS INTEGER FORMAT "9".
 DEFINE VAR CodCreditoActivo AS INTEGER.
 DEFINE VAR PDFImpreso AS LOGICAL INITIAL NO.
 DEF VAR W_Sarlaft AS LOG INIT FALSE.
+DEF VAR enviado AS LOGICAL NO-UNDO.
+DEF VAR respuesta AS CHAR NO-UNDO.
 
 DEFINE TEMP-TABLE TCred_ACanc
     FIELD Agen AS INTEGER
@@ -1158,8 +1159,8 @@ DEFINE VARIABLE Cmb_Agencias AS CHARACTER FORMAT "X(256)":U
 
 DEFINE VARIABLE Cmb_PerPago AS CHARACTER FORMAT "X(25)":U INITIAL "4 - Mensual" 
      LABEL "Período" 
-     VIEW-AS COMBO-BOX INNER-LINES 11
-     LIST-ITEMS "0 - Diario","1 - Semanal","2 - Decadal","3 - Quincenal","4 - Mensual","5 - Bimestral","6 - Trimestral","7 - Cuatrimestral","8 - Semestral","9 - Anual","10 - Al Vencimiento" 
+     VIEW-AS COMBO-BOX INNER-LINES 6
+     LIST-ITEMS "0 - Diario","1 - Semanal","2 - Decadal","3 - Quincenal","4 - Mensual","5 - Bimestral","6 - Trimestral","7 - Cuatrimestral","8 - Semestral","9 - Anual" 
      DROP-DOWN-LIST
      SIZE 18.86 BY 1
      BGCOLOR 15  NO-UNDO.
@@ -1307,15 +1308,19 @@ DEFINE RECTANGLE RECT-325
 
 DEFINE RECTANGLE RECT-327
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 33.57 BY 5.31.
+     SIZE 33.57 BY 2.31.
 
 DEFINE RECTANGLE RECT-330
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 70 BY 2.23.
 
+DEFINE RECTANGLE RECT-331
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
+     SIZE 32.57 BY 4.88.
+
 DEFINE RECTANGLE RECT-333
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 48.72 BY 7.27.
+     SIZE 48.72 BY 4.27.
 
 DEFINE RECTANGLE RECT-334
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
@@ -1483,6 +1488,10 @@ DEFINE BUTTON BUTTON-233
      IMAGE-UP FILE "imagenes/salir3.bmp":U
      LABEL "Salir" 
      SIZE 7 BY 1.62.
+
+DEFINE BUTTON enviarEmail 
+     LABEL "Enviar a e-mail" 
+     SIZE 15 BY 1.12.
 
 /* Query definitions                                                    */
 &ANALYZE-SUSPEND
@@ -1661,6 +1670,33 @@ DEFINE BROWSE Br_Usuarios
 
 /* ************************  Frame Definitions  *********************** */
 
+DEFINE FRAME F_CredACanc
+     Br_Cred AT ROW 1.27 COL 2
+     btnSalirAbonoCreditos AT ROW 7.46 COL 73
+     W_TotCanc AT ROW 7.65 COL 54 COLON-ALIGNED
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 14.14 ROW 5.81
+         SIZE 81.43 BY 8.88
+         TITLE "Deudas a Cancelar con esta Solicitud: S/N en Columna C.Si/No".
+
+DEFINE FRAME F_Extras
+     Btn_AdExt AT ROW 2.23 COL 40
+     W_PPExtra AT ROW 2.27 COL 3.72 COLON-ALIGNED NO-LABEL
+     W_VrExtra AT ROW 2.27 COL 17.43 COLON-ALIGNED NO-LABEL
+     Btn_EliExt AT ROW 3.65 COL 40.14
+     BUTTON-170 AT ROW 4.73 COL 58.86
+     Br_Extras AT ROW 6.46 COL 1.72
+     "Pdo.Pago              Valor Cuota Extra" VIEW-AS TEXT
+          SIZE 35 BY .62 AT ROW 1.38 COL 4.72
+          BGCOLOR 18 FGCOLOR 15 
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 36 ROW 4.62
+         SIZE 72.86 BY 14.38
+         FONT 5
+         TITLE "Extras Pactadas".
+
 DEFINE FRAME F_VblesS
      cmbEstdoCrgo AT ROW 10.69 COL 46 COLON-ALIGNED WIDGET-ID 8
      Rs_Ocupacion AT ROW 10.69 COL 10 COLON-ALIGNED WIDGET-ID 4
@@ -1749,227 +1785,31 @@ DEFINE FRAME F_VblesS
          FONT 4
          TITLE "Actualización Información de análisis".
 
-DEFINE FRAME F_Extras
-     Btn_AdExt AT ROW 2.23 COL 40
-     W_PPExtra AT ROW 2.27 COL 3.72 COLON-ALIGNED NO-LABEL
-     W_VrExtra AT ROW 2.27 COL 17.43 COLON-ALIGNED NO-LABEL
-     Btn_EliExt AT ROW 3.65 COL 40.14
-     BUTTON-170 AT ROW 4.73 COL 58.86
-     Br_Extras AT ROW 6.46 COL 1.72
-     "Pdo.Pago              Valor Cuota Extra" VIEW-AS TEXT
-          SIZE 35 BY .62 AT ROW 1.38 COL 4.72
-          BGCOLOR 18 FGCOLOR 15 
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 36 ROW 4.62
-         SIZE 72.86 BY 14.38
-         FONT 5
-         TITLE "Extras Pactadas".
-
-DEFINE FRAME F_CredACanc
-     Br_Cred AT ROW 1.27 COL 2
-     btnSalirAbonoCreditos AT ROW 7.46 COL 73
-     W_TotCanc AT ROW 7.65 COL 54 COLON-ALIGNED
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 14.14 ROW 5.81
-         SIZE 81.43 BY 8.88
-         TITLE "Deudas a Cancelar con esta Solicitud: S/N en Columna C.Si/No".
-
 DEFINE FRAME F_Creditos
      Cmb_Instancias AT ROW 1.27 COL 10 COLON-ALIGNED
      BUTTON-169 AT ROW 1.27 COL 82
-     Btn_Imprimir AT ROW 1.54 COL 135
+     Btn_Imprimir AT ROW 1.54 COL 109.72
      PDF AT ROW 1.81 COL 102 WIDGET-ID 6
      Btn_ProcesarInstancia AT ROW 2.35 COL 12
      T_Refresh AT ROW 2.35 COL 48
      Btn_ImpCA AT ROW 2.5 COL 82
-     Btn_Consulta AT ROW 3.42 COL 135
-     BUTTON-164 AT ROW 5.31 COL 135
-     Btn_Anexos AT ROW 7.46 COL 135 WIDGET-ID 2
-     Btn_Salvar AT ROW 9.62 COL 135
-     Btn_Deshacer AT ROW 11.42 COL 135
-     Btn_Ingresar AT ROW 13.23 COL 135
-     Btn_Cancelar AT ROW 15.04 COL 135
-     BUTTON-9 AT ROW 16.85 COL 135
-     BUTTON-2 AT ROW 18.65 COL 135
+     Btn_Consulta AT ROW 3.42 COL 109.72
+     BUTTON-164 AT ROW 5.31 COL 109.72
+     Btn_Anexos AT ROW 7.46 COL 109.72 WIDGET-ID 2
+     Btn_Salvar AT ROW 9.62 COL 109.72
+     Btn_Deshacer AT ROW 11.42 COL 109.72
+     Btn_Ingresar AT ROW 13.23 COL 109.72
+     Btn_Cancelar AT ROW 15.04 COL 109.72
+     BUTTON-9 AT ROW 16.85 COL 109.72
+     BUTTON-2 AT ROW 18.65 COL 109.72
      NomUsuario AT ROW 1.27 COL 45 COLON-ALIGNED NO-LABEL
-     RECT-3 AT ROW 1.27 COL 134
+     RECT-3 AT ROW 1.27 COL 108.72
      RECT-347 AT ROW 9.35 COL 109.14 WIDGET-ID 4
-     SPACE(12.86) SKIP(14.15)
+     SPACE(0.00) SKIP(14.15)
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1 ROW 1 SCROLLABLE 
          FONT 5.
-
-DEFINE FRAME F_Solicitud
-     Cmb_Agencias AT ROW 1.04 COL 10 COLON-ALIGNED
-     Solicitud.Num_Solicitud AT ROW 1.08 COL 99.57 COLON-ALIGNED
-          LABEL "Solicitud"
-          VIEW-AS FILL-IN 
-          SIZE 11 BY .81
-          BGCOLOR 3 FGCOLOR 15 
-     Solicitud.Fec_Solicitud AT ROW 1.08 COL 118.86 COLON-ALIGNED
-          LABEL "Fecha"
-          VIEW-AS FILL-IN 
-          SIZE 10 BY .81
-          BGCOLOR 3 FGCOLOR 15 
-     Solicitud.Nit AT ROW 2.35 COL 14.43 COLON-ALIGNED
-          LABEL "Cédula/Nit"
-          VIEW-AS FILL-IN 
-          SIZE 16.57 BY .81
-          BGCOLOR 15 FGCOLOR 0 
-     BUTTON-19 AT ROW 2.35 COL 100.72
-     NomNit AT ROW 2.38 COL 31.43 COLON-ALIGNED NO-LABEL
-     Fec_Asociado AT ROW 3.19 COL 14.57 COLON-ALIGNED HELP
-          "Fecha en que ingresa como asociado a la Organización" WIDGET-ID 354
-     BUTTON-103 AT ROW 3.69 COL 101.43
-     Nom_Producto AT ROW 3.77 COL 40.57 COLON-ALIGNED
-     WX_Edad AT ROW 4.04 COL 27 COLON-ALIGNED
-     Solicitud.DestinoF AT ROW 4.27 COL 100 COLON-ALIGNED NO-LABEL WIDGET-ID 346
-          VIEW-AS FILL-IN 
-          SIZE 2 BY .5
-          FGCOLOR 17 
-     Nom_Destino AT ROW 4.62 COL 70.57 COLON-ALIGNED WIDGET-ID 20
-     Btn_Destino AT ROW 4.77 COL 101.43 WIDGET-ID 344
-     WAntiguedad AT ROW 4.92 COL 27 COLON-ALIGNED WIDGET-ID 356
-     WVeces AT ROW 5.77 COL 27 COLON-ALIGNED WIDGET-ID 358
-     Texto1 AT ROW 5.81 COL 33.72 COLON-ALIGNED NO-LABEL WIDGET-ID 16
-     Texto2 AT ROW 6.5 COL 33.72 COLON-ALIGNED NO-LABEL WIDGET-ID 18
-     WMonto AT ROW 7.42 COL 17 COLON-ALIGNED WIDGET-ID 362
-     WTasa AT ROW 7.65 COL 82 RIGHT-ALIGNED WIDGET-ID 360
-     Solicitud.For_Interes AT ROW 8 COL 37.72 NO-LABEL
-          VIEW-AS RADIO-SET HORIZONTAL
-          RADIO-BUTTONS 
-                    "Vencido", 1,
-"Anticipado", 2
-          SIZE 23.29 BY .81
-          FONT 5
-     Solicitud.Tasa AT ROW 8.15 COL 71 COLON-ALIGNED
-          LABEL "Efectiva" FORMAT ">>9.9999"
-          VIEW-AS FILL-IN 
-          SIZE 10 BY .81
-          BGCOLOR 3 FGCOLOR 15 
-     Solicitud.Monto AT ROW 8.27 COL 17 COLON-ALIGNED
-          LABEL "Monto solicitud"
-          VIEW-AS FILL-IN 
-          SIZE 15 BY .81
-          BGCOLOR 15 FONT 5
-     Cmb_Sistemas AT ROW 9.04 COL 42.57 COLON-ALIGNED NO-TAB-STOP 
-     Solicitud.Plazo AT ROW 9.12 COL 19 COLON-ALIGNED
-          VIEW-AS FILL-IN 
-          SIZE 13 BY .81
-          BGCOLOR 15 FONT 5
-     W_TasaNominal AT ROW 9.12 COL 71 COLON-ALIGNED
-     Solicitud.fec_desembolso AT ROW 10.04 COL 19 COLON-ALIGNED WIDGET-ID 390
-          LABEL "Fecha Desembolso"
-          VIEW-AS FILL-IN 
-          SIZE 12.86 BY .85
-          FONT 4
-     Cmb_PerPago AT ROW 10.08 COL 42.57 COLON-ALIGNED NO-TAB-STOP 
-     btnGrntias AT ROW 10.12 COL 85.43 WIDGET-ID 6
-     W_TasaPeriodo AT ROW 10.15 COL 71 COLON-ALIGNED
-     Solicitud.fec_primerPago AT ROW 10.88 COL 19 COLON-ALIGNED WIDGET-ID 392
-          LABEL "Fecha primer pago"
-          VIEW-AS FILL-IN 
-          SIZE 12.86 BY .85
-          FONT 4
-     Btn_Gar AT ROW 11.19 COL 85.43
-     NomIndicador AT ROW 11.5 COL 43 COLON-ALIGNED
-     Solicitud.Cuota AT ROW 11.92 COL 19 COLON-ALIGNED NO-LABEL FORMAT ">,>>>,>>>,>>9"
-          VIEW-AS FILL-IN 
-          SIZE 13 BY .85
-          BGCOLOR 3 FGCOLOR 15 FONT 5
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 2 ROW 3.62
-         SIZE 131 BY 20
-         FONT 5.
-
-/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
-DEFINE FRAME F_Solicitud
-     btnFrmlrioAfliacion AT ROW 12.27 COL 85.43 WIDGET-ID 4 NO-TAB-STOP 
-     Solicitud.Deducible AT ROW 12.81 COL 19 COLON-ALIGNED
-          LABEL "Valor Deducible"
-          VIEW-AS FILL-IN 
-          SIZE 13 BY .81
-          BGCOLOR 3 FGCOLOR 15 
-     W_ForPago AT ROW 12.96 COL 49 COLON-ALIGNED
-     BUTTON-107 AT ROW 12.96 COL 81
-     Btn_Proyectar AT ROW 13.35 COL 85.43 NO-TAB-STOP 
-     Solicitud.Total_Prestamo AT ROW 13.65 COL 19 COLON-ALIGNED
-          LABEL "Total a Prestar"
-          VIEW-AS FILL-IN 
-          SIZE 13 BY .77
-          BGCOLOR 3 FGCOLOR 15 
-     W_Desembolso AT ROW 13.73 COL 49 COLON-ALIGNED
-     BUTTON-105 AT ROW 13.81 COL 81.14
-     BUTTON-120 AT ROW 14.42 COL 85.43
-     Btn_Extras AT ROW 14.92 COL 2.14
-     W_VrCredACanc AT ROW 15.31 COL 67.29 COLON-ALIGNED
-     Btn_CancCred AT ROW 15.42 COL 81.14
-     BUTTON-100 AT ROW 15.5 COL 85.43
-     W_TotExt AT ROW 16.04 COL 18.86 COLON-ALIGNED
-     W_VrADesemb AT ROW 16.08 COL 67.29 COLON-ALIGNED
-     Btn_HojaVida AT ROW 16.58 COL 85.43
-     BUTTON-102 AT ROW 17.65 COL 85.43
-     Btn_Liquidar AT ROW 18.77 COL 85.43
-     W_Tipo_Credito AT ROW 4.65 COL 40.57 COLON-ALIGNED
-     W_NomPdo AT ROW 12.04 COL 2 NO-LABEL
-     "Tasas" VIEW-AS TEXT
-          SIZE 5.57 BY .54 AT ROW 7.19 COL 65
-     "Interés" VIEW-AS TEXT
-          SIZE 6 BY .62 AT ROW 7.58 COL 45.86 WIDGET-ID 350
-     RECT-322 AT ROW 7.46 COL 36 WIDGET-ID 8
-     RECT-323 AT ROW 7.46 COL 64 WIDGET-ID 10
-     RECT-325 AT ROW 7.92 COL 36.57 WIDGET-ID 352
-     RECT-327 AT ROW 14.81 COL 1.43 WIDGET-ID 368
-     RECT-330 AT ROW 3.42 COL 35.57 WIDGET-ID 374
-     RECT-333 AT ROW 12.85 COL 36 WIDGET-ID 380
-     RECT-334 AT ROW 7.19 COL 1.43 WIDGET-ID 388
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 2 ROW 3.62
-         SIZE 131 BY 20
-         FONT 5
-         TITLE "Radicación de Solicitudes".
-
-DEFINE FRAME F_HojaVida
-     Hoja_Vida.Fec_Grabacion AT ROW 1.27 COL 70 COLON-ALIGNED
-          LABEL "Fecha Grabación"
-          VIEW-AS FILL-IN 
-          SIZE 11.43 BY .81
-          BGCOLOR 18 FGCOLOR 15 
-     BUTTON-150 AT ROW 1.27 COL 86
-     Hoja_Vida.Asunto_Cumplido AT ROW 1.54 COL 4
-          LABEL "Asunto Cumplido"
-          VIEW-AS TOGGLE-BOX
-          SIZE 18 BY .81
-     Hoja_Vida.Observacion AT ROW 2.62 COL 4 NO-LABEL
-          VIEW-AS EDITOR LARGE
-          SIZE 80 BY 7.08
-          BGCOLOR 15 
-     Btn_SalvaHV AT ROW 3.15 COL 86
-     Btn_NvoHv AT ROW 4.5 COL 86
-     BUTTON-152 AT ROW 5.85 COL 86
-     BUTTON-149 AT ROW 8 COL 86
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 3 ROW 12.04
-         SIZE 98 BY 9.96
-         FONT 5
-         TITLE "Hoja de Vida".
-
-DEFINE FRAME VisorSolicitud
-     BUTTON-233 AT ROW 18.27 COL 100 WIDGET-ID 10
-     Btn_IrProcesarInst AT ROW 18.31 COL 76.86 WIDGET-ID 14
-     "Si es necesario, puede actualizar los datos del sistema y volver a generar PDF." VIEW-AS TEXT
-          SIZE 74.86 BY .62 AT ROW 18.77 COL 2.14 WIDGET-ID 12
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 2 ROW 3.42
-         SIZE 107 BY 19.92
-         TITLE "Visor de solicitud" WIDGET-ID 200.
 
 DEFINE FRAME F_Consulta
      Br_Consulta AT ROW 2.08 COL 4
@@ -1996,46 +1836,139 @@ DEFINE FRAME F_Consulta
          FONT 5
          TITLE "Solicitudes Disponibles".
 
-DEFINE FRAME F_Scoring
-     BR_Scoring AT ROW 1.04 COL 1
-     M_Cliente AT ROW 11.81 COL 54.72
-     Nom_CteCod AT ROW 12.46 COL 27.14 COLON-ALIGNED NO-LABEL
-     BUTTON-166 AT ROW 12.5 COL 26
-     W_Concepto AT ROW 13.46 COL 36.57 COLON-ALIGNED
-     Total_Puntaje AT ROW 14.5 COL 36.57 COLON-ALIGNED
-     BUT-IMP-Scoring AT ROW 15.54 COL 25.86 WIDGET-ID 2
-     Btn_Ejecutar AT ROW 15.54 COL 43 WIDGET-ID 36
-     BUTTON-99 AT ROW 15.54 COL 60.14
-     "Cada Codeudor" VIEW-AS TEXT
-          SIZE 14.57 BY .62 AT ROW 11.77 COL 26.29
+DEFINE FRAME F_Agregar
+     E_Agregar AT ROW 1.27 COL 2 NO-LABEL
+     BUTTON-153 AT ROW 6.92 COL 48
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 19 ROW 11.5
+         SIZE 57 BY 8.88
+         TITLE "Texto a ser Agregado".
+
+DEFINE FRAME F_Cerradas
+     Br_Cerradas AT ROW 1.27 COL 3
+     Btn_OutCerradas AT ROW 7.73 COL 89
+     BUTTON-154 AT ROW 8 COL 62
+     "La instancia activa se encuentra en letra color rojo" VIEW-AS TEXT
+          SIZE 43 BY .81 AT ROW 7.19 COL 3
+          FGCOLOR 7 FONT 5
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 3 ROW 3.69
+         SIZE 98 BY 9.42
+         FGCOLOR 0 FONT 4
+         TITLE "Consulta de Instancias Procesadas y Actuales".
+
+DEFINE FRAME F_ConHV
+     Br_ConHV AT ROW 1.27 COL 3
+     Btn_OutConHV AT ROW 8.27 COL 89
+     "   Los Mensajes en Rojo estan pendientes por cumplirse" VIEW-AS TEXT
+          SIZE 85 BY 1.08 AT ROW 8.54 COL 3
+          BGCOLOR 0 FGCOLOR 15 FONT 5
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 3 ROW 12.04
+         SIZE 98 BY 9.96
+         FONT 4
+         TITLE "Asuntos Pendientes".
+
+DEFINE FRAME F_Deducibles
+     Br_Deducibles AT ROW 1.27 COL 2
+     BUTTON-101 AT ROW 9.35 COL 45
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 3 ROW 10.69
+         SIZE 55 BY 11.31
+         TITLE "Deducibles del Producto".
+
+DEFINE FRAME F_Desembolso
+     Solicitud.Desembolso AT ROW 1.27 COL 3 NO-LABEL
+          VIEW-AS RADIO-SET HORIZONTAL
+          RADIO-BUTTONS 
+                    "Efectivo", 1,
+"Cheque", 2,
+"Cta Ahorros", 3,
+"Orden a 3os", 4
+          SIZE 52 BY .81
+     Solicitud.Age_Desembolso AT ROW 2.35 COL 10 COLON-ALIGNED
+          LABEL "Agencia"
+          VIEW-AS FILL-IN 
+          SIZE 10 BY .81
+          BGCOLOR 18 FGCOLOR 15 FONT 4
+     W_NomAgeDesembolso AT ROW 2.35 COL 20 COLON-ALIGNED NO-LABEL
+     Solicitud.Cod_Desembolso AT ROW 3.42 COL 10 COLON-ALIGNED
+          LABEL "Producto"
+          VIEW-AS FILL-IN 
+          SIZE 10 BY .81
+          BGCOLOR 18 FGCOLOR 15 FONT 5
+     W_NomProDesembolso AT ROW 3.42 COL 20 COLON-ALIGNED NO-LABEL
+     Solicitud.Cue_Desembolso AT ROW 4.5 COL 10 COLON-ALIGNED
+          LABEL "Cuenta"
+          VIEW-AS FILL-IN 
+          SIZE 41 BY .81
           BGCOLOR 18 FGCOLOR 15 
+     BUTTON-104 AT ROW 5.58 COL 46
     WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 3 ROW 4.23
-         SIZE 98 BY 17.23
+         AT COL 32 ROW 6.92
+         SIZE 55 BY 7.27
          FONT 5
-         TITLE "Datos del Scoring de Créditos".
+         TITLE "Destino del Desembolso".
 
-DEFINE FRAME F_InfoProducto
-     S_InfoProducto AT ROW 1.27 COL 1.72 NO-LABEL
-     Btn_OutScoring AT ROW 9.15 COL 43.72
+DEFINE FRAME F_ForPago
+     Solicitud.For_Pago AT ROW 1.27 COL 1 NO-LABEL
+          VIEW-AS RADIO-SET HORIZONTAL
+          RADIO-BUTTONS 
+                    "Caja", 1,
+"Nómina", 2,
+"Déb Aut", 3,
+"Nóm Crec", 4,
+"Prima", 5
+          SIZE 45 BY .81
+     Anexos_Clientes.Cam_Cat1 AT ROW 2.35 COL 15 COLON-ALIGNED HELP
+          "" WIDGET-ID 4
+          LABEL "Capacidad Pago" FORMAT "x(15)"
+          VIEW-AS COMBO-BOX SORT INNER-LINES 4
+          LIST-ITEM-PAIRS ""," ",
+                     "50%","f50%",
+                     "SMMLV","fsmmlv",
+                     "CAJA","fcapagocaja"
+          DROP-DOWN-LIST
+          SIZE 16 BY 1 TOOLTIP "Función Para Calcular La Capacidad De Pago"
+     Solicitud.Age_DebAutomatico AT ROW 3.42 COL 15 COLON-ALIGNED
+          LABEL "Agencia"
+          VIEW-AS FILL-IN 
+          SIZE 4 BY .81
+          BGCOLOR 18 FGCOLOR 15 
+     W_NomAgeDebAutomatico AT ROW 3.42 COL 19 COLON-ALIGNED NO-LABEL
+     Solicitud.Cod_DebAutomatico AT ROW 4.5 COL 15 COLON-ALIGNED
+          LABEL "Producto"
+          VIEW-AS FILL-IN 
+          SIZE 4 BY .81
+          BGCOLOR 18 FGCOLOR 15 
+     W_NomCodDebAutomatico AT ROW 4.5 COL 19 COLON-ALIGNED NO-LABEL
+     Solicitud.Cue_DebAutomatico AT ROW 5.58 COL 15 COLON-ALIGNED
+          LABEL "Cuenta"
+          VIEW-AS FILL-IN 
+          SIZE 29 BY .81
+          BGCOLOR 18 FGCOLOR 15 
+     BUTTON-106 AT ROW 6.65 COL 38
     WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 44.43 ROW 7.73
-         SIZE 53.57 BY 10.77
-         FGCOLOR 0 FONT 5
-         TITLE "Información del Producto".
-
-DEFINE FRAME F_InfoCliente
-     S_InfoCliente AT ROW 1.27 COL 2 NO-LABEL WIDGET-ID 2
-     BUTTON-156 AT ROW 13.65 COL 2
-     BUTTON-108 AT ROW 13.65 COL 42
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 3 ROW 6.65
-         SIZE 51 BY 15.35
+         AT COL 18 ROW 10.42
+         SIZE 46 BY 8.35
          FONT 5
-         TITLE "Información Financiera del Cliente".
+         TITLE BGCOLOR 16 "Forma de Pago de la Cuota".
+
+DEFINE FRAME F_Foto
+     BUTTON-230 AT ROW 6.12 COL 5 WIDGET-ID 4
+     P_Foto AT ROW 1 COL 1.43 WIDGET-ID 2
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 70 ROW 1
+         SIZE 19 BY 6.73
+         TITLE "Foto del Asociado"
+         CANCEL-BUTTON BUTTON-230 WIDGET-ID 100.
 
 DEFINE FRAME F_Garantias
      R_TipoGarantia AT ROW 1.27 COL 17.43 NO-LABEL
@@ -2047,43 +1980,6 @@ DEFINE FRAME F_Garantias
          SIZE 98 BY 15.35
          FONT 5
          TITLE "Garantías".
-
-DEFINE FRAME F_ConAdmisible
-     BR_Admisible AT ROW 1.27 COL 2
-     Btn_OutConAdm AT ROW 8.27 COL 85
-     R_ConAdm AT ROW 8.54 COL 2.57 NO-LABEL
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 2 ROW 2.08
-         SIZE 95 BY 9.96
-         FONT 5
-         TITLE BGCOLOR 3 "Consulta de Garantías Admisibles y No-Admisibles".
-
-DEFINE FRAME F_Codeudores
-     Relaciones.Aprobada AT ROW 1.27 COL 78.72 HELP
-          "Aprobada/Negada" NO-LABEL
-          VIEW-AS RADIO-SET VERTICAL
-          RADIO-BUTTONS 
-                    "Aceptado", yes,
-"Rechazado", no
-          SIZE 14.14 BY 1.35 TOOLTIP "Marque si el Codeudor es Aceptado Ò No."
-     W_NitCodeudor AT ROW 1.54 COL 14 COLON-ALIGNED
-     W_NomCodeudor AT ROW 1.54 COL 27 COLON-ALIGNED NO-LABEL
-     BUTTON-155 AT ROW 1.58 COL 72.14
-     Btn_CreCod AT ROW 2.62 COL 3
-     Btn_CanCod AT ROW 2.62 COL 13.86
-     Btn_Activas AT ROW 2.62 COL 25.43
-     Btn_SalCod AT ROW 2.62 COL 36.29
-     BUTTON-165 AT ROW 2.69 COL 50.86
-     RActivas AT ROW 2.88 COL 73 NO-LABEL
-     Br_Codeudores AT ROW 3.96 COL 3
-     RECT-297 AT ROW 1 COL 77
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 2 ROW 2.08
-         SIZE 95 BY 9.69
-         FONT 5
-         TITLE "Personal".
 
 DEFINE FRAME F_Admisible
      Garantias.Descripcion_Bien2 AT ROW 4.46 COL 3 NO-LABEL
@@ -2212,12 +2108,6 @@ DEFINE FRAME F_Admisible
      Btn_InaAdm AT ROW 12.31 COL 44.43
      W_DispGaran AT ROW 11.23 COL 45.86 COLON-ALIGNED NO-LABEL
      Btn_Borra AT ROW 12.31 COL 59.43
-     "Valor Crèditos Avalados + Vr.Solicitado" VIEW-AS TEXT
-          SIZE 27 BY .5 AT ROW 9.42 COL 34.86
-          FGCOLOR 7 
-     "Descripción del Bien" VIEW-AS TEXT
-          SIZE 18 BY .5 AT ROW 3.92 COL 3.14
-          FGCOLOR 7 
      "Valor Disponible de esta Garantia" VIEW-AS TEXT
           SIZE 27 BY .5 AT ROW 10.73 COL 34.86
           FGCOLOR 7 
@@ -2238,6 +2128,12 @@ DEFINE FRAME F_Admisible
      "Usuario que Ingreso" VIEW-AS TEXT
           SIZE 14.43 BY .5 AT ROW 10.42 COL 64
           FGCOLOR 7 
+     "Valor Crèditos Avalados + Vr.Solicitado" VIEW-AS TEXT
+          SIZE 27 BY .5 AT ROW 9.42 COL 34.86
+          FGCOLOR 7 
+     "Descripción del Bien" VIEW-AS TEXT
+          SIZE 18 BY .5 AT ROW 3.92 COL 3.14
+          FGCOLOR 7 
      RECT-293 AT ROW 6.38 COL 2
      RECT-294 AT ROW 6.38 COL 34
      RECT-295 AT ROW 6.38 COL 64
@@ -2251,71 +2147,295 @@ DEFINE FRAME F_Admisible
          FONT 4
          TITLE "Garantías Admisibles".
 
-DEFINE FRAME F_Foto
-     BUTTON-230 AT ROW 6.12 COL 5 WIDGET-ID 4
-     P_Foto AT ROW 1 COL 1.43 WIDGET-ID 2
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 70 ROW 1
-         SIZE 19 BY 6.73
-         TITLE "Foto del Asociado"
-         CANCEL-BUTTON BUTTON-230 WIDGET-ID 100.
-
-DEFINE FRAME F_Desembolso
-     Solicitud.Desembolso AT ROW 1.27 COL 3 NO-LABEL
-          VIEW-AS RADIO-SET HORIZONTAL
+DEFINE FRAME F_Codeudores
+     Relaciones.Aprobada AT ROW 1.27 COL 78.72 HELP
+          "Aprobada/Negada" NO-LABEL
+          VIEW-AS RADIO-SET VERTICAL
           RADIO-BUTTONS 
-                    "Efectivo", 1,
-"Cheque", 2,
-"Cta Ahorros", 3,
-"Orden a 3os", 4
-          SIZE 52 BY .81
-     Solicitud.Age_Desembolso AT ROW 2.35 COL 10 COLON-ALIGNED
-          LABEL "Agencia"
-          VIEW-AS FILL-IN 
-          SIZE 10 BY .81
-          BGCOLOR 18 FGCOLOR 15 FONT 4
-     W_NomAgeDesembolso AT ROW 2.35 COL 20 COLON-ALIGNED NO-LABEL
-     Solicitud.Cod_Desembolso AT ROW 3.42 COL 10 COLON-ALIGNED
-          LABEL "Producto"
-          VIEW-AS FILL-IN 
-          SIZE 10 BY .81
-          BGCOLOR 18 FGCOLOR 15 FONT 5
-     W_NomProDesembolso AT ROW 3.42 COL 20 COLON-ALIGNED NO-LABEL
-     Solicitud.Cue_Desembolso AT ROW 4.5 COL 10 COLON-ALIGNED
-          LABEL "Cuenta"
-          VIEW-AS FILL-IN 
-          SIZE 41 BY .81
-          BGCOLOR 18 FGCOLOR 15 
-     BUTTON-104 AT ROW 5.58 COL 46
+                    "Aceptado", yes,
+"Rechazado", no
+          SIZE 14.14 BY 1.35 TOOLTIP "Marque si el Codeudor es Aceptado Ò No."
+     W_NitCodeudor AT ROW 1.54 COL 14 COLON-ALIGNED
+     W_NomCodeudor AT ROW 1.54 COL 27 COLON-ALIGNED NO-LABEL
+     BUTTON-155 AT ROW 1.58 COL 72.14
+     Btn_CreCod AT ROW 2.62 COL 3
+     Btn_CanCod AT ROW 2.62 COL 13.86
+     Btn_Activas AT ROW 2.62 COL 25.43
+     Btn_SalCod AT ROW 2.62 COL 36.29
+     BUTTON-165 AT ROW 2.69 COL 50.86
+     RActivas AT ROW 2.88 COL 73 NO-LABEL
+     Br_Codeudores AT ROW 3.96 COL 3
+     RECT-297 AT ROW 1 COL 77
     WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 32 ROW 6.92
-         SIZE 55 BY 7.27
+         AT COL 2 ROW 2.08
+         SIZE 95 BY 9.69
          FONT 5
-         TITLE "Destino del Desembolso".
+         TITLE "Personal".
 
-DEFINE FRAME F_Deducibles
-     Br_Deducibles AT ROW 1.27 COL 2
-     BUTTON-101 AT ROW 9.35 COL 45
+DEFINE FRAME F_ConAdmisible
+     BR_Admisible AT ROW 1.27 COL 2
+     Btn_OutConAdm AT ROW 8.27 COL 85
+     R_ConAdm AT ROW 8.54 COL 2.57 NO-LABEL
     WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 3 ROW 10.69
-         SIZE 55 BY 11.31
-         TITLE "Deducibles del Producto".
+         AT COL 2 ROW 2.08
+         SIZE 95 BY 9.96
+         FONT 5
+         TITLE BGCOLOR 3 "Consulta de Garantías Admisibles y No-Admisibles".
 
-DEFINE FRAME F_ConHV
-     Br_ConHV AT ROW 1.27 COL 3
-     Btn_OutConHV AT ROW 8.27 COL 89
-     "   Los Mensajes en Rojo estan pendientes por cumplirse" VIEW-AS TEXT
-          SIZE 85 BY 1.08 AT ROW 8.54 COL 3
-          BGCOLOR 0 FGCOLOR 15 FONT 5
+DEFINE FRAME F_HojaVida
+     Hoja_Vida.Fec_Grabacion AT ROW 1.27 COL 70 COLON-ALIGNED
+          LABEL "Fecha Grabación"
+          VIEW-AS FILL-IN 
+          SIZE 11.43 BY .81
+          BGCOLOR 18 FGCOLOR 15 
+     BUTTON-150 AT ROW 1.27 COL 86
+     Hoja_Vida.Asunto_Cumplido AT ROW 1.54 COL 4
+          LABEL "Asunto Cumplido"
+          VIEW-AS TOGGLE-BOX
+          SIZE 18 BY .81
+     Hoja_Vida.Observacion AT ROW 2.62 COL 4 NO-LABEL
+          VIEW-AS EDITOR LARGE
+          SIZE 80 BY 7.08
+          BGCOLOR 15 
+     Btn_SalvaHV AT ROW 3.15 COL 86
+     Btn_NvoHv AT ROW 4.5 COL 86
+     BUTTON-152 AT ROW 5.85 COL 86
+     BUTTON-149 AT ROW 8 COL 86
     WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 3 ROW 12.04
          SIZE 98 BY 9.96
-         FONT 4
-         TITLE "Asuntos Pendientes".
+         FONT 5
+         TITLE "Hoja de Vida".
+
+DEFINE FRAME F_InfoCliente
+     S_InfoCliente AT ROW 1.27 COL 2 NO-LABEL WIDGET-ID 2
+     BUTTON-156 AT ROW 13.65 COL 2
+     BUTTON-108 AT ROW 13.65 COL 42
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 3 ROW 6.65
+         SIZE 51 BY 15.35
+         FONT 5
+         TITLE "Información Financiera del Cliente".
+
+DEFINE FRAME F_InfoProducto
+     S_InfoProducto AT ROW 1.27 COL 1.72 NO-LABEL
+     Btn_OutScoring AT ROW 9.15 COL 43.72
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 44.43 ROW 7.73
+         SIZE 53.57 BY 10.77
+         FGCOLOR 0 FONT 5
+         TITLE "Información del Producto".
+
+DEFINE FRAME F_Instancias
+     BUTTON-142 AT ROW 1.27 COL 3
+     Mov_Instancias.Fec_Ingreso AT ROW 1.27 COL 73 COLON-ALIGNED
+          VIEW-AS FILL-IN 
+          SIZE 11.43 BY .81
+          BGCOLOR 18 FGCOLOR 15 
+     WHora_Ingreso AT ROW 1.27 COL 85 COLON-ALIGNED NO-LABEL
+     W_Instancia AT ROW 1.42 COL 12 COLON-ALIGNED NO-LABEL
+     W_UsuarioInstancia AT ROW 2.35 COL 12 COLON-ALIGNED NO-LABEL
+     Mov_Instancias.Fec_Retiro AT ROW 2.35 COL 73 COLON-ALIGNED
+          VIEW-AS FILL-IN 
+          SIZE 11.43 BY .81
+          BGCOLOR 18 FGCOLOR 15 
+     Whora_Retiro AT ROW 2.35 COL 85 COLON-ALIGNED NO-LABEL
+     Vigencia AT ROW 3.42 COL 48 COLON-ALIGNED
+     Mov_Instancias.Estado AT ROW 3.54 COL 3
+          LABEL "Cerrar Instancia"
+          VIEW-AS TOGGLE-BOX
+          SIZE 17 BY .77
+     Mov_Instancias.Descripcion AT ROW 4.5 COL 3 NO-LABEL
+          VIEW-AS EDITOR MAX-CHARS 1200 SCROLLBAR-VERTICAL LARGE
+          SIZE 77 BY 9.69
+          BGCOLOR 15 
+     Btn_GraInstancia AT ROW 4.5 COL 82
+     Btn_AgregarTxt AT ROW 6.38 COL 82
+     Btn_Imp AT ROW 9.69 COL 82
+     Btn_insVolver AT ROW 12.58 COL 82
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 3 ROW 7.46
+         SIZE 98 BY 14.54
+         FONT 5
+         TITLE "Procesar Instancias".
+
+DEFINE FRAME F_Producto
+     Solicitud.Tip_Credito AT ROW 1 COL 3 NO-LABEL
+          VIEW-AS RADIO-SET HORIZONTAL
+          RADIO-BUTTONS 
+                    "Consumo", 1,
+"Comercial", 2,
+"Hipotecario", 3,
+"Microcrédito", 4
+          SIZE 52 BY 1.08
+     Cmb_Productos AT ROW 2.65 COL 10.29 COLON-ALIGNED
+     Btn_OutProductos AT ROW 3.92 COL 43.86
+     BUTTON-131 AT ROW 4.19 COL 11.86
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 28 ROW 10.96
+         SIZE 57 BY 5.65
+         FONT 5
+         TITLE BGCOLOR 11 "Producto de la Solicitud".
+
+DEFINE FRAME F_Scoring
+     BR_Scoring AT ROW 1.04 COL 1
+     M_Cliente AT ROW 11.81 COL 54.72
+     Nom_CteCod AT ROW 12.46 COL 27.14 COLON-ALIGNED NO-LABEL
+     BUTTON-166 AT ROW 12.5 COL 26
+     W_Concepto AT ROW 13.46 COL 36.57 COLON-ALIGNED
+     Total_Puntaje AT ROW 14.5 COL 36.57 COLON-ALIGNED
+     BUT-IMP-Scoring AT ROW 15.54 COL 25.86 WIDGET-ID 2
+     Btn_Ejecutar AT ROW 15.54 COL 43 WIDGET-ID 36
+     BUTTON-99 AT ROW 15.54 COL 60.14
+     "Cada Codeudor" VIEW-AS TEXT
+          SIZE 14.57 BY .62 AT ROW 11.77 COL 26.29
+          BGCOLOR 18 FGCOLOR 15 
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 3 ROW 4.23
+         SIZE 98 BY 17.23
+         FONT 5
+         TITLE "Datos del Scoring de Créditos".
+
+DEFINE FRAME F_Solicitud
+     Cmb_Agencias AT ROW 1.04 COL 10 COLON-ALIGNED
+     Solicitud.Num_Solicitud AT ROW 1.08 COL 74.57 COLON-ALIGNED
+          LABEL "Solicitud"
+          VIEW-AS FILL-IN 
+          SIZE 11 BY .81
+          BGCOLOR 3 FGCOLOR 15 
+     Solicitud.Fec_Solicitud AT ROW 1.08 COL 93.86 COLON-ALIGNED
+          LABEL "Fecha"
+          VIEW-AS FILL-IN 
+          SIZE 10 BY .81
+          BGCOLOR 3 FGCOLOR 15 
+     NomNit AT ROW 2.19 COL 33 COLON-ALIGNED NO-LABEL
+     BUTTON-19 AT ROW 2.19 COL 102.72
+     Solicitud.Nit AT ROW 2.35 COL 14.43 COLON-ALIGNED
+          LABEL "Cédula/Nit"
+          VIEW-AS FILL-IN 
+          SIZE 16.57 BY .81
+          BGCOLOR 15 FGCOLOR 0 
+     Fec_Asociado AT ROW 3.19 COL 14.57 COLON-ALIGNED HELP
+          "Fecha en que ingresa como asociado a la Organización" WIDGET-ID 354
+     BUTTON-103 AT ROW 3.69 COL 101.43
+     Nom_Producto AT ROW 3.77 COL 40.57 COLON-ALIGNED
+     WX_Edad AT ROW 4.04 COL 27 COLON-ALIGNED
+     Solicitud.DestinoF AT ROW 4.27 COL 100 COLON-ALIGNED NO-LABEL WIDGET-ID 346
+          VIEW-AS FILL-IN 
+          SIZE 2 BY .5
+          FGCOLOR 17 
+     Nom_Destino AT ROW 4.62 COL 70.57 COLON-ALIGNED WIDGET-ID 20
+     Btn_Destino AT ROW 4.77 COL 101.43 WIDGET-ID 344
+     WAntiguedad AT ROW 4.92 COL 27 COLON-ALIGNED WIDGET-ID 356
+     WVeces AT ROW 5.77 COL 27 COLON-ALIGNED WIDGET-ID 358
+     Texto1 AT ROW 5.81 COL 33.72 COLON-ALIGNED NO-LABEL WIDGET-ID 16
+     Texto2 AT ROW 6.5 COL 33.72 COLON-ALIGNED NO-LABEL WIDGET-ID 18
+     WMonto AT ROW 7.42 COL 17 COLON-ALIGNED WIDGET-ID 362
+     btnGrntias AT ROW 7.46 COL 85.43 WIDGET-ID 6
+     WTasa AT ROW 7.65 COL 82 RIGHT-ALIGNED WIDGET-ID 360
+     Solicitud.For_Interes AT ROW 8 COL 37.72 NO-LABEL
+          VIEW-AS RADIO-SET HORIZONTAL
+          RADIO-BUTTONS 
+                    "Vencido", 1,
+"Anticipado", 2
+          SIZE 23.29 BY .81
+          FONT 5
+     Solicitud.Tasa AT ROW 8.15 COL 71 COLON-ALIGNED
+          LABEL "Efectiva" FORMAT ">>9.9999"
+          VIEW-AS FILL-IN 
+          SIZE 10 BY .81
+          BGCOLOR 3 FGCOLOR 15 
+     Solicitud.Monto AT ROW 8.27 COL 17 COLON-ALIGNED
+          LABEL "Monto solicitud"
+          VIEW-AS FILL-IN 
+          SIZE 15 BY .81
+          BGCOLOR 15 FONT 5
+     Btn_Gar AT ROW 8.54 COL 85.43
+     Cmb_Sistemas AT ROW 9.04 COL 42.57 COLON-ALIGNED NO-TAB-STOP 
+     Solicitud.Plazo AT ROW 9.12 COL 19 COLON-ALIGNED
+          VIEW-AS FILL-IN 
+          SIZE 13 BY .81
+          BGCOLOR 15 FONT 5
+     W_TasaNominal AT ROW 9.12 COL 71 COLON-ALIGNED
+     btnFrmlrioAfliacion AT ROW 9.62 COL 85.43 WIDGET-ID 4 NO-TAB-STOP 
+     Solicitud.fec_desembolso AT ROW 10 COL 19 COLON-ALIGNED WIDGET-ID 390
+          LABEL "Fecha Desembolso"
+          VIEW-AS FILL-IN 
+          SIZE 12.86 BY .85
+          FONT 4
+     Cmb_PerPago AT ROW 10.08 COL 42.57 COLON-ALIGNED NO-TAB-STOP 
+     W_TasaPeriodo AT ROW 10.15 COL 71 COLON-ALIGNED
+     Btn_Proyectar AT ROW 10.69 COL 85.43 NO-TAB-STOP 
+     Solicitud.fec_primerPago AT ROW 10.88 COL 19 COLON-ALIGNED WIDGET-ID 392
+          LABEL "Fecha primer pago"
+          VIEW-AS FILL-IN 
+          SIZE 12.86 BY .85
+          FONT 4
+     NomIndicador AT ROW 11.5 COL 43 COLON-ALIGNED
+     BUTTON-120 AT ROW 11.77 COL 85.43
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 2 ROW 3.62
+         SIZE 106 BY 20
+         FONT 5.
+
+/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
+DEFINE FRAME F_Solicitud
+     Solicitud.Cuota AT ROW 11.92 COL 19 COLON-ALIGNED NO-LABEL FORMAT ">,>>>,>>>,>>9"
+          VIEW-AS FILL-IN 
+          SIZE 13 BY .85
+          BGCOLOR 3 FGCOLOR 15 FONT 5
+     Solicitud.Deducible AT ROW 12.81 COL 19 COLON-ALIGNED
+          LABEL "Valor Deducible"
+          VIEW-AS FILL-IN 
+          SIZE 13 BY .81
+          BGCOLOR 3 FGCOLOR 15 
+     BUTTON-100 AT ROW 12.85 COL 85.43
+     W_ForPago AT ROW 12.96 COL 49 COLON-ALIGNED
+     BUTTON-107 AT ROW 12.96 COL 81
+     Solicitud.Total_Prestamo AT ROW 13.65 COL 19 COLON-ALIGNED
+          LABEL "Total a Prestar"
+          VIEW-AS FILL-IN 
+          SIZE 13 BY .77
+          BGCOLOR 3 FGCOLOR 15 
+     W_Desembolso AT ROW 13.73 COL 49 COLON-ALIGNED
+     BUTTON-105 AT ROW 13.81 COL 81.14
+     Btn_HojaVida AT ROW 13.92 COL 85.43
+     Btn_Extras AT ROW 14.92 COL 2.14
+     BUTTON-102 AT ROW 15 COL 85.43
+     W_VrCredACanc AT ROW 15.31 COL 67.29 COLON-ALIGNED
+     Btn_CancCred AT ROW 15.42 COL 81.14
+     W_TotExt AT ROW 16.04 COL 18.86 COLON-ALIGNED
+     W_VrADesemb AT ROW 16.08 COL 67.29 COLON-ALIGNED
+     Btn_Liquidar AT ROW 16.12 COL 85.43
+     W_Tipo_Credito AT ROW 4.65 COL 40.57 COLON-ALIGNED
+     W_NomPdo AT ROW 12.04 COL 2 NO-LABEL
+     "Interés" VIEW-AS TEXT
+          SIZE 6 BY .62 AT ROW 7.58 COL 45.86 WIDGET-ID 350
+     "Tasas" VIEW-AS TEXT
+          SIZE 5.57 BY .54 AT ROW 7.19 COL 65
+     RECT-322 AT ROW 7.46 COL 36 WIDGET-ID 8
+     RECT-323 AT ROW 7.46 COL 64 WIDGET-ID 10
+     RECT-325 AT ROW 7.92 COL 36.57 WIDGET-ID 352
+     RECT-327 AT ROW 14.81 COL 1.43 WIDGET-ID 368
+     RECT-330 AT ROW 3.42 COL 35.57 WIDGET-ID 374
+     RECT-331 AT ROW 2.04 COL 1.43 WIDGET-ID 376
+     RECT-333 AT ROW 12.85 COL 36 WIDGET-ID 380
+     RECT-334 AT ROW 7.19 COL 1.43 WIDGET-ID 388
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 2 ROW 3.62
+         SIZE 106 BY 20
+         FONT 5
+         TITLE "Radicación de Solicitudes".
 
 DEFINE FRAME F_Ultima
      Btn_SalvaUltima AT ROW 1.27 COL 85
@@ -2353,14 +2473,14 @@ DEFINE FRAME F_Condicionada
      Br_Usuarios AT ROW 2.08 COL 51
      E_Condicion AT ROW 3.15 COL 3 NO-LABEL
      BUTTON-162 AT ROW 9.88 COL 82
+     "Los Usuarios en Rojo han tenido la Solicitud asignada" VIEW-AS TEXT
+          SIZE 42 BY .62 AT ROW 8.81 COL 52
+          FGCOLOR 15 FONT 4
      "Condición" VIEW-AS TEXT
           SIZE 10 BY .62 AT ROW 2.35 COL 3
      "  Usuarios Disponibles para recibir la Solicitud" VIEW-AS TEXT
           SIZE 40.29 BY .81 AT ROW 1.27 COL 52
           BGCOLOR 18 FGCOLOR 15 
-     "Los Usuarios en Rojo han tenido la Solicitud asignada" VIEW-AS TEXT
-          SIZE 42 BY .62 AT ROW 8.81 COL 52
-          FGCOLOR 15 FONT 4
     WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 2 ROW 6.12
@@ -2368,126 +2488,17 @@ DEFINE FRAME F_Condicionada
          FGCOLOR 15 FONT 5
          TITLE "Instancia a la cual se devuelve la Solicitud Condicionada".
 
-DEFINE FRAME F_Cerradas
-     Br_Cerradas AT ROW 1.27 COL 3
-     Btn_OutCerradas AT ROW 7.73 COL 89
-     BUTTON-154 AT ROW 8 COL 62
-     "La instancia activa se encuentra en letra color rojo" VIEW-AS TEXT
-          SIZE 43 BY .81 AT ROW 7.19 COL 3
-          FGCOLOR 7 FONT 5
+DEFINE FRAME VisorSolicitud
+     BUTTON-233 AT ROW 18.27 COL 100 WIDGET-ID 10
+     Btn_IrProcesarInst AT ROW 18.31 COL 75.14 WIDGET-ID 14
+     enviarEmail AT ROW 18.62 COL 57.43 WIDGET-ID 16
+     "Puede actualizar los datos y volver a generar PDF." VIEW-AS TEXT
+          SIZE 48.86 BY .62 AT ROW 18.85 COL 3.43 WIDGET-ID 12
     WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 3 ROW 3.69
-         SIZE 98 BY 9.42
-         FGCOLOR 0 FONT 4
-         TITLE "Consulta de Instancias Procesadas y Actuales".
-
-DEFINE FRAME F_Agregar
-     E_Agregar AT ROW 1.27 COL 2 NO-LABEL
-     BUTTON-153 AT ROW 6.92 COL 48
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 19 ROW 11.5
-         SIZE 57 BY 8.88
-         TITLE "Texto a ser Agregado".
-
-DEFINE FRAME F_Producto
-     Solicitud.Tip_Credito AT ROW 1 COL 3 NO-LABEL
-          VIEW-AS RADIO-SET HORIZONTAL
-          RADIO-BUTTONS 
-                    "Consumo", 1,
-"Comercial", 2,
-"Hipotecario", 3,
-"Microcrédito", 4
-          SIZE 52 BY 1.08
-     Cmb_Productos AT ROW 2.65 COL 10.29 COLON-ALIGNED
-     Btn_OutProductos AT ROW 3.92 COL 43.86
-     BUTTON-131 AT ROW 4.19 COL 11.86
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 13 ROW 5.04
-         SIZE 57 BY 5.65
-         FONT 5
-         TITLE BGCOLOR 11 "Producto de la Solicitud".
-
-DEFINE FRAME F_ForPago
-     Solicitud.For_Pago AT ROW 1.27 COL 1 NO-LABEL
-          VIEW-AS RADIO-SET HORIZONTAL
-          RADIO-BUTTONS 
-                    "Caja", 1,
-"Nómina", 2,
-"Déb Aut", 3,
-"Nóm Crec", 4,
-"Prima", 5
-          SIZE 45 BY .81
-     Anexos_Clientes.Cam_Cat1 AT ROW 2.35 COL 15 COLON-ALIGNED HELP
-          "" WIDGET-ID 4
-          LABEL "Capacidad Pago" FORMAT "x(15)"
-          VIEW-AS COMBO-BOX SORT INNER-LINES 4
-          LIST-ITEM-PAIRS ""," ",
-                     "50%","f50%",
-                     "SMMLV","fsmmlv",
-                     "CAJA","fcapagocaja"
-          DROP-DOWN-LIST
-          SIZE 16 BY 1 TOOLTIP "Función Para Calcular La Capacidad De Pago"
-     Solicitud.Age_DebAutomatico AT ROW 3.42 COL 15 COLON-ALIGNED
-          LABEL "Agencia"
-          VIEW-AS FILL-IN 
-          SIZE 4 BY .81
-          BGCOLOR 18 FGCOLOR 15 
-     W_NomAgeDebAutomatico AT ROW 3.42 COL 19 COLON-ALIGNED NO-LABEL
-     Solicitud.Cod_DebAutomatico AT ROW 4.5 COL 15 COLON-ALIGNED
-          LABEL "Producto"
-          VIEW-AS FILL-IN 
-          SIZE 4 BY .81
-          BGCOLOR 18 FGCOLOR 15 
-     W_NomCodDebAutomatico AT ROW 4.5 COL 19 COLON-ALIGNED NO-LABEL
-     Solicitud.Cue_DebAutomatico AT ROW 5.58 COL 15 COLON-ALIGNED
-          LABEL "Cuenta"
-          VIEW-AS FILL-IN 
-          SIZE 29 BY .81
-          BGCOLOR 18 FGCOLOR 15 
-     BUTTON-106 AT ROW 6.65 COL 38
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 26 ROW 10.15
-         SIZE 46 BY 8.35
-         FONT 5
-         TITLE BGCOLOR 16 "Forma de Pago de la Cuota".
-
-DEFINE FRAME F_Instancias
-     BUTTON-142 AT ROW 1.27 COL 3
-     Mov_Instancias.Fec_Ingreso AT ROW 1.27 COL 73 COLON-ALIGNED
-          VIEW-AS FILL-IN 
-          SIZE 11.43 BY .81
-          BGCOLOR 18 FGCOLOR 15 
-     WHora_Ingreso AT ROW 1.27 COL 85 COLON-ALIGNED NO-LABEL
-     W_Instancia AT ROW 1.42 COL 12 COLON-ALIGNED NO-LABEL
-     W_UsuarioInstancia AT ROW 2.35 COL 12 COLON-ALIGNED NO-LABEL
-     Mov_Instancias.Fec_Retiro AT ROW 2.35 COL 73 COLON-ALIGNED
-          VIEW-AS FILL-IN 
-          SIZE 11.43 BY .81
-          BGCOLOR 18 FGCOLOR 15 
-     Whora_Retiro AT ROW 2.35 COL 85 COLON-ALIGNED NO-LABEL
-     Vigencia AT ROW 3.42 COL 48 COLON-ALIGNED
-     Mov_Instancias.Estado AT ROW 3.54 COL 3
-          LABEL "Cerrar Instancia"
-          VIEW-AS TOGGLE-BOX
-          SIZE 17 BY .77
-     Mov_Instancias.Descripcion AT ROW 4.5 COL 3 NO-LABEL
-          VIEW-AS EDITOR MAX-CHARS 1200 SCROLLBAR-VERTICAL LARGE
-          SIZE 77 BY 9.69
-          BGCOLOR 15 
-     Btn_GraInstancia AT ROW 4.5 COL 82
-     Btn_AgregarTxt AT ROW 6.38 COL 82
-     Btn_Imp AT ROW 9.69 COL 82
-     Btn_insVolver AT ROW 12.58 COL 82
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 3 ROW 7.46
-         SIZE 98 BY 14.54
-         FONT 5
-         TITLE "Procesar Instancias".
+         AT COL 2 ROW 3.42
+         SIZE 107 BY 19.92
+         TITLE "Visor de solicitud" WIDGET-ID 200.
 
 
 /* *********************** Procedure Settings ************************ */
@@ -2508,7 +2519,7 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
          HIDDEN             = YES
          TITLE              = "Proceso de Solicitudes"
          HEIGHT             = 22.69
-         WIDTH              = 145.72
+         WIDTH              = 127.29
          MAX-HEIGHT         = 36.54
          MAX-WIDTH          = 182.86
          VIRTUAL-HEIGHT     = 36.54
@@ -2616,7 +2627,7 @@ ASSIGN
 
 /* SETTINGS FOR FRAME F_Cerradas
    NOT-VISIBLE                                                          */
-/* BROWSE-TAB Br_Cerradas TEXT-7 F_Cerradas */
+/* BROWSE-TAB Br_Cerradas TEXT-25 F_Cerradas */
 ASSIGN 
        FRAME F_Cerradas:HIDDEN           = TRUE.
 
@@ -2650,7 +2661,7 @@ ASSIGN
 
 /* SETTINGS FOR FRAME F_ConHV
    NOT-VISIBLE                                                          */
-/* BROWSE-TAB Br_ConHV TEXT-14 F_ConHV */
+/* BROWSE-TAB Br_ConHV TEXT-24 F_ConHV */
 ASSIGN 
        FRAME F_ConHV:HIDDEN           = TRUE.
 
@@ -2808,7 +2819,7 @@ ASSIGN
 
 /* SETTINGS FOR FRAME F_Scoring
    NOT-VISIBLE                                                          */
-/* BROWSE-TAB BR_Scoring TEXT-24 F_Scoring */
+/* BROWSE-TAB BR_Scoring TEXT-14 F_Scoring */
 ASSIGN 
        FRAME F_Scoring:HIDDEN           = TRUE.
 
@@ -2839,9 +2850,6 @@ ASSIGN
    NO-ENABLE                                                            */
 /* SETTINGS FOR FILL-IN Fec_Asociado IN FRAME F_Solicitud
    NO-ENABLE                                                            */
-ASSIGN 
-       Fec_Asociado:READ-ONLY IN FRAME F_Solicitud        = TRUE.
-
 /* SETTINGS FOR FILL-IN Solicitud.fec_desembolso IN FRAME F_Solicitud
    EXP-LABEL                                                            */
 /* SETTINGS FOR FILL-IN Solicitud.fec_primerPago IN FRAME F_Solicitud
@@ -2876,9 +2884,6 @@ ASSIGN
    NO-ENABLE EXP-LABEL                                                  */
 /* SETTINGS FOR FILL-IN WAntiguedad IN FRAME F_Solicitud
    NO-ENABLE                                                            */
-ASSIGN 
-       WAntiguedad:READ-ONLY IN FRAME F_Solicitud        = TRUE.
-
 /* SETTINGS FOR FILL-IN WMonto IN FRAME F_Solicitud
    NO-ENABLE                                                            */
 /* SETTINGS FOR FILL-IN WTasa IN FRAME F_Solicitud
@@ -2888,14 +2893,8 @@ ASSIGN
 
 /* SETTINGS FOR FILL-IN WVeces IN FRAME F_Solicitud
    NO-ENABLE                                                            */
-ASSIGN 
-       WVeces:READ-ONLY IN FRAME F_Solicitud        = TRUE.
-
 /* SETTINGS FOR FILL-IN WX_Edad IN FRAME F_Solicitud
    NO-ENABLE                                                            */
-ASSIGN 
-       WX_Edad:READ-ONLY IN FRAME F_Solicitud        = TRUE.
-
 /* SETTINGS FOR FILL-IN W_Desembolso IN FRAME F_Solicitud
    NO-ENABLE                                                            */
 /* SETTINGS FOR FILL-IN W_ForPago IN FRAME F_Solicitud
@@ -4526,7 +4525,7 @@ DO:
                                 Mov_Instancias.Fec_Retiro = W_Fecha.
                                 Mov_Instancias.Hora_Retiro = TIME.
                                 Mov_Instancias.Estado = YES.
-                                Mov_Instancias.Agencia = clientes.agencia.
+                                Mov_Instancias.Agencia = INT(SUBSTR(Cmb_Agencias:SCREEN-VALUE IN FRAME F_Solicitud,1,3)).
                             END.
 
                             FIND CURRENT Mov_Instancias NO-LOCK NO-ERROR.
@@ -4782,8 +4781,16 @@ DO:
         W_TotExt = 0.
         W_TotExt:SCREEN-VALUE = "0".
 
-        APPLY "entry" TO Solicitud.Nit.
-        RETURN NO-APPLY.
+        IF W_SucAgen THEN DO:
+            ENABLE Cmb_Agencias WITH FRAME F_Solicitud.
+            APPLY "entry" TO Cmb_Agencias.
+            RETURN NO-APPLY.
+        END.
+        ELSE DO:
+            DISABLE Cmb_Agencias WITH FRAME F_Solicitud.
+            APPLY "entry" TO Solicitud.Nit.
+            RETURN NO-APPLY.
+        END.
     END.
 END.
 
@@ -5102,7 +5109,7 @@ DO:
                         "se debe escoger un cliente para poder" SKIP
                         "saber si este puede acceder al producto" SKIP
                         "escogido." SKIP(1)
-                        "A continuación escoja un Cliente"
+                        "A continuación Escoja un Cliente"
                     VIEW-AS ALERT-BOX WARNING.
 
                 HIDE FRAME F_Producto.
@@ -5110,8 +5117,8 @@ DO:
                 RETURN NO-APPLY.
             END.
 
-            IF Pro_Creditos.Id_Asociado > 1 THEN DO:
-                IF Pro_Creditos.Id_Asociado = 2 AND Clientes.Tipo_Vinculo <> 1 THEN DO:
+            IF Pro_Creditos.Id_Asociado GT 1 THEN DO:
+                IF Pro_Creditos.Id_Asociado EQ 2 AND Clientes.Tipo_Vinculo <> 1 THEN DO:
                     MESSAGE "Este producto esta diseñado solo para Asociados." SKIP
                             "El cliente elejido no es un Asociado."
                         VIEW-AS ALERT-BOX WARNING.
@@ -5120,7 +5127,7 @@ DO:
                     RETURN NO-APPLY.
                 END.
                 
-                IF Pro_Creditos.Id_Asociado = 3 AND Clientes.Tipo_Vinculo <> 5 THEN DO:
+                IF Pro_Creditos.Id_Asociado EQ 3 AND Clientes.Tipo_Vinculo <> 5 THEN DO:
                     MESSAGE "Este producto esta diseñado solo para Empleados." SKIP
                             "El cliente elejido no es un Empleado."
                         VIEW-AS ALERT-BOX WARNING.
@@ -5147,33 +5154,6 @@ DO:
                 ASSIGN Solicitud.Tasa:BGCOL = 18
                        Solicitud.Tasa:FGCOL = 15
                        Solicitud.Tasa:SENSITIVE = NO.
-
-            /* Condiciones para los créditos a 01 cuota */
-            IF pro_creditos.cod_credito = 108 OR
-               pro_creditos.cod_credito = 113 OR
-               pro_creditos.cod_credito = 114 THEN DO:
-                cmb_sistemas:SCREEN-VALUE IN FRAME F_Solicitud = "00002 - Cuota única".
-                cmb_sistemas:SENSITIVE = FALSE.
-                cmb_perPago:SCREEN-VALUE = "8 - Semestral".
-                cmb_perPago:SENSITIVE = FALSE.
-                solicitud.plazo:SCREEN-VALUE = "1".
-                solicitud.plazo:SENSITIVE = FALSE.
-                solicitud.FOR_pago:SCREEN-VALUE IN FRAME F_ForPago = "1".
-                solicitud.FOR_pago:SENSITIVE = FALSE.
-                W_ForPago:SCREEN-VALUE = "Caja".
-                button-107:SENSITIVE = FALSE.
-
-                APPLY 'leave' TO solicitud.plazo.
-            END.
-            ELSE DO:
-                cmb_sistemas:SCREEN-VALUE IN FRAME F_Solicitud = "00001 - Cuota fija".
-                cmb_sistemas:SENSITIVE = FALSE.
-                cmb_perPago:SCREEN-VALUE = "4 - Mensual".
-                cmb_perPago:SENSITIVE = FALSE.
-                solicitud.plazo:SCREEN-VALUE = "".
-                solicitud.plazo:SENSITIVE = TRUE.
-                button-107:SENSITIVE = TRUE.
-            END.
         END.
     END.
 
@@ -5677,7 +5657,7 @@ DO:
                            INPUT Solicitud.Nit:SCREEN-VALUE,
                            INPUT DEC(Solicitud.Monto:SCREEN-VALUE),
                            INPUT INT(Solicitud.Plazo:SCREEN-VALUE),
-                           INPUT clientes.agencia,
+                           INPUT INT(SUBSTR(Cmb_Agencias:SCREEN-VALUE,1,3)),
                            INPUT INT(Solicitud.For_Pago:SCREEN-VALUE IN FRAME F_Forpago),
                            INPUT vPeriodicidad,
                            OUTPUT W_Valida) NO-ERROR.
@@ -5696,7 +5676,7 @@ DO:
             Solicitud.Num_Solicitud:SCREEN-VALUE IN FRAME F_Solicitud = STRING(Solicitud.Num_Solicitud).
         END.
         ELSE DO:
-            FIND FIRST Solicitud WHERE Solicitud.Agencia EQ clientes.agencia
+            FIND FIRST Solicitud WHERE Solicitud.Agencia EQ INT(SUBSTR(Cmb_Agencias:SCREEN-VALUE,1,3))
                                    AND Solicitud.Num_Solicitud EQ INT(Solicitud.Num_Solicitud:SCREEN-VALUE)
                                    AND Solicitud.Nit EQ Solicitud.Nit:SCREEN-VALUE EXCLUSIVE-LOCK NO-ERROR.
             IF NOT AVAIL Solicitud THEN DO:
@@ -5736,7 +5716,7 @@ DO:
             solicitud.fec_desembolso
             solicitud.fec_primerPago.
 
-        ASSIGN Solicitud.Agencia = clientes.agencia
+        ASSIGN Solicitud.Agencia = INT(SUBSTR(Cmb_Agencias:SCREEN-VALUE,1,3))
                Solicitud.Per_Pago = INT(SUBSTR(Cmb_PerPago:SCREEN-VALUE IN FRAME F_Solicitud,1,1))
                Solicitud.Sistema = INT(SUBSTR(Cmb_Sistemas:SCREEN-VALUE IN FRAME F_Solicitud,1,5))
                Solicitud.Id_Adicionales = 2.
@@ -6086,10 +6066,10 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BUTTON-103 wWin
 ON CHOOSE OF BUTTON-103 IN FRAME F_Solicitud /* Button 103 */
 DO:
-    solicitud.tip_credito:SCREEN-VALUE IN FRAME f_producto = "1".
-
+    solicitud.tip_credito:SCREEN-VALUE IN FRAME f_producto = "1" .
     APPLY "Mouse-Select-Click" TO Solicitud.Tip_Credito IN FRAME F_Producto.
-
+    /*Cmb_Producto:SCREEN-VALUE IN FRAME F_Producto = */
+   /* DYNAMIC-FUNCTION('fActualzaTposPrdctos':U).*/
     VIEW FRAME F_Producto.
 END.
 
@@ -7284,6 +7264,41 @@ END.
 &ANALYZE-RESUME
 
 
+&Scoped-define FRAME-NAME VisorSolicitud
+&Scoped-define SELF-NAME enviarEmail
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL enviarEmail wWin
+ON CHOOSE OF enviarEmail IN FRAME VisorSolicitud /* Enviar a e-mail */
+DO:
+    FIND FIRST usuarios WHERE usuarios.usuario = w_usuario NO-LOCK NO-ERROR.
+
+    RUN mail.r(INPUT Clientes.email,
+               INPUT Clientes.Nombre + " " + Clientes.Apellido1 + " " + Clientes.Apellido2,
+               INPUT Usuario.email,
+               INPUT Usuario.nombre + " FODUN",
+               INPUT Usuario.email,
+               INPUT "", 
+               INPUT "Formato de solicitud de crédito " + STRING(Solicitud.Num_Solicitud),
+               INPUT "<img width='200px' src='https://www.fodun.com.co/Files/Logo/logo-fodun-1.png' align='right'/><p>Bogot&aacute;, D.C., " + STRING(TODAY,"99/99/9999") + 
+                     "</p><p><strong>&nbsp;</strong></p><p><strong>REF. Formato de solicitud de cr&eacute;dito.</strong></p><p><strong>Profesor(a):</strong></p><p><strong>" + 
+                     Clientes.Nombre + " " + Clientes.Apellido1 + " " + Clientes.Apellido2 + "</strong></p><p><strong>Asociado(a) de Fodun</strong></p><p>&nbsp;</p><p>Respetado(a) Profesor(a):</p>" +
+                     "<p>&nbsp;</p><p>Reciba un cordial saludo en nombre de <strong>FODUN</strong>.</p><p>Adjunto puede encontrar el formato de solicitud para el cr&eacute;dito "  +
+                     STRING(Solicitud.Num_Solicitud) + "</p><p>Cordial Saludo,</p><p>FODUN</p><p style='text-align: center;'>www.fodun.com.co</p>",
+               INPUT "Solicitudes\" + Solicitud.Nit + "_" + STRING(integer(Solicitud.Num_Solicitud)) + ".pdf",
+               OUTPUT enviado,
+               OUTPUT respuesta) NO-ERROR.
+        
+    IF enviado = TRUE THEN
+        MESSAGE "El mensaje fue enviado correctamente."
+            VIEW-AS ALERT-BOX ERROR.
+    ELSE
+        MESSAGE "El mensaje no pudo ser enviado. Intente nuevamente o contacte al administrador. " + respuesta 
+            VIEW-AS ALERT-BOX ERROR.
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
 &Scoped-define FRAME-NAME F_Ultima
 &Scoped-define SELF-NAME Solicitud.Estado
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL Solicitud.Estado wWin
@@ -7454,7 +7469,8 @@ DO:
     IF INTEGER(SUBSTRING(Cmb_Sistemas:SCREEN-VALUE IN FRAME F_Solicitud,1,5)) <> 2 AND
        INTEGER(SUBSTRING(Cmb_Productos:SCREEN-VALUE IN FRAME F_Producto,1,3)) <> 108 AND
        INTEGER(SUBSTRING(Cmb_Productos:SCREEN-VALUE IN FRAME F_Producto,1,3)) <> 113 AND
-       INTEGER(SUBSTRING(Cmb_Productos:SCREEN-VALUE IN FRAME F_Producto,1,3)) <> 114 THEN DO:
+       INTEGER(SUBSTRING(Cmb_Productos:SCREEN-VALUE IN FRAME F_Producto,1,3)) <> 114 AND
+       INTEGER(SUBSTRING(Cmb_Productos:SCREEN-VALUE IN FRAME F_Producto,1,3)) <> 194 THEN DO:
         IF INTEGER(SUBSTRING(Cmb_Productos:SCREEN-VALUE IN FRAME F_Producto,1,3)) <> 62 AND DAY(DATE(solicitud.fec_primerPago:SCREEN-VALUE)) <> 10 THEN DO:
             MESSAGE "Por políticas del Fondo, las fechas de pago para" SKIP
                     "esta línea de crédito serán los días 10." SKIP
@@ -7924,7 +7940,7 @@ DO:
     DEFINE VAR valorMaximoPermanencia AS DECIMAL.
 
     DO WITH FRAME F_Solicitud:
-        FIND FIRST Cfg_Instancias WHERE Cfg_Instancias.Agencia = w_agencia
+        FIND FIRST Cfg_Instancias WHERE Cfg_Instancias.Agencia = INTEGER(SUBSTRING(Cmb_Agencias:SCREEN-VALUE IN FRAME F_Solicitud,1,3))
                                     AND Cfg_instancias.Tipo_Instancia = 1
                                     AND Cfg_Instancias.Instancia = INTEGER(SUBSTRING(Cmb_Instancias:SCREEN-VALUE IN FRAME F_Creditos,1,5))
                                     AND Cfg_Instancias.Usuario = W_Usuario
@@ -7932,7 +7948,7 @@ DO:
         IF NOT AVAILABLE Cfg_instancias THEN DO:
             MESSAGE "El usuario no tiene configurada la instancia" SKIP(1)
                     Cmb_Instancias:SCREEN-VALUE IN FRAME F_Creditos SKIP(1)
-                    "En la Agencia:" w_agencia
+                    "En la Agencia:" Cmb_Agencias:SCREEN-VALUE IN FRAME F_Solicitud
                 VIEW-AS ALERT-BOX ERROR.
                 
             APPLY "choose" TO Btn_Consulta IN FRAME F_Creditos.
@@ -7990,8 +8006,6 @@ DO:
             END.
         END.
     END.
-
-    RUN liquidar.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -8037,6 +8051,9 @@ DO:
            WVeces:SCREEN-VALUE IN FRAME F_Solicitud = ""
            WTasa:SCREEN-VALUE IN FRAME F_Solicitud = ""
            WMonto:SCREEN-VALUE IN FRAME F_Solicitud = "".
+
+    IF Cmb_Agencias:SENSITIVE = NO THEN
+        APPLY "leave" TO Cmb_Agencias.
 
     IF SELF:SCREEN-VALUE = "" THEN DO:
         MESSAGE "Debe ingresarse el número de identificación del posible deudor. ¡Rectifique!" SKIP(1)
@@ -8139,6 +8156,8 @@ DO:
         RUN edad IN w_manija (INPUT clientes.fec_nacimiento,
                               OUTPUT wk_edad) NO-ERROR.
 
+        /* oakley */
+
         ASSIGN WX_Edad = WK_Edad
                WX_Edad:SCREEN-VALUE = STRING(WX_Edad).
 
@@ -8159,7 +8178,7 @@ DO:
             ASSIGN Solicitud.Nit:SCREEN-VALUE = ""
                    NomNit:SCREEN-VALUE = "".
 
-            APPLY "entry" TO solicitud.nit.
+            APPLY "entry" TO Cmb_Agencias.
             RETURN NO-APPLY.
         END.
 
@@ -8428,7 +8447,7 @@ DO:
     END.
 
     DO WITH FRAME F_Solicitud:
-        FIND FIRST Cfg_Instancias WHERE Cfg_Instancias.Agencia = w_agencia
+        FIND FIRST Cfg_Instancias WHERE Cfg_Instancias.Agencia EQ INT(SUBSTR(Cmb_Agencias:SCREEN-VALUE IN FRAME F_Solicitud,1,3))
                                     AND Cfg_Instancias.Tipo_Instancia EQ 1
                                     AND Cfg_Instancias.Instancia EQ INT(SUBSTR(Cmb_Instancias:SCREEN-VALUE IN FRAME F_Creditos,1,5))
                                     AND Cfg_Instancias.Usuario EQ W_Usuario
@@ -8544,7 +8563,7 @@ DO:
             ASSIGN solicitud.fec_primerPago:SCREEN-VALUE = STRING(fechaTemp,"99/99/9999").
         END.
         ELSE
-            ASSIGN solicitud.fec_primerPago:SCREEN-VALUE = STRING(ADD-INTERVAL(DATE(solicitud.fec_solicitud:SCREEN-VALUE),/*INTEGER(solicitud.plazo:SCREEN-VALUE)*/ 6,"months"),"99/99/9999").
+            ASSIGN solicitud.fec_primerPago:SCREEN-VALUE = STRING(ADD-INTERVAL(DATE(solicitud.fec_solicitud:SCREEN-VALUE),INTEGER(solicitud.plazo:SCREEN-VALUE),"months"),"99/99/9999").
     END.
     /* ------------------------------------------------------------------------- */
     
@@ -8559,8 +8578,8 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL Solicitud.Plazo wWin
 ON VALUE-CHANGED OF Solicitud.Plazo IN FRAME F_Solicitud /* Plazo */
 DO:
-    /*Solicitud.Cuota:SCREEN-VALUE = "0".
-    ENABLE Btn_Liquidar WITH FRAME F_Solicitud.*/
+  Solicitud.Cuota:SCREEN-VALUE = "0".
+  ENABLE Btn_Liquidar WITH FRAME F_Solicitud.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -8997,6 +9016,7 @@ DO WITH FRAME F_Codeudores:
        SELF:SCREEN-VALUE =  " ".
        DISABLE W_NitCodeudor Btn_SalCod.
        ENABLE Btn_CreCod Btn_Activas.
+       APPLY "entry" TO Cmb_Agencias.
        RETURN NO-APPLY. */
    END.
    ELSE DO:
@@ -9009,6 +9029,7 @@ DO WITH FRAME F_Codeudores:
             SELF:SCREEN-VALUE =  " ".
             DISABLE W_NitCodeudor Btn_SalCod.
             ENABLE Btn_CreCod Btn_Activas.
+            APPLY "entry" TO Cmb_Agencias.
             RETURN NO-APPLY. */
       END.
 
@@ -9018,7 +9039,7 @@ DO WITH FRAME F_Codeudores:
                   SELF:SCREEN-VALUE =  " ".
                   DISABLE W_NitCodeudor Btn_SalCod.
                   ENABLE Btn_CreCod Btn_Activas.
-                  APPLY "entry" TO solicitud.nit.
+                  APPLY "entry" TO Cmb_Agencias.
                   RETURN NO-APPLY.
       END.
 
@@ -9028,6 +9049,7 @@ DO WITH FRAME F_Codeudores:
                   SELF:SCREEN-VALUE =  " ".
                   DISABLE W_NitCodeudor Btn_SalCod.
                   ENABLE Btn_CreCod Btn_Activas.
+                  APPLY "entry" TO Cmb_Agencias.
                   RETURN NO-APPLY.
       END.*/
    
@@ -9037,6 +9059,7 @@ DO WITH FRAME F_Codeudores:
           SELF:SCREEN-VALUE =  " ".
           DISABLE W_NitCodeudor Btn_SalCod.
           ENABLE Btn_CreCod Btn_Activas.
+          APPLY "entry" TO Cmb_Agencias.
           RETURN NO-APPLY.
       END.*/
 
@@ -9264,7 +9287,7 @@ IF Solicitud.Estado EQ 3 THEN DO:
           FOR EACH TProIns: DELETE TProIns. END.
           /*Encuentra los usuarios configurados para las instancias siguientes, y que cumplen los limites*/
           FOR EACH Cfg_Instancias WHERE 
-                   Cfg_Instancias.Agencia = w_agencia AND
+                   Cfg_Instancias.Agencia        EQ INTEGER(SUBSTRING(Cmb_Agencias:SCREEN-VALUE IN FRAME F_Solicitud,1,3)) AND
                    Cfg_Instancias.Tipo_Instancia EQ Instancias.Tipo_Instancia AND
                    Cfg_Instancias.Instancia      EQ Instancias.Instancia AND
                    Cfg_Instancias.Orden          EQ Instancias.Orden_Instancia AND
@@ -9511,7 +9534,7 @@ IF Solicitud.Estado EQ 2 THEN DO:
           FOR EACH TProIns: DELETE TProIns. END.
           /*Encuentra los usuarios configurados para las instancias siguientes, y que cumplen los limites*/
           FOR EACH Cfg_Instancias WHERE 
-                   Cfg_Instancias.Agencia = w_agencia AND
+                   Cfg_Instancias.Agencia        EQ INTEGER(SUBSTRING(Cmb_Agencias:SCREEN-VALUE IN FRAME F_Solicitud,1,3)) AND
                    Cfg_Instancias.Instancia      EQ Instancias.Instancia       AND
                    Cfg_Instancias.Tipo_Instancia EQ Instancias.Tipo_Instancia  AND
                    Cfg_Instancias.Orden          EQ Instancias.Orden_Instancia AND
@@ -9521,6 +9544,25 @@ IF Solicitud.Estado EQ 2 THEN DO:
                    Cfg_Instancias.Monto_Maximo   GE Solicitud.Monto AND 
                    Cfg_Instancias.Estado         EQ 1 NO-LOCK:
 
+              /* IF  Cfg_RegCredito.Agencia_Exigida EQ 11                 /*Dic.16/05 GAER*/
+               AND Pro_Creditos.Tip_Credito       EQ 4 
+               AND Pro_Creditos.Id_AprobAgencia 
+               AND Cfg_Instancias.Usuario NE Solicitud.Usuario THEN
+                   NEXT.*/
+               
+             /* Sept 27/09/2007   politicas de la empres */
+           /*  IF INTEGER(SUBSTRING(Cmb_Agencias:SCREEN-VALUE IN FRAME F_Solicitud,1,3)) GT 3  AND
+                INTEGER(SUBSTRING(Cmb_Agencias:SCREEN-VALUE IN FRAME F_Solicitud,1,3)) LT 11 THEN DO:
+                IF  Cfg_Instancias.Usuario EQ W_Usuario THEN NEXT.
+             END.
+             ELSE */
+               /* IF  Cfg_Instancias.Usuario NE W_Usuario THEN NEXT. */ /* Tomar mismo usuario */
+          
+
+              /* IF Solicitud.Cod_Credito EQ 7 AND Cfg_Instancias.Usuario EQ W_Usuario THEN 
+                  MESSAGE "El crédito es un transitorio para asociados" SKIP
+                          "se asignará automáticamente a la agencia y" SKIP
+                          "al usuario que aprobó la solicitud!" VIEW-AS ALERT-BOX.              */
                /* 3 */
                CREATE TProIns.
                ASSIGN TProIns.TP_Orden     = Cfg_Instancias.Orden
@@ -9547,6 +9589,29 @@ IF Solicitud.Estado EQ 2 THEN DO:
 
           FIND FIRST TProIns NO-ERROR.
           IF NOT AVAILABLE TProIns THEN DO:
+             /*IF  Cfg_RegCredito.Agencia_Exigida EQ 11                 /*Dic.16/05 GAER*/
+             AND Pro_Creditos.Tip_Credito       EQ 4 
+             AND Pro_Creditos.Id_AprobAgencia THEN DO:
+                 FIND FIRST Cfg_Instancias WHERE 
+                   Cfg_Instancias.Agencia        EQ INTEGER(SUBSTRING(Cmb_Agencias:SCREEN-VALUE IN FRAME F_Solicitud,1,3)) AND
+                   Cfg_Instancias.Instancia      EQ Instancias.Instancia       AND
+                   Cfg_Instancias.Tipo_Instancia EQ Instancias.Tipo_Instancia  AND
+                   Cfg_Instancias.Orden          EQ Instancias.Orden_Instancia AND
+                   Cfg_Instancias.Plazo_Minimo   LE Dias AND
+                   Cfg_Instancias.Plazo_Maximo   GE Dias AND
+                   Cfg_Instancias.Monto_Minimo   LE Solicitud.Monto AND
+                   Cfg_Instancias.Monto_Maximo   GE Solicitud.Monto AND 
+                   Cfg_Instancias.Estado         EQ 1 NO-LOCK NO-ERROR.
+                 IF AVAIL(Cfg_Instancias) THEN DO:
+                    CREATE TProIns.
+                    ASSIGN TProIns.TP_Orden     = Cfg_Instancias.Orden     
+                           TProIns.TP_Instancia = Cfg_Instancias.Instancia 
+                           TProIns.TP_Usuario   = Cfg_Instancias.Usuario   
+                           TProIns.Tp_Cantidad  = 0                        
+                           TProIns.TP_Agencia   = CFG_Instancias.Agencia.  
+                 END.
+             END. */
+             
              FIND FIRST TProIns NO-ERROR.
              IF NOT AVAILABLE TProIns THEN DO:
                 MESSAGE "No se ha encontrado Ninguna Configuración" SKIP
@@ -9702,7 +9767,7 @@ DEF VAR EndGlo          LIKE Solicitud.Monto INIT 0.
              IF NOT Pro_Creditos.Id_AprobAgencia THEN DO:
 
                 FOR EACH Cfg_Instancias NO-LOCK WHERE 
-                         Cfg_Instancias.Agencia = w_agencia
+                         Cfg_Instancias.Agencia        EQ INT(SUBSTR(Cmb_Agencias:SCREEN-VALUE IN FRAME F_Solicitud,1,3))
                     AND  Cfg_Instancias.Tipo_Instancia EQ Instancias.Tipo_Instancia
                     AND  Cfg_Instancias.Orden          EQ Instancias.Orden_Instancia
                     AND  Cfg_Instancias.Plazo_Minimo   LE Dias
@@ -9733,8 +9798,9 @@ DEF VAR EndGlo          LIKE Solicitud.Monto INIT 0.
              END.
              ELSE DO:
                 FOR EACH Cfg_Instancias WHERE 
-                         Cfg_Instancias.Agencia = w_agencia
-                    AND Cfg_Instancias.Tipo_Instancia EQ Instancias.Tipo_Instancia
+                         Cfg_Instancias.Agencia        EQ INT(SUBSTR(Cmb_Agencias:SCREEN-VALUE IN FRAME F_Solicitud,1,3))
+                    AND /*w_agencia INT(SUBSTR(Cmb_Agencias:SCREEN-VALUE IN FRAME F_Solicitud,1,3)) AND */
+                         Cfg_Instancias.Tipo_Instancia EQ Instancias.Tipo_Instancia
                     AND  Cfg_Instancias.Orden          EQ Instancias.Orden_Instancia
                     AND  Cfg_Instancias.Plazo_Minimo   LE Dias
                     AND  Cfg_Instancias.Plazo_Maximo   GE Dias
@@ -10623,7 +10689,7 @@ PROCEDURE enable_UI :
   ENABLE BR_Admisible Btn_OutConAdm R_ConAdm 
       WITH FRAME F_ConAdmisible IN WINDOW wWin.
   {&OPEN-BROWSERS-IN-QUERY-F_ConAdmisible}
-  ENABLE BUTTON-233 Btn_IrProcesarInst 
+  ENABLE BUTTON-233 Btn_IrProcesarInst enviarEmail 
       WITH FRAME VisorSolicitud IN WINDOW wWin.
   {&OPEN-BROWSERS-IN-QUERY-VisorSolicitud}
   DISPLAY Cmb_Agencias NomNit Fec_Asociado Nom_Producto WX_Edad Nom_Destino 
@@ -10638,11 +10704,11 @@ PROCEDURE enable_UI :
           Solicitud.fec_primerPago Solicitud.Cuota Solicitud.Deducible 
           Solicitud.Total_Prestamo 
       WITH FRAME F_Solicitud IN WINDOW wWin.
-  ENABLE RECT-322 RECT-323 RECT-325 RECT-327 RECT-330 RECT-333 RECT-334 
-         BUTTON-19 BUTTON-103 Btn_Destino Solicitud.fec_desembolso Cmb_PerPago 
-         btnGrntias Solicitud.fec_primerPago Btn_Gar btnFrmlrioAfliacion 
-         BUTTON-107 Btn_Proyectar BUTTON-105 BUTTON-120 Btn_Extras Btn_CancCred 
-         Btn_HojaVida BUTTON-102 Btn_Liquidar 
+  ENABLE RECT-322 RECT-323 RECT-325 RECT-327 RECT-330 RECT-331 RECT-333 
+         RECT-334 BUTTON-19 BUTTON-103 Btn_Destino btnGrntias Btn_Gar 
+         btnFrmlrioAfliacion Solicitud.fec_desembolso Cmb_PerPago Btn_Proyectar 
+         Solicitud.fec_primerPago BUTTON-120 BUTTON-107 BUTTON-105 Btn_HojaVida 
+         Btn_Extras BUTTON-102 Btn_CancCred Btn_Liquidar 
       WITH FRAME F_Solicitud IN WINDOW wWin.
   {&OPEN-BROWSERS-IN-QUERY-F_Solicitud}
   DISPLAY R_Organizar Buscar VG_Normal VG_Media VG_Alta 
@@ -10690,14 +10756,6 @@ PROCEDURE enable_UI :
   ENABLE Btn_AdExt W_PPExtra W_VrExtra Btn_EliExt BUTTON-170 Br_Extras 
       WITH FRAME F_Extras IN WINDOW wWin.
   {&OPEN-BROWSERS-IN-QUERY-F_Extras}
-  DISPLAY Cmb_Productos 
-      WITH FRAME F_Producto IN WINDOW wWin.
-  IF AVAILABLE Solicitud THEN 
-    DISPLAY Solicitud.Tip_Credito 
-      WITH FRAME F_Producto IN WINDOW wWin.
-  ENABLE Solicitud.Tip_Credito Cmb_Productos Btn_OutProductos BUTTON-131 
-      WITH FRAME F_Producto IN WINDOW wWin.
-  {&OPEN-BROWSERS-IN-QUERY-F_Producto}
   DISPLAY W_TotCanc 
       WITH FRAME F_CredACanc IN WINDOW wWin.
   ENABLE Br_Cred btnSalirAbonoCreditos 
@@ -10708,16 +10766,16 @@ PROCEDURE enable_UI :
   ENABLE Cmb_InsCon Br_Usuarios E_Condicion BUTTON-162 
       WITH FRAME F_Condicionada IN WINDOW wWin.
   {&OPEN-BROWSERS-IN-QUERY-F_Condicionada}
-  DISPLAY S_InfoCliente 
-      WITH FRAME F_InfoCliente IN WINDOW wWin.
-  ENABLE BUTTON-156 BUTTON-108 
-      WITH FRAME F_InfoCliente IN WINDOW wWin.
-  {&OPEN-BROWSERS-IN-QUERY-F_InfoCliente}
   DISPLAY R_TipoGarantia 
       WITH FRAME F_Garantias IN WINDOW wWin.
   ENABLE RECT-226 R_TipoGarantia Btn_OutGarantias 
       WITH FRAME F_Garantias IN WINDOW wWin.
   {&OPEN-BROWSERS-IN-QUERY-F_Garantias}
+  DISPLAY S_InfoCliente 
+      WITH FRAME F_InfoCliente IN WINDOW wWin.
+  ENABLE BUTTON-156 BUTTON-108 
+      WITH FRAME F_InfoCliente IN WINDOW wWin.
+  {&OPEN-BROWSERS-IN-QUERY-F_InfoCliente}
   DISPLAY W_NomAgeDesembolso W_NomProDesembolso 
       WITH FRAME F_Desembolso IN WINDOW wWin.
   IF AVAILABLE Solicitud THEN 
@@ -10757,6 +10815,14 @@ PROCEDURE enable_UI :
   ENABLE Br_Deducibles BUTTON-101 
       WITH FRAME F_Deducibles IN WINDOW wWin.
   {&OPEN-BROWSERS-IN-QUERY-F_Deducibles}
+  DISPLAY Cmb_Productos 
+      WITH FRAME F_Producto IN WINDOW wWin.
+  IF AVAILABLE Solicitud THEN 
+    DISPLAY Solicitud.Tip_Credito 
+      WITH FRAME F_Producto IN WINDOW wWin.
+  ENABLE Solicitud.Tip_Credito Cmb_Productos Btn_OutProductos BUTTON-131 
+      WITH FRAME F_Producto IN WINDOW wWin.
+  {&OPEN-BROWSERS-IN-QUERY-F_Producto}
   DISPLAY E_Agregar 
       WITH FRAME F_Agregar IN WINDOW wWin.
   ENABLE E_Agregar BUTTON-153 
@@ -10958,7 +11024,43 @@ PROCEDURE Garantias_Imprimir :
      END.
  END.
 
- END PROCEDURE.
+ /*
+ /*ADMISIBLES a temporal de garantias           no x ahora en Informe*/
+ DEFINE VAR W_NomGar AS CHARACTER FORMAT "X(15)".
+ FIND FIRST Garantias WHERE 
+            Garantias.Agencia     EQ INTEGER(SUBSTRING(Cmb_Agencias:SCREEN-VALUE IN FRAME F_Solicitud,1,3)) AND
+            Garantias.Tip_Credito EQ Solicitud.Tip_Credito AND
+            Garantias.Cod_Credito EQ Solicitud.Cod_Credito AND
+            Garantias.Num_Solicitud EQ INTEGER(Solicitud.Num_Solicitud:SCREEN-VALUE IN FRAME F_Solicitud) AND
+            Garantias.Estado      EQ 1 AND
+            Garantias.Fec_Retiro  EQ ? NO-LOCK NO-ERROR.
+  IF AVAILABLE Garantias THEN DO:
+    W = W + 1.
+    RUN TmpL (INPUT W, INPUT "").
+    W = W + 1.
+    CREATE CTmpI.
+    ASSIGN CTmpI.ILinea  = W
+           CTmpI.ITexto = "GARANTIAS ADMISIBLES (Propiedades - Vehículos - Inversiones)".
+     FOR EACH Garantias WHERE 
+              Garantias.Agencia     EQ Solicitud.Agencia AND
+              Garantias.Tip_Credito EQ Solicitud.Tip_Credito AND
+              Garantias.Cod_Credito EQ Solicitud.Cod_Credito AND
+              Garantias.Num_Solicitud EQ Solicitud.Num_Solicitud AND
+              Garantias.Estado      EQ 1 AND
+              Garantias.Fec_Retiro  EQ ? NO-LOCK:
+        CASE Garantias.Tipo_Garantia:
+          WHEN 1 THEN W_NomGar = "Propiedad".
+          WHEN 2 THEN W_NomGar = "Vehículo".
+          WHEN 3 THEN W_NomGar = "Inversion".
+        END CASE.
+        W = W + 1.
+        CREATE CTmpI.
+        ASSIGN CTmpI.ILinea  = W
+               CTmpI.ITexto = STRING(W_NomGar,"X(10)") + " - " + STRING(Garantias.Nom_Bien,"X(35)") + "     Valor: $" + STRING(Garantias.Val_Bien,">>>,>>>,>>>,>>9").
+     END.
+  END.
+  */
+END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -11008,7 +11110,7 @@ DO TRANSACTION:
     SSistema = INTEGER(SUBSTRING(Cmb_Sistemas:SCREEN-VALUE IN FRAME F_Solicitud,1,5)).
 
     CREATE Creditos.
-    ASSIGN Creditos.Agencia = clientes.agencia
+    ASSIGN Creditos.Agencia = INTEGER(SUBSTRING(Cmb_Agencias:SCREEN-VALUE IN FRAME F_Solicitud,1,3))
            Creditos.Fec_Aprobacion = W_Fecha
            Creditos.For_Interes = INTEGER(Solicitud.FOR_Interes:SCREEN-VALUE IN FRAME F_Solicitud)
            Creditos.For_Pago = INTEGER(Solicitud.FOR_Pago:SCREEN-VALUE IN FRAME F_ForPago)
@@ -11071,7 +11173,7 @@ DO TRANSACTION:
         RETURN ERROR.
 
     /*Contabilizacion*/
-    FIND FIRST CortoLargo WHERE CortoLargo.Agencia = clientes.agencia
+    FIND FIRST CortoLargo WHERE CortoLargo.Agencia EQ INTEGER(SUBSTRING(Cmb_Agencias:SCREEN-VALUE IN FRAME F_Solicitud,1,3))
                             AND CortoLargo.Clase_Producto EQ 2
                             AND CortoLargo.Cod_Producto EQ INTEGER(SUBSTRING(Cmb_Productos:SCREEN-VALUE IN FRAME F_Producto,1,3))
                             AND CortoLargo.Cta_ContingenteDB NE ""
@@ -11086,12 +11188,12 @@ DO TRANSACTION:
         RETURN ERROR.
     END.
 
-    FIND FIRST Comprobantes WHERE Comprobantes.Agencia = clientes.agencia
+    FIND FIRST Comprobantes WHERE Comprobantes.Agencia EQ INTEGER(SUBSTRING(Cmb_Agencias:SCREEN-VALUE IN FRAME F_Solicitud,1,3))
                               AND Comprobantes.Comprobante EQ CortoLargo.Comprobante NO-ERROR.
     IF NOT AVAILABLE Comprobantes THEN DO:
         MESSAGE "No se ha encontrado el comprobante para la contabilización" SKIP
                 "de la aprobación de la Solicitud. Rectifique con el Administrador!" SKIP
-                "Agencia :" clientes.agencia SKIP
+                "Agencia :" INTEGER(SUBSTRING(Cmb_Agencias:SCREEN-VALUE IN FRAME F_Solicitud,1,3)) SKIP
                 "Comprobante :" CortoLargo.Comprobante
             VIEW-AS ALERT-BOX ERROR.
 
@@ -12512,14 +12614,16 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE initializeObject wWin 
 PROCEDURE initializeObject :
+MESSAGE "Inicia proceso"
+        VIEW-AS ALERT-BOX INFO BUTTONS OK.
+
+    /* oakley */
+
 FOR EACH pro_scoring WHERE pro_scoring.observacion = "ESCENARIO ECONOMICO" NO-LOCK:
     CREATE tEscnrioEcnmco.
     ASSIGN tEscnrioEcnmco.clfccion = pro_scoring.titulo
            tEscnrioEcnmco.ps = fchar2decimal(pro_scoring.Rango_final).
 END.
-
-MESSAGE "Inicia proceso"
-        VIEW-AS ALERT-BOX INFO BUTTONS OK.
 
 FOR EACH Varios WHERE Varios.Tipo = 26 NO-LOCK:
     W_Ok = Cmb_Negadas:ADD-LAST(STRING(Varios.Codigo,"99999") + " - " + Varios.Descripcion) IN FRAME F_Ultima.
@@ -14180,7 +14284,7 @@ IF AVAILABLE pro_creditos THEN DO:
     END.
 
     /* Control 9.000'000.000 para el crédito de Vivienda */
-    IF pro_creditos.cod_credito = 189 THEN DO:
+    /*IF pro_creditos.cod_credito = 189 THEN DO:
         FOR EACH creditos WHERE creditos.cod_credito = 189 NO-LOCK:
             vTotalDesembolsado = vTotalDesembolsado + creditos.monto.
         END.
@@ -14192,7 +14296,7 @@ IF AVAILABLE pro_creditos THEN DO:
 
             /*RETURN ERROR.*/
         END.
-    END.
+    END.*/
 
     /* Control 1.500'000.000 para el crédito de Alta Liquidez - 11/07/2019 */
     IF pro_creditos.cod_credito = 57 THEN DO:
@@ -14213,7 +14317,8 @@ IF AVAILABLE pro_creditos THEN DO:
     IF pro_creditos.cod_credito <> 108 AND
        pro_creditos.cod_credito <> 113 AND
        pro_creditos.cod_credito <> 114 AND
-       pro_creditos.cod_credito <> 190 THEN DO:
+       pro_creditos.cod_credito <> 190 AND
+       pro_creditos.cod_credito <> 194 THEN DO:
         FIND FIRST creditos WHERE creditos.nit = solicitud.nit:SCREEN-VALUE
                               AND creditos.cod_credito = 158
                               AND creditos.estado = 2 NO-LOCK NO-ERROR.

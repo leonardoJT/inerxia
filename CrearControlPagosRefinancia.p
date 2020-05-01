@@ -27,6 +27,7 @@ DEFINE VAR flagPrimeraCuota AS LOGICAL INITIAL YES.
 DEFINE VAR fechaIni AS DATE.
 DEFINE VAR fechaAnterior AS DATE.
 DEFINE VAR interesPendiente AS DECIMAL.
+DEFINE VAR fechaDeTrabajo AS DATE.
 
 DEFINE TEMP-TABLE ttAmortizacion
     FIELD nroPeriodo AS INTEGER
@@ -37,12 +38,15 @@ DEFINE TEMP-TABLE ttAmortizacion
     FIELD cuotaInteres AS DECIMAL FORMAT "->>>,>>>,>>>,>>>,>>9"
     FIELD saldoCapital AS DEC INIT 0 FORMAT "->>>,>>>,>>>,>>>,>>9".
 
-DEFINE VAR cuotaIni AS INTEGER.
-
 RUN rutfinan.r PERSISTENT SET w_manfin.
 
 FIND FIRST creditos WHERE creditos.nit = nitCredito
                       AND creditos.num_credito = numeroCredito NO-ERROR.
+
+IF creditos.fec_pago <= TODAY THEN
+    fechaDeTrabajo = credito.fec_pago.
+ELSE
+    fechaDeTrabajo = TODAY.
 
 RUN HallarPeriodo IN W_ManFin (INPUT creditos.per_pago,
                                INPUT creditos.plazo,
@@ -53,21 +57,17 @@ RUN HallarPeriodo IN W_ManFin (INPUT creditos.per_pago,
 
 IF creditos.cod_credito <> 108 AND
    creditos.cod_credito <> 113 AND
-   creditos.cod_credito <> 1114 THEN DO:
+   creditos.cod_credito <> 114 THEN DO:
     FOR EACH control_pagos WHERE control_pagos.nit = creditos.nit
                              AND control_pagos.num_credito = creditos.num_credito
-                             AND CONTROL_pagos.fec_vcto >= TODAY /*+ diasPeriodo*/
+                             AND CONTROL_pagos.fec_vcto >= fechaDeTrabajo
                              AND control_pagos.id_PdoMes < 2 NO-LOCK BY control_pagos.nro_cuota:
-        cuotaIni = control_pagos.nro_cuota.
         fechaIni = control_pagos.fec_ini.
-    
         LEAVE.
     END.
 END.
-ELSE DO:
-    cuotaIni = 1.
+ELSE
     fechaIni = creditos.fec_pago.
-END.
 
 FOR EACH planpagos WHERE planPagos.nit = creditos.nit
                      AND planPagos.num_credito = creditos.num_credito:
@@ -93,22 +93,13 @@ vTasaPeriodica = creditos.tasa / (numPeriodos * 100).
 
 FOR EACH amortizacion WHERE amortizacion.nit = creditos.nit
                         AND amortizacion.num_credito = creditos.num_Credito
-                        AND amortizacion.fec_pago >= TODAY:
+                        AND amortizacion.fec_pago >= fechaDeTrabajo:
     DELETE amortizacion.
 END.
 
-/* oakley */
-
 RUN P-Amortizacion.
 
-/*FOR EACH CONTROL_pagos WHERE control_pagos.Nit = Creditos.Nit
-                         and control_pagos.Num_Credito = Creditos.Num_Credito:
-    CONTROL_pagos.nro_cuota = CONTROL_pagos.nro_cuota + cuotaIni - 1.
-END.*/
-
-
 /* *********************** Fin *********************** */
-
 
 PROCEDURE P-Amortizacion:
     FIND FIRST Pro_Creditos WHERE Pro_Creditos.Cod_Credito = vCodCredito NO-LOCK NO-ERROR.
@@ -234,7 +225,6 @@ PROCEDURE P-AmortCuotaFija:
         ttAmortizacion.saldoCapital = W_SdoCapTra.
     END.
 
-    /* Ajuste a la última cuota - 27/05/2010 - */
     IF contCuota = vPlazo AND ttAmortizacion.saldoCapital <> 0 THEN DO:
         IF ttAmortizacion.saldoCapital < 0 THEN
             ttAmortizacion.cuotaCapital = ttAmortizacion.cuotaCapital - ABS(ttAmortizacion.saldoCapital).
@@ -333,7 +323,7 @@ PROCEDURE Crear_Plan:
         creditos.fec_pago = pfecPago.
 
         CREATE amortizacion.
-        amortizacion.fec_pago = /*creditos.fec_desembolso*/ TODAY.
+        amortizacion.fec_pago = TODAY.
         amortizacion.nit = nitCredito.
         amortizacion.nro_cuota = 0.
         amortizacion.num_credito = vNumCredito.

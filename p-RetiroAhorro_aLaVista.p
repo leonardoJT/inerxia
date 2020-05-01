@@ -102,8 +102,6 @@ IF AVAILABLE ahorros THEN DO:
     Mov_Contable.Num_Documento = pNumDocumento.
     Mov_Contable.Usuario = pUsuario.
 
-    /* oakley - Llamar rutina de GMF */
-
     w_usuario = pUsuario.
 
     RUN \\192.168.1.101\Aplicacion\Obj\RutGMF.R (INPUT TRUE,

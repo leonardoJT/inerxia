@@ -674,9 +674,9 @@ DEFINE FRAME F_Proc
      TotC AT ROW 21.12 COL 36.43 COLON-ALIGNED NO-LABEL
      W_TGmf AT ROW 21.12 COL 50.29 COLON-ALIGNED NO-LABEL
      TotH AT ROW 21.12 COL 65.57 COLON-ALIGNED NO-LABEL
-     "Tip   Ag.   Pdto  Cuenta                  Descripción" VIEW-AS TEXT
-          SIZE 37.43 BY .62 AT ROW 2.54 COL 2.57
-          BGCOLOR 17 FGCOLOR 0 
+     "Concepto  Contrapartida     Ced./Nit            Ref. /Cheq." VIEW-AS TEXT
+          SIZE 44.57 BY .62 AT ROW 4.54 COL 2.72
+          BGCOLOR 18 FGCOLOR 15 
      "TOT.DEBITOS" VIEW-AS TEXT
           SIZE 13.14 BY .54 AT ROW 20.54 COL 38.43
           BGCOLOR 18 FGCOLOR 15 
@@ -689,9 +689,9 @@ DEFINE FRAME F_Proc
      "Concepto         Valor Débitos       Valor Créditos        Descripción Contrap." VIEW-AS TEXT
           SIZE 60.86 BY .62 AT ROW 4.54 COL 49
           BGCOLOR 18 FGCOLOR 15 
-     "Concepto  Contrapartida     Ced./Nit            Ref. /Cheq." VIEW-AS TEXT
-          SIZE 44.57 BY .62 AT ROW 4.54 COL 2.72
-          BGCOLOR 18 FGCOLOR 15 
+     "Tip   Ag.   Pdto  Cuenta                  Descripción" VIEW-AS TEXT
+          SIZE 37.43 BY .62 AT ROW 2.54 COL 2.57
+          BGCOLOR 17 FGCOLOR 0 
      "        Total Gmf" VIEW-AS TEXT
           SIZE 14.86 BY .54 AT ROW 20.54 COL 52.29
           BGCOLOR 18 FGCOLOR 15 
@@ -1572,7 +1572,7 @@ DO:
         RETURN.
     END.
 
-    RUN Valida NO-ERROR. /* oakley */
+    RUN Valida NO-ERROR.
     IF ERROR-STATUS:ERROR THEN DO:
         MESSAGE "La configuración contable presentó errores... Proceso cancelado."
             VIEW-AS ALERT-BOX ERROR.
@@ -1586,7 +1586,7 @@ DO:
 
     SESSION:SET-WAIT-STATE("GENERAL").
 
-    RUN Contabilizar NO-ERROR.
+    RUN Contabilizar NO-ERROR. /* oakley */
     IF ERROR-STATUS:ERROR THEN DO:
         MESSAGE "La contabilización presentó errores... Proceso cancelado."
             VIEW-AS ALERT-BOX ERROR.
@@ -2965,7 +2965,8 @@ DO TRANS ON ERROR UNDO Contabilizando:
 
     W_NoGmf = FALSE.
 
-    FOR EACH TPC WHERE TPC.TP EQ "A" BREAK BY TPC.NitP BY TPC.TipA:
+    FOR EACH TPC WHERE TPC.TP = "A" BREAK BY TPC.NitP
+                                          BY TPC.TipA:
         Neto = Neto + (TPC.Cargo - TPC.Abono).
 
         IF LAST-OF(TPC.TipA) THEN DO:
@@ -3028,54 +3029,77 @@ DO TRANS ON ERROR UNDO Contabilizando:
                                    BY TPC.CodP
                                    BY TPC.CtaP
                                    BY TPC.Cpto:
-        IF TPC.DocRef LE " " THEN
+        IF TPC.DocRef <= " " THEN
             TPC.DocRef = STRING(Comprobantes.Secuencia).
 
-        IF FIRST-OF(TPC.CtaP) THEN
-            ASSIGN VrCargos = 0
-                   VrAbonos = 0.
-
-        IF TPC.TP NE "0" THEN DO:
-            IF TPC.Cpto EQ "SdoCta" THEN
-                ASSIGN VrCargos[1] = VrCargos[1] + TPC.Cargo
-                       VrAbonos[1] = VrAbonos[1] + TPC.Abono.
-            ELSE
-                IF TPC.Cpto EQ "Int-Ctes" OR TPC.Cpto EQ "IntCausado" THEN
-                    ASSIGN VrCargos[2] = VrCargos[2] + TPC.Cargo
-                           VrAbonos[2] = VrAbonos[2] + TPC.Abono.
-                ELSE
-                    IF TPC.Cpto EQ "IntMora" OR TPC.Cpto EQ "IntXPagar" THEN
-                        ASSIGN VrCargos[3] = VrCargos[3] + TPC.Cargo
-                               VrAbonos[3] = VrAbonos[3] + TPC.Abono.
-                    ELSE
-                        IF TPC.Cpto EQ "IntAnticip" OR TPC.Cpto EQ "RetFuente" THEN
-                            ASSIGN VrCargos[4] = VrCargos[4] + TPC.Cargo
-                                   VrAbonos[4] = VrAbonos[4] + TPC.Abono.
-                        ELSE
-                            IF TPC.Cpto EQ "IntDifCob" THEN
-                                ASSIGN VrCargos[5] = VrCargos[5] + TPC.Cargo
-                                       VrAbonos[5] = VrAbonos[5] + TPC.Abono.
-                            ELSE
-                                IF TPC.Cpto EQ "Costas" THEN
-                                    ASSIGN VrCargos[6] = VrCargos[6] + TPC.Cargo
-                                           VrAbonos[6] = VrAbonos[6] + TPC.Abono.
-                                ELSE
-                                    IF TPC.Cpto EQ "Polizas" THEN
-                                        ASSIGN VrCargos[7] = VrCargos[7] + TPC.Cargo
-                                               VrAbonos[7] = VrAbonos[7] + TPC.Abono.
-                                    ELSE
-                                        IF TPC.Cpto EQ "Honorarios" THEN
-                                            ASSIGN VrCargos[8] = VrCargos[8] + TPC.Cargo
-                                                   VrAbonos[8] = VrAbonos[8] + TPC.Abono.
-                                        ELSE
-                                            IF TPC.Cpto EQ "SegVida" THEN
-                                                ASSIGN VrCargos[9] = VrCargos[9] + TPC.Cargo
-                                                       VrAbonos[9] = VrAbonos[9] + TPC.Abono.
-                                            ELSE
-                                                IF TPC.Cpto EQ "SegVivienda" THEN
-                                                    ASSIGN VrCargos[10] = VrCargos[10] + TPC.Cargo
-                                                           VrAbonos[10] = VrAbonos[10] + TPC.Abono.
+        IF FIRST-OF(TPC.CtaP) THEN DO:
+            VrCargos = 0.
+            VrAbonos = 0.
         END.
+
+        IF TPC.TP <> "0" THEN DO:
+            IF TPC.Cpto = "SdoCta" THEN DO:
+                VrCargos[1] = VrCargos[1] + TPC.Cargo.
+                VrAbonos[1] = VrAbonos[1] + TPC.Abono.
+            END.
+            ELSE DO:
+                IF TPC.Cpto = "Int-Ctes" OR TPC.Cpto = "IntCausado" THEN DO:
+                    VrCargos[2] = VrCargos[2] + TPC.Cargo.
+                    VrAbonos[2] = VrAbonos[2] + TPC.Abono.
+                END.
+                ELSE DO:
+                    IF TPC.Cpto = "IntMora" OR TPC.Cpto = "IntXPagar" THEN DO:
+                        VrCargos[3] = VrCargos[3] + TPC.Cargo.
+                        VrAbonos[3] = VrAbonos[3] + TPC.Abono.
+                    END.
+                    ELSE DO:
+                        IF TPC.Cpto = "IntAnticip" OR TPC.Cpto = "RetFuente" THEN DO:
+                            VrCargos[4] = VrCargos[4] + TPC.Cargo.
+                            VrAbonos[4] = VrAbonos[4] + TPC.Abono.
+                        END.
+                        ELSE DO:
+                            IF TPC.Cpto = "IntDifCob" THEN DO:
+                                VrCargos[5] = VrCargos[5] + TPC.Cargo.
+                                VrAbonos[5] = VrAbonos[5] + TPC.Abono.
+                            END.
+                            ELSE DO:
+                                IF TPC.Cpto = "Costas" THEN DO:
+                                    VrCargos[6] = VrCargos[6] + TPC.Cargo.
+                                    VrAbonos[6] = VrAbonos[6] + TPC.Abono.
+                                END.
+                                ELSE DO:
+                                    IF TPC.Cpto = "Polizas" THEN DO:
+                                        VrCargos[7] = VrCargos[7] + TPC.Cargo.
+                                        VrAbonos[7] = VrAbonos[7] + TPC.Abono.
+                                    END.
+                                    ELSE DO:
+                                        IF TPC.Cpto = "Honorarios" THEN DO:
+                                            VrCargos[8] = VrCargos[8] + TPC.Cargo.
+                                            VrAbonos[8] = VrAbonos[8] + TPC.Abono.
+                                        END.
+                                        ELSE DO:
+                                            IF TPC.Cpto = "SegVida" THEN DO:
+                                                VrCargos[9] = VrCargos[9] + TPC.Cargo.
+                                                VrAbonos[9] = VrAbonos[9] + TPC.Abono.
+                                            END.
+                                            ELSE DO:
+                                                IF TPC.Cpto = "SegVivienda" THEN DO:
+                                                    VrCargos[10] = VrCargos[10] + TPC.Cargo.
+                                                    VrAbonos[10] = VrAbonos[10] + TPC.Abono.
+                                                END.
+                                            END.
+                                        END.
+                                    END.
+                                END.
+                            END.
+                        END.
+                    END.
+                END.
+            END.
+        END.
+        
+        /* oakley */
+
         ELSE DO:   /*Contables Cta-PPal*/
             ASSIGN W_Cta = TPC.CtaP
                    W_Valor = TPC.Cargo - TPC.Abono.
@@ -4940,62 +4964,39 @@ DEFINE VAR p_anticipado AS DECIMAL.
 DEFINE VAR p_contingente AS DECIMAL.
 DEFINE VAR p_segVida AS DECIMAL.
 DEFINE VAR p_segDeudor AS DECIMAL.
-DEFINE VAR flagFecPago AS LOGICAL INITIAL FALSE.
+DEFINE VAR flagFecPago AS LOGICAL.
 DEFINE VAR saldoProyectado AS DECIMAL.
 DEFINE VAR diasPeriodo AS INTEGER.
-
-FIND FIRST Entidad WHERE Entidad.Entidad EQ W_Entidad NO-LOCK NO-ERROR.
-FIND FIRST Indicadores WHERE Indicadores.Indicador EQ Entidad.Ind_Usura AND Indicadores.Estado EQ 1 AND Indicadores.FecVcto GE W_Fecha NO-LOCK NO-ERROR.
-IF NOT AVAILABLE(Indicadores) THEN DO:
-    MESSAGE "Falta Indicador de Usura Vigente, No se permite el abono al Credito."
-        VIEW-AS ALERT-BOX TITLE "Programa W-Tras_Cuentas.W".
-    
-    RETURN ERROR.
-END.
+DEFINE VAR pError AS LOGICAL.
 
 W_SiCanc = "".
 
-IF Creditos.Sdo_Capital LE 0 THEN
-    ASSIGN W_SiCanc = "Pagaré Activado".  /*El pagaré estaba cancelado y lo Habilitaron*/
+IF Creditos.Sdo_Capital <= 0 THEN
+    W_SiCanc = "Pagaré Activado".  /*El pagaré estaba cancelado y lo Habilitaron*/
 
-IF (Creditos.Sdo_Capital + (VrCargos[1] - VrAbonos[1]) LE 0) AND (Creditos.Int_Corriente + (VrCargos[2] - VrAbonos[2]) GT 0 OR
-                                                                  Creditos.Int_MorCobrar  + (VrCargos[3] - VrAbonos[3]) GT 0 OR
-                                                                  Creditos.Int_MoraDifCob + (VrCargos[9] - VrAbonos[9]) GT 0 OR
-                                                                  Creditos.Int_Anticipado - (VrCargos[4] - VrAbonos[4]) NE 0 OR
-                                                                  Creditos.Int_DifCobro + (VrCargos[5] - VrAbonos[5]) GT 0 OR
-                                                                  Creditos.Costas + (VrCargos[6] - VrAbonos[6]) GT 0 OR
-                                                                  Creditos.Polizas + (VrCargos[7] - VrAbonos[7]) GT 0 OR
-                                                                  Creditos.Honorarios + (VrCargos[8] - VrAbonos[8]) GT 0) THEN DO:
-    MESSAGE "El Sdo-Capital no puede Cancelarse mientras Hallan Otros Saldos..." SKIP
-            "                                   Revise por favor..."
-        VIEW-AS ALERT-BOX ERROR.
-
-    RETURN ERROR.
-END.
-
-ASSIGN Creditos.Sdo_Capital = Creditos.Sdo_Capital + (VrCargos[1] - VrAbonos[1])
-       Creditos.Int_Corriente = Creditos.Int_Corrientes + (VrCargos[2] - VrAbonos[2])
-       Creditos.Int_Anticipado = Creditos.Int_Anticipado + (VrAbonos[4] - VrCargos[4])
-       Creditos.Int_DifCobro = Creditos.Int_DifCobro + (VrCargos[5] - VrAbonos[5])
-       Creditos.Int_MorCobrar = Creditos.Int_MorCobrar + (VrCargos[3] - VrAbonos[3])
-       Creditos.Int_MoraDifCob = Creditos.Int_MoraDifCob + (VrCargos[9] - VrAbonos[9])
-       Creditos.Costas = Creditos.Costas + (VrCargos[6] - VrAbonos[6])
-       Creditos.Polizas = Creditos.Polizas + (VrCargos[7] - VrAbonos[7])
-       Creditos.Honorarios = Creditos.Honorarios + (VrCargos[8] - VrAbonos[8])
-       creditos.seg_vida = creditos.seg_vida + (VrCargos[9] - VrAbonos[9])
-       creditos.seg_Cartera = creditos.seg_Cartera + (VrCargos[10] - VrAbonos[10]).
+Creditos.Sdo_Capital = Creditos.Sdo_Capital + (VrCargos[1] - VrAbonos[1]).
+Creditos.Int_Corriente = Creditos.Int_Corrientes + (VrCargos[2] - VrAbonos[2]).
+Creditos.Int_Anticipado = Creditos.Int_Anticipado + (VrAbonos[4] - VrCargos[4]).
+Creditos.Int_DifCobro = Creditos.Int_DifCobro + (VrCargos[5] - VrAbonos[5]).
+Creditos.Int_MorCobrar = Creditos.Int_MorCobrar + (VrCargos[3] - VrAbonos[3]).
+Creditos.Int_MoraDifCob = Creditos.Int_MoraDifCob + (VrCargos[9] - VrAbonos[9]).
+Creditos.Costas = Creditos.Costas + (VrCargos[6] - VrAbonos[6]).
+Creditos.Polizas = Creditos.Polizas + (VrCargos[7] - VrAbonos[7]).
+Creditos.Honorarios = Creditos.Honorarios + (VrCargos[8] - VrAbonos[8]).
+creditos.seg_vida = creditos.seg_vida + (VrCargos[9] - VrAbonos[9]).
+creditos.seg_Cartera = creditos.seg_Cartera + (VrCargos[10] - VrAbonos[10]).
 
 IF ABS(VrCargos[2] - VrAbonos[2]) <> 0 THEN DO:
     CREATE movProductos.
-    ASSIGN movProductos.agencia = creditos.agencia
-           movProductos.comprobante = Comprobantes.Comprobante
-           movProductos.estado = 1
-           movProductos.fecha = w_fecha
-           movProductos.id_producto = string(creditos.num_credito)
-           movProductos.int_corriente = ABS(VrCargos[2] - VrAbonos[2])
-           movProductos.nit = creditos.nit
-           movProductos.num_documento = comprobantes.secuencia
-           movProductos.tipo_producto = 2.
+    movProductos.agencia = creditos.agencia.
+    movProductos.comprobante = Comprobantes.Comprobante.
+    movProductos.estado = 1.
+    movProductos.fecha = w_fecha.
+    movProductos.id_producto = string(creditos.num_credito).
+    movProductos.int_corriente = ABS(VrCargos[2] - VrAbonos[2]).
+    movProductos.nit = creditos.nit.
+    movProductos.num_documento = comprobantes.secuencia.
+    movProductos.tipo_producto = 2.
 
     IF (VrCargos[2] - VrAbonos[2]) > 0 THEN
         movProductos.tipo_transaccion = 2.
@@ -5005,15 +5006,15 @@ END.
 
 IF ABS(VrCargos[5] - VrAbonos[5]) <> 0 THEN DO:
     CREATE movProductos.
-    ASSIGN movProductos.agencia = creditos.agencia
-           movProductos.comprobante = Comprobantes.Comprobante
-           movProductos.estado = 1
-           movProductos.fecha = w_fecha
-           movProductos.id_producto = string(creditos.num_credito)
-           movProductos.int_difCobro = ABS(VrCargos[5] - VrAbonos[5])
-           movProductos.nit = creditos.nit
-           movProductos.num_documento = comprobantes.secuencia
-           movProductos.tipo_producto = 2.
+    movProductos.agencia = creditos.agencia.
+    movProductos.comprobante = Comprobantes.Comprobante.
+    movProductos.estado = 1.
+    movProductos.fecha = w_fecha.
+    movProductos.id_producto = string(creditos.num_credito).
+    movProductos.int_difCobro = ABS(VrCargos[5] - VrAbonos[5]).
+    movProductos.nit = creditos.nit.
+    movProductos.num_documento = comprobantes.secuencia.
+    movProductos.tipo_producto = 2.
 
     IF (VrCargos[5] - VrAbonos[5]) > 0 THEN
         movProductos.tipo_transaccion = 2.
@@ -5023,15 +5024,15 @@ END.
 
 IF ABS(VrCargos[3] - VrAbonos[3]) <> 0 THEN DO:
     CREATE movProductos.
-    ASSIGN movProductos.agencia = creditos.agencia
-           movProductos.comprobante = Comprobantes.Comprobante
-           movProductos.estado = 1
-           movProductos.fecha = w_fecha
-           movProductos.id_producto = string(creditos.num_credito)
-           movProductos.int_mora = ABS(VrCargos[3] - VrAbonos[3])
-           movProductos.nit = creditos.nit
-           movProductos.num_documento = comprobantes.secuencia
-           movProductos.tipo_producto = 2.
+    movProductos.agencia = creditos.agencia.
+    movProductos.comprobante = Comprobantes.Comprobante.
+    movProductos.estado = 1.
+    movProductos.fecha = w_fecha.
+    movProductos.id_producto = string(creditos.num_credito).
+    movProductos.int_mora = ABS(VrCargos[3] - VrAbonos[3]).
+    movProductos.nit = creditos.nit.
+    movProductos.num_documento = comprobantes.secuencia.
+    movProductos.tipo_producto = 2.
 
     IF (VrCargos[3] - VrAbonos[3]) > 0 THEN
         movProductos.tipo_transaccion = 2.
@@ -5041,27 +5042,37 @@ END.
 
 IF ABS(VrCargos[1] - VrAbonos[1]) <> 0 THEN DO:
     CREATE movProductos.
-    ASSIGN movProductos.agencia = creditos.agencia
-           movProductos.comprobante = Comprobantes.Comprobante
-           movProductos.estado = 1
-           movProductos.fecha = w_fecha
-           movProductos.id_producto = string(creditos.num_credito)
-           movProductos.nit = creditos.nit
-           movProductos.num_documento = comprobantes.secuencia
-           movProductos.sdo_capital = ABS(VrCargos[1] - VrAbonos[1])
-           movProductos.tipo_producto = 2.
+    movProductos.agencia = creditos.agencia.
+    movProductos.comprobante = Comprobantes.Comprobante.
+    movProductos.estado = 1.
+    movProductos.fecha = w_fecha.
+    movProductos.id_producto = string(creditos.num_credito).
+    movProductos.nit = creditos.nit.
+    movProductos.num_documento = comprobantes.secuencia.
+    movProductos.sdo_capital = ABS(VrCargos[1] - VrAbonos[1]).
+    movProductos.tipo_producto = 2.
 
-    IF (VrCargos[1] - VrAbonos[1]) > 0 THEN
+    IF (VrCargos[1] - VrAbonos[1]) > 0 THEN DO:
         movProductos.tipo_transaccion = 2.
+
+        IF creditos.cod_credito = 123 THEN DO:
+            RUN p-UtilizacionRotativo.r (INPUT 'INT',
+                                         INPUT creditos.nit,
+                                         INPUT creditos.num_credito,
+                                         INPUT TPC.descrip,
+                                         INPUT VrCargos[1] - VrAbonos[1],
+                                         OUTPUT pError) NO-ERROR.
+        END.
+    END.
     ELSE
         movProductos.tipo_transaccion = 1.
 END.
 
 
-ASSIGN Creditos.Sdo_CapPag = Creditos.Sdo_CapPag + (VrAbonos[1] - VrCargos[1])
-       Creditos.Sdo_IntMor = Creditos.Sdo_IntMor + (VrAbonos[3] + VrAbonos[9]) - (VrCargos[3] + VrCargos[9])
-       Creditos.Sdo_IntPag = Creditos.Sdo_IntPag + (VrAbonos[2] + VrAbonos[4] + VrAbonos[5]) - (VrCargos[2] + VrCargos[4] + VrCargos[5])
-       Creditos.Fec_UltPag = W_Fecha.
+Creditos.Sdo_CapPag = Creditos.Sdo_CapPag + (VrAbonos[1] - VrCargos[1]).
+Creditos.Sdo_IntMor = Creditos.Sdo_IntMor + (VrAbonos[3] + VrAbonos[9]) - (VrCargos[3] + VrCargos[9]).
+Creditos.Sdo_IntPag = Creditos.Sdo_IntPag + (VrAbonos[2] + VrAbonos[4] + VrAbonos[5]) - (VrCargos[2] + VrCargos[4] + VrCargos[5]).
+Creditos.Fec_UltPag = W_Fecha.
 
 /* Devolvemos el Control_Pagos - Leonardo G. Ocampo - 26/05/2010 */
 IF (VrCargos[1] - VrAbonos[1]) <> 0 OR /* sdo_capital */
@@ -5089,7 +5100,6 @@ IF (VrCargos[1] - VrAbonos[1]) <> 0 OR /* sdo_capital */
     /* Capital */
     IF creditos.cod_credito <> 123 THEN DO:
         IF p_capital <> 0 THEN DO:
-
             saldoProyectado = creditos.monto.
 
             FOR EACH CONTROL_pagos WHERE CONTROL_pagos.nit = creditos.nit
@@ -5116,7 +5126,6 @@ IF (VrCargos[1] - VrAbonos[1]) <> 0 OR /* sdo_capital */
     END.
 END.
 
-
 IF Creditos.Sdo_Capital = 0 AND
    Creditos.Int_Corriente = 0 AND
    Creditos.Int_Anticipado = 0 AND
@@ -5127,12 +5136,12 @@ IF Creditos.Sdo_Capital = 0 AND
    Creditos.Polizas = 0 AND
    Creditos.Honorarios = 0 AND
    creditos.cod_credito <> 123 /* Distintos al Rotativo */ THEN DO:
-    ASSIGN Creditos.Fec_CanceTotal = W_Fecha
-           Creditos.Fec_UltPag = W_Fecha
-           Creditos.Cuo_Pagada = Creditos.Plazo
-           creditos.val_atraso = 0
-           creditos.dias_atraso = 0
-           creditos.estado = 3.
+    Creditos.Fec_CanceTotal = W_Fecha.
+    Creditos.Fec_UltPag = W_Fecha.
+    Creditos.Cuo_Pagada = Creditos.Plazo.
+    creditos.val_atraso = 0.
+    creditos.dias_atraso = 0.
+    creditos.estado = 3.
 END.
 
 RUN MovCreditos.
